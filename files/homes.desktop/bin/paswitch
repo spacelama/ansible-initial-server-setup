@@ -1,42 +1,54 @@
-#!/bin/bash
- 
-# Script to switch all programs to a specific sink. Why this isn't easy, i
-# don't know.
- 
-# This script takes a single argument, the sink name, index, or alias (defined
-# below).
- 
-# To make this work, you will need to:
-#   - In /etc/pulse/default.pa:
-#       change "load-module module-stream-restore"
-#       to     "load-module module-stream-restore restore_device=false"
-#     This makes all streams use the default device when they start, rather
-#     than the last device.
-#   - Set up the sink_names array below.
-#     PulseAudio sink names are usually rather obtuse, and the indices can
-#     change, so you can declare short names for sinks in the array below.
-#     
-#     The format is '[alias]=device_name'. The sink names can be found with:
-#       $ pacmd list-sinks | grep '^\s*name'
-#     , and are the monstrosities between the angle brackets.
- 
-#get these from: pacmd list-sink-inputs | grep sink:
-declare -A sink_names=(
-	[mainstereo]=alsa_output.usb-0c45_USB_Audio-00-Audio.analog-surround-51
-	[headphones]=alsa_output.usb-Burr-Brown_from_TI_USB_Audio_DAC-00-DAC.analog-stereo
-	[computerspeakers]=alsa_output.pci-0000_00_1b.0.analog-stereo
-)
- 
-sink=${sink_names[$1]:-$1}
- 
-(
-	echo set-default-sink $sink
-	
-	pacmd list-sink-inputs |
-	      grep -E '^\s*index:' |
-	      	   grep -oE '[0-9]+' |
-		   	while read input
-			do
-				echo move-sink-input $input $sink
-				done
-) | pacmd > /dev/null
+#/bin/bash
+# paswitch 2011-02-02 by Ng Oon-Ee <ngoonee.talk@gmail.com>
+# I can't remember where I found this script, can't locate the original author.
+# Please inform me if you know, so that I can give proper attribution.
+# CHANGES: Added auto-move all inputs to new default sound card.
+# WAS: Pulse Audio Sound Card Switcher v1.0 2010-01-13
+#   Switches between soundcards when run. All streams are moved to the new default sound-card.
+
+# $totalsc: Number of sound cards available
+totalsc=$(pacmd "list-sinks" | grep index: | wc -l) # total of sound cards: $totalsc
+if [ $totalsc -le 1 ]; then # Check whether there are actually multiple cards available
+  notify-send -u critical -t 5000 "Nothing to switch, system only has one sound card."
+  exit
+fi
+# $scindex: The Pulseaudio index of the current default sound card
+scindex=$(pacmd list-sinks | awk '$1 == "*" && $2 == "index:" {print $3}')
+# $cards: A list of card Pulseaudio indexes
+cards=$(pacmd list-sinks | sed 's|*||' | awk '$1 == "index:" {print $2}')
+PICKNEXTCARD=1 # Is true when the previous card is default
+count=0 # count of number of iterations
+for CARD in $cards; do
+  if [ $PICKNEXTCARD == 1 ]; then
+# $nextsc: The pulseaudio index of the next sound card (to be switched to)
+    nextsc=$CARD
+    PICKNEXTCARD=0
+# $nextind: The numerical index (1 to totalsc) of the next card
+    nextind=$count
+  fi
+  if [ $CARD == $scindex ]; then # Choose the next card as default
+    PICKNEXTCARD=1
+  fi
+  count=$((count+1))
+done
+pacmd "set-default-sink $nextsc" # switch default sound card to next 
+
+# $inputs: A list of currently playing inputs
+inputs=$(pacmd list-sink-inputs | awk '$1 == "index:" {print $2}')
+for INPUT in $inputs; do # Move all current inputs to the new default sound card
+  pacmd move-sink-input $INPUT $nextsc
+done
+# $nextscdec: The device.description of the new default sound card
+# NOTE: This is the most likely thing to break in future, the awk lines may need playing around with
+nextscdesc=$(pacmd list-sinks | awk '$1 == "device.description" {print substr($0,5+length($1 $2))}' \
+                         | sed 's|"||g' | awk -F"," 'NR==v1{print$0}' v1=$((nextind+1))) 
+#notify-send "Default sound-card changed to $nextscdesc"
+dbus-send --session --type=method_call --reply-timeout=10000 \
+  --dest=org.freedesktop.Notifications /org/freedesktop/Notifications \
+  org.freedesktop.Notifications.Notify  string:"paswitch"  uint32:1 \
+  string:$icon_name  string:"Default sound card is now"  string:"$nextscdesc" \
+  array:string:"" dict:string:string:"",""  int32:3000
+exit
+# Below text was from original author and remains unaltered
+# CC BY - creative commons
+# Thanks God for help :) and guys lhunath, geirha, Tramp and others from irc #bash on freenode.net
