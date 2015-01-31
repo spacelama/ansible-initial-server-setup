@@ -96,7 +96,8 @@ while read header index ; do
     fi
 
     while read b ; do
-        if [[ "$descr" = "FFT based equalizer on"* ]] ; then
+        if [[ "$descr" = "FFT based equalizer on "* ]] && 
+           [[ "$descr" != "FFT based equalizer on "*" on "*"@"* ]] ; then
             equaliser=$index
             echo "$index: found equaliser on: $descr"
             continue 2
