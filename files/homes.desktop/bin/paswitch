@@ -145,7 +145,8 @@ while read header index ; do
     fi
 done < <( pacmd list-sinks | sed 's|*||' | grep -e index: -e device.description )
 
-setdefaultsink $equaliser
+# only if we want to set everything to the equaliser FFT sink
+#setdefaultsink $equaliser
 
             
 #notify-send "Default sound-card changed to $nextscdesc"
