@@ -6,6 +6,10 @@
 # WAS: Pulse Audio Sound Card Switcher v1.0 2010-01-13
 #   Switches between soundcards when run. All streams are moved to the new default sound-card.
 
+debug=
+if [ "$1" = --debug ] ; then
+    debug=true
+fi
 if [ "$1" = --all ] ; then
     blacklist="$HOME/.paswitchblacklist-hard"
 else
