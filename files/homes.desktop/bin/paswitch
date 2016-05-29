@@ -103,7 +103,7 @@ while read header index ; do
             continue 2
         fi
         
-        if [[ "$descr" = $b ]] ; then
+        if [[ "$descr" == $b ]] ; then
             echo "ignoring $index: $descr"
             continue 2
         fi
