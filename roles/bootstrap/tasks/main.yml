@@ -1,0 +1,76 @@
+---
+- name: Install ansible bootstrap packages
+  apt:
+    name: ['sudo', 'ntp', 'mlocate', 'aptitude']
+    update_cache: yes
+    cache_valid_time: 3600
+    autoremove: no
+    state: latest   # take care of correct pinning?
+##    state: installed ???
+  become: true
+
+#- name: Enable unattended upgrades
+#  copy:
+#    src: ./src/apt/10periodic
+#    dest: /etc/apt/apt.conf.d/10periodic
+#    owner: root
+#    group: root
+#    mode: 0644
+
+- name: Ensure ntp starts on a fresh reboot
+  service:
+    name: ntp
+    state: started
+    enabled: yes
+  become: true
+
+#- name: Ensure sudo group is present
+#  group:
+#    name: sudo
+#    state: present
+
+#- name: Ensure sudo group has sudo privileges
+#  lineinfile:
+#    dest: /etc/sudoers
+#    state: present
+#    regexp: "^%sudo"
+#    line: "%sudo ALL=(ALL:ALL) ALL"
+#    validate: "/usr/sbin/visudo -cf %s"
+
+- name: Add new ansible group
+  group:
+    name: "ansible"
+    gid: 99
+    state: present
+  become: true
+
+- name: Add new ansible user
+  user:
+    name: "ansible"
+    password: "!"
+    uid: 99
+    append: no
+    state: present
+    shell: /bin/bash
+  become: true
+
+- name: remove sshknownhosts munging
+  lineinfile:
+    path: "/etc/ssh/ssh_config"
+    backup: yes
+    backrefs: yes
+    regexp: '^( *HashKnownHosts yes)'
+    line: '#\1\nHashKnownHosts no'
+    state: present
+  become: true
+
+- name: Add SSH key for new ansible user
+  authorized_key:
+    user: "ansible"
+    manage_dir: yes
+    key: "{{ lookup('file', item) }}"
+#    comment: ansible_was_run_by
+    exclusive: yes
+  become: true
+  with_items: "{{ my_public_key }}"
+
