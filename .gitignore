@@ -1,3 +1,5 @@
 *.vagrant
 *.log
 *.retry
+hosts.yml
+vars/main.yml
