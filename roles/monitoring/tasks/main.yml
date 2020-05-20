@@ -1,0 +1,78 @@
+---
+- name: find extraneous ntp_<dynamic> munin checks
+  find:
+    paths: /etc/munin/plugins
+    patterns: ntp_[0-9]*.[0-9]*.[0-9]*.[0-9]*
+    file_type: link
+  register: munin_plugins_to_delete
+
+- name: remove extraneous ntp_<dynamic> munin checks
+  file:
+    path: "{{ item.path }}"
+    state: absent
+  with_items: "{{ munin_plugins_to_delete.files }}"
+  become: true
+
+- name: new munin plugins
+  copy:
+    src: "/etc/munin/plugins/{{ item }}"
+    dest: "/etc/munin/plugins/{{ item }}"
+    owner: root
+    group: root
+    mode: 0755
+  become: true
+  with_items: [ 'cpuidle', 'fail2ban_all_jails', 'ntp_thirdparty' ]
+
+- name: existing munin plugins without params
+  file:
+    src: "/usr/share/munin/plugins/{{ item }}"
+    dest: "/etc/munin/plugins/{{ item }}"
+    state: link
+  become: true
+  with_items: [ 'hddtemp_smartctl', 'hddtempd', 'df_abs', 'iostat', 'iostat_ios', 'netstat' ]
+  
+- name: existing munin plugins with params
+  file:
+    src: "/usr/share/munin/plugins/{{ item.dest }}"
+    dest: "/etc/munin/plugins/{{ item.src }}"
+    state: link
+  become: true
+  with_items:
+    - { src: 'ping_dirac', dest: 'ping_' }
+    - { src: 'ping_fs', dest: 'ping_' }
+    - { src: 'ping_gamow', dest: 'ping_' }
+    - { src: 'ping_gw', dest: 'ping_' }
+    - { src: 'ping_www.google.com.au', dest: 'ping_' }
+
+- name: allow munin-node from fs
+  lineinfile:
+    path: "/etc/munin/munin-node.conf"
+    line: "{{ item }}"
+    state: present
+  become: true
+  with_items: [ 'cidr_allow 127.0.0.1/32', 'cidr_allow 192.168.1.2/24', 'cidr_deny  192.168.1.254/32' ]
+  notify: restart munin-node
+
+- name: Ensure munin df excludes
+  lineinfile:
+    path: "/etc/munin/plugin-conf.d/munin-node"
+    backup: yes
+    regexp: '^env.exclude none '
+    insertafter: '^\[df\*\]'
+    line: 'env.exclude none unknown iso9660 squashfs udf romfs ramfs debugfs'
+  become: true
+  notify: restart munin-node
+
+- name: Ensure munin df excludes
+  blockinfile:
+    path: "/etc/munin/plugin-conf.d/munin-node"
+#    marker: "# ANSIBLE MANAGED BLOCK"
+    backup: yes
+    block: |
+      
+      #for nice devicemapper names
+      [diskstats]
+      user root
+  become: true
+  notify: restart munin-node
+  

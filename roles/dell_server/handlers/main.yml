@@ -1,0 +1,9 @@
+---
+- name: enable and restart fan-speed-control
+  # systemd rather than service because we're explicitly installing our own systemd units
+  systemd:
+    name: fan-speed-control
+    enabled: yes
+    state: restarted
+    daemon_reload: yes  # pick up any new unit files
+  become: true

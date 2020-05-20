@@ -4,26 +4,32 @@
     rule: allow
     port: "{{ ssh_port }}"
     proto: tcp
+  become: true
 
 - name: Allow http traffic on port 80
   ufw:
     rule: allow
     port: 80
     proto: tcp
+  become: true
 
 - name: Allow https traffic on port 443
   ufw:
     rule: allow
     port: 443
     proto: tcp
+  become: true
 
-- name: Allow access to admin tools on port 22222
+# FIXME: parameterise all firewall ports - this one is needed for pve, so fix this at a later date
+- name: Allow https traffic on port 8006
   ufw:
     rule: allow
-    port: 22222
+    port: 8006
     proto: tcp
+  become: true
 
 - name: Enable firewall
   ufw:
     state: enabled
     policy: deny
+  become: true

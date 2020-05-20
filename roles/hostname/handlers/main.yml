@@ -1,5 +1,7 @@
 ---
 - name: restart hostname
-  service:
-    name: hostname
-    state: restarted
+#  service:
+#    name: hostname
+#    state: restarted
+  shell:
+    hostname

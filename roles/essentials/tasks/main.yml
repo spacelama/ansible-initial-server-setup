@@ -1,31 +1,108 @@
 ---
-- name: Update all packages
-  apt:
-    update_cache: yes
-    upgrade: safe
-    autoremove: yes
-
-- name: Install essential packages
-  apt:
-    name: "{{ item }}"
-    update_cache: yes
-    cache_valid_time: 3600
-    state: latest
-  with_items:
-    - unattended-upgrades
-    - git
-    - ntp
-
-- name: Enable unattended upgrades
+- name: Enable default set of repositories
   copy:
-    src: ./src/apt/10periodic
-    dest: /etc/apt/apt.conf.d/10periodic
+    src: ./src/apt/sources.list
+    dest: /etc/apt/sources.list
     owner: root
     group: root
     mode: 0644
+  become: true
 
-- name: Ensure ntp starts on a fresh reboot
-  service:
-    name: ntp
-    state: started
-    enabled: yes
+#- name: Update all packages
+#  apt:
+#    update_cache: yes
+#    upgrade: safe
+#    autoremove: no
+
+- name: Configure timezone country
+  debconf:
+    name: tzdata
+    question: tzdata/Areas
+    value: "Australia"
+    vtype: select
+
+- name: Configure timezone city
+  debconf:
+    name: tzdata
+    question: tzdata/Zones/Australia
+    value: "Melbourne"
+    vtype: select
+
+- name: Configure locales
+  debconf:
+    name: locales
+    question: locales/locales_to_be_generated
+    value: "en_AU.UTF-8 UTF-8"
+    vtype: multiselect
+  become: true
+
+- name: Configure default locale
+  debconf:
+    name: locales
+    question: locales/default_environment_locale
+    value: "en_AU.UTF-8"
+    vtype: select
+  become: true
+
+- name: Install essential packages
+  apt:
+    name: ['git', 'htop', 'iotop', 'ethtool', 'net-tools', 'iperf3',  'aptitude', 'dlocate', 'vim', 'sysstat', 'nicstat', 'lshw', 'uswsusp', 'parted', 'sdparm', 'needrestart', 'munin-node', 'ntpdate', 'colordiff', 'ifstat', 'iftop', 'apt-listchanges', 'apt-show-versions', 'etckeeper', 'apt-listbugs', 'apt-listbugs', 'rlwrap', 'rsync', 'strace', 'procmail', 'make', 'keychain'] # ufw
+    update_cache: yes
+    cache_valid_time: 0
+    autoremove: no
+    state: present
+  become: true
+
+#- name: Enable unattended upgrades
+#  copy:
+#    src: ./src/apt/10periodic
+#    dest: /etc/apt/apt.conf.d/10periodic
+#    owner: root
+#    group: root
+#    mode: 0644
+
+
+
+- name: allow backuppc to check all mountpoints
+  copy:
+    src: /home/tconnors/bin/is_all_mounted
+    dest: /usr/local/bin/is_all_mounted
+    owner: root
+    group: root
+    mode: 0755
+  become: true
+
+- name: setup apt listchanges news
+  lineinfile:
+    dest: /etc/apt/listchanges.conf
+    backrefs: yes
+    regexp: '^(which=news)'
+    line: '#\1\nwhich=both'
+    state: present
+  become: true
+
+- name: setup apt listchanges confirm
+  lineinfile:
+    dest: /etc/apt/listchanges.conf
+    regexp: '^confirm='
+    line: 'confirm=false'
+    state: present
+  become: true
+
+- name: listbugs, but don't ask questions
+  lineinfile:
+    dest: /etc/apt/apt.conf.d/10apt-listbugs
+    regexp: '^.*DPkg::Pre-Install-Pkgs'
+    line: '// DPkg::Pre-Install-Pkgs {"/usr/sbin/apt-listbugs apt";};'
+    state: present
+  become: true
+
+- name: stop restricting dmesg pointlessly
+  copy:
+    dest: /etc/sysctl.d/10-local.conf
+    content: "kernel.dmesg_restrict = 0\n"
+    owner: root
+    group: root
+    mode: 0644
+  become: true
+  notify: restart sysctl

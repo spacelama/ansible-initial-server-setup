@@ -1,11 +1,21 @@
 ---
+# USAGE for a brand new machine:
+#
+#      ansible-playbook bootstrap.yml -u root -k --extra-vars "target=dirac-new" --ask-vault-pass
+#FIXME: on really brand new machines, perhaps sudo isn't installed, and there are accidentally some tasks in bootstrap that still ask for become: true, so perhaps we fix that by removing those erronous becomes (might not work because pve_server is shared between both), or by setting --become_method=su above
+#
+# Just to renew ssh hostkeys etc, without having to first turn on ssh PermitRootLogin:
+#
+#      ansible-playbook bootstrap.yml -u ansible --extra-vars "target=dirac-new" --ask-vault-pass --become
+#
 # https://stackoverflow.com/questions/18195142/safely-limiting-ansible-playbooks-to-a-single-machine
 - hosts: '{{ target }}'
-#- hosts: laptops
-  become_method: su
 
   vars_files:
     - vars/main.yml
 
   roles:
+    - role: pve_server
+      when: host_is_pve_server is defined
     - bootstrap
+    - ssh_bootstrap

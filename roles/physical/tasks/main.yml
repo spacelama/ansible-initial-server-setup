@@ -1,0 +1,9 @@
+---
+- name: Install tools required by physical hardware
+  apt:
+    name: ['hddtemp', 'lm-sensors', 'sg3-utils', 'scsitools', 'bonnie++', 'apt-file']
+    update_cache: yes
+    cache_valid_time: 3600
+    autoremove: no
+    state: present
+  become: true

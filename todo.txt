@@ -1,0 +1,9 @@
+initial: use su
+add ansible user
+install rsync, sudo
+
+proper:
+use sudo, ansible
+packages: git cvs
+users: tconnors, backuppc
+hosts: fermi, pauli

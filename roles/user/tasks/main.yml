@@ -1,29 +1,103 @@
 ---
-- name: Ensure sudo group is present
+#- name: Ensure sudo group is present
+#  group:
+#    name: sudo
+#    state: present
+
+#- name: Ensure sudo group has sudo privileges
+#  lineinfile:
+#    dest: /etc/sudoers
+#    state: present
+#    regexp: "^%sudo"
+#    line: "%sudo ALL=(ALL:ALL) ALL"
+#    validate: "/usr/sbin/visudo -cf %s"
+
+#- name: Add new super user
+#  user:
+#    name: "{{ user }}"
+#    password: "{{ password }}"
+##    groups: sudo
+#    append: yes
+#    state: present
+#    shell: /bin/bash
+#    update_password: always
+
+#- name: Add SSH key for new super user
+#  authorized_key:
+#    user: "{{ user }}"
+#    key: "{{ lookup('file', item) }}"
+#  with_items: "{{ public_key }}"
+
+# https://opensource.com/article/18/7/sysadmin-tasks-ansible
+- name: all groups in the department
   group:
-    name: sudo
-    state: present
+    name:  "{{ item.key }}"
+    gid: "{{ item.value.gid }}"
+  loop: "{{ lookup('dict', my_groups) }}"
+  become: true
 
-- name: Ensure sudo group has sudo privileges
-  lineinfile:
-    dest: /etc/sudoers
-    state: present
-    regexp: "^%sudo"
-    line: "%sudo ALL=(ALL:ALL) ALL"
-    validate: "/usr/sbin/visudo -cf %s"
-
-- name: Add new super user
+- name: all users in the department
   user:
-    name: "{{ user }}"
-    password: "{{ password }}"
-    groups: sudo
+    name:  "{{ item.key }}"
+    group: "{{ item.value.group }}"
+    groups: "{{ item.value.groups }}"
+    uid: "{{ item.value.uid }}"
+    password: "{{ item.value.password }}"
+    update_password: on_create
+    comment:  "{{ item.value.name }}"
+    shell:  "{{ item.value.shell }}"
     append: yes
-    state: present
-    shell: /bin/bash
-    update_password: always
+  loop: "{{ lookup('dict', my_users) }}"
+  become: true
 
-- name: Add SSH key for new super user
+  # FIXME: HOWTO: assign a list of objects to a parameter
+  #- name: FIXME test group - assign by list
+  # replace:
+  #   dest: /etc/{{ item }}
+  #   regexp: "^docker:(.*:.*):.*"
+  #   replace: "docker:\\1:{{ foreman_params.docker_runners | join(',') }}"
+  # become: true
+  # with_items:
+  #   - group
+  #   - gshadow
+
+
+
+# # FIXME: HOWTO: add a list to a parameter
+# - name: "Search for docker grub config"
+#   become: yes
+#   register: docker_grub_cmdline_exists
+#   shell: "grep '^GRUB_CMDLINE_LINUX_DEFAULT=.*user_namespace.enable=1 namespace.unpriv_enable=1' /etc/default/grub"
+#   failed_when: docker_grub_cmdline_exists.rc > 1
+#   changed_when: false
+
+# - name: "Append docker grub config"
+#   when: docker_grub_cmdline_exists.rc != 0
+#   lineinfile:
+#     dest: /etc/default/grub
+#     backrefs: yes
+#     regexp: "^GRUB_CMDLINE_LINUX_DEFAULT=\"(.*)\""
+#     line: "GRUB_CMDLINE_LINUX_DEFAULT=\"\\1 user_namespace.enable=1 namespace.unpriv_enable=1\""
+#     state: present
+#   become: true
+
+
+- name: copy ssh keys
   authorized_key:
-    user: "{{ user }}"
-    key: "{{ lookup('file', item) }}"
-  with_items: "{{ public_key }}"
+    user: "{{ item.key }}"
+    key: "{{ item.value.sshkey }}"
+    state: "{{ item.value.state }}"
+#    comment: "{{ item.value.comment }}"
+  loop: "{{ lookup('dict', my_users) }}"
+  become: true
+
+- name: copy sudoers
+  copy:
+    src: "./src/user/{{ item.key }}"
+    dest: "/etc/sudoers.d/{{ item.key }}"
+    #FIXME: needs to ignore this (outputting info message that theres no sudoers for this user) clause when src file not exist
+    owner: root
+    group: root
+    mode: 0644
+  loop: "{{ lookup('dict', my_users) }}"
+  become: true

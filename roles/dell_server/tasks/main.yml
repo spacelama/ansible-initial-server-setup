@@ -1,0 +1,74 @@
+---
+- name: copy fan-speed-control
+  copy:
+    src: /home/tconnors/code/Scripts/R710-IPMI-TEMP/fan-speed-control.pl
+    dest: /usr/local/bin/fan-speed-control.pl
+    owner: root
+    group: root
+    mode: 0755
+  become: true
+  notify: restart fan-speed-control
+
+- name: install fan-speed-control systemd target
+  copy:
+    src: /home/tconnors/code/Scripts/R710-IPMI-TEMP/fan-speed-control.service
+    dest: /etc/systemd/system/fan-speed-control.service
+    owner: root
+    group: root
+    mode: 0644
+  become: true
+  notify: restart fan-speed-control
+
+- name: enable fan-speed-control systemd target
+  # systemd rather than service because we're explicitly installing our own systemd units
+  systemd:
+    name: fan-speed-control
+    enabled: yes
+    state: started
+  become: true
+  
+- name: dell repository key
+  apt_key:
+    keyserver: pool.sks-keyservers.net
+    id: 1285491434D8786F
+  become: true
+
+- name: dell repository
+  apt_repository:
+    repo: deb http://linux.dell.com/repo/community/openmanage/910/stretch stretch main
+    state: present
+    filename: linux.dell.com.sources
+  become: true
+
+#- name: Check if sfcb libcimcclient0 and libssl1.0.2 is installed
+#  shell: "dpkg-query -W --showformat='${Status}\n' sfcb libcimcclient0 libssl1.0.2 libwsman-server1_2.6.5-0ubuntu3_amd64.deb 2>&1 | grep -v '^install ok installed$' | grep -q ."
+#  register: archived_package_check_deb
+#  failed_when: archived_package_check_deb.rc > 1
+#  changed_when: archived_package_check_deb.rc == 0
+
+- name: Ensures ~ansible/Downloads dir exists
+  file:
+    path="/home/{{ ansible_env.USER }}/Downloads"
+    state=directory
+
+- name: Download archived .deb files
+  copy:
+    src: "/var/cache/apt/non-delete/{{ item }}"
+    dest: "/home/{{ ansible_env.USER }}/Downloads/{{ item }}.deb"
+#  when: archived_package_check_deb.rc == 0
+  loop: "{{ srvadmin_depends }}"
+
+- name: Install archived_package
+  apt: deb="/home/{{ ansible_env.USER }}/Downloads/{{ item }}.deb"
+  become: true
+#  when: archived_package_check_deb.rc == 0
+  loop: "{{ srvadmin_depends }}"
+
+- name: Install dell tools
+  apt:
+    name: ['srvadmin-all', 'ipmitool', 'intel-microcode']
+    update_cache: yes
+    cache_valid_time: 0
+    autoremove: no
+    state: present
+  become: true

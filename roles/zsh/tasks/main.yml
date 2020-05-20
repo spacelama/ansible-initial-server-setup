@@ -3,7 +3,7 @@
   when: enable_custom_shell
   apt:
     name: zsh
-    state: latest
+    state: present
   register: zsh_installed
 
 - name: Clone oh-my-zsh

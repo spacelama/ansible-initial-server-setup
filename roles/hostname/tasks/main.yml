@@ -1,8 +1,9 @@
 ---
 - name: Set hostname
   hostname:
-    name: "{{ fqdn }}"
+    name: "{{ hostname }}"
   notify: restart hostname
+  become: true
 
 - name: Add correct IP address to hosts file
   lineinfile:
@@ -11,6 +12,7 @@
     line: "{{ ansible_default_ipv4.address }} {{ fqdn }} {{ hostname }}"
     state: present
   notify: restart hostname
+  become: true
 
 - name: Remove default line from hosts file
   lineinfile:
@@ -18,3 +20,4 @@
     regexp: '^127\.0\.1\.1'
     state: absent
   notify: restart hostname
+  become: true

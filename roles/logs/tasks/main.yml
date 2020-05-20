@@ -1,0 +1,12 @@
+---
+- name: install logrotate.d/[wb]tmp
+  copy:
+    src: ./src/logrotate/{{ item }}
+    dest: /etc/logrotate.d/{{ item }}
+    owner: root
+    group: root
+    mode: 0644
+  with_items:
+    - wtmp
+    - btmp
+  become: true

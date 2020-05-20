@@ -1,0 +1,7 @@
+#backuppc ALL = NOPASSWD: /bin/tar, /usr/bin/rsync
+#backuppc ALL = NOPASSWD: /usr/bin/rsync --server --sender *
+# it turns out we really do want the ability to restore files...
+backuppc ALL = NOPASSWD: /usr/bin/ionice -c 3 /usr/bin/rsync --server *
+backuppc ALL = NOPASSWD: /usr/local/bin/is_all_mounted *
+backuppc ALL = NOPASSWD: /usr/local/bin/lock_backuppc *
+backuppc ALL = NOPASSWD: /usr/local/bin/unlock_backuppc *

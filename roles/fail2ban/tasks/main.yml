@@ -1,10 +1,11 @@
 ---
 - name: Install fail2ban
   apt:
-    name: fail2ban
+    name: ['fail2ban']
     state: present
     update_cache: yes
     cache_valid_time: 3600
+  become: true
 
 - name: Copy custom fail2ban config
   copy:
@@ -14,9 +15,11 @@
     group: root
     mode: 0644
   notify: restart fail2ban
+  become: true
 
 - name: Ensure fail2ban starts on a fresh reboot
   service:
     name: fail2ban
     state: started
     enabled: yes
+  become: true

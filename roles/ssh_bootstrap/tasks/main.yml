@@ -1,0 +1,114 @@
+---
+
+# This is for host keys, root keys etc, but it's only done in
+# bootstap, because we don't want to have to ask the vault password
+# all the time.  This means you'll need to run bootstrap.yml per
+# instructions in that file
+
+- name: ensure ssh is installed
+  apt:
+    pkg: openssh-server
+    state: present
+    update_cache: true
+    cache_valid_time: 3600
+  notify: restart ssh
+
+- name: Change ssh port
+  lineinfile:
+    dest: /etc/ssh/sshd_config
+    regexp: '^Port\s'
+    line: "Port {{ ssh_port }}"
+    state: present
+  notify: restart ssh
+
+- name: Install ssh_host_rsa_key ssh host keys
+  copy:
+    content: "{{ ssh_host_rsa_key }}"
+    dest: /etc/ssh/ssh_host_rsa_key
+    owner: root
+    group: root
+    mode: 0600
+  notify: restart ssh
+  when: ssh_host_rsa_key is defined
+
+- name: Install ssh_host_rsa_key_pub ssh host keys
+  copy:
+    content: "{{ ssh_host_rsa_key_pub }}"
+    dest: /etc/ssh/ssh_host_rsa_key.pub
+    owner: root
+    group: root
+    mode: 0644
+  notify: restart ssh
+  when: ssh_host_rsa_key_pub is defined
+
+- name: Install ssh_host_ecdsa_key ssh host keys
+  copy:
+    content: "{{ ssh_host_ecdsa_key }}"
+    dest: /etc/ssh/ssh_host_ecdsa_key
+    owner: root
+    group: root
+    mode: 0600
+  notify: restart ssh
+  when: ssh_host_ecdsa_key is defined
+
+- name: Install ssh_host_ecdsa_key_pub ssh host keys
+  copy:
+    content: "{{ ssh_host_ecdsa_key_pub }}"
+    dest: /etc/ssh/ssh_host_ecdsa_key.pub
+    owner: root
+    group: root
+    mode: 0644
+  notify: restart ssh
+  when: ssh_host_ecdsa_key_pub is defined
+
+- name: Install ssh_host_ed25519_key ssh host keys
+  copy:
+    content: "{{ ssh_host_ed25519_key }}"
+    dest: /etc/ssh/ssh_host_ed25519_key
+    owner: root
+    group: root
+    mode: 0600
+  notify: restart ssh
+  when: ssh_host_ed25519_key is defined
+
+- name: Install ssh_host_ed25519_key_pub ssh host keys
+  copy:
+    content: "{{ ssh_host_ed25519_key_pub }}"
+    dest: /etc/ssh/ssh_host_ed25519_key.pub
+    owner: root
+    group: root
+    mode: 0644
+  notify: restart ssh
+  when: ssh_host_ed25519_key_pub is defined
+
+- name: Ensures /root/.ssh dir exists
+  file: path=/root/.ssh state=directory mode=0700
+  
+
+
+- name: Install root id_rsa ssh keys
+  copy:
+    content: "{{ root_id_rsa }}"
+    dest: /root/.ssh/id_rsa
+    owner: root
+    group: root
+    mode: 0600
+  when: root_id_rsa is defined
+
+- name: Install root id_rsa.pub ssh keys
+  copy:
+    content: "{{ root_id_rsa_pub }}"
+    dest: /root/.ssh/id_rsa.pub
+    owner: root
+    group: root
+    mode: 0644
+  when: root_id_rsa_pub is defined
+
+- name: Install root ssh authorized_keys
+  copy:
+    content: "{{ root_authorized_keys }}"
+    dest: /root/.ssh/authorized_keys
+    owner: root
+    group: root
+    mode: 0644
+  when: root_authorized_keys is defined

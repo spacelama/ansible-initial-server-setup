@@ -2,11 +2,10 @@
 - name: Install ansible bootstrap packages
   apt:
     name: ['sudo', 'ntp', 'mlocate', 'aptitude']
-    update_cache: yes
+    update_cache: no # can't - proxmox enterprise might be a repo, and isn't valid yet
     cache_valid_time: 3600
     autoremove: no
-    state: latest   # take care of correct pinning?
-##    state: installed ???
+    state: present
   become: true
 
 #- name: Enable unattended upgrades
@@ -36,6 +35,14 @@
 #    regexp: "^%sudo"
 #    line: "%sudo ALL=(ALL:ALL) ALL"
 #    validate: "/usr/sbin/visudo -cf %s"
+
+- name: set up ansible sudoers
+  copy:
+    src: ./src/user/ansible
+    dest: /etc/sudoers.d/ansible
+    owner: root
+    group: root
+    mode: 0440
 
 - name: Add new ansible group
   group:
@@ -69,7 +76,7 @@
     user: "ansible"
     manage_dir: yes
     key: "{{ lookup('file', item) }}"
-#    comment: ansible_was_run_by
+#    comment: "{{ ansible_was_run_by }}"
     exclusive: yes
   become: true
   with_items: "{{ my_public_key }}"

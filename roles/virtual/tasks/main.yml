@@ -1,0 +1,26 @@
+---
+- name: Install tools required by VMs
+  apt:
+  # https://daniel-lange.com/archives/152-Openssh-taking-minutes-to-become-available,-booting-takes-half-an-hour-...-because-your-server-waits-for-a-few-bytes-of-randomness.html
+    name: ['qemu-guest-agent', 'spice-vdagent']
+    update_cache: yes
+    cache_valid_time: 3600
+    autoremove: no
+    state: present
+  become: true
+
+- name: remove tools not required by VMs
+  apt:
+  # VirtIO RNG now added - FIXME: but need to make sure actually works!
+    name: ['haveged']
+    autoremove: no
+    state: absent
+  become: true
+
+- name: ensure SMR drives have a longer timeout
+  copy:
+     content: "ACTION==\"add\", SUBSYSTEM==\"block\",  ENV{ID_SERIAL_SHORT}==\"ST8000*\", RUN+=\"/bin/sh -c 'echo 60 > /sys/block/%k/device/timeout'\"\n"
+     # find string with `udevadm test /sys/class/block/sdf`
+     # also tells you whether it appended RUN appropriately
+     dest: /etc/udev/rules.d/90-SMR-drive-timeout.rules
+  become: true

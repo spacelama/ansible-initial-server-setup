@@ -1,6 +1,7 @@
 ---
-- hosts: production
-  user: root
+# https://stackoverflow.com/questions/18195142/safely-limiting-ansible-playbooks-to-a-single-machine
+- hosts: '{{ target }}'
+  remote_user: ansible
 
   vars_files:
     - vars/main.yml
@@ -8,10 +9,22 @@
   roles:
     - essentials
     - hostname
-    - timezone
     - user
+    - logs
+    # pve_server is loaded in bootstrap.yml as well, but that's just to make sure all the repos are there.  No harm updating that here as time goes on
+    - role: pve_server
+      when: host_is_pve_server is defined
+    - role: virtual
+      when: host_is_virtual is defined
+    - role: physical
+      when: host_is_physical is defined
+    - role: dell_server
+      when: host_is_dell_server is defined
+    - role: desktop
+      when: host_is_desktop is defined
     - fail2ban
-    - zsh
-    - newrelic
     - ssh
-    - ufw
+    - monitoring
+#    - zsh
+#    - newrelic
+#    - ufw

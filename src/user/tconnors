@@ -1,0 +1,5 @@
+tconnors        ALL=(ALL) ALL
+#for sillysu function.  also allows me to override PULSE_RUNTIME_PATH=/var/run/pulse pacmd
+tconnors ALL = (ALL) NOPASSWD: /usr/bin/env *
+
+# tconnors ALL = (pulse) NOPASSWD:

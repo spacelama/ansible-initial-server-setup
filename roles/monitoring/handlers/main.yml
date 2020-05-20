@@ -1,6 +1,6 @@
 ---
-- name: restart ssh
+- name: restart munin-node
   service:
-    name: ssh
+    name: munin-node
     state: restarted
   become: true
