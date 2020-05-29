@@ -7,7 +7,7 @@
     group: root
     mode: 0755
   become: true
-  notify: restart fan-speed-control
+  notify: enable and restart fan-speed-control
 
 - name: install fan-speed-control systemd target
   copy:
@@ -17,7 +17,7 @@
     group: root
     mode: 0644
   become: true
-  notify: restart fan-speed-control
+  notify: enable and restart fan-speed-control
 
 - name: enable fan-speed-control systemd target
   # systemd rather than service because we're explicitly installing our own systemd units
@@ -63,6 +63,18 @@
   become: true
 #  when: archived_package_check_deb.rc == 0
   loop: "{{ srvadmin_depends }}"
+
+- name: Download megacli .deb files
+  copy:
+    src: "/home/tconnors/sysadmin/install/megaraid_cli/Linux/megacli_8.07.14-2_all.deb"
+    dest: "/home/{{ ansible_env.USER }}/Downloads/megacli_8.07.14-2_all.deb"
+
+- name: Install megacli .deb files
+  apt: deb="/home/{{ ansible_env.USER }}/Downloads/{{ item }}.deb"
+  become: true
+#  when: archived_package_check_deb.rc == 0
+  with_items:
+    - "megacli_8.07.14-2_all"
 
 - name: Install dell tools
   apt:

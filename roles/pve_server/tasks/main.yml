@@ -1,18 +1,24 @@
 ---
 - name: determine if enterprise pve subscription exists
-  stat: path=/etc/apt/sources.list.d/pve-enterprise.list
-  register: pve_enterprise
+  stat: path=/etc/apt/apt.conf.d/86pve-nags
+  register: pve_enterprise_nag_buster
 
-- name: move the original pve subscription out of the way
-  command: mv /etc/apt/sources.list.d/pve-enterprise.list /etc/apt/sources.list.d/pve-enterprise.list.disabled
-  when: pve_enterprise.stat.exists
-  become: true
-
-- name: ensure pve community repository available
+- name: ensure old pve community repository removed
   apt_repository:
     repo: deb http://download.proxmox.com/debian/pve buster pve-no-subscription
-    state: present
+    state: absent
     filename: pve-community
+  become: true
+
+- name: copy pve-nag-buster/install.sh to pve
+  copy:
+    src: /home/tconnors/sysadmin/install/pve-nag-buster/install.sh
+    dest: "/home/{{ ansible_env.USER }}/Downloads/pve-nag-buster-install.sh"
+    mode: 0755
+
+- name: install the pve nag buster
+  command: /home/{{ ansible_env.USER }}/Downloads/pve-nag-buster-install.sh --offline
+  when: not pve_enterprise_nag_buster.stat.exists
   become: true
 
 - name: remove prohibited packages
