@@ -44,3 +44,15 @@
      # also tells you whether it appended RUN appropriately
      dest: /etc/udev/rules.d/90-SMR-drive-timeout.rules
   become: true
+
+- name: install suspend-all
+  copy:
+    src: ./src/pve_server/{{ item }}
+    dest: /usr/local/bin/{{ item }}
+    owner: root
+    group: root
+    mode: 0755
+  become: true
+  with_items:
+    - suspend-all
+    - 

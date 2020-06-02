@@ -1,0 +1,11 @@
+#!/bin/sh
+
+for i in /etc/pve/local/*/*conf ; do
+  i=${i%.conf}
+  i=${i##*/}
+  echo $i
+  qm suspend $i --todisk 1 &
+done
+echo "Initiating suspend of all VMs, now waiting..."
+wait
+echo "All VMs suspended"

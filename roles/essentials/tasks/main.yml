@@ -89,7 +89,7 @@
     state: present
   become: true
 
-- name: listbugs, but don't ask questions
+- name: "listbugs, but don't ask questions"
   lineinfile:
     dest: /etc/apt/apt.conf.d/10apt-listbugs
     regexp: '^.*DPkg::Pre-Install-Pkgs'
@@ -106,3 +106,19 @@
     mode: 0644
   become: true
   notify: restart sysctl
+
+- name: copy /usr/local/bin/get_conf_info
+  copy:
+    dest: /usr/local/bin/get_conf_info
+    src: /home/tconnors/debian-common-files/cron.daily_get_conf_info
+    owner: root
+    group: root
+    mode: 0755
+  become: true
+
+- name: install cron.daily.get_conf_info
+  file:
+    src: /usr/local/bin/get_conf_info
+    dest: /etc/cron.daily/get_conf_info
+    state: link
+  become: true
