@@ -55,4 +55,3 @@
   become: true
   with_items:
     - suspend-all
-    - 
