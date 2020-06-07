@@ -43,9 +43,14 @@ function setdefaultsink() {
         read header1 state
         [ "$header1" != "state:" ] && continue
         [ "$state" != "RUNNING" ] && continue
+
+        read header1 equals application_name
+        [ "$header1 $equals" != "application.name =" ] && continue
+        # ignore this source if the application is called "*headphone*" - the user has explicitly set the sink and doesn't want it changed
+        [[ "$application_name" == *headphone* ]] && continue
         
         inputs="$inputs $index"
-    done < <( pacmd list-sink-inputs | grep -e driver: -e index: -e flags: -e state: )
+    done < <( pacmd list-sink-inputs | grep -e driver: -e index: -e flags: -e state: -e application.name )
 
     for INPUT in $inputs; do # Move all current inputs to the new default sound card
         verboserun pacmd move-sink-input $INPUT "$@"
