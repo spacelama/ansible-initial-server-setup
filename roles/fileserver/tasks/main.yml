@@ -1,0 +1,10 @@
+---
+- name: Install fileserver packages
+  apt:
+    name: ['zfs-dkms', 'samba']
+    update_cache: yes
+    cache_valid_time: 0
+    autoremove: no
+    state: present
+  become: true
+

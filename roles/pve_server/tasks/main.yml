@@ -30,7 +30,7 @@
 - name: Install proxmox tools
   apt:
     # https://pve.proxmox.com/wiki/Install_Proxmox_VE_on_Debian_Jessie
-    name: ['proxmox-ve', 'ssh', 'postfix', 'ksm-control-daemon', 'open-iscsi', 'systemd-sysv', 'virt-goodies', 'munin-libvirt-plugins']
+    name: ['proxmox-ve', 'ssh', 'postfix', 'ksm-control-daemon', 'open-iscsi', 'systemd-sysv', 'virt-goodies', 'munin-libvirt-plugins', 'swapspace']
     update_cache: yes
     cache_valid_time: 3600
     autoremove: no
@@ -55,3 +55,11 @@
   become: true
   with_items:
     - suspend-all
+
+  # FIXME: there are no partitions on pve where there's enough space for swapspace to operate
+- name: Ensures /var/lib/swapspace 0700
+  file:
+    path="/var/lib/swapspace"
+    state=directory
+    mode=0700
+  become: true

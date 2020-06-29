@@ -16,13 +16,6 @@
 #    group: root
 #    mode: 0644
 
-- name: Ensure ntp starts on a fresh reboot
-  service:
-    name: ntp
-    state: started
-    enabled: yes
-  become: true
-
 #- name: Ensure sudo group is present
 #  group:
 #    name: sudo
@@ -38,7 +31,7 @@
 
 - name: set up ansible sudoers
   copy:
-    src: ./src/user/ansible
+    src: ./src/user/sudoers.d.ansible
     dest: /etc/sudoers.d/ansible
     owner: root
     group: root

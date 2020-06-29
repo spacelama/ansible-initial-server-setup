@@ -20,6 +20,7 @@
     question: tzdata/Areas
     value: "Australia"
     vtype: select
+  become: true
 
 - name: Configure timezone city
   debconf:
@@ -27,6 +28,14 @@
     question: tzdata/Zones/Australia
     value: "Melbourne"
     vtype: select
+  become: true
+
+- name: Ensure ntp starts on a fresh reboot
+  service:
+    name: ntp
+    state: started
+    enabled: yes
+  become: true
 
 - name: Configure locales
   debconf:
@@ -121,4 +130,5 @@
     src: /usr/local/bin/get_conf_info
     dest: /etc/cron.daily/get_conf_info
     state: link
+    force: yes
   become: true

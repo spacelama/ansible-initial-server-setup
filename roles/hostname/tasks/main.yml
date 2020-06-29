@@ -5,7 +5,33 @@
   notify: restart hostname
   become: true
 
+- name: "Search for correct hosts line"
+  become: yes
+  register: hosts_line
+  check_mode: yes # cause this to become just a test.  If there's already
+                  # user_namespace settings, then this will think line is
+                  # being replaced, and changed will become true (but we
+                  # force it to false to not output a line saying
+                  # "changed"), and msg will become "line added", else
+                  # changed stays false, and msg does not contain "line
+                  # added"
+  lineinfile:
+    dest: /etc/hosts
+    line: hosts already has correct hostname
+    regexp: "^{{ ansible_default_ipv4.address }} {{ fqdn }} {{ hostname }}$"
+    state: present
+  changed_when: false
+
+- name: "Remove existing incorrect host entries"
+  when: hosts_line.msg == "line added"
+  lineinfile:
+    dest: /etc/hosts
+    regexp: "\\s{{ hostname }}$"
+    state: absent
+  become: true
+
 - name: Add correct IP address to hosts file
+  when: hosts_line.msg == "line added"
   lineinfile:
     dest: /etc/hosts
     insertafter: '^127\.0\.0\.1\slocalhost'
