@@ -1,6 +1,6 @@
 ---
 # https://stackoverflow.com/questions/18195142/safely-limiting-ansible-playbooks-to-a-single-machine
-- hosts: '{{ target }}'
+- hosts: '{{ target | default(all) }}'
   remote_user: ansible
 
   vars_files:
@@ -22,6 +22,8 @@
       when: host_is_virtual is defined
     - role: physical
       when: host_is_physical is defined
+    - role: laptop
+      when: host_is_laptop is defined
     - role: dell_server
       when: host_is_dell_server is defined
     - role: desktop

@@ -6,6 +6,8 @@
     file_type: link
   register: munin_plugins_to_delete
 
+  #FIXME: might need to go chrony instead of NTP if thats how we get VMs working
+
 - name: remove extraneous ntp_<dynamic> munin checks
   file:
     path: "{{ item.path }}"
@@ -66,7 +68,7 @@
 - name: Ensure munin df excludes
   blockinfile:
     path: "/etc/munin/plugin-conf.d/munin-node"
-#    marker: "# ANSIBLE MANAGED BLOCK"
+    marker: "# {mark} ANSIBLE MANAGED BLOCK"
     backup: yes
     block: |
       

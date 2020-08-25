@@ -38,7 +38,9 @@
 
 - name: all users in the department
   user:
-    name:  "{{ item.key }}"
+    name: "{{ item.key }}"
+    home: "{{ item.value.dir | default(omit) }}"
+    move_home: true
     group: "{{ item.value.group }}"
     groups: "{{ item.value.groups }}"
     uid: "{{ item.value.uid }}"

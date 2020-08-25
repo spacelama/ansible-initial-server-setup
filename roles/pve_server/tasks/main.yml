@@ -63,3 +63,11 @@
     state=directory
     mode=0700
   become: true
+
+- name: ensure all munin smart links are in place
+  file:
+    src: /usr/share/munin/plugins/smart_
+    dest: "/etc/munin/plugins/smart_sd{{ item }}"
+    state: link
+  become: true
+  with_items: { a, b, c, d, e, f, g, h, i, j, k, l, m, n }

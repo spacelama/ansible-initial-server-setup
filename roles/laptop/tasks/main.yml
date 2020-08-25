@@ -1,0 +1,13 @@
+---
+- name: determine if systemd login needs tweaking
+  stat: path=/etc/systemd/logind.conf
+  register: systemd_logind
+
+- name: Get rid of stupid lid behaviour
+  lineinfile:
+    dest: /etc/systemd/logind.conf
+    line: HandleLidSwitch=ignore
+    regexp: ^HandleLidSwitch=.*
+    state: present
+  become: true
+  when: systemd_logind.stat.exists

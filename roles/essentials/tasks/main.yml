@@ -37,6 +37,8 @@
     enabled: yes
   become: true
 
+  #FIXME: might need to go chrony instead of NTP if thats how we get VMs working
+
 - name: Configure locales
   debconf:
     name: locales
@@ -55,7 +57,7 @@
 
 - name: Install essential packages
   apt:
-    name: ['git', 'htop', 'iotop', 'ethtool', 'net-tools', 'iperf3',  'aptitude', 'dlocate', 'vim', 'sysstat', 'nicstat', 'lshw', 'uswsusp', 'parted', 'sdparm', 'needrestart', 'munin-node', 'ntpdate', 'colordiff', 'ifstat', 'iftop', 'apt-listchanges', 'apt-show-versions', 'etckeeper', 'apt-listbugs', 'apt-listbugs', 'rlwrap', 'rsync', 'strace', 'procmail', 'make', 'keychain'] # ufw
+    name: ['git', 'htop', 'iotop', 'ethtool', 'net-tools', 'iperf3',  'aptitude', 'dlocate', 'vim', 'sysstat', 'nicstat', 'lshw', 'uswsusp', 'parted', 'sdparm', 'needrestart', 'munin-node', 'ntpdate', 'colordiff', 'ifstat', 'iftop', 'apt-listchanges', 'apt-show-versions', 'etckeeper', 'apt-listbugs', 'apt-listbugs', 'rlwrap', 'rsync', 'strace', 'procmail', 'make', 'keychain', 'libstring-shellquote-perl'] # ufw
     update_cache: yes
     cache_valid_time: 0
     autoremove: no
