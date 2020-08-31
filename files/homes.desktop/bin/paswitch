@@ -104,7 +104,7 @@ while read header index ; do
         scindex=$index
     fi
 
-    while read b ; do
+    while read blocked ; do
         if [[ "$descr" = "FFT based equalizer on "* ]] && 
            [[ "$descr" != "FFT based equalizer on "*" on "*"@"* ]] ; then
             equaliser=$index
@@ -112,7 +112,7 @@ while read header index ; do
             continue 2
         fi
         
-        if [[ "$descr" == $b ]] ; then
+        if [[ "$descr" == $blocked ]] ; then
             echo "ignoring $index: $descr"
             continue 2
         fi
