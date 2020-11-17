@@ -1,6 +1,6 @@
 ---
 # https://stackoverflow.com/questions/18195142/safely-limiting-ansible-playbooks-to-a-single-machine
-- hosts: '{{ target | default(all) }}'
+- hosts: "{{ target | default('all') }}"
   remote_user: ansible
 
   vars_files:
@@ -11,6 +11,7 @@
     - hostname
     - user
     - logs
+    - spectre_mitigations_disabled
     # pve_server is loaded in bootstrap.yml as well, but that's just to make sure all the repos are there.  No harm updating that here as time goes on
     - role: fileserver
       when: host_is_fileserver is defined

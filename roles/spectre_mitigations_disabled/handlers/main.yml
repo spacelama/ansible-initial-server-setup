@@ -1,0 +1,5 @@
+---
+- name: "Regenerate grub config"
+  shell: "/usr/sbin/update-grub"
+  become: true
+
