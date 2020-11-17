@@ -3,11 +3,31 @@
   stat: path=/etc/systemd/logind.conf
   register: systemd_logind
 
-- name: Get rid of stupid lid behaviour
+- name: Get rid of systemd lid behaviour
   lineinfile:
     dest: /etc/systemd/logind.conf
     line: HandleLidSwitch=ignore
-    regexp: ^HandleLidSwitch=.*
+    regexp: ^HandleLidSwitch=
     state: present
   become: true
   when: systemd_logind.stat.exists
+
+- name: Get rid of Upower lid behaviour
+  lineinfile:
+    dest: /etc/UPower/UPower.conf
+    line: IgnoreLid=true
+    regexp: ^IgnoreLid=
+    state: present
+  become: true
+
+- name: Get rid of elogind lid behaviour
+  lineinfile:
+    dest: /etc/elogind/logind.conf
+    line: HandleLidSwitch=ignore
+    regexp: ^HandleLidSwitch=
+    state: present
+  become: true
+
+- name: Get rid of acpi-support lid behaviour
+  lineinfile:
+    dest: /etc/acpi/lid.sh
