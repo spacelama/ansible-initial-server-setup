@@ -59,7 +59,7 @@
 
 - name: Install essential packages (all)
   apt:
-    name: ['needrestart', 'munin-node']
+    name: ['needrestart', 'rsync', 'munin-node']
     update_cache: yes
     cache_valid_time: 0
     autoremove: no
@@ -68,7 +68,7 @@
 
 - name: Install essential packages (not container)
   apt:
-    name: ['git', 'htop', 'iotop', 'ethtool', 'net-tools', 'iperf3',  'aptitude', 'dlocate', 'vim', 'sysstat', 'nicstat', 'lshw', 'uswsusp', 'parted', 'sdparm', 'ntpdate', 'colordiff', 'ifstat', 'iftop', 'apt-listchanges', 'apt-show-versions', 'etckeeper', 'apt-listbugs', 'apt-listbugs', 'rlwrap', 'rsync', 'strace', 'procmail', 'make', 'keychain', 'libstring-shellquote-perl']
+    name: ['git', 'htop', 'iotop', 'ethtool', 'net-tools', 'iperf3',  'aptitude', 'dlocate', 'vim', 'sysstat', 'nicstat', 'lshw', 'uswsusp', 'parted', 'sdparm', 'ntpdate', 'colordiff', 'ifstat', 'iftop', 'apt-listchanges', 'apt-show-versions', 'etckeeper', 'apt-listbugs', 'apt-listbugs', 'rlwrap', 'strace', 'procmail', 'make', 'keychain', 'libstring-shellquote-perl']
     update_cache: yes
     cache_valid_time: 0
     autoremove: no
