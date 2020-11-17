@@ -13,13 +13,13 @@
     cache_valid_time: 3600
   notify: restart ssh
 
-- name: Change ssh port
-  lineinfile:
-    dest: /etc/ssh/sshd_config
-    regexp: '^Port\s'
-    line: "Port {{ ssh_port }}"
-    state: present
-  notify: restart ssh
+# - name: Change ssh port
+#   lineinfile:
+#     dest: /etc/ssh/sshd_config
+#     regexp: '^Port\s'
+#     line: "Port {{ ssh_port }}"
+#     state: present
+#   notify: restart ssh
 
 - name: Install ssh_host_rsa_key ssh host keys
   copy:

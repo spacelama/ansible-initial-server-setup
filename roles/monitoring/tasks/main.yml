@@ -32,6 +32,7 @@
     state: link
   become: true
   with_items: [ 'hddtemp_smartctl', 'hddtempd', 'df_abs', 'iostat', 'iostat_ios', 'netstat' ]
+  when: not host_is_container
   
 - name: existing munin plugins with params
   file:
@@ -45,6 +46,7 @@
     - { src: 'ping_gamow', dest: 'ping_' }
     - { src: 'ping_gw', dest: 'ping_' }
     - { src: 'ping_www.google.com.au', dest: 'ping_' }
+  when: not host_is_container
 
 - name: allow munin-node from fs
   lineinfile:

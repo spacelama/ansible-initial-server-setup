@@ -7,6 +7,7 @@
     group: root
     mode: 0644
   become: true
+  when: not host_is_container
 
 #- name: Update all packages
 #  apt:
@@ -36,6 +37,7 @@
     state: started
     enabled: yes
   become: true
+  when: not host_is_container
 
   #FIXME: might need to go chrony instead of NTP if thats how we get VMs working
 
@@ -55,14 +57,24 @@
     vtype: select
   become: true
 
-- name: Install essential packages
+- name: Install essential packages (all)
   apt:
-    name: ['git', 'htop', 'iotop', 'ethtool', 'net-tools', 'iperf3',  'aptitude', 'dlocate', 'vim', 'sysstat', 'nicstat', 'lshw', 'uswsusp', 'parted', 'sdparm', 'needrestart', 'munin-node', 'ntpdate', 'colordiff', 'ifstat', 'iftop', 'apt-listchanges', 'apt-show-versions', 'etckeeper', 'apt-listbugs', 'apt-listbugs', 'rlwrap', 'rsync', 'strace', 'procmail', 'make', 'keychain', 'libstring-shellquote-perl'] # ufw
+    name: ['needrestart', 'munin-node']
     update_cache: yes
     cache_valid_time: 0
     autoremove: no
     state: present
   become: true
+
+- name: Install essential packages (not container)
+  apt:
+    name: ['git', 'htop', 'iotop', 'ethtool', 'net-tools', 'iperf3',  'aptitude', 'dlocate', 'vim', 'sysstat', 'nicstat', 'lshw', 'uswsusp', 'parted', 'sdparm', 'ntpdate', 'colordiff', 'ifstat', 'iftop', 'apt-listchanges', 'apt-show-versions', 'etckeeper', 'apt-listbugs', 'apt-listbugs', 'rlwrap', 'rsync', 'strace', 'procmail', 'make', 'keychain', 'libstring-shellquote-perl']
+    update_cache: yes
+    cache_valid_time: 0
+    autoremove: no
+    state: present
+  become: true
+  when: not host_is_container
 
 #- name: Enable unattended upgrades
 #  copy:
@@ -91,6 +103,7 @@
     line: '#\1\nwhich=both'
     state: present
   become: true
+  when: not host_is_container
 
 - name: setup apt listchanges confirm
   lineinfile:
@@ -99,6 +112,7 @@
     line: 'confirm=false'
     state: present
   become: true
+  when: not host_is_container
 
 - name: "listbugs, but don't ask questions"
   lineinfile:
@@ -107,6 +121,7 @@
     line: '// DPkg::Pre-Install-Pkgs {"/usr/sbin/apt-listbugs apt";};'
     state: present
   become: true
+  when: not host_is_container
 
 - name: stop restricting dmesg pointlessly
   copy:
