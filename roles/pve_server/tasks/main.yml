@@ -126,6 +126,6 @@
 - name: "host modules blacklist"
   copy:
     dest: /etc/modprobe.d/pve-custom-blacklist.conf
-    content: "blacklist radeon"
+    content: "blacklist radeon\n"
   become: true
   notify: "Update initramfs config"
