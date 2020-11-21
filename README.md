@@ -1,21 +1,15 @@
-# Ansible Playbook for Initial Server Setup with Ubuntu 14.04
+# Ansible Playbook for Initial Server Setup with Debian
 
-An [Ansible](http://docs.ansible.com/) playbook which runs a series of configuration steps to increase the security and usability of a new Ubuntu 14.04 server, in order to provide a solid foundation for subsequent actions.
+A couple of [Ansible](http://docs.ansible.com/) playbooks which runs a series of configuration steps to set up an SOE based on Debian, in order to provide a solid foundation for subsequent actions.
 
 It borrows heavily from the work of: [Bryan Kennedy](https://plusbryan.com/my-first-5-minutes-on-a-server-or-essential-security-for-linux-servers), [Ryan Eschinger](http://ryaneschinger.com/blog/securing-a-server-with-ansible/),  [Ashley Rich](https://github.com/A5hleyRich/wordpress-ansible), and [Digital Ocean](https://www.digitalocean.com/community/tutorials/initial-server-setup-with-ubuntu-14-04)
 
 It will perform the following:
-* Create a new "super user" with root privileges and public key authentication
+* Create a new ansible "super user" with with root privileges and public key authentication
 * Implement several SSH hardening techniques
-* Configure a basic firewall
 * Configure the timezone and enable time synchronization
 * Modify the hostname and hosts file
-* Enable unattended upgrades
 * Install Fail2Ban
-
-Optional extras:
-* Install New Relic Server monitoring
-* Install customised shell with Zsh and oh-my-zsh
 
 ## Requirements
 
@@ -45,12 +39,6 @@ Modify the variables in **_vars/main.yml_** according to your needs:
 **timezone:** the most appropriate [timezone](https://en.wikipedia.org/wiki/List_of_tz_database_time_zones) for your server
 
 **ssh_port:** your chosen SSH port
-
-**enable_newrelic:** change to `no` to disable installation of New Relic Server monitor, which requires a [New Relic license key](https://docs.newrelic.com/docs/accounts-partnerships/accounts/account-setup/license-key)
-
-**newrelic_license_key:** your [New Relic license key](https://docs.newrelic.com/docs/accounts-partnerships/accounts/account-setup/license-key)
-
-**enable_custom_shell:** change to `no` to disable installation of customised shell with Zsh and oh-my-zsh
 
 ## Testing
 

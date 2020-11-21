@@ -9,10 +9,9 @@
   roles:
     - essentials
     - hostname
-    - timezone
     - user
+    - logs
+    - spectre_mitigations_disabled
     - fail2ban
-    - zsh
-    - newrelic
     - ssh
-    - ufw
+    - monitoring

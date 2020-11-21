@@ -32,6 +32,3 @@
     - fail2ban
     - ssh
     - monitoring
-#    - zsh
-#    - newrelic
-#    - ufw
