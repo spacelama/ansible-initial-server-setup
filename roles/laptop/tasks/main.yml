@@ -3,6 +3,10 @@
   stat: path=/etc/systemd/logind.conf
   register: systemd_logind
 
+- name: determine if elogind needs tweaking
+  stat: path=/etc/elogind/logind.conf
+  register: elogind
+
 - name: Get rid of systemd lid behaviour
   lineinfile:
     dest: /etc/systemd/logind.conf
@@ -27,7 +31,8 @@
     regexp: ^HandleLidSwitch=
     state: present
   become: true
+  when: elogind.stat.exists
 
-- name: Get rid of acpi-support lid behaviour
-  lineinfile:
-    dest: /etc/acpi/lid.sh
+#- name: Get rid of acpi-support lid behaviour
+#  lineinfile:
+#    dest: /etc/acpi/lid.sh

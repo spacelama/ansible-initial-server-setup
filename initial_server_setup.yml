@@ -8,11 +8,12 @@
 
   roles:
     - essentials
-    - hostname
     - user
     - logs
     - spectre_mitigations_disabled
     # pve_server is loaded in bootstrap.yml as well, but that's just to make sure all the repos are there.  No harm updating that here as time goes on
+    - role: hostname
+      when: host_is_container is not defined and host_is_legacy is not defined
     - role: fileserver
       when: host_is_fileserver is defined
     - role: mailserver
@@ -29,6 +30,9 @@
       when: host_is_dell_server is defined
     - role: desktop
       when: host_is_desktop is defined
-    - fail2ban
-    - ssh
-    - monitoring
+    - role: ssh
+      when: host_is_legacy is not defined
+    - role: fail2ban
+      when: host_is_legacy is not defined
+    - role: monitoring
+      when: host_is_legacy is not defined

@@ -79,6 +79,6 @@
     #FIXME: needs to ignore this (outputting info message that theres no sudoers for this user) clause when src file not exist
     owner: root
     group: root
-    mode: 0644
+    mode: 0440
   loop: "{{ lookup('dict', my_users) }}"
   become: true

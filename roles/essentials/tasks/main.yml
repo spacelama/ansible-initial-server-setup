@@ -7,7 +7,7 @@
     group: root
     mode: 0644
   become: true
-  when: host_is_container is not defined
+  when: host_is_container is not defined and host_is_legacy is not defined
 
 #- name: Update all packages
 #  apt:
@@ -48,6 +48,7 @@
     value: "en_AU.UTF-8 UTF-8"
     vtype: multiselect
   become: true
+  when: host_is_legacy is not defined
 
 - name: Configure default locale
   debconf:
@@ -112,7 +113,7 @@
     line: 'confirm=false'
     state: present
   become: true
-  when: host_is_container is not defined
+  when: host_is_container is not defined and host_is_legacy is not defined
 
 - name: "listbugs, but don't ask questions"
   lineinfile:
@@ -121,7 +122,7 @@
     line: '// DPkg::Pre-Install-Pkgs {"/usr/sbin/apt-listbugs apt";};'
     state: present
   become: true
-  when: host_is_container is not defined
+  when: host_is_container is not defined and host_is_legacy is not defined
 
 - name: stop restricting dmesg pointlessly
   copy:
