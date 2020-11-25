@@ -9,6 +9,16 @@
   become: true
   when: host_is_container is not defined and host_is_legacy is not defined
 
+- name: Enable apt backports
+  copy:
+    src: ./src/apt/sources.list.d.backports.list
+    dest: /etc/apt/sources.list.d/backports.list
+    owner: root
+    group: root
+    mode: 0644
+  become: true
+  when: host_has_backports is defined
+
 #- name: Update all packages
 #  apt:
 #    update_cache: yes
