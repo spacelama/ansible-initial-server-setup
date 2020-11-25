@@ -3,12 +3,23 @@
   stat: path=/etc/apt/apt.conf.d/86pve-nags
   register: pve_enterprise_nag_buster
 
+- name: determine if pve community repository present
+  stat: path=/etc/apt/sources.list.d/pve-community.list
+  register: pve_community_repository
+
+- name: determine if pve enterprise repository present
+  stat: path=/etc/apt/sources.list.d/pve-enterprise.list
+  register: pve_enterprise_repository
+
 - name: ensure old pve community repository removed
-  apt_repository:
-    repo: deb http://download.proxmox.com/debian/pve buster pve-no-subscription
-    state: absent
-    filename: pve-community
+  command: mv /etc/apt/sources.list.d/pve-community.list /etc/apt/sources.list.d/pve-community.list.disabled
   become: true
+  when: pve_community_repository.stat.exists
+
+- name: ensure original pve enterprise repository removed
+  command: mv /etc/apt/sources.list.d/pve-enterprise.list /etc/apt/sources.list.d/pve-enterprise.list.disabled
+  become: true
+  when: pve_enterprise_repository.stat.exists
 
 - name: copy pve-nag-buster/install.sh to pve
   copy:
