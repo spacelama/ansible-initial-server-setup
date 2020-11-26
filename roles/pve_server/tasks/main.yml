@@ -26,10 +26,11 @@
     src: /home/tconnors/sysadmin/install/pve-nag-buster/install.sh
     dest: "/home/{{ ansible_env.USER }}/Downloads/pve-nag-buster-install.sh"
     mode: 0755
+  register: pve_nag_buster_changed
 
 - name: install the pve nag buster
   command: /home/{{ ansible_env.USER }}/Downloads/pve-nag-buster-install.sh --offline
-  when: not pve_enterprise_nag_buster.stat.exists
+  when: not pve_enterprise_nag_buster.stat.exists or pve_nag_buster_changed.changed
   become: true
 
 - name: remove prohibited packages
