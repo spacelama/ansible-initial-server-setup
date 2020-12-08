@@ -14,6 +14,7 @@
     state: absent
   with_items: "{{ munin_plugins_to_delete.files }}"
   become: true
+  notify: restart munin-node
 
 - name: new munin plugins
   copy:
@@ -23,7 +24,8 @@
     group: root
     mode: 0755
   become: true
-  with_items: [ 'cpuidle', 'fail2ban_all_jails', 'ntp_thirdparty' ]
+  with_items: [ 'cpuidle', 'fail2ban_all_jails', 'ntp_thirdparty', 'fail2ban' ]
+  notify: restart munin-node
 
 - name: existing munin plugins without params
   file:
@@ -33,7 +35,36 @@
   become: true
   with_items: [ 'hddtemp_smartctl', 'hddtempd', 'df_abs', 'iostat', 'iostat_ios', 'netstat' ]
   when: host_is_container is not defined
+  notify: restart munin-node
   
+- name: munin ipmi plugins without params
+  file:
+    src: "/usr/share/munin/plugins/ipmi_"
+    dest: "/etc/munin/plugins/{{ item }}"
+    state: link
+  become: true
+  with_items: [ 'ipmi_temp', 'ipmi_power', 'ipmi_fans' ]
+  when: host_is_dell_server is defined
+  notify: restart munin-node
+
+- name: munin sensors plugins without params
+  file:
+    src: "/usr/share/munin/plugins/sensors_"
+    dest: "/etc/munin/plugins/{{ item }}"
+    state: link
+  become: true
+  with_items: [ 'sensors_temp' ]
+  when: host_is_dell_server is defined
+  notify: restart munin-node
+
+- name: remove extaneous munin tests
+  file:
+    dest: "/etc/munin/plugins/{{ item }}"
+    state: absent
+  become: true
+  with_items: [ 'ntp_kernel_err', 'ntp_kernel_pll_freq', 'ntp_kernel_pll_off', 'ntp_offset', 'ntp_states', 'squid_requests', 'squid_objectsize', 'squid_cache', 'squid_traffic' ]
+  notify: restart munin-node
+
 - name: existing munin plugins with params
   file:
     src: "/usr/share/munin/plugins/{{ item.dest }}"
@@ -47,6 +78,7 @@
     - { src: 'ping_gw', dest: 'ping_' }
     - { src: 'ping_www.google.com.au', dest: 'ping_' }
   when: host_is_container is not defined
+  notify: restart munin-node
 
 - name: allow munin-node from fs
   lineinfile:
