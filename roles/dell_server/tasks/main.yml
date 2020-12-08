@@ -51,6 +51,12 @@
     path="/home/{{ ansible_env.USER }}/Downloads"
     state=directory
 
+- name: remove prohibited packages
+  apt:
+    name: ['libwsman-client2']
+    state: absent
+  become: true
+
 - name: Download archived .deb files
   copy:
     src: "/var/cache/apt/non-delete/{{ item }}"
