@@ -21,9 +21,14 @@
   become: true
   when: pve_enterprise_repository.stat.exists
 
+- name: Ensures ~ansible/Downloads dir exists
+  file:
+    path="/home/{{ ansible_env.USER }}/Downloads"
+    state=directory
+
 - name: copy pve-nag-buster/install.sh to pve
   copy:
-    src: /home/tconnors/sysadmin/install/pve-nag-buster/install.sh
+    src: /home/tconnors/code/pve-nag-buster/install.sh
     dest: "/home/{{ ansible_env.USER }}/Downloads/pve-nag-buster-install.sh"
     mode: 0755
   register: pve_nag_buster_changed
