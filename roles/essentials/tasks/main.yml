@@ -147,7 +147,7 @@
 - name: copy /usr/local/bin/get_conf_info
   copy:
     dest: /usr/local/bin/get_conf_info
-    src: /home/tconnors/debian-common-files/cron.daily_get_conf_info
+    src: ./src/cron/cron.daily_get_conf_info
     owner: root
     group: root
     mode: 0755
@@ -157,6 +157,23 @@
   file:
     src: /usr/local/bin/get_conf_info
     dest: /etc/cron.daily/get_conf_info
+    state: link
+    force: yes
+  become: true
+
+- name: copy /usr/local/bin/backuppc_check_backups
+  copy:
+    dest: /usr/local/bin/backuppc_check_backups
+    src: ./src/cron/cron.daily_backuppc_check_backups
+    owner: root
+    group: root
+    mode: 0755
+  become: true
+
+- name: install cron.daily.backuppc_check_backups
+  file:
+    src: /usr/local/bin/backuppc_check_backups
+    dest: /etc/cron.daily/backuppc_check_backups
     state: link
     force: yes
   become: true
