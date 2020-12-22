@@ -1,1 +1,50 @@
-/home/tconnors/debian-common-files/cron.daily_backuppc_check_backups
+#!/bin/bash
+# -*- Mode: shell-script -*-
+
+# checks /.backuppc_status to make sure that all local paths are
+# included except for documented exeptions
+
+log=/.backuppc_status
+date=`date +%s`
+excludes=( /backuppc /home/tconnors/.mp3.low_qual /var/spool/squid "/tank[^/]*" "/mnt/.*" "/media/.*" /var/spool/dovecot /mnt/olddirac "/var/cache/.*" ".*not_backed_up.*" ".*scratch" /external_backups /tmp )
+HOST=`hostname`
+
+function get_logentry() {
+    sed -n "s@^$HOST:$1 @@p" $log 2>/dev/null | head -n 1 | awk '{print $1}'  # head just in case the sed substituion went bad and we have repeat lines.  want to pick the earlier occurence so we flag the error
+}
+
+grep -q '192.168.1.2:/piroot / nfs' /proc/mounts && exit 0
+
+msg=$(
+    df -lPk -x tmpfs -x devtmpfs -x devpts -x sysfs -x proc -x udf | 
+       tail -n +2 | 
+       awk '{print $6}' | 
+       grep -v /net/ |
+       sort | uniq | 
+       while read fs ; do
+        for exclude in "${excludes[@]}" ; do 
+            if echo "$fs" | grep -q "^$exclude\$" ; then
+#               echo "fs $fs deliberately excluded"
+                continue 2
+            fi
+        done
+        logentry=`get_logentry $fs`
+        if [ -n "$logentry" ] ; then
+            if [ $logentry -gt $((date-86400*10)) -a $fs != /home/tconnors/thesis ] ||
+               [ $logentry -gt $((date-86400*30)) -a $fs == /home/tconnors/thesis ] ; then
+                :
+            else
+                backed_up=`date -d "1970-01-01 UTC $logentry seconds"`
+                echo "$HOST:$fs not attempted to be backed up since: $backed_up"
+                echo
+                echo $HOSTNAME:$0
+            fi    
+        else
+            echo "$HOST:$fs not recorded in $log status file "
+        fi
+    done
+)
+
+if [ -n "$msg" ] ; then
+    echo "$msg" | mail -s "Backups incomplete: $HOST" root
+fi
