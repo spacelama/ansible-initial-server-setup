@@ -55,10 +55,9 @@
   debconf:
     name: locales
     question: locales/locales_to_be_generated
-    value: "en_AU.UTF-8 UTF-8"
+    value: "en_AU.UTF-8 UTF-8, en_AU ISO-8859-1, en_DK ISO-8859-1, en_DK.ISO-8859-15 ISO-8859-15, en_DK.UTF-8 UTF-8, en_GB ISO-8859-1, en_GB.ISO-8859-15 ISO-8859-15, en_GB.UTF-8 UTF-8"
     vtype: multiselect
   become: true
-  when: host_is_legacy is not defined
 
 - name: Configure default locale
   debconf:
@@ -79,13 +78,19 @@
 
 - name: Install essential packages (not container)
   apt:
-    name: ['git', 'htop', 'iotop', 'ethtool', 'net-tools', 'iperf3',  'aptitude', 'dlocate', 'vim', 'sysstat', 'nicstat', 'lshw', 'uswsusp', 'parted', 'sdparm', 'ntpdate', 'colordiff', 'ifstat', 'iftop', 'apt-listchanges', 'apt-show-versions', 'etckeeper', 'apt-listbugs', 'apt-listbugs', 'rlwrap', 'strace', 'procmail', 'make', 'keychain', 'libstring-shellquote-perl']
-    update_cache: yes
-    cache_valid_time: 0
+    name: ['git', 'htop', 'iotop', 'ethtool', 'net-tools', 'iperf3',  'aptitude', 'dlocate', 'vim', 'sysstat', 'nicstat', 'lshw', 'parted', 'sdparm', 'ntpdate', 'colordiff', 'ifstat', 'iftop', 'apt-listchanges', 'apt-show-versions', 'etckeeper', 'apt-listbugs', 'apt-listbugs', 'rlwrap', 'strace', 'procmail', 'make', 'keychain', 'libstring-shellquote-perl']
     autoremove: no
     state: present
   become: true
   when: host_is_container is not defined
+
+- name: Install essential packages (not pi or container)
+  apt:
+    name: ['uswsusp']
+    autoremove: no
+    state: present
+  become: true
+  when: host_is_container is not defined and host_is_pi is not defined
 
 #- name: Enable unattended upgrades
 #  copy:
