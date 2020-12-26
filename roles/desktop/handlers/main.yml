@@ -1,0 +1,6 @@
+---
+- name: restart earlyoom
+  service:
+    name: earlyoom
+    state: restarted
+  become: true

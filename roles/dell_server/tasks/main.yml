@@ -60,12 +60,12 @@
 - name: Download archived .deb files
   copy:
     src: "/var/cache/apt/non-delete/{{ item }}"
-    dest: "/home/{{ ansible_env.USER }}/Downloads/{{ item }}.deb"
+    dest: "/home/{{ ansible_env.USER }}/Downloads/{{ item }}"
 #  when: archived_package_check_deb.rc == 0
   loop: "{{ srvadmin_depends }}"
 
 - name: Install archived_package
-  apt: deb="/home/{{ ansible_env.USER }}/Downloads/{{ item }}.deb"
+  apt: deb="/home/{{ ansible_env.USER }}/Downloads/{{ item }}"
   become: true
 #  when: archived_package_check_deb.rc == 0
   loop: "{{ srvadmin_depends }}"
@@ -76,11 +76,11 @@
     dest: "/home/{{ ansible_env.USER }}/Downloads/megacli_8.07.14-2_all.deb"
 
 - name: Install megacli .deb files
-  apt: deb="/home/{{ ansible_env.USER }}/Downloads/{{ item }}.deb"
+  apt: deb="/home/{{ ansible_env.USER }}/Downloads/{{ item }}"
   become: true
 #  when: archived_package_check_deb.rc == 0
   with_items:
-    - "megacli_8.07.14-2_all"
+    - "megacli_8.07.14-2_all.deb"
 
 - name: Install dell tools
   apt:

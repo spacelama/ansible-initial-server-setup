@@ -1,7 +1,7 @@
 ---
 - name: Install desktop tools
   apt:
-    name: ['fvwm', 'menu', 'mesa-utils', 'chromium', 'nfs-common', 'nfs4-acl-tools', 'afuse', 'sshfs', 'mplayer', 'mencoder', 'vlc', 'ffmpeg', 'mpv', 'totem', 'pqiv', 'gliv', 'imagemagick', 'alpine', 'acl', 'apt-file', 'beep', 'bluetooth', 'ansible', 'bc', 'cdrdao', 'cvs', 'curl', 'dconf-cli', 'apg', 'x11-apps', 'xorg', 'libegl1-mesa', 'desktop-file-utils', 'emacs', 'exiftran', 'emacs-el', 'emacs-gtk', 'git-el', 'git-gui', 'gitk', 'gitweb', 'gnuplot-x11', 'gxmessage', 'hibernate', 'hpcc', 'hyphen-en-gb', 'hunspell-en-gb', 'paprefs', 'pavucontrol', 'pulseaudio-module-bluetooth', 'ssh-askpass', 'task-print-server', 'tuxguitar', 'vim-gtk', 'xcb', 'xdm', 'xinput', 'xpdf', 'xscreensaver', 'xutils', 'brasero', 'xorg', 'xinit', 'emacs-common-non-dfsg', 'isag', 'pigz', 'picocom', 'libreoffice', 'xplanet', 'barrier', 'xloadimage', 'libtime-duration-parse-perl', 'libtime-duration-perl', 'dh-elpa', 'dh-elpa-helper', 'dh-make-elpa', 'elpa-apache-mode', 'elpa-async', 'elpa-bar-cursor', 'elpa-bind-key', 'elpa-bm', 'elpa-boxquote', 'elpa-browse-kill-ring', 'elpa-bug-hunter', 'elpa-csv-mode', 'elpa-dash', 'elpa-debian-el', 'elpa-dictionary', 'elpa-diff-hl', 'elpa-diffview', 'elpa-diminish', 'elpa-dired-du', 'elpa-dired-quick-sort', 'elpa-dired-rsync', 'elpa-epl', 'elpa-eproject', 'elpa-flycheck', 'elpa-folding', 'elpa-ghub', 'elpa-git-commit', 'elpa-git-modes', 'elpa-git-timemachine', 'elpa-gitattributes-mode', 'elpa-gitconfig-mode', 'elpa-gitignore-mode', 'elpa-gnuplot-mode', 'elpa-go-mode', 'elpa-goto-chg', 'elpa-graphql', 'elpa-graphviz-dot-mode', 'elpa-helm', 'elpa-helm-core', 'elpa-highlight-indentation', 'elpa-highlight-numbers', 'elpa-hl-todo', 'elpa-htmlize', 'elpa-hydra', 'elpa-initsplit', 'elpa-jinja2-mode', 'elpa-let-alist', 'elpa-magit', 'elpa-magit-popup', 'elpa-markdown-mode', 'elpa-mutt-alias', 'elpa-muttrc-mode', 'elpa-org', 'elpa-parent-mode', 'elpa-pcre2el', 'elpa-pdf-tools', 'elpa-pdf-tools-server', 'elpa-perspective', 'elpa-php-mode', 'elpa-pkg-info', 'elpa-pod-mode', 'elpa-popup', 'elpa-powerline', 'elpa-puppet-mode', 'elpa-rainbow-delimiters', 'elpa-rich-minority', 'elpa-s', 'elpa-seq', 'elpa-session', 'elpa-smart-mode-line', 'elpa-smart-mode-line-powerline-theme', 'elpa-systemd', 'elpa-tabbar', 'elpa-tablist', 'elpa-treepy', 'elpa-undo-tree', 'elpa-use-package', 'elpa-visual-regexp', 'elpa-wc-mode', 'elpa-web-mode', 'elpa-with-editor', 'elpa-world-time-mode', 'elpa-yaml-mode', 'asunder'] # xawtv only in testing, 'synergy' has been taken over by 'barrier'
+    name: ['fvwm', 'menu', 'mesa-utils', 'chromium', 'nfs-common', 'nfs4-acl-tools', 'afuse', 'sshfs', 'mplayer', 'mencoder', 'vlc', 'ffmpeg', 'mpv', 'totem', 'pqiv', 'gliv', 'imagemagick', 'alpine', 'acl', 'apt-file', 'beep', 'bluetooth', 'ansible', 'bc', 'cdrdao', 'cvs', 'curl', 'dconf-cli', 'apg', 'x11-apps', 'xorg', 'libegl1-mesa', 'desktop-file-utils', 'emacs', 'exiftran', 'emacs-el', 'emacs-gtk', 'git-el', 'git-gui', 'gitk', 'gitweb', 'gnuplot-qt', 'gxmessage', 'hibernate', 'hpcc', 'hyphen-en-gb', 'hunspell-en-gb', 'paprefs', 'pavucontrol', 'pulseaudio-module-bluetooth', 'ssh-askpass', 'task-print-server', 'tuxguitar', 'vim-gtk', 'xcb', 'xdm', 'xinput', 'xpdf', 'xscreensaver', 'xutils', 'brasero', 'xorg', 'xinit', 'emacs-common-non-dfsg', 'isag', 'pigz', 'picocom', 'libreoffice', 'xplanet', 'barrier', 'xloadimage', 'libtime-duration-parse-perl', 'libtime-duration-perl', 'dh-elpa', 'dh-elpa-helper', 'dh-make-elpa', 'elpa-apache-mode', 'elpa-async', 'elpa-bar-cursor', 'elpa-bind-key', 'elpa-bm', 'elpa-boxquote', 'elpa-browse-kill-ring', 'elpa-bug-hunter', 'elpa-csv-mode', 'elpa-dash', 'elpa-debian-el', 'elpa-dictionary', 'elpa-diff-hl', 'elpa-diffview', 'elpa-diminish', 'elpa-dired-du', 'elpa-dired-quick-sort', 'elpa-dired-rsync', 'elpa-epl', 'elpa-eproject', 'elpa-flycheck', 'elpa-folding', 'elpa-ghub', 'elpa-git-commit', 'elpa-git-modes', 'elpa-git-timemachine', 'elpa-gitattributes-mode', 'elpa-gitconfig-mode', 'elpa-gitignore-mode', 'elpa-gnuplot-mode', 'elpa-go-mode', 'elpa-goto-chg', 'elpa-graphql', 'elpa-graphviz-dot-mode', 'elpa-helm', 'elpa-helm-core', 'elpa-highlight-indentation', 'elpa-highlight-numbers', 'elpa-hl-todo', 'elpa-htmlize', 'elpa-hydra', 'elpa-initsplit', 'elpa-jinja2-mode', 'elpa-let-alist', 'elpa-magit', 'elpa-magit-popup', 'elpa-markdown-mode', 'elpa-mutt-alias', 'elpa-muttrc-mode', 'elpa-org', 'elpa-parent-mode', 'elpa-pcre2el', 'elpa-pdf-tools', 'elpa-pdf-tools-server', 'elpa-perspective', 'elpa-php-mode', 'elpa-pkg-info', 'elpa-pod-mode', 'elpa-popup', 'elpa-powerline', 'elpa-puppet-mode', 'elpa-rainbow-delimiters', 'elpa-rich-minority', 'elpa-s', 'elpa-seq', 'elpa-session', 'elpa-smart-mode-line', 'elpa-smart-mode-line-powerline-theme', 'elpa-systemd', 'elpa-tabbar', 'elpa-tablist', 'elpa-treepy', 'elpa-undo-tree', 'elpa-use-package', 'elpa-visual-regexp', 'elpa-wc-mode', 'elpa-web-mode', 'elpa-with-editor', 'elpa-world-time-mode', 'elpa-yaml-mode', 'asunder', 'earlyoom', 'firejail'] # xawtv only in testing, 'synergy' has been taken over by 'barrier'
     update_cache: yes
     cache_valid_time: 3600
     autoremove: no
@@ -16,19 +16,19 @@
     purge: yes
   become: true
 
-  # first check whether its installed at all
-#- name: Check if qiv is installed
-#  command: dpkg-query -W qiv
-#  register: archived_package_check_deb
-#  failed_when: archived_package_check_deb.rc > 1
-#  changed_when: archived_package_check_deb.rc == 1
+#   # first check whether its installed at all
+# - name: Check if qiv is installed
+#   command: dpkg-query -W qiv
+#   register: archived_package_check_deb
+#   failed_when: archived_package_check_deb.rc > 1
+#   changed_when: archived_package_check_deb.rc == 1
 
-  # first check whether the correct custom version is installed
-#- name: Check if qiv is installed
-#  shell: "dpkg-query -W qiv | grep 2.2.2-1"
-#  register: correct_archived_package_check_deb
-#  failed_when: correct_archived_package_check_deb.rc > 1
-#  changed_when: correct_archived_package_check_deb.rc == 1
+#   # first check whether the correct custom version is installed
+# - name: Check if qiv is installed
+#   shell: "dpkg-query -W qiv | grep 2.3.2-2"
+#   register: correct_archived_package_check_deb
+#   failed_when: correct_archived_package_check_deb.rc > 1
+#   changed_when: correct_archived_package_check_deb.rc == 1
 
 - name: Ensures ~ansible/Downloads dir exists
   file:
@@ -38,26 +38,33 @@
 - name: Download archived .deb files
   copy:
     src: "/root/apt-source/{{ item }}"
-    dest: "/home/{{ ansible_env.USER }}/Downloads/{{ item }}.deb"
+    dest: "/home/{{ ansible_env.USER }}/Downloads/{{ item }}"
 #  when: correct_archived_package_check_deb.rc == 1
   loop:
-    - qiv_2.2.2-1_amd64.deb
+    - qiv_2.3.2-2_amd64.deb
 
-- name: remove wrong version of downloaded .deb files
-  apt:
-    name: "{{ item }}"
-    state: absent
-  become: true
-#  when: (correct_archived_package_check_deb.rc == 1) and (archived_package_check_deb.rc == 0)
-  loop:
-    - qiv
+# - name: remove wrong version of downloaded .deb files
+#   apt:
+#     name: "{{ item }}"
+#     state: absent
+#   become: true
+# #  when: (correct_archived_package_check_deb.rc == 1) and (archived_package_check_deb.rc == 0)
+#   loop:
+#     - qiv
     
 - name: Install archived_package
-  apt: deb="/home/{{ ansible_env.USER }}/Downloads/{{ item }}.deb"
+  apt:
+    deb: "/home/{{ ansible_env.USER }}/Downloads/{{ item }}"
+    force: yes # would rather --allow-change-held-packages https://github.com/ansible/ansible/issues/32092 https://github.com/ansible/ansible/issues/65325
   become: true
 #  when: correct_archived_package_check_deb.rc == 1
   loop:
-    - qiv_2.2.2-1_amd64.deb
+    - qiv_2.3.2-2_amd64.deb
+
+- name: Hold qiv package
+  dpkg_selections:
+    name: "qiv"
+    selection: hold
 
 - name: Install radeon firmware
   apt:
@@ -65,5 +72,26 @@
     cache_valid_time: 3600
     autoremove: no
     state: present
-  when: host_has_radeon
+  when: host_has_radeon is defined
   become: true
+
+  # https://www.reddit.com/r/linuxadmin/comments/fbfc6w/how_to_wrap_my_firefox_process_in_a_cgroup_to/
+  # https://lists.luv.asn.au/pipermail/luv-main/2020-December/011334.html (firejail other suggestion)
+- name: Setup earlyoom for desktops (unset default)
+  lineinfile:
+    dest: /etc/default/earlyoom
+    backrefs: yes
+    regexp: '^EARLYOOM_ARGS="-r 60"$'
+    line: "#EARLYOOM_ARGS=\"-r 60\"\nEARLYOOM_ARGS=TEMPLATE_XXX"
+    state: present
+  become: true
+
+- name: Setup earlyoom for desktops
+  lineinfile:
+    dest: /etc/default/earlyoom
+    backrefs: yes
+    regexp: '^EARLYOOM_ARGS='
+    line: "EARLYOOM_ARGS=\"-r 60 --avoid '(^|/)(init|X|sshd)$' --prefer '(firefox|Web Content|chrome|chromium)$'\""
+    state: present
+  become: true
+  notify: restart earlyoom
