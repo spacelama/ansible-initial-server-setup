@@ -91,7 +91,7 @@
     dest: /etc/default/earlyoom
     backrefs: yes
     regexp: '^EARLYOOM_ARGS='
-    line: "EARLYOOM_ARGS=\"-r 60 --avoid '(^|/)(init|X|sshd)$' --prefer '(firefox|Web Content|chrome|chromium)$'\""
+    line: "EARLYOOM_ARGS=\"-r 60 --avoid '(^|/)(init|X|sshd)$' --prefer '(^Web Content|(^|/)(teams|firefox|chromium|chrome|spotify))$'\""
     state: present
   become: true
   notify: restart earlyoom
