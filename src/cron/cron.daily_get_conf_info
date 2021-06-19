@@ -43,7 +43,7 @@ echo "Date: $date" >> $data_dir/info
 # Disk info
 
 cat /proc/partitions > $data_dir/partitions
-parted -l > $data_dir/parted
+parted -l > $data_dir/parted 2>&1 || true
 
 [ -e /dev/disk/by-id/ ] && ls -lA /dev/disk/by-id/ > $data_dir/dev.disk.by-id
 fdisk -l > $data_dir/fdisk 2>&1
