@@ -42,6 +42,9 @@ echo "Date: $date" >> $data_dir/info
 
 # Disk info
 
+cat /proc/partitions > $data_dir/partitions
+parted -l > $data_dir/parted
+
 [ -e /dev/disk/by-id/ ] && ls -lA /dev/disk/by-id/ > $data_dir/dev.disk.by-id
 fdisk -l > $data_dir/fdisk 2>&1
 cat /etc/mtab > $data_dir/mtab
@@ -127,6 +130,7 @@ fi
 uname -a > $data_dir/uname 2>&1
 #backup /boot/config-`uname -r` $data_dir/kernel-config
 backup /proc/modules $data_dir/modules
+backup /proc/cpuinfo $data_dir/cpuinfo
 #backup /boot/grub/menu.lst $data_dir/grub
 dmesg > $data_dir/dmesg 2>&1
 backup --noerr /proc/pci $data_dir/pci
