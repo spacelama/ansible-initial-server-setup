@@ -195,3 +195,9 @@
     state: link
     force: yes
   become: true
+
+- name: ensure /var/log/journal persistent journal exists
+  file:
+    dest: /var/log/journal
+    state: directory
+  become: true
