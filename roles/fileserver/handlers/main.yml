@@ -4,3 +4,9 @@
 #    name: procps
 #    state: restarted
 #  become: true
+
+- name: restart smbd
+  service:
+    name: smbd
+    state: restarted
+  become: true

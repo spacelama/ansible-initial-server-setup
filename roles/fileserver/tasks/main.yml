@@ -8,3 +8,20 @@
     state: present
   become: true
 
+- name: ensure files publicly readable (mainly for public_html)
+  ini_file:
+    path: /etc/samba/smb.conf
+    section: users
+    option: create mask
+    value: '0755'
+  notify: restart smbd
+  become: true
+
+- name: ensure directories publicly readable (mainly for public_html)
+  ini_file:
+    path: /etc/samba/smb.conf
+    section: users
+    option: directory mask
+    value: '0755'
+  notify: restart smbd
+  become: true
