@@ -129,6 +129,16 @@
     state: present
   changed_when: false
 
+
+  # test devices you want to pass through belong in separate IOMMUs:
+#https://www.reddit.com/r/SolusProject/comments/955osy/vfio_passthrough_quick_reference/
+##!/bin/bash
+#shopt -s nullglob
+#for d in /sys/kernel/iommu_groups/*/devices/*; do
+#    n=${d#*/iommu_groups/*}; n=${n%%/*}
+#    printf 'IOMMU Group %s ' "$n"
+#    lspci -nns "${d##*/}"
+#done;
 - name: "Append intel_iommu=on grub config"
   when: iommu_grub_cmdline_exists.msg == "line added"
   lineinfile:
@@ -140,9 +150,51 @@
   become: true
   notify: "Regenerate grub config"
 
-- name: "host modules blacklist"
+# if need to regenerate grub boot config because of new disks, procedure is here: https://pve.proxmox.com/wiki/Host_Bootloader
+
+- name: "host modules blacklist (radeon, snd_hda_intel, amdgpu, usb3)"
   copy:
     dest: /etc/modprobe.d/pve-custom-blacklist.conf
-    content: "blacklist radeon\n"
+    content: "# ansible controlled for RX550 by pve_server/main.yml\nblacklist radeon\nblacklist amdgpu\nblacklist snd_hda_intel\nblacklist xhci_hcd\nblacklist xhci_pci\n"
   become: true
   notify: "Update initramfs config"
+
+#FIXME: keep monitoring lifetime left, and if drops below 0 (or Percent_Lifetime_Remain raw value goes above 100 on its way to 255, which then makes lifetime writes somewhere around 264TB, which is much closer to TBW), then it's just a SMART bug and we can back out this timeout back to default 5.  Also, if doesn't drop its rate, might as well back it out too and find some other source of write amplification in the fs VM # https://www.reddit.com/r/zfs/comments/cott44/how_can_i_check_to_make_sure_i_dont_have_a_write/ewqjld0/
+- name: "zfs module parameters"
+  copy:
+    dest: /etc/modprobe.d/zfs-custom.conf
+    content: "# ansible controlled to ensure SSD doesn't have too many writes, by pve_server/main.yml\noptions zfs zfs_txg_timeout=15\n"
+  become: true
+  notify: "Update initramfs config"
+
+- name: "vfio module parameters"
+  copy:
+    dest: /etc/modprobe.d/vfio-custom.conf
+    content: "# ansible controlled to passthrough amdgpu and usb card, by pve_server/main.yml\noptions vfio-pci ids=1002:699f,1002:aae0,1106:3483\n"
+  become: true
+  notify: "Update initramfs config"
+
+- name: "Ensure vfio, vendor-reset in /etc/modules"
+  lineinfile:
+    dest: /etc/modules
+    line: "{{ item }}"
+    state: present
+  become: true
+  notify: "Update initramfs config"
+  with_items:
+    - "# ansible controlled for GPU passthrough and reset by pve_server/main.yml"
+    - vfio
+    - vfio_iommu_type1
+    - vfio_pci
+    - vfio_virqfd
+    - vendor-reset
+
+#FIXME: still need to upload vendor-reset in here
+
+- name: "Install root crontab"
+  copy:
+    dest: /var/spool/cron/crontabs/root
+    content: "@reboot echo powersave | tee /sys/devices/system/cpu/cpu*/cpufreq/scaling_governor\n"
+    mode: 0600
+  become: true
+  notify: "reload cron"
