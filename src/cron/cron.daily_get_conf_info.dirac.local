@@ -1,0 +1,17 @@
+#!/bin/bash -l
+
+data_dir="$1"
+
+cd "$data_dir"
+mkdir -p switch
+cd switch
+
+get_conf_info.switch "show running-config" "show system-time" "show system-info" "show vlan" "show mac address-table all" "show interface status" "show interface switchport" "copy startup-config tftp ip 192.168.1.17 filename switch-startup-config" > /dev/null
+cp -pra "/var/lib/tftpboot/switch-startup-config.cfg" "show_startup-config"
+sed 's/\r//g' "show_running-config" |
+    sed 's/Press any key to continue (Q to quit).                                      //' |
+    grep -v 'show running-config' |
+    head -n -3 > "show_running-config.munged"
+mv "show_running-config.munged" "show_running-config"
+dos2unix "show_startup-config" 2>/dev/null
+diff "show_running-config" "show_startup-config" && rm copy_startup-config_tftp_ip_192.168.1.17_filename_switch-startup-config
