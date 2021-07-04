@@ -15,7 +15,7 @@
       when: host_is_container is not defined and host_is_pi is not defined
     # pve_server is loaded in bootstrap.yml as well, but that's just to make sure all the repos are there.  No harm updating that here as time goes on
     - role: hostname
-      when: host_is_container is not defined and host_is_legacy is not defined
+      when: host_is_container is not defined
     - role: fileserver
       when: host_is_fileserver is defined
     - role: mailserver
