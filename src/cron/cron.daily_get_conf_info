@@ -131,6 +131,10 @@ uname -a > $data_dir/uname 2>&1
 #backup /boot/config-`uname -r` $data_dir/kernel-config
 backup /proc/modules $data_dir/modules
 backup /proc/cpuinfo $data_dir/cpuinfo
+backup /proc/meminfo $data_dir/meminfo
+lscpu > $data_dir/lscpu
+lspci > $data_dir/lspci
+lspci -vvv > $data_dir/lspci-vvv
 #backup /boot/grub/menu.lst $data_dir/grub
 dmesg > $data_dir/dmesg 2>&1
 backup --noerr /proc/pci $data_dir/pci
