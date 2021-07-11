@@ -171,6 +171,16 @@
   with_fileglob:
     - "./src/cron/cron.daily_get_conf_info.{{ hostname }}*"
 
+- name: install cron.daily switch password conf file if defined for this host
+  copy:
+    content: "{{ switch_pass }}"
+    dest: /usr/local/etc/get_conf_info.switch.pass
+    owner: root
+    group: root
+    mode: 0600
+  become: true
+  when: switch_pass is defined
+
 - name: install cron.daily.get_conf_info
   file:
     src: /usr/local/bin/get_conf_info

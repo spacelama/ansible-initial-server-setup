@@ -1,8 +1,15 @@
 #!/usr/bin/expect
 
+proc slurp {file} {
+    set fh [open $file r]
+    set ret [read $fh]
+    close $fh
+    return $ret
+}
+
 ## Access CLI
 set loginUser "admin"
-set enablePassword ""
+set enablePassword [string trim [ slurp /usr/local/etc/get_conf_info.switch.pass ] ]
 set mgmtServerAddress "switch"
 
 ## Expect Parameters
@@ -30,6 +37,7 @@ for {set i 0} {$i < $argc} {incr i 1} {
 #   expect "show"
    set log_filename "[lindex $argv $i]"
    set log_filename [regsub -all { } $log_filename {_}]
+   set log_filename [regsub -all {/} $log_filename {_}]
    log_file -noappend "$log_filename"
    while { 1 } {
       expect "TL-SG3216#" {
