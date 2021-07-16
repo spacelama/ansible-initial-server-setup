@@ -94,6 +94,30 @@
   become: true
   when: host_is_container is not defined and host_is_pi is not defined
 
+- name: Install intel microcode
+  apt:
+    name: ['intel-microcode']
+    autoremove: no
+    state: present
+  become: true
+  when: host_is_intel is defined
+
+- name: Install amd microcode
+  apt:
+    name: ['amd64-microcode']
+    autoremove: no
+    state: present
+  become: true
+  when: host_is_amd is defined
+
+- name: Remove intel and amd microcode
+  apt:
+    name: ['amd64-microcode', 'intel-microcode']
+    autoremove: no
+    state: absent
+  become: true
+  when: host_is_intel is not defined and host_is_amd is not defined
+
 #- name: Enable unattended upgrades
 #  copy:
 #    src: ./src/apt/10periodic
