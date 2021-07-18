@@ -135,6 +135,9 @@ backup /proc/meminfo $data_dir/meminfo
 lscpu > $data_dir/lscpu
 lspci > $data_dir/lspci 2>/dev/null || true
 lspci -vvv > $data_dir/lspci-vvv 2>/dev/null || true
+if [ -x /usr/sbin/dmidecode ] ; then
+    dmidecode >> $data_dir/dmidecode
+fi
 #backup /boot/grub/menu.lst $data_dir/grub
 dmesg > $data_dir/dmesg 2>&1
 backup --noerr /proc/pci $data_dir/pci

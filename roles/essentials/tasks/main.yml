@@ -79,7 +79,7 @@
 
 - name: Install essential packages (not container)
   apt:
-    name: ['git', 'htop', 'iotop', 'smem', 'atop', 'ethtool', 'net-tools', 'iperf3',  'aptitude', 'dlocate', 'vim', 'sysstat', 'nicstat', 'lshw', 'parted', 'sdparm', 'ntpdate', 'colordiff', 'ifstat', 'iftop', 'apt-listchanges', 'apt-show-versions', 'etckeeper', 'apt-listbugs', 'apt-listbugs', 'rlwrap', 'strace', 'procmail', 'make', 'keychain', 'libstring-shellquote-perl']
+    name: ['git', 'htop', 'iotop', 'smem', 'atop', 'ethtool', 'net-tools', 'iperf3',  'aptitude', 'dlocate', 'vim', 'sysstat', 'nicstat', 'lshw', 'parted', 'sdparm', 'ntpdate', 'colordiff', 'ifstat', 'iftop', 'apt-listchanges', 'apt-show-versions', 'etckeeper', 'apt-listbugs', 'apt-listbugs', 'rlwrap', 'strace', 'procmail', 'make', 'keychain', 'libstring-shellquote-perl', 'dmidecode']
     autoremove: no
     state: present
     install_recommends: no
