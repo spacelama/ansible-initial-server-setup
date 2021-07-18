@@ -36,3 +36,20 @@
 #- name: Get rid of acpi-support lid behaviour
 #  lineinfile:
 #    dest: /etc/acpi/lid.sh
+
+- name: Install battery tools
+  apt:
+    name: ['ibam', 'wmbattery', 'powerstat', 'battery-stats']
+    autoremove: no
+    state: present
+  become: true
+
+- name: configure battery-stats
+  lineinfile:
+    dest: /etc/battery-stats.conf
+    backrefs: yes
+    regexp: '^(ARGS=.*interval=60 .*)'
+    line: '#\1\nARGS="--interval=300 --flush=10 --ignore-missing-battery"'
+    state: present
+  become: true
+  notify: restart battery-stats

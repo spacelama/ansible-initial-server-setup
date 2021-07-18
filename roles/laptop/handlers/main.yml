@@ -1,0 +1,6 @@
+---
+- name: restart battery-stats
+  service:
+    name: battery-stats
+    state: restarted
+  become: true
