@@ -1,0 +1,1 @@
+ansible_adm ALL = (ALL) NOPASSWD: ALL

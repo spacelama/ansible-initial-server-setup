@@ -41,29 +41,49 @@
 #    line: "%sudo ALL=(ALL:ALL) ALL"
 #    validate: "/usr/sbin/visudo -cf %s"
 
-- name: set up ansible sudoers
+- name: set up ansible_adm sudoers
   copy:
-    src: ./src/user/sudoers.d.ansible
-    dest: /etc/sudoers.d/ansible
+    src: ./src/user/sudoers.d.ansible_adm
+    dest: /etc/sudoers.d/ansible_adm
     owner: root
     group: root
     mode: 0440
+  become: true
 
-- name: Add new ansible group
+- name: Add new ansible_adm group
   group:
-    name: "ansible"
-    gid: 99
+    name: "ansible_adm"
+    gid: 9999
     state: present
   become: true
 
-- name: Add new ansible user
+- name: Add new ansible_adm user
   user:
-    name: "ansible"
+    name: "ansible_adm"
     password: "!"
-    uid: 99
+    uid: 9999
+    group: ansible_adm
     append: no
     state: present
     shell: /bin/bash
+  become: true
+
+- name: Remove old ansible sudoers
+  file:
+    path: /etc/sudoers.d/ansible
+    state: absent
+  become: true
+
+- name: Remove old ansible_adm user
+  user:
+    name: "ansible"
+    state: absent
+  become: true
+
+- name: Remove old ansible group
+  group:
+    name: "ansible"
+    state: absent
   become: true
 
 - name: remove sshknownhosts munging
@@ -76,9 +96,10 @@
     state: present
   become: true
 
-- name: Add SSH key for new ansible user
+  # could also have multiple keys with exclusive: https://stackoverflow.com/questions/38879266/is-it-possible-to-use-ansible-authorized-key-exclusive-with-multiple-keys
+- name: Add SSH key for new ansible_adm user
   authorized_key:
-    user: "ansible"
+    user: "ansible_adm"
     manage_dir: yes
     key: "{{ lookup('file', item) }}"
 #    comment: "{{ ansible_was_run_by }}"
