@@ -7,7 +7,7 @@
     group: root
     mode: 0644
   become: true
-  when: host_is_container is not defined and host_is_legacy is not defined
+  when: host_is_container is not defined and host_is_pi is not defined and host_is_pve_server is not defined
 
 - name: Enable apt backports
   copy:
@@ -154,7 +154,7 @@
     line: 'confirm=false'
     state: present
   become: true
-  when: host_is_container is not defined and host_is_legacy is not defined
+  when: host_is_container is not defined
 
 - name: "listbugs, but don't ask questions"
   lineinfile:
@@ -163,7 +163,7 @@
     line: '// DPkg::Pre-Install-Pkgs {"/usr/sbin/apt-listbugs apt";};'
     state: present
   become: true
-  when: host_is_container is not defined and host_is_legacy is not defined
+  when: host_is_container is not defined and host_is_pi is not defined
 
 - name: stop restricting dmesg pointlessly
   copy:
