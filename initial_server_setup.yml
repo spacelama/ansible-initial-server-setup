@@ -1,7 +1,7 @@
 ---
 # https://stackoverflow.com/questions/18195142/safely-limiting-ansible-playbooks-to-a-single-machine
 - hosts: "{{ target | default('all') }}"
-  remote_user: ansible
+  remote_user: ansible_adm
 
   vars_files:
     - vars/main.yml
