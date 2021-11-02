@@ -1,0 +1,12 @@
+---
+- name: install compulsory packages
+  opkg:
+    name: bash,muninlite,rsync
+    state: present
+
+- name: setup dhcp reservations
+  copy:
+    dest: /etc/config/dhcp
+    content: "{{ lookup('file', 'roles/openwrt/files/dhcp.head.{{ type }}')}}\n\n{{lookup('file', 'roles/openwrt/files/dhcp.reservations') }}\n"
+  notify: restart dnsmasq
+

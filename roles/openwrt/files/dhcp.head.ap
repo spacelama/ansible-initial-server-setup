@@ -1,0 +1,40 @@
+
+config dnsmasq
+	option localise_queries '1'
+	option rebind_protection '1'
+	option rebind_localhost '1'
+	option expandhosts '1'
+	option readethers '1'
+	option leasefile '/tmp/dhcp.leases'
+	option localservice '1'
+	option domain 'rather.puzzling.org'
+	option local '/rather.puzzling.org/'
+	option authoritative '1'
+	option resolvfile '/tmp/resolv.conf.d/resolv.conf.auto'
+
+config dhcp 'LAN1'
+	option interface 'LAN1'
+	option ignore '1'
+
+config dhcp 'LANGUEST3'
+	option interface 'LANGUEST3'
+	option ignore '1'
+
+config dhcp 'LANIOT4'
+	option interface 'LANIOT4'
+	option ignore '1'
+
+config dhcp 'LANWINDOWS7'
+	option interface 'LANWINDOWS7'
+	option ignore '1'
+
+config dhcp 'wan'
+	option interface 'wan'
+	option ignore '1'
+
+config odhcpd 'odhcpd'
+	option maindhcp '0'
+	option leasefile '/tmp/hosts/odhcpd'
+	option leasetrigger '/usr/sbin/odhcpd-update'
+	option loglevel '4'
+
