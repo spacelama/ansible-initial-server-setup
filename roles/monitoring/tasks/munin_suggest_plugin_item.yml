@@ -1,0 +1,8 @@
+---
+- name: implement munin {{ munin_plugin }} {{ suggest_item }} suggests
+  become: yes
+  file:
+    src: "/usr/share/munin/plugins/{{ munin_plugin }}"
+    dest: "/etc/munin/plugins/{{ munin_plugin }}{{ suggest_item }}"
+    state: link
+  notify: restart munin-node
