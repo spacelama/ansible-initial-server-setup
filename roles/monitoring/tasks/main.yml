@@ -33,8 +33,28 @@
     dest: "/etc/munin/plugins/{{ item }}"
     state: link
   become: true
-  with_items: [ 'hddtemp_smartctl', 'hddtempd', 'df_abs', 'iostat', 'iostat_ios', 'netstat' ]
+  with_items: [ 'df_abs', 'iostat', 'iostat_ios', 'netstat' ]
   when: host_is_container is not defined
+  notify: restart munin-node
+
+
+- name: existing munin plugins without params (physical machines)
+  file:
+    src: "/usr/share/munin/plugins/{{ item }}"
+    dest: "/etc/munin/plugins/{{ item }}"
+    state: link
+  become: true
+  with_items: [ 'hddtemp_smartctl', 'hddtempd' ]
+  when: host_is_container is not defined and host_is_virtual is not defined
+  notify: restart munin-node
+
+- name: remove extraneous munin plugins (virtual machines)
+  file:
+    dest: "/etc/munin/plugins/{{ item }}"
+    state: absent
+  become: true
+  with_items: [ 'hddtemp_smartctl', 'hddtempd' ]
+  when: host_is_container is defined or host_is_virtual is defined
   notify: restart munin-node
   
 - name: munin ipmi plugins without params
@@ -79,6 +99,59 @@
     - { src: 'ping_www.google.com.au', dest: 'ping_' }
   when: host_is_container is not defined
   notify: restart munin-node
+
+- name: install munin zfs_*
+  copy:
+    src: ./src/monitoring/munin/{{ item }}
+    dest: /etc/munin/plugins/{{ item }}
+    owner: root
+    group: root
+    mode: 0755
+    local_follow: true
+  become: true
+  with_items:
+    - zfs-demand
+    - zfs-general
+    - zfs-hash
+    - zfs-l2
+    - zfs-mru-mfu
+    - zfs-prefetch
+    - zfsarc-l1
+    - zfsarc-l2
+    - zfs-filesystem-graph
+    - zfs_arcstats
+    - zfs_cache_efficiency
+    - zfs_list
+    - zfsarcstats-counters
+    - zlist
+    - zpool_capacity
+    - zpool_iostat
+  when: host_is_zfs is defined
+  notify: restart munin-node
+
+- name: install munin zfs_*_
+  copy:
+    src: ./src/monitoring/munin/{{ item }}
+    dest: /usr/share/munin/plugins/{{ item }}
+    owner: root
+    group: root
+    mode: 0755
+    local_follow: true
+  become: true
+  with_items:
+    - zfs_usage_
+    - zfsonlinux_stats_
+    - numa_
+
+- name: gather and implement munin suggests
+  include_tasks: roles/monitoring/tasks/munin_suggest_plugin.yml
+  loop_control:
+    loop_var: munin_plugin
+  with_items:
+    - zfs_usage_
+    - zfsonlinux_stats_
+    - numa_
+    - smart_
 
 - name: allow munin-node from fs
   lineinfile:
