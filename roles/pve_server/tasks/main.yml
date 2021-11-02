@@ -23,12 +23,12 @@
 
 - name: Ensures ~ansible/Downloads dir exists
   file:
-    path="/home/{{ ansible_env.USER }}/Downloads"
-    state=directory
+    path: "/home/{{ ansible_env.USER }}/Downloads"
+    state: directory
 
 - name: copy pve-nag-buster/install.sh to pve
   copy:
-    src: /home/tconnors/code/pve-nag-buster/install.sh
+    src: /home/tconnors/code/proxmox/pve-nag-buster/install.sh
     dest: "/home/{{ ansible_env.USER }}/Downloads/pve-nag-buster-install.sh"
     mode: 0755
   register: pve_nag_buster_changed
@@ -82,6 +82,7 @@
 #    mode=0700
 #  become: true
 
+# these smart_ links are in addition to those handled by munin_suggest_plugin.yml, which appears to ignore devices that are sent through to VMs (where we still have to run the smart queries from)
 - name: ensure all munin smart links are in place
   file:
     src: /usr/share/munin/plugins/smart_
