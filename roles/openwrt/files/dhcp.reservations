@@ -1,3 +1,51 @@
+config domain
+	option name 'rather.puzzling.org'
+	option ip '192.168.1.17'
+
+config domain
+	option name 'www.rather.puzzling.org'
+	option ip '192.168.1.17'
+
+config domain
+	option name 'angelahughes.org'
+	option ip '192.168.1.17'
+
+config domain
+	option name 'www.angelahughes.org'
+	option ip '192.168.1.17'
+
+config domain
+	option name 'switch'
+	option ip '192.168.1.249'
+
+config domain
+	option name 'gateway'
+	option ip '192.168.1.254'
+
+config domain
+	option name 'gw'
+	option ip '192.168.1.254'
+
+config domain
+	option name 'b1300'
+	option ip '192.168.1.254'
+
+config domain
+	option name 'wavlink'
+	option ip '192.168.1.253'
+
+config domain
+	option name 're450'
+	option ip '192.168.1.252'
+
+config domain
+	option name 'archerd7'
+	option ip '192.168.1.251'
+
+config domain
+	option name 'archerc7'
+	option ip '192.168.1.250'
+
 config host
 	option ip '192.168.1.20'
 	option name 'gamow'
@@ -161,6 +209,12 @@ config host
 	option ip '192.168.1.79'
 	option mac 'dc:4f:22:59:30:40'
 	option name 'ecowitt'
+	option dns '1'
+
+config host
+	option ip '192.168.4.126'
+	option mac '24:ec:99:7b:f5:59'
+	option name 'panasonic-tv'
 	option dns '1'
 
 config host
@@ -350,52 +404,4 @@ config host
 	option name 'cam-rear'
 	option dns '1'
 	option ip '192.168.4.11'
-
-config domain
-	option name 'rather.puzzling.org'
-	option ip '192.168.1.17'
-
-config domain
-	option name 'www.rather.puzzling.org'
-	option ip '192.168.1.17'
-
-config domain
-	option name 'angelahughes.org'
-	option ip '192.168.1.17'
-
-config domain
-	option name 'www.angelahughes.org'
-	option ip '192.168.1.17'
-
-config domain
-	option name 'switch'
-	option ip '192.168.1.249'
-
-config domain
-	option name 'gateway'
-	option ip '192.168.1.254'
-
-config domain
-	option name 'gw'
-	option ip '192.168.1.254'
-
-config domain
-	option name 'b1300'
-	option ip '192.168.1.254'
-
-config domain
-	option name 'wavlink'
-	option ip '192.168.1.253'
-
-config domain
-	option name 're450'
-	option ip '192.168.1.252'
-
-config domain
-	option name 'archerd7'
-	option ip '192.168.1.251'
-
-config domain
-	option name 'archerc7'
-	option ip '192.168.1.250'
 
