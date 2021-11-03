@@ -1,0 +1,401 @@
+config host
+	option ip '192.168.1.20'
+	option name 'gamow'
+	option dns '1'
+
+config host
+	option ip '192.168.1.17'
+	option mac 'f6:7f:da:7d:af:30'
+	option name 'dirac'
+	option dns '1'
+
+config host
+	option ip '192.168.1.123'
+	option mac 'a0:a8:cd:2d:d4:df 00:90:f5:e7:b0:7a'
+	option name 'dirac-laptop'
+	option dns '1'
+
+#config host
+#	option name 'sony'
+#	option dns '1'
+
+config host
+	option name 'zte'
+	option dns '1'
+	option mac 'B0:C1:9E:10:B2:79'
+	option ip '192.168.1.86'
+
+config host
+	option mac '18:D0:C5:DF:EC:EF'
+	option name 'oppo'
+	option dns '1'
+	option ip '192.168.1.33'
+
+config host
+	option ip '192.168.1.6'
+	option mac '00:14:fd:16:21:c4'
+	option name 'enclosure'
+	option dns '1'
+
+config host
+	option ip '192.168.1.2'
+	option mac '00:14:fd:16:21:e4'
+	option name 'fs'
+	option dns '1'
+
+config host
+	option ip '192.168.1.28'
+	option mac '00:14:fd:16:21:ff'
+	option name 'pi'
+	option dns '1'
+
+config host
+	option ip '192.168.1.34'
+	option mac 'd0:13:fd:63:dc:3c'
+	option name 'lg'
+	option dns '1'
+
+config host
+	option ip '192.168.1.52'
+	option mac 'd0:73:d5:30:f2:93'
+	option name 'loungeroomlifx'
+	option dns '1'
+
+config host
+	option ip '192.168.1.54'
+	option mac 'd0:73:d5:26:d2:00'
+	option name 'bedroomlifx'
+	option dns '1'
+
+config host
+	option ip '192.168.1.58'
+	option mac '84:f3:eb:59:e6:ae'
+	option name 'ledstrip'
+	option dns '1'
+
+config host
+	option ip '192.168.1.36'
+	option mac '74:40:bb:d4:48:07'
+	option name 'fermi'
+	option dns '1'
+
+config host
+	option ip '192.168.1.74'
+	option mac '84:f3:eb:59:e5:bf'
+	option name 'netclock'
+	option dns '1'
+
+config host
+	option ip '192.168.1.75'
+	option mac '68:c6:3a:9e:e3:4a'
+	option name 'ac'
+	option dns '1'
+
+config host
+	option ip '192.168.1.76'
+	option mac '10:52:1c:69:53:10'
+	option name 'esp32cam'
+	option dns '1'
+
+config host
+	option ip '192.168.1.77'
+	option mac '7c:9e:bd:fa:f0:b4'
+	option name 'epaper-clock'
+	option dns '1'
+
+config host
+	option ip '192.168.1.10'
+	option mac 'f0:1f:af:d9:75:22'
+	option name 'idrac'
+	option dns '1'
+
+config host
+	option ip '192.168.1.18'
+	option mac '70:54:d2:90:a2:52'
+	option name 'pauli'
+	option dns '1'
+
+config host
+	option ip '192.168.1.61'
+	option mac 'c4:4f:33:a6:84:95'
+	option name 'ac-power'
+	option dns '1'
+
+config host
+	option ip '192.168.1.62'
+	option mac '80:7d:3a:6b:87:c4'
+	option name 'loungeroomlights-power'
+	option dns '1'
+
+config host
+	option ip '192.168.1.60'
+	option mac 'c4:4f:33:a8:eb:9b'
+	option name 'monitor-power'
+	option dns '1'
+
+config host
+	option ip '192.168.1.63'
+	option mac 'cc:50:e3:02:7c:de'
+	option name 'bedroomlights-power'
+	option dns '1'
+
+config host
+	option ip '192.168.1.66'
+	option mac 'cc:50:e3:68:4d:fc'
+	option name 'garagelights-power'
+	option dns '1'
+
+config host
+	option ip '192.168.1.65'
+	option mac 'a4:cf:12:b7:93:df'
+	option name 'studio-power'
+	option dns '1'
+
+config host
+	option ip '192.168.1.78'
+	option mac '2c:f4:32:4e:38:11'
+	option name 'pantech'
+	option dns '1'
+
+config host
+	option ip '192.168.1.79'
+	option mac 'dc:4f:22:59:30:40'
+	option name 'ecowitt'
+	option dns '1'
+
+config host
+	option ip '192.168.4.127'
+	option mac '24:df:a7:e8:42:0f'
+	option name 'study-rm4'
+	option dns '1'
+
+config host
+	option ip '192.168.4.128'
+	option mac '24:df:a7:f1:02:ba'
+	option name 'loungeroom-rm4'
+	option dns '1'
+
+config host
+	option ip '192.168.7.102'
+	option mac '74:38:b7:27:19:04'
+	option name 'canon'
+	option dns '1'
+
+config host
+	option ip '192.168.7.103'
+	option mac '38:9d:92:17:87:22'
+	option name 'epson'
+	option dns '1'
+
+config host
+	option ip '192.168.7.104'
+	option mac 'ac:18:26:3d:be:17'
+	option name 'epson-a3'
+	option dns '1'
+
+config host
+	option ip '192.168.1.117'
+	option mac '0a:8b:d6:fc:43:c1'
+	option name 'dirac-new'
+	option dns '1'
+
+config host
+	option mac 'f8:0f:f9:4b:a4:a9'
+	option name 'chromecast-lounge'
+	option dns '1'
+	option ip '192.168.7.5'
+
+config host
+	option ip '192.168.1.102'
+	option mac 'ea:0d:d5:6e:9c:eb'
+	option name 'fs-new'
+	option dns '1'
+
+config host
+	option ip '192.168.1.35'
+	option mac '2c:59:8a:60:80:e8'
+	option name 'nexus'
+	option dns '1'
+
+config host
+	option ip '192.168.1.5'
+	option mac 'f0:1f:af:d9:75:20'
+	option name 'pve'
+	option dns '1'
+
+config host
+	option mac '00:21:70:A7:FD:30 7C:5C:F8:E5:6E:CE'
+	option dns '1'
+	option ip '192.168.1.22'
+	option name 'maxwell'
+
+config host
+	option mac 'D6:ED:7A:5B:80:73'
+	option name 'zm'
+	option dns '1'
+	option ip '192.168.1.201'
+
+config host
+	option mac 'CC:50:E3:68:28:B9'
+	option name 'patiolights-power'
+	option dns '1'
+	option ip '192.168.1.64'
+
+config host
+	option mac 'CC:50:E3:68:52:1E'
+	option name 'laundrylights-power'
+	option dns '1'
+	option ip '192.168.1.69'
+
+config host
+	option mac 'CC:50:E3:68:51:CD'
+	option name 'christmaslights-power'
+	option dns '1'
+	option ip '192.168.1.70'
+
+config host
+	option mac 'C4:4F:33:87:A1:F7'
+	option name 'beerfridges-power'
+	option dns '1'
+	option ip '192.168.1.67'
+
+config host
+	option mac 'C4:4F:33:87:97:AC'
+	option name 'brewfridge-power'
+	option dns '1'
+	option ip '192.168.1.68'
+
+config host
+	option mac 'd4:a6:51:2a:b3:c3'
+	option name 'tuya-1'
+	option dns '1'
+	option ip '192.168.4.40'
+
+config host
+        option mac 'd4:a6:51:2a:bd:b3'
+        option name 'tuya-2'
+        option dns '1'
+        option ip '192.168.4.41'
+
+config host
+        option mac 'd4:a6:51:2a:a6:79'
+        option name 'tuya-3'
+        option dns '1'
+        option ip '192.168.4.42'
+
+config host
+        option mac 'd4:a6:51:2a:b8:b7'
+        option name 'tuya-4'
+        option dns '1'
+        option ip '192.168.4.43'
+
+config host
+        # studio lights
+        option mac 'e0:98:06:c6:d9:00'
+        option name 'tuya-5'
+        option dns '1'
+        option ip '192.168.4.44'
+
+config host
+        # studio stereo
+        option mac '50:02:91:1a:2e:69'
+        option name 'tuya-6'
+        option dns '1'
+        option ip '192.168.4.45'
+
+config host
+	option mac '56:0f:c8:9f:b2:a4'
+	option name 'AngelaHssiPhone'
+	option dns '1'
+	option ip '192.168.7.174'
+
+config host
+	option mac '9c:30:5b:59:dd:c5'
+	option name 'DESKTOP-JASCATN'
+	option dns '1'
+	option ip '192.168.7.206'
+
+config host
+	option mac '34:48:ed:4f:bb:64'
+	option name 'B028609'
+	option dns '1'
+	option ip '192.168.7.205'
+
+config host
+	option mac '04:33:c2:dc:f5:64'
+	option name 'B028609-wifi'
+	option dns '1'
+	option ip '192.168.4.205'
+
+config host
+	option mac '74:d8:3e:d5:de:14'
+	option name 'B028757'
+	option dns '1'
+	option ip '192.168.4.187'
+
+config host
+	option mac '0e:0a:a4:5e:6c:7b'
+	option name 'homeassistant'
+	option dns '1'
+	option ip '192.168.1.80'
+
+config host
+	option mac '4C:B0:08:3F:B5:A5 A0:9D:C1:E2:FB:B6'
+	option name 'cam-garage'
+	option dns '1'
+	option ip '192.168.4.10'
+
+config host
+	option mac '4C:B0:08:66:80:50 A0:9D:C1:DD:F4:16'
+	option name 'cam-rear'
+	option dns '1'
+	option ip '192.168.4.11'
+
+config domain
+	option name 'rather.puzzling.org'
+	option ip '192.168.1.17'
+
+config domain
+	option name 'www.rather.puzzling.org'
+	option ip '192.168.1.17'
+
+config domain
+	option name 'angelahughes.org'
+	option ip '192.168.1.17'
+
+config domain
+	option name 'www.angelahughes.org'
+	option ip '192.168.1.17'
+
+config domain
+	option name 'switch'
+	option ip '192.168.1.249'
+
+config domain
+	option name 'gateway'
+	option ip '192.168.1.254'
+
+config domain
+	option name 'gw'
+	option ip '192.168.1.254'
+
+config domain
+	option name 'b1300'
+	option ip '192.168.1.254'
+
+config domain
+	option name 'wavlink'
+	option ip '192.168.1.253'
+
+config domain
+	option name 're450'
+	option ip '192.168.1.252'
+
+config domain
+	option name 'archerd7'
+	option ip '192.168.1.251'
+
+config domain
+	option name 'archerc7'
+	option ip '192.168.1.250'
+
