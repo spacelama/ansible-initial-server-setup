@@ -39,6 +39,14 @@ config domain
 	option ip '192.168.1.252'
 
 config domain
+	option name 'billion'
+	option ip '192.168.1.248'
+
+config domain
+	option name 'huawei'
+	option ip '192.168.1.247'
+
+config domain
 	option name 'archerd7'
 	option ip '192.168.1.251'
 
@@ -326,36 +334,36 @@ config host
 	option ip '192.168.4.40'
 
 config host
-        option mac 'd4:a6:51:2a:bd:b3'
-        option name 'tuya-2'
-        option dns '1'
-        option ip '192.168.4.41'
+	option mac 'd4:a6:51:2a:bd:b3'
+	option name 'tuya-2'
+	option dns '1'
+	option ip '192.168.4.41'
 
 config host
-        option mac 'd4:a6:51:2a:a6:79'
-        option name 'tuya-3'
-        option dns '1'
-        option ip '192.168.4.42'
+	option mac 'd4:a6:51:2a:a6:79'
+	option name 'tuya-3'
+	option dns '1'
+	option ip '192.168.4.42'
 
 config host
-        option mac 'd4:a6:51:2a:b8:b7'
-        option name 'tuya-4'
-        option dns '1'
-        option ip '192.168.4.43'
+	option mac 'd4:a6:51:2a:b8:b7'
+	option name 'tuya-4'
+	option dns '1'
+	option ip '192.168.4.43'
 
 config host
-        # studio lights
-        option mac 'e0:98:06:c6:d9:00'
-        option name 'tuya-5'
-        option dns '1'
-        option ip '192.168.4.44'
+	# studio lights
+	option mac 'e0:98:06:c6:d9:00'
+	option name 'tuya-5'
+	option dns '1'
+	option ip '192.168.4.44'
 
 config host
-        # studio stereo
-        option mac '50:02:91:1a:2e:69'
-        option name 'tuya-6'
-        option dns '1'
-        option ip '192.168.4.45'
+	# studio stereo
+	option mac '50:02:91:1a:2e:69'
+	option name 'tuya-6'
+	option dns '1'
+	option ip '192.168.4.45'
 
 config host
 	option mac '56:0f:c8:9f:b2:a4'
