@@ -6,12 +6,12 @@ config dnsmasq
 	option expandhosts '1'
 	option readethers '1'
 	option leasefile '/tmp/dhcp.leases'
-	option resolvfile '/tmp/resolv.conf.auto'
 	option localservice '1'
 	option domain 'rather.puzzling.org'
 	option local '/rather.puzzling.org/'
 	option authoritative '1'
 	option confdir '/tmp/dnsmasq.d'
+	option resolvfile '/tmp/resolv.conf.d/resolv.conf.auto'
 
 config dhcp 'LAN1'
 	option interface 'LAN1'
