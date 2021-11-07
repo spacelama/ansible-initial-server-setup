@@ -2,7 +2,7 @@
 # https://stackoverflow.com/questions/18195142/safely-limiting-ansible-playbooks-to-a-single-machine
 - hosts: "{{ target | default('openwrt') }}"
 #  gather_facts: no
-  remote_user: rootsh
+  remote_user: rootsh # so keeps working even fresh after upgrade (but not brand-new installation)
   vars_files:
     - vars/main.yml
   roles:

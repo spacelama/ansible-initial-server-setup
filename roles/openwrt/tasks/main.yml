@@ -1,8 +1,27 @@
 ---
+- name: remove conflicting packages
+  opkg:
+    name: wpad-basic-wolfssl
+    state: absent
+
 - name: install compulsory packages
   opkg:
-    name: bash,muninlite,rsync
+    name: bash,muninlite,rsync,dawn,luci-app-dawn,wpad-wolfssl
     state: present
+
+- name: install router packages
+  opkg:
+    # kmod-tcp-bbr was on b1300 prior to 21.02.1 upgrade - no idea how
+    # it got there
+    name: luci-app-sqm,avahi-dbus-daemon,adblock,luci-app-adblock,msmtp,crelay,luci-app-banip,ethtool,arp-scan
+    state: present
+  when: openwrt_router_packages is defined
+
+- name: install full packages
+  opkg:
+    name: tcpdump,strace
+    state: present
+  when: openwrt_heavy_installation is defined
 
 - name: setup dhcp reservations
   copy:
