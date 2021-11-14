@@ -366,6 +366,13 @@ config host
 	option ip '192.168.4.45'
 
 config host
+	# bedroom fan
+	option mac '50:8a:06:34:cc:1a'
+	option name 'fan-1'
+	option dns '1'
+	option ip '192.168.4.60'
+
+config host
 	option mac '56:0f:c8:9f:b2:a4'
 	option name 'AngelaHssiPhone'
 	option dns '1'
