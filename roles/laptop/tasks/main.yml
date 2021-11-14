@@ -15,6 +15,7 @@
     state: present
   become: true
   when: systemd_logind.stat.exists
+  notify: restart systemd-logind
 
 - name: Get rid of Upower lid behaviour
   lineinfile:

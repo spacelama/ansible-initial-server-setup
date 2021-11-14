@@ -230,8 +230,34 @@
     force: yes
   become: true
 
+# https://forum.proxmox.com/threads/oom-kill-process-inside-lxc-memory-cgroup-out-of-memory.65106/
 - name: ensure /var/log/journal persistent journal exists
   file:
     dest: /var/log/journal
     state: directory
   become: true
+
+- name: determine if systemd login needs tweaking
+  stat: path=/etc/systemd/logind.conf
+  register: systemd_logind
+
+- name: Unscrew systemd login defaults
+  lineinfile:
+    dest: /etc/systemd/logind.conf
+    line: HandlePowerKey=suspend
+    regexp: ^HandlePowerKey=
+    state: present
+  become: true
+  when: systemd_logind.stat.exists
+  notify: restart systemd-logind
+
+- name: Unscrew systemd login defaults
+  lineinfile:
+    dest: /etc/systemd/logind.conf
+    line: KillUserProcesses=no
+    regexp: ^KillUserProcesses=
+    state: present
+  become: true
+  when: systemd_logind.stat.exists
+  notify: restart systemd-logind
+
