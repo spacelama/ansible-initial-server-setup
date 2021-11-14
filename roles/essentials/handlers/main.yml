@@ -10,3 +10,28 @@
     name: systemd-logind
     state: restarted
   become: true
+
+- name: Reconfigure locales
+  file:
+    path: /etc/locale.gen
+    state: absent
+  become: true
+  notify: dpkg-reconfigure locales
+
+- name: dpkg-reconfigure locales
+  shell: dpkg-reconfigure --frontend noninteractive locales
+  become: true
+
+- name: Reconfigure tzdata
+  file:
+    path: "{{ item }}"
+    state: absent
+  loop:
+    - "/etc/localtime"
+    - "/etc/timezone"
+  notify: dpkg-reconfigure tzdata
+  become: true
+
+- name: dpkg-reconfigure tzdata
+  command: dpkg-reconfigure --frontend noninteractive tzdata
+  become: true

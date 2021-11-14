@@ -25,21 +25,28 @@
 #    upgrade: safe
 #    autoremove: no
 
-- name: Configure timezone country
-  debconf:
-    name: tzdata
-    question: tzdata/Areas
-    value: "Australia"
-    vtype: select
-  become: true
+- name: Configure tzdata
+  block:
+    - name: Configure timezone country
+      debconf:
+        name: tzdata
+        question: tzdata/Areas
+        value: "Australia"
+        vtype: select
+      become: true
+      notify: Reconfigure tzdata
 
-- name: Configure timezone city
-  debconf:
-    name: tzdata
-    question: tzdata/Zones/Australia
-    value: "Melbourne"
-    vtype: select
-  become: true
+    - name: Configure timezone city
+      debconf:
+        name: tzdata
+        question: tzdata/Zones/Australia
+        value: "Melbourne"
+        vtype: select
+      become: true
+      notify: Reconfigure tzdata
+  always:
+    - name: Make sure all handlers run
+      meta: flush_handlers
 
 - name: Ensure ntp starts on a fresh reboot
   service:
@@ -51,20 +58,10 @@
 
   #FIXME: might need to go chrony instead of NTP if thats how we get VMs working
 
-- name: Configure locales
-  debconf:
-    name: locales
-    question: locales/locales_to_be_generated
-    value: "en_AU.UTF-8 UTF-8, en_AU ISO-8859-1, en_DK ISO-8859-1, en_DK.ISO-8859-15 ISO-8859-15, en_DK.UTF-8 UTF-8, en_GB ISO-8859-1, en_GB.ISO-8859-15 ISO-8859-15, en_GB.UTF-8 UTF-8"
-    vtype: multiselect
-  become: true
-
-- name: Configure default locale
-  debconf:
-    name: locales
-    question: locales/default_environment_locale
-    value: "en_AU.UTF-8"
-    vtype: select
+- name: Remove erroneous packages
+  apt:
+    name: ['locales-all']
+    state: absent
   become: true
 
 - name: Install essential packages (all)
@@ -76,6 +73,29 @@
     state: present
   become: true
   when: quick is not defined
+
+- name: Configure locales
+  block:
+    - name: List of locales
+      debconf:
+        name: locales
+        question: locales/locales_to_be_generated
+        value: "en_AU.UTF-8 UTF-8, en_AU ISO-8859-1, en_DK ISO-8859-1, en_DK.ISO-8859-15 ISO-8859-15, en_DK.UTF-8 UTF-8, en_GB ISO-8859-1, en_GB.ISO-8859-15 ISO-8859-15, en_GB.UTF-8 UTF-8"
+        vtype: multiselect
+      become: true
+      notify: Reconfigure locales
+
+    - name: Configure default locale
+      debconf:
+        name: locales
+        question: locales/default_environment_locale
+        value: "en_AU.UTF-8"
+        vtype: select
+      become: true
+      notify: Reconfigure locales
+  always:
+    - name: Make sure all handlers run
+      meta: flush_handlers
 
 - name: Install essential packages (not container)
   apt:
