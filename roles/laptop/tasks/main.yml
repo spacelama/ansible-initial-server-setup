@@ -38,9 +38,9 @@
 #  lineinfile:
 #    dest: /etc/acpi/lid.sh
 
-- name: Install battery tools
+- name: Install battery, wifi tools
   apt:
-    name: ['ibam', 'wmbattery', 'powerstat', 'battery-stats']
+    name: ['ibam', 'wmbattery', 'powerstat', 'battery-stats', 'network-manager', 'iwd', 'rfkill', 'wireless-tools']
     autoremove: no
     state: present
   become: true
@@ -54,3 +54,80 @@
     state: present
   become: true
   notify: restart battery-stats
+
+#https://wiki.debian.org/WiFi/HowToUse#NetworkManager_Frontends
+#https://wiki.debian.org/NetworkManager/iwd (note that it might still have troubles auto-reconnecting upon AP requesting we roam)
+
+- name: ensure network-manager can use iwd
+  ini_file:
+    path: /etc/iwd/main.conf
+    section: "{{ item.section }}"
+    option: "{{ item.key }}"
+    value: "{{ item.value }}"
+    state: present
+  become: true
+  with_items:
+    - { section: "General", key: "EnableNetworkConfiguration", value: "false" }
+    - { section: "Network", key: "EnableIPv6", value: "false" }
+
+# if were to use iwd without network-manager, would want to inject /var/lib/*psk
+
+- name: Ensure NetworkManager.conf has no randomisation
+  ini_file:
+    path: /etc/NetworkManager/NetworkManager.conf
+    section: "{{ item.section }}"
+    option: "{{ item.key }}"
+    value: "{{ item.value }}"
+    state: present
+  become: true
+  with_items:
+    - { section: "device", key: "wifi.scan-rand-mac-address", value: "no" }
+    - { section: "device", key: "wifi.backend", value: "iwd" }
+
+- name: reset /etc/network/interfaces back to vanilla
+  copy:
+    dest: /etc/network/interfaces
+    content: "# This file describes the network interfaces available on your system\n# and how to activate them. For more information, see interfaces(5).\n\nsource /etc/network/interfaces.d/*\n\n# The loopback network interface\nauto lo\niface lo inet loopback\n"
+  become: true
+
+- name: set /etc/network/interfaces.d/eth0.conf if has a wired interface
+  copy:
+    dest: /etc/network/interfaces.d/eth0.conf
+    content: "auto eth0\nallow-hotplug eth0\niface eth0 inet dhcp\n"
+  become: true
+  when: ansible_facts["eth0"] is defined
+
+- name: enable systemd-resolved
+  service:
+    name: systemd-resolved
+    enabled: yes
+    state: started
+  become: true
+
+- name: setup systemd-resolv.conf link
+  file:
+    src: /run/systemd/resolve/stub-resolv.conf
+    dest: /etc/resolv.conf
+    state: link
+    force: true
+  become: true
+
+- name: disable wpa_supplicant
+  service:
+    name: wpa_supplicant
+    enabled: no
+    state: stopped
+  become: true
+
+- name: disable iwd from autostarting
+  service:
+    name: iwd
+    enabled: no
+  become: true
+
+- name: Remove pdnsd
+  apt:
+    name: ['pdnsd']
+    state: absent
+  become: true
+
