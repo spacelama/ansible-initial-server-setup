@@ -13,10 +13,13 @@
 
 - name: Reconfigure locales
   file:
-    path: /etc/locale.gen
+    path: "{{ item }}"
     state: absent
-  become: true
+  loop:
+    - "/etc/locale.gen"
+    - "/etc/default/locale"
   notify: dpkg-reconfigure locales
+  become: true
 
 - name: dpkg-reconfigure locales
   shell: dpkg-reconfigure --frontend noninteractive locales
