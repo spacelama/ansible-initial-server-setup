@@ -1,6 +1,13 @@
 ---
 - name: restart dnsmasq
+  # actually, remove reservations first
+  file:
+    dest: /tmp/dhcp.leases
+    state: absent
+  notify: restart dnsmasq service
+
+- name: restart dnsmasq service
   service:
     name: dnsmasq
     state: restarted
-
+  throttle: 1
