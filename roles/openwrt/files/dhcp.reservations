@@ -1,18 +1,27 @@
+# tftpd, MX split horizon DNS, CNAMEs etc all documented here: https://openwrt.org/docs/guide-user/base-system/dhcp_configuration
+
+config cname
+	option cname 'www.rather.puzzling.org'
+	option target 'rather.puzzling.org'
+
+# a daemon running external to openwrt (monitor_iot.worker) monitors
+# our public IP and resets our internal DNS entry to this if it finds
+# it doesn't match
 config domain
 	option name 'rather.puzzling.org'
-	option ip '192.168.1.17'
+	option ip '0.0.0.0'
 
-config domain
-	option name 'www.rather.puzzling.org'
-	option ip '192.168.1.17'
+# config domain
+# 	option name 'www.rather.puzzling.org'
+# 	option ip '192.168.1.17'
 
-config domain
-	option name 'angelahughes.org'
-	option ip '192.168.1.17'
+# config domain
+# 	option name 'angelahughes.org'
+# 	option ip '192.168.1.17'
 
-config domain
-	option name 'www.angelahughes.org'
-	option ip '192.168.1.17'
+# config domain
+# 	option name 'www.angelahughes.org'
+# 	option ip '192.168.1.17'
 
 config domain
 	option name 'switch'
@@ -209,7 +218,7 @@ config host
 
 config host
 	option ip '192.168.1.65'
-	option mac 'a4:cf:12:b7:93:df'
+	option mac '40:f5:20:f0:a8:ee'
 	option name 'studio-power'
 	option dns '1'
 
