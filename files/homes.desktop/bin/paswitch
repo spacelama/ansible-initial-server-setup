@@ -16,15 +16,65 @@ else
     blacklist="$HOME/.paswitchblacklist-hard $HOME/.paswitchblacklist-soft"
 fi
 
+log() {
+    echo "$@"
+}
+logf() {
+    printf "$@"
+}
+
+# if a TTY output or we've been asked, use colour
+use_colour() {
+    green=$(TERM=xterm tput setf 2)
+    red=$(TERM=xterm tput setf 4)
+    yellow=$(TERM=xterm tput setf 6)
+    normal=$(TERM=xterm tput sgr0)
+    bold=$(TERM=xterm tput bold)
+    color=--color=always
+}
+
+# Colourise single line
+echocolour() {
+    while : ; do
+        colour="$1"
+        case "$colour" in
+            green)
+                log -n "$green"
+                ;;
+            red)
+                log -n "$red"
+                ;;
+            yellow)
+                log -n "$yellow"
+                ;;
+            normal)
+                log -n "$normal"
+                ;;
+            bold)
+                log -n "$bold"
+                ;;
+            *)
+                break
+                ;;
+        esac
+        shift
+    done
+    log "$@${normal}"
+}
+
 function verboserun () {
-    echo "$*"
+    declare -a cmd=()
+    for arg in "$@" ; do
+        cmd+=($(printf "%q" "$arg")) # escape all args (could also use /usr/bin/shell-quote)
+    done
+    echocolour green "${cmd[*]}"
     if [ -z "$noop" ] ; then
-        eval "$*" || exit 2   #eval because comments are enclosed in ' " '
+        "$@"
     fi
 }
 
 function setdefaultsink() {
-    verboserun pacmd "set-default-sink $@" # switch default sound card to next 
+    verboserun pacmd set-default-sink "$@" # switch default sound card to next 
 # $inputs: A list of currently playing inputs
     inputs=
     while read header index ; do
@@ -56,6 +106,16 @@ function setdefaultsink() {
         verboserun pacmd move-sink-input $INPUT "$@"
     done
 }
+
+green=
+red=
+yellow=
+normal=
+bold=
+color=
+if [ -t 1 ] ; then
+    use_colour
+fi
 
 # $totalsc: Number of sound cards available
 totalsc=$(pacmd "list-sinks" | grep index: | wc -l) # total of sound cards: $totalsc
