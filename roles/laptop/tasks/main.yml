@@ -72,7 +72,7 @@
 
 # if were to use iwd without network-manager, would want to inject /var/lib/*psk
 
-- name: Ensure NetworkManager.conf has no randomisation
+- name: Ensure NetworkManager.conf has no randomisation, and set backend
   ini_file:
     path: /etc/NetworkManager/NetworkManager.conf
     section: "{{ item.section }}"
@@ -82,7 +82,8 @@
   become: true
   with_items:
     - { section: "device", key: "wifi.scan-rand-mac-address", value: "no" }
-    - { section: "device", key: "wifi.backend", value: "iwd" }
+#    - { section: "device", key: "wifi.backend", value: "iwd" }
+    - { section: "device", key: "wifi.backend", value: "wpa_supplicant" }
 
 - name: reset /etc/network/interfaces back to vanilla
   copy:
@@ -116,7 +117,6 @@
   service:
     name: wpa_supplicant
     enabled: no
-    state: stopped
   become: true
 
 - name: disable iwd from autostarting
