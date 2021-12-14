@@ -1,7 +1,7 @@
 ---
 - name: copy fan-speed-control
   copy:
-    src: /home/tconnors/code/Scripts/R710-IPMI-TEMP/fan-speed-control.pl
+    src: /home/tconnors/code/R710-Fan-Control/fan-speed-control.pl
     dest: /usr/local/bin/fan-speed-control.pl
     owner: root
     group: root
@@ -11,7 +11,7 @@
 
 - name: install fan-speed-control systemd target
   copy:
-    src: /home/tconnors/code/Scripts/R710-IPMI-TEMP/fan-speed-control.service
+    src: /home/tconnors/code/R710-Fan-Control/fan-speed-control.service
     dest: /etc/systemd/system/fan-speed-control.service
     owner: root
     group: root
