@@ -217,6 +217,12 @@ config host
 	option dns '1'
 
 config host
+	option ip '192.168.1.67'
+	option mac 'a4:cf:12:b7:93:df'
+	option name 'externalgaragelights-power'
+	option dns '1'
+
+config host
 	option ip '192.168.1.65'
 	option mac '40:f5:20:f0:a8:ee'
 	option name 'studio-power'
@@ -322,25 +328,25 @@ config host
 	option mac 'CC:50:E3:68:52:1E'
 	option name 'laundrylights-power'
 	option dns '1'
-	option ip '192.168.1.69'
+	option ip '192.168.1.70'
 
 config host
 	option mac 'CC:50:E3:68:51:CD'
 	option name 'christmaslights-power'
 	option dns '1'
-	option ip '192.168.1.70'
+	option ip '192.168.1.71'
 
 config host
 	option mac 'C4:4F:33:87:A1:F7'
 	option name 'beerfridges-power'
 	option dns '1'
-	option ip '192.168.1.67'
+	option ip '192.168.1.68'
 
 config host
 	option mac 'C4:4F:33:87:97:AC'
 	option name 'brewfridge-power'
 	option dns '1'
-	option ip '192.168.1.68'
+	option ip '192.168.1.69'
 
 config host
 	option mac 'd4:a6:51:2a:b3:c3'
