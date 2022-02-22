@@ -68,6 +68,7 @@
     user: "{{ item.key }}"
     key: "{{ item.value.sshkey }}"
     state: "{{ item.value.state }}"
+    path: "{{ not ansible_check_mode | ternary(omit, '/tmp/new_user_ssh_key') }}"
 #    comment: "{{ item.value.comment }}"
   loop: "{{ lookup('dict', my_users) }}"
   become: true

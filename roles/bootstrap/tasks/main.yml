@@ -102,8 +102,8 @@
     user: "ansible_adm"
     manage_dir: yes
     key: "{{ lookup('file', item) }}"
-#    comment: "{{ ansible_was_run_by }}"
+    #    comment: "{{ ansible_was_run_by }}"
+    path: "{{ not ansible_check_mode | ternary(omit, '/tmp/new_user_ssh_key') }}"
     exclusive: yes
   become: true
   with_items: "{{ my_public_key }}"
-
