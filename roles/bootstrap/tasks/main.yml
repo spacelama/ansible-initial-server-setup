@@ -96,6 +96,10 @@
     state: present
   become: true
 
+- name: Get the local passwd database
+  getent:
+    database: passwd
+
   # could also have multiple keys with exclusive: https://stackoverflow.com/questions/38879266/is-it-possible-to-use-ansible-authorized-key-exclusive-with-multiple-keys
 - name: Add SSH key for new ansible_adm user
   authorized_key:
@@ -103,7 +107,7 @@
     manage_dir: yes
     key: "{{ lookup('file', item) }}"
     #    comment: "{{ ansible_was_run_by }}"
-    path: "{{ not ansible_check_mode | ternary(omit, '/tmp/new_user_ssh_key') }}"
+    path: "{{ getent_passwd['ansible_adm'][4] is defined | ternary(omit, '/tmp/ansible_adm_ssh_authorized_keys') }}"
     exclusive: yes
   become: true
   with_items: "{{ my_public_key }}"

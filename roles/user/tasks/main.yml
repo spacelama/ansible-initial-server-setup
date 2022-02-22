@@ -63,12 +63,16 @@
   #   - group
   #   - gshadow
 
+- name: Get the local passwd database
+  getent:
+    database: passwd
+
 - name: copy ssh keys
   authorized_key:
     user: "{{ item.key }}"
     key: "{{ item.value.sshkey }}"
     state: "{{ item.value.state }}"
-    path: "{{ not ansible_check_mode | ternary(omit, '/tmp/new_user_ssh_key') }}"
+    path: "{{ getent_passwd[item.key][4] is defined | ternary(omit, '/tmp/' ~ item.key ~ '_ssh_authorized_keys') }}"
 #    comment: "{{ item.value.comment }}"
   loop: "{{ lookup('dict', my_users) }}"
   become: true
