@@ -1,4 +1,10 @@
 ---
+- name: Setup pve users
+  copy:
+     content: "user:root@pam:1:0:::tim.w.connors@gmail.com::\n"
+     dest: /etc/pve/user.cfg
+  become: true
+
 - name: determine if enterprise pve subscription exists
   stat: path=/etc/apt/apt.conf.d/86pve-nags
   register: pve_enterprise_nag_buster
@@ -118,7 +124,7 @@
   with_items:
     - suspend-all
 
-  # FIXME: there are no partitions on pve where there's enough space for swapspace to operate
+  # FIXME: there are no non-zfs partitions on pve where there's enough space for swapspace to operate
 #- name: Ensures /var/lib/swapspace 0700
 #  file:
 #    path="/var/lib/swapspace"
@@ -140,8 +146,8 @@
   # https://forum.proxmox.com/threads/pmxcfs-writing-to-disk-all-the-time.35828/ https://www.reddit.com/r/Proxmox/comments/i8e5fi/excessive_nvme_wear_out/g193xr2/
   service:
     name: "{{ item }}"
-    enabled: no
-    state: stopped
+    enabled: "{{ ( host_is_in_pve_cluster is defined and host_is_in_pve_cluster ) | ternary('yes', 'no') }}"
+    state: "{{ ( host_is_in_pve_cluster is defined and host_is_in_pve_cluster ) | ternary('started', 'stopped') }}"
   become: true
   with_items:
     - pve-ha-lrm
@@ -255,6 +261,9 @@
     - vfio_pci
     - vfio_virqfd
     - vendor-reset
+    - "# following modules are blacklisted on the kernel commandline to stop from autoloading, but now that vfio is loaded reserving the appropriate devices, we are free to load them again (nope, have to probe them manually)"
+    - "#xhci_pci"
+    - "#xhci_hcd"
 
 #FIXME: still need to upload vendor-reset in here
 

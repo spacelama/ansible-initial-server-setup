@@ -3,7 +3,8 @@
   lineinfile:
     dest: /etc/ssh/sshd_config
     regexp: '^PermitRootLogin'
-    line: "PermitRootLogin no # ANSIBLE CONFIGURED"
+    # pve in cluster mode automatically enables PermitRootLogin
+    line: "{{ host_is_in_pve_cluster is defined | ternary ('PermitRootLogin yes', 'PermitRootLogin no # ANSIBLE CONFIGURED') }}"
     state: present
   notify: restart ssh
   become: true
