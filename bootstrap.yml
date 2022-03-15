@@ -21,6 +21,9 @@
   vars_files:
     - vars/main.yml
 
+  vars:
+    - in_bootstrap: true
+
   roles:
     - role: pve_server
       when: host_is_pve_server is defined

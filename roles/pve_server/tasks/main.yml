@@ -11,6 +11,10 @@
   stat: path=/etc/apt/sources.list.d/pve-enterprise.list
   register: pve_enterprise_repository
 
+- name: determine if vendor-reset dkms module already exists
+  stat: path=/var/lib/dkms/vendor-reset/0.1.1
+  register: vendor_reset_dkms
+
 - name: ensure old pve community repository removed
   command: mv /etc/apt/sources.list.d/pve-community.list /etc/apt/sources.list.d/pve-community.list.disabled
   become: true
@@ -25,6 +29,7 @@
   file:
     path: "/home/{{ ansible_env.USER }}/Downloads"
     state: directory
+  when: in_bootstrap is not defined
 
 - name: copy pve-nag-buster/install.sh to pve
   copy:
@@ -32,11 +37,50 @@
     dest: "/home/{{ ansible_env.USER }}/Downloads/pve-nag-buster-install.sh"
     mode: 0755
   register: pve_nag_buster_changed
+  when: in_bootstrap is not defined
 
 - name: install the pve nag buster
   command: /home/{{ ansible_env.USER }}/Downloads/pve-nag-buster-install.sh --offline
-  when: not pve_enterprise_nag_buster.stat.exists or pve_nag_buster_changed.changed
   become: true
+  when: in_bootstrap is not defined and ( not pve_enterprise_nag_buster.stat.exists or pve_nag_buster_changed.changed )
+  register: pve_nag_installed
+
+- name: Install pve prereq packages
+  apt:
+    name: ['dkms', 'pve-headers']
+    autoremove: no
+    state: present
+    install_recommends: no
+  become: true
+  when: in_bootstrap is not defined
+
+- name: Ensures ~ansible/Downloads/vendor-reset-225a49a dir exists
+  file:
+    path: "/home/{{ ansible_env.USER }}/Downloads/vendor-reset-225a49a"
+    state: directory
+  when: in_bootstrap is not defined
+
+- name: copy AMD graphics vendor-reset to pve
+  unarchive:
+    src: /home/tconnors/code/vendor-reset-225a49a.tar
+    dest: "/home/{{ ansible_env.USER }}/Downloads/vendor-reset-225a49a"
+    extra_opts:
+    - --transform
+    - s/^vendor-reset//
+  register: vendor_reset_changed
+  # want to rethink this, but in check_mode, we can't hope to unpack
+  # the archive when the user doesn't yet exist
+  when: not ansible_check_mode and in_bootstrap is not defined and not vendor_reset_dkms.stat.exists
+
+- name: install AMD graphics vendor-reset to pve
+#  command: bash -c 'cd Downloads/vendor-reset-225a49a ; dkms install .'
+  command: dkms install .
+  args:
+    chdir: /home/{{ ansible_env.USER }}/Downloads/vendor-reset-225a49a
+  become: true
+  # want to rethink this, but in check_mode, we can't hope to unpack
+  # the archive when the archive isn't yet unpacked
+  when: not ansible_check_mode and in_bootstrap is not defined and ( not vendor_reset_dkms.stat.exists or vendor_reset_changed.changed )
 
 - name: remove prohibited packages
   apt:
@@ -90,6 +134,7 @@
     state: link
   become: true
   with_items: { a, b, c, d, e, f, g, h, i, j, k, l, m, n }
+  when: in_bootstrap is not defined
 
 - name: disable pve-ha-lrm/pve-ha-crm on a non HA setup, to alleviate constant disk writes by pmxcfs to SSD
   # https://forum.proxmox.com/threads/pmxcfs-writing-to-disk-all-the-time.35828/ https://www.reddit.com/r/Proxmox/comments/i8e5fi/excessive_nvme_wear_out/g193xr2/

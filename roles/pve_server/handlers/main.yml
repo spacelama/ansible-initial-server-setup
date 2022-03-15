@@ -1,6 +1,6 @@
 ---
 - name: "Regenerate grub config"
-  shell: "/usr/sbin/update-grub"
+  shell: "proxmox-boot-tool refresh" # not meant to use update-grub
   become: true
 
 - name: "Update initramfs config"
