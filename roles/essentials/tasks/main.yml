@@ -300,4 +300,11 @@
   when: systemd_logind.stat.exists
   notify: restart systemd-logind
 
+- name: fix up utterly braindead config file defaults
+  include_tasks: roles/essentials/tasks/fixup_user_conf_files.yml
+  loop_control:
+    loop_var: user
+  with_items: "{{ fixup_conf_files.users }}"
+
+
 # FIXME: should set up postfix for !host_is_mailserver
