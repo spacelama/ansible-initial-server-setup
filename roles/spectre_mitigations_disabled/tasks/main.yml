@@ -12,7 +12,7 @@
   lineinfile:
     dest: /etc/default/grub
     line: grub cmdline already has spectre mitigations disabled
-    regexp: "^GRUB_CMDLINE_LINUX_DEFAULT=.*nopti.*mitigations=off"
+    regexp: "^GRUB_CMDLINE_LINUX_DEFAULT=.*mitigations=off"
     state: present
   changed_when: false
 
@@ -22,9 +22,10 @@
     dest: /etc/default/grub
     backrefs: yes
     regexp: "^GRUB_CMDLINE_LINUX_DEFAULT=\"(.*)\""
-    line: "GRUB_CMDLINE_LINUX_DEFAULT=\"\\1 nopti nospectre_v2 nospectre_v1 noibrs noibpb l1tf=off nospec_store_bypass_disable no_stf_barrier mds=off mitigations=off\""
+    line: "GRUB_CMDLINE_LINUX_DEFAULT=\"\\1 {{ item }}\""
     state: present
   become: true
+  with_items: { nopti, nospectre_v2, nospectre_v1, noibrs, noibpb, l1tf=off, nospec_store_bypass_disable, no_stf_barrier, mds=off, mitigations=off }
   notify: "Regenerate grub config"
 
 - name: "Remove mitigations=off grub config"
@@ -32,9 +33,10 @@
   lineinfile:
     dest: /etc/default/grub
     backrefs: yes
-    regexp: "^GRUB_CMDLINE_LINUX_DEFAULT=\"(.*)nopti nospectre_v2 nospectre_v1 noibrs noibpb l1tf=off nospec_store_bypass_disable no_stf_barrier mds=off mitigations=off(.*)\""
+    regexp: "^GRUB_CMDLINE_LINUX_DEFAULT=\"(.*){{ item }}(.*)\""
     line: "GRUB_CMDLINE_LINUX_DEFAULT=\"\\1\\2\""
     state: present
   become: true
+  with_items: { nopti, nospectre_v2, nospectre_v1, noibrs, noibpb, l1tf=off, nospec_store_bypass_disable, no_stf_barrier, mds=off, mitigations=off, "   *" }
   notify: "Regenerate grub config"
 
