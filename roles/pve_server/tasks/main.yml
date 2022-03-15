@@ -158,9 +158,9 @@
 # (but primarily, suspect most writes are coming from rrd in fs)
 
 # https://pve.proxmox.com/wiki/Pci_passthrough
-- name: "Search for iommu grub config"
+- name: "Search for intel iommu grub config"
   become: yes
-  register: iommu_grub_cmdline_exists
+  register: intel_iommu_grub_cmdline_exists
   check_mode: yes # cause this to become just a test.  If there's already
                   # iommu settings, then this will think line is
                   # being replaced, and changed will become true (but we
@@ -175,6 +175,24 @@
     state: present
   changed_when: false
 
+# https://pve.proxmox.com/wiki/Pci_passthrough
+- name: "Search for amd iommu grub config"
+  become: yes
+  register: amd_iommu_grub_cmdline_exists
+  check_mode: yes # cause this to become just a test.  If there's already
+                  # iommu settings, then this will think line is
+                  # being replaced, and changed will become true (but we
+                  # force it to false to not output a line saying
+                  # "changed"), and msg will become "line added", else
+                  # changed stays false, and msg does not contain "line
+                  # added"
+  lineinfile:
+    dest: /etc/default/grub
+    line: grub cmdline already has iommu mitigations disabled
+    regexp: "^GRUB_CMDLINE_LINUX_DEFAULT=.*amd_iommu=on"
+    state: present
+  changed_when: false
+
 
   # test devices you want to pass through belong in separate IOMMUs:
 #https://www.reddit.com/r/SolusProject/comments/955osy/vfio_passthrough_quick_reference/
@@ -185,25 +203,28 @@
 #    printf 'IOMMU Group %s ' "$n"
 #    lspci -nns "${d##*/}"
 #done;
+
 - name: "Append intel_iommu=on grub config"
-  when: iommu_grub_cmdline_exists.msg == "line added"
+  when: (intel_iommu_grub_cmdline_exists.msg == "line added") and (host_is_intel is defined)
   lineinfile:
     dest: /etc/default/grub
     backrefs: yes
     regexp: "^GRUB_CMDLINE_LINUX_DEFAULT=\"(.*)\""
-    line: "GRUB_CMDLINE_LINUX_DEFAULT=\"\\1 intel_iommu=on iommu=pt\""
+    line: "GRUB_CMDLINE_LINUX_DEFAULT=\"\\1 intel_iommu=on iommu=pt pcie_acs_override=downstream,multifunction\""
     state: present
   become: true
   notify: "Regenerate grub config"
 
-# if need to regenerate grub boot config because of new disks, procedure is here: https://pve.proxmox.com/wiki/Host_Bootloader
-
-- name: "host modules blacklist (radeon, snd_hda_intel, amdgpu, usb3)"
-  copy:
-    dest: /etc/modprobe.d/pve-custom-blacklist.conf
-    content: "# ansible controlled for RX550 by pve_server/main.yml\nblacklist radeon\nblacklist amdgpu\nblacklist snd_hda_intel\nblacklist xhci_hcd\nblacklist xhci_pci\n"
+- name: "Append amd_iommu=on grub config"
+  when: (amd_iommu_grub_cmdline_exists.msg == "line added") and (host_is_amd is defined)
+  lineinfile:
+    dest: /etc/default/grub
+    backrefs: yes
+    regexp: "^GRUB_CMDLINE_LINUX_DEFAULT=\"(.*)\""
+    line: "GRUB_CMDLINE_LINUX_DEFAULT=\"\\1 amd_iommu=on iommu=pt pcie_acs_override=downstream,multifunction\""
+    state: present
   become: true
-  notify: "Update initramfs config"
+  notify: "Regenerate grub config"
 
 #FIXME: keep monitoring lifetime left, and if drops below 0 (or Percent_Lifetime_Remain raw value goes above 100 on its way to 255, which then makes lifetime writes somewhere around 264TB, which is much closer to TBW), then it's just a SMART bug and we can back out this timeout back to default 5.  Also, if doesn't drop its rate, might as well back it out too and find some other source of write amplification in the fs VM # https://www.reddit.com/r/zfs/comments/cott44/how_can_i_check_to_make_sure_i_dont_have_a_write/ewqjld0/
 - name: "zfs module parameters"
