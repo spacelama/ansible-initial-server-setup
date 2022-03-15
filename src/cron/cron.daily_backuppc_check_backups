@@ -6,7 +6,7 @@
 
 log=/.backuppc_status
 date=`date +%s`
-excludes=( /backuppc /home/tconnors/.mp3.low_qual /var/spool/squid "/tank[^/]*" "/mnt/.*" "/media/.*" /var/spool/dovecot /mnt/olddirac "/var/cache/.*" ".*not_backed_up.*" ".*scratch" /external_backups /tmp /home/angela /piroot-new ".*subvol.*" ".*basevol.*" "/rpool.*" "/hdd" "/ssd_hdd" ) # it's not ideal that /hdd matches on both pve and dirac and we care about dirac, but we know its already backed up, and next replacement host for dirac won't have that mount name
+excludes=( /backuppc /home/tconnors/.mp3.low_qual /var/spool/squid "/tank[^/]*" "/mnt/.*" "/media/.*" /var/spool/dovecot /mnt/olddirac "/var/cache/.*" ".*not_backed_up.*" ".*scratch" /external_backups /tmp /home/angela /piroot-new ".*subvol.*" ".*basevol.*" "/rpool.*" "/hdd" "/ssd_hdd" "/wavlink" ) # it's not ideal that /hdd matches on both pve and dirac and we care about dirac, but we know its already backed up, and next replacement host for dirac won't have that mount name
 HOST=`hostname`
 
 function get_logentry() {
