@@ -7,7 +7,7 @@
     group: root
     mode: 0644
   become: true
-  when: host_is_container is not defined and host_is_pi is not defined and host_is_pve_server is not defined
+  when: host_is_container is not defined and host_is_pi is not defined and host_is_still_debian_buster is not defined
 
 - name: Enable apt backports
   copy:
@@ -103,20 +103,20 @@
 
 - name: Install essential packages (not container)
   apt:
-    name: ['git', 'htop', 'iotop', 'smem', 'atop', 'ethtool', 'net-tools', 'iperf3',  'aptitude', 'dlocate', 'vim', 'sysstat', 'nicstat', 'lshw', 'parted', 'sdparm', 'ntpdate', 'colordiff', 'ifstat', 'iftop', 'apt-listchanges', 'apt-show-versions', 'etckeeper', 'apt-listbugs', 'apt-listbugs', 'rlwrap', 'strace', 'procmail', 'make', 'keychain', 'libstring-shellquote-perl', 'dmidecode']
+    name: ['git', 'htop', 'iotop', 'smem', 'ethtool', 'net-tools', 'iperf3',  'aptitude', 'dlocate', 'vim', 'sysstat', 'nicstat', 'lshw', 'parted', 'sdparm', 'ntpdate', 'colordiff', 'ifstat', 'iftop', 'apt-listchanges', 'apt-show-versions', 'etckeeper', 'apt-listbugs', 'apt-listbugs', 'rlwrap', 'strace', 'procmail', 'make', 'keychain', 'libstring-shellquote-perl', 'dmidecode']
+    # atop
     autoremove: no
     state: present
     install_recommends: no
   become: true
   when: host_is_container is not defined
 
-- name: Install essential packages (not pi or container)
+- name: Remove previously essential but no longer current packages
   apt:
     name: ['uswsusp']
     autoremove: no
-    state: present
+    state: absent
   become: true
-  when: host_is_container is not defined and host_is_pi is not defined
 
 - name: Install intel microcode
   apt:
@@ -187,7 +187,9 @@
     line: '// DPkg::Pre-Install-Pkgs {"/usr/sbin/apt-listbugs apt";};'
     state: present
   become: true
-  when: host_is_container is not defined and host_is_pi is not defined
+  # listbugs might not be installed yet if still in check_mode, so
+  # don't run anything relying on the conffile being there
+  when: host_is_container is not defined and not ansible_check_mode
 
 - name: stop restricting dmesg pointlessly
   copy:

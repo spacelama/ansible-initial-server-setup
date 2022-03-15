@@ -7,3 +7,7 @@
     autoremove: no
     state: present
   become: true
+
+# FIXME: in debian bullseye and above, consider removing hddtemp and installing:
+#  echo drivetemp > /etc/modules-load.d/drivetemp.conf
+# for hddtemps to be reported through `sensors`

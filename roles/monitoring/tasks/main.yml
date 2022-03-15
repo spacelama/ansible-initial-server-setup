@@ -45,7 +45,7 @@
     state: link
   become: true
   with_items: [ 'hddtemp_smartctl', 'hddtempd' ]
-  when: host_is_container is not defined and host_is_virtual is not defined
+  when: not ( host_is_container is defined or host_is_virtual is defined or host_is_pi is defined )
   notify: restart munin-node
 
 - name: remove extraneous munin plugins (virtual machines)
@@ -54,7 +54,7 @@
     state: absent
   become: true
   with_items: [ 'hddtemp_smartctl', 'hddtempd' ]
-  when: host_is_container is defined or host_is_virtual is defined
+  when: host_is_container is defined or host_is_virtual is defined or host_is_pi is defined
   notify: restart munin-node
   
 - name: munin ipmi plugins without params
@@ -185,3 +185,13 @@
   become: true
   notify: restart munin-node
   
+- name: Ensure apt_all doesn't trigger every 5 minutes
+  lineinfile:
+    path: "/etc/cron.d/munin-node"
+    backup: yes
+    backrefs: yes
+    regexp: '^\*/5 \* (.* /etc/munin/plugins/apt_all.*)'
+    line: '0 */3 \1'
+  become: true
+  notify: restart cron
+
