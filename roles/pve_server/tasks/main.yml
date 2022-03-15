@@ -274,3 +274,12 @@
     mode: 0600
   become: true
   notify: "reload cron"
+
+- name: "Install guest snippets"
+  copy:
+    dest: /var/lib/vz/snippets/guest-hookscript.pl
+    src: guest-hookscript.pl
+    mode: 0755
+  become: true
+
+# FIXME: install QemuServer hook to call this hook
