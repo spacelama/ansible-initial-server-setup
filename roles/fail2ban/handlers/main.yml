@@ -4,3 +4,8 @@
     name: fail2ban
     state: restarted
   become: true
+  when: not ansible_check_mode # from memory, this is because in a
+                               # truly new system, fail2ban isn't yet
+                               # installed if we're in check_mode, so
+                               # we don't want to fail restarting
+                               # something that isn't installed
