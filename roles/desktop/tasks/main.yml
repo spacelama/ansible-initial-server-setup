@@ -100,3 +100,8 @@
     state: present
   become: true
   notify: restart earlyoom
+
+# FIXME: /proc/sys/vm/swappiness = 0 on large memory desktops with
+# SSD?.  On 2022/02/23, dirac was actively registering 30MB/s so and
+# si in vmstat, despite having 9GB of free RAM
+
