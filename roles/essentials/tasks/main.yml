@@ -58,6 +58,15 @@
 
   #FIXME: might need to go chrony instead of NTP if thats how we get VMs working
 
+  # WARNING: on ZFS you also need to set org.debian:periodic-trim on each zpool!
+- name: Ensure fstrim timer runs
+  service:
+    name: fstrim.timer
+    state: started
+    enabled: yes
+  become: true
+  when: host_is_container is not defined
+
 - name: Remove erroneous packages
   apt:
     name: ['locales-all']
