@@ -97,7 +97,7 @@ config host
 	option ip '192.168.1.33'
 
 config host
-	option ip '192.168.1.6'
+	option ip '192.168.1.7'
 	option mac '00:14:fd:16:21:c4'
 	option name 'enclosure'
 	option dns '1'
@@ -304,6 +304,12 @@ config host
 	option ip '192.168.1.5'
 	option mac 'f0:1f:af:d9:75:20'
 	option name 'pve'
+	option dns '1'
+
+config host
+	option ip '192.168.1.6'
+	option mac '04:42:1a:2d:76:29'
+	option name 'pve2'
 	option dns '1'
 
 config host
