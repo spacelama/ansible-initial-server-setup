@@ -17,12 +17,23 @@
   changed_when: false
 
 - name: "Append mitigations=off grub config"
-  when: spectre_grub_cmdline_exists.msg == "line added"
+  when: (spectre_grub_cmdline_exists.msg == "line added") and (host_needs_no_spectre_mitigations is not defined)
   lineinfile:
     dest: /etc/default/grub
     backrefs: yes
     regexp: "^GRUB_CMDLINE_LINUX_DEFAULT=\"(.*)\""
     line: "GRUB_CMDLINE_LINUX_DEFAULT=\"\\1 nopti nospectre_v2 nospectre_v1 noibrs noibpb l1tf=off nospec_store_bypass_disable no_stf_barrier mds=off mitigations=off\""
+    state: present
+  become: true
+  notify: "Regenerate grub config"
+
+- name: "Remove mitigations=off grub config"
+  when: (spectre_grub_cmdline_exists.msg != "line added") and (host_needs_no_spectre_mitigations is defined)
+  lineinfile:
+    dest: /etc/default/grub
+    backrefs: yes
+    regexp: "^GRUB_CMDLINE_LINUX_DEFAULT=\"(.*)nopti nospectre_v2 nospectre_v1 noibrs noibpb l1tf=off nospec_store_bypass_disable no_stf_barrier mds=off mitigations=off(.*)\""
+    line: "GRUB_CMDLINE_LINUX_DEFAULT=\"\\1\\2\""
     state: present
   become: true
   notify: "Regenerate grub config"
