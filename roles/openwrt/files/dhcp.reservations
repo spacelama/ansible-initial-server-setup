@@ -324,6 +324,18 @@ config host
 	option dns '1'
 	option ip '192.168.1.201'
 
+#config host
+#	option mac '92:B6:AF:F3:0B:19'
+#	option name 'media'
+#	option dns '1'
+#	option ip '192.168.1.201'
+
+config host
+	option mac '92:B6:AF:F3:0B:20'
+	option name 'media'
+	option dns '1'
+	option ip '192.168.7.157'
+
 config host
 	option mac 'CC:50:E3:68:28:B9'
 	option name 'patiolights-power'
