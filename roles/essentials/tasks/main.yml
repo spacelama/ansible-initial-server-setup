@@ -163,8 +163,6 @@
 #    group: root
 #    mode: 0644
 
-
-
 - name: allow backuppc to check all mountpoints
   copy:
     src: /home/tconnors/bin/is_all_mounted
@@ -306,5 +304,16 @@
     loop_var: user
   with_items: "{{ fixup_conf_files.users }}"
 
+- name: fix defaults in grub config
+  lineinfile:
+    dest: "/etc/default/grub"
+    line: "{{ item }}"
+  become: true
+  with_items:
+    - "#717586"
+    - "#Is it 'info grub'->Configuration->Simple Configuration:"
+    - "GRUB_DISABLE_SUBMENU=y"
+  notify: "Regenerate grub config"
+  when: host_is_container is not defined and host_is_pi is not defined
 
 # FIXME: should set up postfix for !host_is_mailserver
