@@ -301,7 +301,7 @@
   notify: restart systemd-logind
 
 - name: fix up utterly braindead config file defaults
-  include_tasks: roles/essentials/tasks/fixup_user_conf_files.yml
+  include_tasks: fixup_user_conf_files.yml
   loop_control:
     loop_var: user
   with_items: "{{ fixup_conf_files.users }}"

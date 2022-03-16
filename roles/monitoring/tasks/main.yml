@@ -144,7 +144,7 @@
     - numa_
 
 - name: gather and implement munin suggests
-  include_tasks: roles/monitoring/tasks/munin_suggest_plugin.yml
+  include_tasks: munin_suggest_plugin.yml
   loop_control:
     loop_var: munin_plugin
   with_items:

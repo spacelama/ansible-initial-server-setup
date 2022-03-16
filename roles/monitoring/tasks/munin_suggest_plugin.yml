@@ -12,7 +12,7 @@
 #    var: suggests
 #
 - name: implement munin {{ munin_plugin }} suggests
-  include_tasks: roles/monitoring/tasks/munin_suggest_plugin_item.yml
+  include_tasks: munin_suggest_plugin_item.yml
   loop_control:
     loop_var: suggest_item
   with_items: "{{ suggests.stdout_lines }}"
