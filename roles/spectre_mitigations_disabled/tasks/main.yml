@@ -1,39 +1,17 @@
 ---
-- name: "Search for spectre/meltdown grub config"
-  become: yes
-  register: spectre_grub_cmdline_exists
-  check_mode: yes # cause this to become just a test.  If there's already
-                  # spectre settings, then this will think line is
-                  # being replaced, and changed will become true (but we
-                  # force it to false to not output a line saying
-                  # "changed"), and msg will become "line added", else
-                  # changed stays false, and msg does not contain "line
-                  # added"
-  lineinfile:
-    dest: /etc/default/grub
-    line: grub cmdline already has spectre mitigations disabled
-    regexp: "^GRUB_CMDLINE_LINUX_DEFAULT=.*mitigations=off"
-    state: present
-  changed_when: false
-
-- name: "Append mitigations=off grub config"
-  when: (spectre_grub_cmdline_exists.msg == "line added") and (host_needs_no_spectre_mitigations is not defined)
-  lineinfile:
-    dest: /etc/default/grub
-    backrefs: yes
-    regexp: "^GRUB_CMDLINE_LINUX_DEFAULT=\"(.*)\""
-    line: "GRUB_CMDLINE_LINUX_DEFAULT=\"\\1 {{ item }}\""
-    state: present
-  become: true
+- name: "Append spectre unmitigations grub config"
+  include_tasks: add_grub_flag.yml
+  loop_control:
+    loop_var: mitigation_flag
+  when: host_needs_no_spectre_mitigations is not defined
   with_items: { nopti, nospectre_v2, nospectre_v1, noibrs, noibpb, l1tf=off, nospec_store_bypass_disable, no_stf_barrier, mds=off, mitigations=off }
-  notify: "Regenerate grub config"
 
-- name: "Remove mitigations=off grub config"
-  when: (spectre_grub_cmdline_exists.msg != "line added") and (host_needs_no_spectre_mitigations is defined)
+- name: "Remove spectre unmitigations grub config"
+  when: host_needs_no_spectre_mitigations is defined
   lineinfile:
     dest: /etc/default/grub
     backrefs: yes
-    regexp: "^GRUB_CMDLINE_LINUX_DEFAULT=\"(.*){{ item }}(.*)\""
+    regexp: "^GRUB_CMDLINE_LINUX_DEFAULT=\"(.*) *{{ item }} *(.*)\""
     line: "GRUB_CMDLINE_LINUX_DEFAULT=\"\\1\\2\""
     state: present
   become: true

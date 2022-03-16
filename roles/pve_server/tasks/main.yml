@@ -219,7 +219,7 @@
     line: "GRUB_CMDLINE_LINUX_DEFAULT=\"\\1 intel_iommu=on iommu=pt pcie_acs_override=downstream,multifunction\""
     state: present
   become: true
-  notify: "Regenerate grub config"
+  notify: "Regenerate pve grub config"
 
 - name: "Append amd_iommu=on grub config"
   when: (amd_iommu_grub_cmdline_exists.msg == "line added") and (host_is_amd is defined)
@@ -230,7 +230,7 @@
     line: "GRUB_CMDLINE_LINUX_DEFAULT=\"\\1 amd_iommu=on iommu=pt pcie_acs_override=downstream,multifunction\""
     state: present
   become: true
-  notify: "Regenerate grub config"
+  notify: "Regenerate pve grub config"
 
 # - name: "host modules blacklist (radeon, snd_hda_intel, amdgpu, usb3)"
 #   copy:
@@ -265,7 +265,7 @@
     line: "GRUB_CMDLINE_LINUX_DEFAULT=\"\\1 modprobe.blacklist=radeon,amdgpu,snd_hda_intel,xhci_hcd,xhci_pci\""
     state: present
   become: true
-  notify: "Regenerate grub config"
+  notify: "Regenerate pve grub config"
 
 - name: "vfio module parameters"
   copy:
@@ -303,7 +303,7 @@
   become: true
   notify: "Update initramfs config"
 
-# if need to regenerate grub boot config because of new disks,
+# if need to regenerate pve grub config because of new disks,
 # procedure is here: https://pve.proxmox.com/wiki/Host_Bootloader
 
 - name: "Install root crontab"
