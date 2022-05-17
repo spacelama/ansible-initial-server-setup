@@ -5,6 +5,13 @@ addkeychain
 data_dir="$1"
 
 cd "$data_dir" || exit 1
+mkdir -p tasmota
+cd tasmota || exit 1
+nodeattr -n tasmota | while read h ; do
+    decode-config.py --source "$h" | jq > $h.json
+done
+
+cd "$data_dir" || exit 1
 mkdir -p switch
 cd switch || exit 1
 
