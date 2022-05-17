@@ -11,6 +11,12 @@
     state: restarted
   become: true
 
+- name: restart smartmontools
+  service:
+    name: smartmontools
+    state: restarted
+  become: true
+
 - name: Reconfigure locales
   file:
     path: "{{ item }}"

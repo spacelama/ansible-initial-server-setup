@@ -63,7 +63,7 @@
     dest: "/etc/munin/plugins/{{ item }}"
     state: link
   become: true
-  with_items: [ 'ipmi_temp', 'ipmi_power', 'ipmi_fans' ]
+  with_items: [ 'ipmi_temp', 'ipmi_power', 'ipmi_fans', 'ipmi_volts' ]
   when: host_is_dell_server is defined
   notify: restart munin-node
 
@@ -152,6 +152,8 @@
     - zfsonlinux_stats_
     - numa_
     - smart_
+    - sensors_
+#    - ipmi_  # wants to set all 4 on all hosts, so define them in dell instead
 
 - name: allow munin-node from fs
   lineinfile:

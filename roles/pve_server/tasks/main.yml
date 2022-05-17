@@ -90,15 +90,16 @@
 
 - name: remove prohibited packages
   apt:
-    name: ['os-prober']
+    name: ['os-prober', 'linux-headers-amd64']
     state: absent
   become: true
 
-- name: Install proxmox tools
+- name: Install virtual host tools
   apt:
     # https://pve.proxmox.com/wiki/Install_Proxmox_VE_on_Debian_Jessie
-    name: ['proxmox-ve', 'ssh', 'postfix', 'ksm-control-daemon', 'open-iscsi', 'systemd-sysv', 'munin-libvirt-plugins', 'targetcli-fb'] # 'virt-goodies',
+    name: ['proxmox-ve', 'ssh', 'postfix', 'ksm-control-daemon', 'open-iscsi', 'systemd-sysv', 'munin-libvirt-plugins', 'targetcli-fb', 'powertop'] # 'virt-goodies',
 #, 'swapspace']
+#    FIXME: run tuned-adm profile powersave or perhaps virtual-host # https://www.reddit.com/r/Proxmox/comments/uc53m7/4port_j4125_pc_how_to_run_proxmox_with_lowpower/
     update_cache: yes
     cache_valid_time: 3600
     autoremove: no
@@ -339,7 +340,9 @@
 - name: "Install root crontab"
   copy:
     dest: /var/spool/cron/crontabs/root
-    content: "@reboot echo powersave | tee /sys/devices/system/cpu/cpu*/cpufreq/scaling_governor\n"
+    content: "@reboot echo ondemand | tee /sys/devices/system/cpu/cpu*/cpufreq/scaling_governor\n"
+#    content: "@reboot echo powersave | tee /sys/devices/system/cpu/cpu*/cpufreq/scaling_governor\n"
+#    content: "\n"
     mode: 0600
   become: true
   notify: "reload cron"

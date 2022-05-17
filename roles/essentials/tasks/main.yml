@@ -69,7 +69,7 @@
 
 - name: Remove erroneous packages
   apt:
-    name: ['locales-all']
+    name: ['locales-all', 'tuned', 'tuned-utils', 'tuned-utils-systemtap']
     state: absent
   become: true
 
@@ -322,10 +322,26 @@
     line: "{{ item }}"
   become: true
   with_items:
-    - "#717586"
+    - "#debian bug #717586"
     - "#Is it 'info grub'->Configuration->Simple Configuration:"
     - "GRUB_DISABLE_SUBMENU=y"
   notify: "Regenerate grub config"
   when: host_is_container is not defined and host_is_pi is not defined
+
+- name: determine if smartmontools config exists
+  stat: path=/etc/default/smartmontools
+  register: smartmontools
+
+- name: poll smartmontools only once per day
+  # we want this so SAS disks are allowed to spin down (smartmontools
+  # only ignores spundown ATA disks)
+  # FIXME: this might be negated by munin's regular polling of smart
+  lineinfile:
+    dest: "/etc/default/smartmontools"
+    regexp: '^(smartd_opts=.*)'
+    line: 'smartd_opts="--interval=86400"'
+  become: true
+  notify: restart smartmontools
+  when: smartmontools.stat.exists
 
 # FIXME: should set up postfix for !host_is_mailserver
