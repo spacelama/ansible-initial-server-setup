@@ -3,6 +3,8 @@
   include_tasks: add_grub_flag.yml
   loop_control:
     loop_var: mitigation_flag
+  vars:
+    variable: "GRUB_CMDLINE_LINUX_DEFAULT"
   when: host_needs_no_spectre_mitigations is not defined
   with_items: { nopti, nospectre_v2, nospectre_v1, noibrs, noibpb, l1tf=off, nospec_store_bypass_disable, no_stf_barrier, mds=off, mitigations=off }
 

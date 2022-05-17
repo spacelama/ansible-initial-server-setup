@@ -163,6 +163,8 @@
   # FIXME: consider also reducing rrd writes: https://forum.proxmox.com/threads/reducing-rrdcached-writes.64473/
 # (but primarily, suspect most writes are coming from rrd in fs)
 
+
+#FIXME: all these (and essentials, and spectre) grub commandline mungings should just be additions and deletions to file from /etc/default/grub.d/
 # https://pve.proxmox.com/wiki/Pci_passthrough
 - name: "Search for intel iommu grub config"
   become: yes
@@ -263,6 +265,34 @@
     backrefs: yes
     regexp: "^GRUB_CMDLINE_LINUX_DEFAULT=\"(.*)\""
     line: "GRUB_CMDLINE_LINUX_DEFAULT=\"\\1 modprobe.blacklist=radeon,amdgpu,snd_hda_intel,xhci_hcd,xhci_pci\""
+    state: present
+  become: true
+  notify: "Regenerate pve grub config"
+
+- name: "Search for grub failsafe cmdline"
+  become: yes
+  register: failsafe_grub_cmdline_exists
+  check_mode: yes # cause this to become just a test.  If there's already
+                  # blacklist settings, then this will think line is
+                  # being replaced, and changed will become true (but we
+                  # force it to false to not output a line saying
+                  # "changed"), and msg will become "line added", else
+                  # changed stays false, and msg does not contain "line
+                  # added"
+  lineinfile:
+    dest: /etc/default/grub
+    line: grub cmdline already has failsafe grub cmdline applied
+    regexp: "^GRUB_CMDLINE_LINUX=.*modprobe.blacklist=vfio_pci"
+    state: present
+  changed_when: false
+
+- name: "Append modprobe.blacklist=vfio_pci grub config"
+  when: failsafe_grub_cmdline_exists.msg == "line added"
+  lineinfile:
+    dest: /etc/default/grub
+    backrefs: yes
+    regexp: "^GRUB_CMDLINE_LINUX=\"(.*)\""
+    line: "GRUB_CMDLINE_LINUX=\"\\1 modprobe.blacklist=vfio_pci\""
     state: present
   become: true
   notify: "Regenerate pve grub config"

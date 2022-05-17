@@ -304,6 +304,18 @@
     loop_var: user
   with_items: "{{ fixup_conf_files.users }}"
 
+- name: "Remove undesired flags from grub config"
+  lineinfile:
+    dest: /etc/default/grub
+    backrefs: yes
+    regexp: "^GRUB_CMDLINE_LINUX_DEFAULT=\"(.*) *{{ item }} *(.*)\""
+    line: "GRUB_CMDLINE_LINUX_DEFAULT=\"\\1\\2\""
+    state: present
+  become: true
+  with_items: { quiet, "   *" }
+  notify: "Regenerate grub config"
+  when: host_is_container is not defined and host_is_pi is not defined
+
 - name: fix defaults in grub config
   lineinfile:
     dest: "/etc/default/grub"
