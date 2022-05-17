@@ -12,16 +12,16 @@ config domain
 	option ip '0.0.0.0'
 
 # config domain
-# 	option name 'www.rather.puzzling.org'
-# 	option ip '192.168.1.17'
+#	option name 'www.rather.puzzling.org'
+#	option ip '192.168.1.17'
 
 # config domain
-# 	option name 'angelahughes.org'
-# 	option ip '192.168.1.17'
+#	option name 'angelahughes.org'
+#	option ip '192.168.1.17'
 
 # config domain
-# 	option name 'www.angelahughes.org'
-# 	option ip '192.168.1.17'
+#	option name 'www.angelahughes.org'
+#	option ip '192.168.1.17'
 
 config domain
 	option name 'switch'
@@ -151,25 +151,25 @@ config host
 	option dns '1'
 
 config host
-	option ip '192.168.1.74'
+	option ip '192.168.1.94'
 	option mac '84:f3:eb:59:e5:bf'
 	option name 'netclock'
 	option dns '1'
 
 config host
-	option ip '192.168.1.75'
+	option ip '192.168.1.95'
 	option mac '68:c6:3a:9e:e3:4a'
 	option name 'ac'
 	option dns '1'
 
 config host
-	option ip '192.168.1.76'
+	option ip '192.168.1.96'
 	option mac '10:52:1c:69:53:10'
 	option name 'esp32cam'
 	option dns '1'
 
 config host
-	option ip '192.168.1.77'
+	option ip '192.168.1.97'
 	option mac '7c:9e:bd:fa:f0:b4'
 	option name 'epaper-clock'
 	option dns '1'
@@ -199,8 +199,8 @@ config host
 	option dns '1'
 
 config host
+	option mac '98:CD:AC:23:5D:8E'
 	option ip '192.168.1.60'
-	option mac 'c4:4f:33:a8:eb:9b'
 	option name 'monitor-power'
 	option dns '1'
 
@@ -229,13 +229,13 @@ config host
 	option dns '1'
 
 config host
-	option ip '192.168.1.78'
+	option ip '192.168.1.98'
 	option mac '2c:f4:32:4e:38:11'
 	option name 'pantech'
 	option dns '1'
 
 config host
-	option ip '192.168.1.79'
+	option ip '192.168.1.99'
 	option mac 'dc:4f:22:59:30:40'
 	option name 'ecowitt'
 	option dns '1'
@@ -349,10 +349,16 @@ config host
 	option ip '192.168.1.70'
 
 config host
-	option mac 'CC:50:E3:68:51:CD'
+	option mac 'C4:DD:57:07:EE:55'
 	option name 'christmaslights-power'
 	option dns '1'
 	option ip '192.168.1.71'
+
+config host
+	option mac 'CC:50:E3:68:51:CD'
+	option name 'studio-power2'
+	option dns '1'
+	option ip '192.168.1.72'
 
 config host
 	option mac 'C4:4F:33:87:A1:F7'
@@ -361,48 +367,52 @@ config host
 	option ip '192.168.1.68'
 
 config host
-	option mac 'C4:4F:33:87:97:AC'
+	option mac '98:cd:ac:23:cb:cc'
 	option name 'brewfridge-power'
 	option dns '1'
 	option ip '192.168.1.69'
 
 config host
-	option mac 'd4:a6:51:2a:b3:c3'
-	option name 'tuya-1'
+	option mac '50:02:91:1A:2E:69'
+	option name 'aquaheater-power'
 	option dns '1'
-	option ip '192.168.4.40'
+	option ip '192.168.1.73'
 
 config host
-	option mac 'd4:a6:51:2a:bd:b3'
-	option name 'tuya-2'
+	option mac '50:02:91:1A:2E:E5'
+	option name 'aquapump-power'
 	option dns '1'
-	option ip '192.168.4.41'
+	option ip '192.168.1.76'
 
 config host
-	option mac 'd4:a6:51:2a:a6:79'
-	option name 'tuya-3'
+	option mac 'E0:98:06:C6:D9:00'
+	option name 'valveamp-power'
 	option dns '1'
-	option ip '192.168.4.42'
+	option ip '192.168.1.74'
 
 config host
-	option mac 'd4:a6:51:2a:b8:b7'
-	option name 'tuya-4'
+	option mac '50:02:91:11:CA:7E'
+	option name 'washingmachine-power'
 	option dns '1'
-	option ip '192.168.4.43'
+	option ip '192.168.1.75'
 
 config host
-	# studio lights
-	option mac 'e0:98:06:c6:d9:00'
-	option name 'tuya-5'
+	option mac 'c4:4f:33:a8:eb:9b'
+	option name 'power5-power'
 	option dns '1'
-	option ip '192.168.4.44'
+	option ip '192.168.1.77'
 
 config host
-	# studio stereo
-	option mac '50:02:91:1a:2e:69'
-	option name 'tuya-6'
+	option mac '00:11:22:33:44:22'
+	option name 'power6-power'
 	option dns '1'
-	option ip '192.168.4.45'
+	option ip '192.168.1.78'
+
+config host
+	option mac '00:11:22:33:44:33'
+	option name 'power7-power'
+	option dns '1'
+	option ip '192.168.1.79'
 
 config host
 	# bedroom fan
