@@ -143,6 +143,11 @@ backup /proc/meminfo $data_dir/meminfo
 lscpu > $data_dir/lscpu
 lspci > $data_dir/lspci 2>/dev/null || true
 lspci -vvv > $data_dir/lspci-vvv 2>/dev/null || true
+for d in /sys/kernel/iommu_groups/*/devices/*; do
+    n=${d#*/iommu_groups/*}; n=${n%%/*}
+    printf 'IOMMU Group %s ' "$n"
+    lspci -nns "${d##*/}" || true
+done > $data_dir/lspci_mmu 2>&1
 if [ -x /usr/sbin/dmidecode ] ; then
     dmidecode >> $data_dir/dmidecode
 fi
