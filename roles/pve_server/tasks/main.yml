@@ -325,6 +325,18 @@
     - "#xhci_pci"
     - "#xhci_hcd"
 
+# persistent network names (lan0): https://wiki.debian.org/NetworkInterfaceNames
+- name: install systemd network persistent net link
+  template:
+    src: systemd-network-persistent-net-link.j2
+    dest: /etc/systemd/network/10-persistent-net.link
+  become: true
+
+- name: install network interfaces
+  template:
+    src: network-interfaces.j2
+    dest: /etc/network/interfaces
+  become: true
 
 #FIXME: keep monitoring lifetime left, and if drops below 0 (or Percent_Lifetime_Remain raw value goes above 100 on its way to 255, which then makes lifetime writes somewhere around 264TB, which is much closer to TBW), then it's just a SMART bug and we can back out this timeout back to default 5.  Also, if doesn't drop its rate, might as well back it out too and find some other source of write amplification in the fs VM # https://www.reddit.com/r/zfs/comments/cott44/how_can_i_check_to_make_sure_i_dont_have_a_write/ewqjld0/
 - name: "zfs module parameters"
