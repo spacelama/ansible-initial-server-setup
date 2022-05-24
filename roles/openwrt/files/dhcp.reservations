@@ -385,34 +385,34 @@ config host
 	option ip '192.168.1.76'
 
 config host
-	option mac 'E0:98:06:C6:D9:00'
+	option mac '4c:eb:d6:02:78:df'
 	option name 'valveamp-power'
 	option dns '1'
 	option ip '192.168.1.74'
 
 config host
-	option mac '50:02:91:11:CA:7E'
-	option name 'washingmachine-power'
+	option mac '4c:eb:d6:02:78:cd'
+	option name 'stereo-power'
 	option dns '1'
-	option ip '192.168.1.75'
+	option ip '192.168.1.79'
 
 config host
 	option mac 'c4:4f:33:a8:eb:9b'
-	option name 'power5-power'
+	option name 'washingmachine-power'
 	option dns '1'
 	option ip '192.168.1.77'
 
 config host
-	option mac '00:11:22:33:44:22'
+	option mac '50:02:91:11:CA:7E'
+	option name 'power5-power'
+	option dns '1'
+	option ip '192.168.1.75'
+
+config host
+	option mac 'E0:98:06:C6:D9:00'
 	option name 'power6-power'
 	option dns '1'
 	option ip '192.168.1.78'
-
-config host
-	option mac '00:11:22:33:44:33'
-	option name 'power7-power'
-	option dns '1'
-	option ip '192.168.1.79'
 
 config host
 	# bedroom fan
