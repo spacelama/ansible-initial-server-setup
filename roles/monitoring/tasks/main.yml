@@ -153,6 +153,7 @@
     - numa_
     - smart_
     - sensors_
+    - tasmota_
 #    - ipmi_  # wants to set all 4 on all hosts, so define them in dell instead
 
 - name: allow munin-node from fs

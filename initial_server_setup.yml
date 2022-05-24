@@ -7,6 +7,8 @@
     - vars/main.yml
 
   roles:
+    - role: management
+      when: host_is_mgmt is defined
     - essentials
     - user
     - logs
@@ -18,8 +20,6 @@
       when: host_is_container is not defined
     - role: fileserver
       when: host_is_fileserver is defined
-    - role: management
-      when: host_is_mgmt is defined
     - role: mailserver
       when: host_is_mailserver is defined
     - role: pve_server
