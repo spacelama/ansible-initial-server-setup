@@ -53,7 +53,7 @@
 
 - name: Install pve prereq packages
   apt:
-    name: ['dkms', 'pve-headers']
+    name: ['dkms', 'pve-headers', 'ifupdown2']
     autoremove: no
     state: present
     install_recommends: no
