@@ -11,11 +11,18 @@
 
 - name: install router packages
   opkg:
-    # kmod-tcp-bbr was on b1300 prior to 21.02.1 upgrade - no idea how
-    # it got there
-    name: luci-app-sqm,avahi-dbus-daemon,adblock,luci-app-adblock,msmtp,crelay,ethtool,arp-scan,ifstat # luci-app-banip has disappeared from b1300, but we want to be able to reinstall it if it becomes available again
+    name: luci-app-sqm,avahi-dbus-daemon,adblock,luci-app-adblock,msmtp,crelay,ethtool,arp-scan,ifstat
     state: present
   when: openwrt_router_packages is defined
+
+- name: install router packages that were failing at one point
+  opkg:
+    # kmod-tcp-bbr was on b1300 prior to 21.02.1 upgrade - no idea how
+    # it got there
+    name: luci-app-banip
+    state: present
+  when: openwrt_router_packages is defined
+  ignore_errors: true
 
 - name: install AP packages
   opkg:
