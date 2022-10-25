@@ -1,0 +1,40 @@
+#!/bin/bash
+
+# https://forum.openwrt.org/t/script-to-list-installed-packages-for-simplifying-sysupgrade/7188/4
+
+all_since_install=
+print_installed_time=
+while [ "$#" != 0 ] ; do
+    case "$1" in
+        --all-since-install)
+            all_since_install=true
+            shift
+        ;;
+        --print-time)
+            print_installed_time=true                                                       
+            shift                                                                        
+        ;;
+        *)
+            echo "Unknown option: $1"
+            exit 1
+        ;;
+    esac
+done
+
+install_time=$(opkg status kernel | grep Installed-Time | sed "s/Installed-Time: //")
+
+opkg list-installed | awk -F " " '{print $1}' > /tmp/installed_pkg
+
+while read index
+do
+    loop_inst_time=$(opkg status $index | grep Installed-Time | sed "s/Installed-Time: //")
+    is_user_installed="$(opkg status $index | grep "Status:" | grep "user")"
+    if [ "$loop_inst_time" -ne "$install_time" ] && ( [ -n "$all_since_install" ] || [ -n "$is_user_installed" ] ) ; then
+        if [ "$print_installed_time" ] ; then
+            echo $index $loop_inst_time
+        else
+            echo $index
+        fi
+    fi
+done < /tmp/installed_pkg
+

@@ -1,0 +1,24 @@
+#!/bin/sh
+
+# imports a "uci show dhcp" format such as this:
+# dhcp.@host[0]=host
+# dhcp.@host[0].ip='192.168.1.20'
+# dhcp.@host[0].mac='00:13:e8:9b:36:d7'
+# dhcp.@host[0].name='gamow'
+# dhcp.@host[0].dns='1'
+# dhcp.@host[1]=host
+# dhcp.@host[1].ip='192.168.1.17'
+# dhcp.@host[1].mac='00:90:f5:e7:b0:7a'
+# dhcp.@host[1].name='dirac'
+# dhcp.@domain[0]=domain
+# dhcp.@domain[0].name='rather.puzzling.org'
+# dhcp.@domain[0].ip='192.168.1.17'
+# dhcp.@domain[1]=domain
+# dhcp.@domain[1].name='switch'
+# dhcp.@domain[1].ip='192.168.1.249'
+
+
+sed "s/^/set / ; s/'//g ; s/.*=host/add dhcp host/ ; s/.*=domain/add dhcp domain/" | uci batch
+
+echo "Then run:"
+echo "uci -q commit"

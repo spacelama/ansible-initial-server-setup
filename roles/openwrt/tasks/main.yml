@@ -42,3 +42,13 @@
     content: "{{ lookup('file', 'roles/openwrt/files/dhcp.head.{{ type }}')}}\n\n{{lookup('file', 'roles/openwrt/files/dhcp.reservations') }}\n"
   notify: restart dnsmasq
 
+- name: setup some custom binaries
+  copy:
+    dest: "/root/bin/{{ item }}"
+    src: "{{ item }}"
+  with_items:
+    - add-batch-dhcp
+    - add-dhcp
+    - list-installed-packages
+    - log-daily-config
+    - show_wifi_clients2.sh

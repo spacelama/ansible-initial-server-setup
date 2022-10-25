@@ -1,0 +1,20 @@
+#!/bin/sh 
+
+#rm -rf /tmp/conf.dump
+if ! [ -d /tmp/conf.dump ] ; then
+  mkdir /tmp/conf.dump
+fi
+cd /tmp/conf.dump
+
+if ! [ -e dmesg.boot ] ; then
+  dmesg > dmesg.boot
+fi
+ 
+opkg update
+
+opkg list-installed > opkg.list-full-install
+/root/bin/list-installed-packages --print-time | awk '{print $2, $1}' | sort > opkg.list-installed-manually
+/root/bin/list-installed-packages --all-since-install --print-time | awk '{print $2, $1}' | sort > opkg.list-installed
+opkg list-upgradable > opkg.list-upgradable
+uci show > uci.show
+iptables-save > iptables

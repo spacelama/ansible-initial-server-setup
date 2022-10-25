@@ -1,0 +1,24 @@
+#!/bin/sh
+
+# https://forum.archive.openwrt.org/viewtopic.php?id=63029
+
+add_lease () {
+    uci add dhcp host
+    uci set dhcp.@host[-1].ip="$1"
+    uci set dhcp.@host[-1].mac="$2"
+    uci set dhcp.@host[-1].name="$3"
+    uci set dhcp.@host[-1].dns='1'
+}
+
+#add_lease "192.168.1.32" "00:11:22:33:44:55" "MethLabDesktop"
+#add_lease "192.168.1.224" "66:77:88:99:AA.BB" "AVReceiver"
+#add_lease "192.168.10.3" "BB:AA:CC:33:22:87" "boink"
+
+if [ "$#" != 3 ] ; then
+  echo "Usage: $0 <ip> <mac> <name>"
+  exit 1
+fi
+add_lease "$@"
+
+# When done, save all the changes made
+uci -q commit
