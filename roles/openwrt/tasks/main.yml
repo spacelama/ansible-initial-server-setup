@@ -1,21 +1,27 @@
 ---
-- name: remove conflicting packages
+- name: remove conflicting and/or obsolete packages
   opkg:
-    name: wpad-basic-wolfssl
+    name: luci-app-dawn,dawn
     state: absent
 
 - name: install compulsory packages
   opkg:
-    name: bash,muninlite,rsync,dawn,luci-app-dawn,wpad-wolfssl
+    name: bash,muninlite,rsync
     state: present
 
 - name: install router packages
   opkg:
     # kmod-tcp-bbr was on b1300 prior to 21.02.1 upgrade - no idea how
     # it got there
-    name: luci-app-sqm,avahi-dbus-daemon,adblock,luci-app-adblock,msmtp,crelay,luci-app-banip,ethtool,arp-scan,ifstat
+    name: luci-app-sqm,avahi-dbus-daemon,adblock,luci-app-adblock,msmtp,crelay,ethtool,arp-scan,ifstat # luci-app-banip has disappeared from b1300, but we want to be able to reinstall it if it becomes available again
     state: present
   when: openwrt_router_packages is defined
+
+- name: install AP packages
+  opkg:
+    name: usteer
+    state: present
+  when: openwrt_router_packages is not defined
 
 - name: install full packages
   opkg:
