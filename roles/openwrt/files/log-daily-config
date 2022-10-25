@@ -17,4 +17,5 @@ opkg list-installed > opkg.list-full-install
 /root/bin/list-installed-packages --all-since-install --print-time | awk '{print $2, $1}' | sort > opkg.list-installed
 opkg list-upgradable > opkg.list-upgradable
 uci show > uci.show
-iptables-save > iptables
+#iptables-save > iptables
+fw4 print > fw4
