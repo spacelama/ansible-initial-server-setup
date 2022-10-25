@@ -259,6 +259,12 @@ config host
 	option dns '1'
 
 config host
+	option ip '192.168.4.129'
+	option mac 'ec:0b:ae:0c:9d:ea'
+	option name 'fishtank-rm4'
+	option dns '1'
+
+config host
 	option ip '192.168.7.102'
 	option mac '74:38:b7:27:19:04'
 	option name 'canon'
@@ -334,6 +340,7 @@ config host
 	option mac '92:B6:AF:F3:0B:20'
 	option name 'media'
 	option dns '1'
+#	option ip '192.168.1.157'
 	option ip '192.168.7.157'
 
 config host
@@ -403,16 +410,22 @@ config host
 	option ip '192.168.1.77'
 
 config host
+	option mac 'E0:98:06:C6:D9:00'
+	option name 'chromecast-lounge-power'
+	option dns '1'
+	option ip '192.168.1.78'
+
+config host
 	option mac '50:02:91:11:CA:7E'
-	option name 'power5-power'
+	option name 'floatcharger-power'
 	option dns '1'
 	option ip '192.168.1.75'
 
 config host
-	option mac 'E0:98:06:C6:D9:00'
-	option name 'power6-power'
+	option mac '60:01:94:c7:fd:3c'
+	option name 'fishtank-temperature'
 	option dns '1'
-	option ip '192.168.1.78'
+	option ip '192.168.1.89'
 
 config host
 	# bedroom fan
@@ -455,7 +468,13 @@ config host
 	option mac '0e:0a:a4:5e:6c:7b'
 	option name 'homeassistant'
 	option dns '1'
-	option ip '192.168.1.80'
+	option ip '192.168.1.90'
+
+config host
+	option mac '06:de:ad:b9:7b:f4'
+	option name 'hass-debian'
+	option dns '1'
+	option ip '192.168.1.91'
 
 config host
 	option mac '4C:B0:08:3F:B5:A5 A0:9D:C1:E2:FB:B6'
