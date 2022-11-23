@@ -1,5 +1,5 @@
 *.vagrant
 *.log
 *.retry
-hosts.yml
 files/main.*.passwd
+host_vars
