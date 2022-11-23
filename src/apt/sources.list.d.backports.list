@@ -1,2 +1,2 @@
 # ANSIBLE CONFIGURED
-deb http://mirror.internode.on.net/pub/debian/ bullseye-backports main non-free contrib
+deb http://ftp.au.debian.org/debian/ bullseye-backports main non-free contrib
