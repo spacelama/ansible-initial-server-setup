@@ -343,6 +343,22 @@
 # if need to regenerate pve grub config because of new disks,
 # procedure is here: https://pve.proxmox.com/wiki/Host_Bootloader
 
+- name: install ssh socket directory
+  file:
+    path: "/root/.ssh/cm_master"
+    state: directory
+  become: true
+
+- name: install ssh config
+  lineinfile:
+    dest: /root/.ssh/config
+    line: "{{ item }}"
+  with_items:
+    - "ControlMaster auto"
+    - "ControlPath ~/.ssh/cm_master/%r@%h:%p"
+    - "ControlPersist yes"
+  become: true
+
 - name: Setup pve users
   copy:
      content: "user:root@pam:1:0:::tim.w.connors@gmail.com:::\n{{ pve_users | join('\n') }}\n"
