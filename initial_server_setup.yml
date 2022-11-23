@@ -7,10 +7,11 @@
     - vars/main.yml
 
   roles:
+    #FIXME: would ideally also include bootstap here with become: true
     - role: management
       when: host_is_mgmt is defined
-    - essentials
     - user
+    - essentials
     - logs
     - monitoring
     - role: spectre_mitigations_disabled
