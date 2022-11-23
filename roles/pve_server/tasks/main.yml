@@ -100,6 +100,24 @@
     state: present
   become: true
 
+- name: mount media
+  mount:
+    path: /media
+    src: fs:/home/tconnors/movies/media
+    fstype: nfs4
+    opts: defaults,_netdev,x-systemd.automount
+    state: mounted
+  become: true
+
+- name: mount media transcodes
+  mount:
+    path: /transcodes
+    src: fs:/home/tconnors/movies/media_transcodes
+    fstype: nfs4
+    opts: defaults,_netdev,x-systemd.automount
+    state: mounted
+  become: true
+
 - name: ensure SMR drives have a longer timeout
   copy:
      content: "ACTION==\"add\", SUBSYSTEM==\"block\",  ENV{ID_MODEL}==\"ST8000AS0002*\", RUN+=\"/bin/sh -c 'echo 60 > /sys/block/%k/device/timeout'\"\n"
