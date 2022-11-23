@@ -1,13 +1,13 @@
 ---
 - name: Install tools required by physical hardware
   apt:
-    name: ['hddtemp', 'lm-sensors', 'sg3-utils', 'scsitools', 'bonnie++', 'apt-file', 'rasdaemon', 'linux-cpupower']
+    name: ['lm-sensors', 'sg3-utils', 'scsitools', 'bonnie++', 'apt-file', 'rasdaemon', 'linux-cpupower']
     update_cache: yes
     cache_valid_time: 3600
     autoremove: no
     state: present
   become: true
 
-# FIXME: in debian bullseye and above, consider removing hddtemp and installing:
+# FIXME: modprobe drivetemp, run sensors-detect, insert those modules into /etc/modprobe, and rerun munin-node:
 #  echo drivetemp > /etc/modules-load.d/drivetemp.conf
 # for hddtemps to be reported through `sensors`

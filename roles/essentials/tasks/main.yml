@@ -69,7 +69,7 @@
 
 - name: Remove erroneous packages
   apt:
-    name: ['locales-all', 'tuned', 'tuned-utils', 'tuned-utils-systemtap']
+    name: ['locales-all', 'tuned', 'tuned-utils', 'tuned-utils-systemtap', 'hddtemp']
     state: absent
   become: true
 
@@ -211,6 +211,15 @@
     mode: 0644
   become: true
   notify: restart sysctl
+
+- name: install hddtemp wrapper
+  copy:
+    src: ./usr_local_bin/hddtemp
+    dest: /usr/local/bin/hddtemp
+    owner: root
+    group: root
+    mode: 0755
+  become: true
 
 - name: copy /usr/local/bin/get_conf_info
   copy:

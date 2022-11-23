@@ -1,14 +1,16 @@
 ---
-- name: find extraneous ntp_<dynamic> munin checks
+- name: find extraneous munin checks
   find:
     paths: /etc/munin/plugins
-    patterns: ntp_[0-9]*.[0-9]*.[0-9]*.[0-9]*
+    patterns:
+      - ntp_[0-9]*.[0-9]*.[0-9]*.[0-9]*
+      - hddtempd
     file_type: link
   register: munin_plugins_to_delete
 
   #FIXME: might need to go chrony instead of NTP if thats how we get VMs working
 
-- name: remove extraneous ntp_<dynamic> munin checks
+- name: remove extraneous munin checks
   file:
     path: "{{ item.path }}"
     state: absent
@@ -44,7 +46,7 @@
     dest: "/etc/munin/plugins/{{ item }}"
     state: link
   become: true
-  with_items: [ 'hddtemp_smartctl', 'hddtempd' ]
+  with_items: [ 'hddtemp_smartctl' ]
   when: not ( host_is_container is defined or host_is_virtual is defined or host_is_pi is defined )
   notify: restart munin-node
 
@@ -53,7 +55,7 @@
     dest: "/etc/munin/plugins/{{ item }}"
     state: absent
   become: true
-  with_items: [ 'hddtemp_smartctl', 'hddtempd' ]
+  with_items: [ 'hddtemp_smartctl' ]
   when: host_is_container is defined or host_is_virtual is defined or host_is_pi is defined
   notify: restart munin-node
   
