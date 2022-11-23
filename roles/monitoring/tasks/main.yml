@@ -77,16 +77,6 @@
   when: host_is_dell_server is defined
   notify: restart munin-node
 
-- name: munin sensors plugins without params
-  file:
-    src: "/usr/share/munin/plugins/sensors_"
-    dest: "/etc/munin/plugins/{{ item }}"
-    state: link
-  become: true
-  with_items: [ 'sensors_temp' ]
-  when: host_is_dell_server is defined
-  notify: restart munin-node
-
 - name: existing munin plugins with params
   file:
     src: "/usr/share/munin/plugins/{{ item.dest }}"
