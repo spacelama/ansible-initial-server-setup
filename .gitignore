@@ -2,4 +2,4 @@
 *.log
 *.retry
 hosts.yml
-vars/main.yml
+files/main.*.passwd

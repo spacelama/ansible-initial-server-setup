@@ -1,0 +1,73 @@
+---
+  my_public_key: ~/.ssh/id_rsa.pub
+#  ssh_port: 22
+  ansible_was_run_by: "{{ lookup('env','USER') }@{{ lookup('env','HOSTNAME') }}"
+
+  pve_users:
+    - "{{ lookup('file', 'main.pve_users.passwd') }}"
+  my_groups:
+    tconnors:
+      gid: 273
+    backuppc:
+      gid: 130
+  my_users:
+    tconnors:
+      name: "Tim Connors"
+      group: 'tconnors'
+      groups: 'tconnors'
+      uid: 738
+      state: 'present'
+      password: "{{ lookup('file', 'main.tconnors.passwd') }}"
+      sshkey: "{{ lookup('file', my_public_key) }}"
+      shell: "/bin/bash"
+#      comment: "{{ ansible_was_run_by }}"
+    backuppc:
+      name: "BackupPC"
+      group: 'backuppc'
+      groups: 'backuppc' # FIXME: needs fuse on fs - does this wipe it out if applied there?
+      dir: '/var/lib/backuppc'
+      uid: 130
+      state: 'present'
+      password: '*'
+      sshkey: "ssh-rsa AAAAB3NzaC1yc2EAAAABIwAAAQEAuzH2v7HY/MOAXOFsYDn3Lj5JG0RVfVYKBoJHj1BlfaH+b7lMIjY6r+6iM2eaH3eE2xUfwU1JVn8khIY1TAZfKRqmF6qST8TXkNbcvABth2hCXP0UmcIDpwXoS3P7yK14w8VmkiIG9EYOS/DGiB02SHtp2feQ6fUh01s0mZgpW+1VNzH2RV8CG79t2oDjMCjzABm2+Wkg1rLDHFONpm4VlJF59OdWugQ3GgzJVSi6O048DNfDkVWhEFah4xoG1Im1lh8pQoRFXIIf5Vk7cS4S15VsoISXiiWhaxK+TKj/aZuBX1tYsNfoEin+meutUarRxt7dxWyduNB1IjJ0SYlGWQ== backuppc@fs"
+#      comment: "backuppc@fs"
+      shell: "/bin/sh"
+
+  fixup_conf_files:
+    users:
+      - tconnors
+      - root
+    files:
+      - name: .vimrc
+        lines:
+          - '" We don''t need to be compatible with vi'
+          - 'set nocompatible'
+          - '" Turn on syntax highlighting'
+          - 'syntax on'
+          - 'set background=dark'
+          - '" Many Colours don''t set using the following check with :hi'
+          - 'let g:hybrid_use_Xresources = 1'
+          - '" mouse support in terminals was invented by a moron: https://unix.stackexchange.com/questions/44513/disabling-mouse-support-in-vim-in-a-gnome-terminal-environment'
+          - 'set mouse='
+      - name: .nanorc
+        lines:
+          - '## Disable mouse support, so that mouse clicks can be used to set the'
+          - '## mark and run shortcuts.'
+          - 'unset mouse'
+          - '## Constantly update the cursor position'
+          - 'set constantshow'
+          - '## Don''t display the help lists at the bottom of the screen'
+          - 'set nohelp'
+          - '## Don''t wrap text at all'
+          - 'set nowrap'
+          - '## Use smooth scrolling as the default'
+          - 'set smooth'
+          - '## Allow nano to be suspended with ^Z'
+          - 'set suspend'
+          - '## Enable ~/.nano_history for saving and reading search/replace strings.'
+          - 'set historylog'
+
+
+
+
+
