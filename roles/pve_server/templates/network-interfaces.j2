@@ -5,11 +5,13 @@ iface lan0 inet manual
 
 auto vmbr0
 iface vmbr0 inet static
-        address {{ inet_addr }}/24
-        gateway 192.168.1.254
-        bridge-ports lan0
-        bridge-stp off
-        bridge-fd 0
+	address {{ inet_addr }}/24
+	gateway 192.168.1.254
+	bridge-ports lan0
+	bridge-stp off
+	bridge-fd 0
+	bridge-vlan-aware yes
+	bridge-vids 2-4094
 
 #iface wlp5s0 inet manual
 #iface eno2 inet manual
