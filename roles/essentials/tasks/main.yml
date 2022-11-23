@@ -212,6 +212,20 @@
   become: true
   notify: restart sysctl
 
+- name: Set /etc/default/keyboard
+  lineinfile:
+    dest: /etc/default/keyboard
+    line: "{{ item.key }}=\"{{ item.value }}\""
+    regexp: "^{{ item.key }}="
+    state: present
+  become: true
+  with_items:
+    - { key: "XKBMODEL", value: "{{ XKBMODEL | default('pc104') }}" }
+    - { key: "XKBLAYOUT", value: "{{ XKBLAYOUT | default('us') }}" }
+    - { key: "XKBVARIANT", value: "{{ XKBVARIANT | default('') }}" }
+    - { key: "XKBOPTIONS", value: "{{ XKBOPTIONS | default('ctrl:nocaps,terminate:ctrl_alt_bksp,compose:rwin') }}" }
+  when: host_is_container is not defined
+
 - name: install hddtemp wrapper
   copy:
     src: ./usr_local_bin/hddtemp
@@ -306,6 +320,12 @@
   become: true
   when: systemd_logind.stat.exists
   notify: restart systemd-logind
+
+- name: Unscrew systemd login defaults - disable ctrl-alt-delete
+  systemd:
+    name: ctrl-alt-del.target
+    masked: true
+  become: true
 
 - name: fix up utterly braindead config file defaults
   include_tasks: fixup_user_conf_files.yml
