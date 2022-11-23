@@ -344,4 +344,12 @@
   notify: restart smartmontools
   when: smartmontools.stat.exists
 
+- name: setup systemd overrides
+  copy:
+    src: "etc_systemd/system/{{ item }}.d/override.conf"
+    dest: "/etc/systemd/system/{{ item }}.d/"
+  with_items: "{{ systemd_overrides }}"
+  become: true
+  notify: restart systemd overrides
+
 # FIXME: should set up postfix for !host_is_mailserver
