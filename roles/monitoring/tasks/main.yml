@@ -18,6 +18,23 @@
   become: true
   notify: restart munin-node
 
+- name: remove extraneous munin tests (all)
+  file:
+    dest: "/etc/munin/plugins/{{ item }}"
+    state: absent
+  become: true
+  with_items: [ 'ntp_kernel_err', 'ntp_kernel_pll_freq', 'ntp_kernel_pll_off', 'ntp_offset', 'ntp_states', 'squid_requests', 'squid_objectsize', 'squid_cache', 'squid_traffic' ]
+  notify: restart munin-node
+
+- name: remove extraneous munin plugins (virtual machines)
+  file:
+    dest: "/etc/munin/plugins/{{ item }}"
+    state: absent
+  become: true
+  with_items: [ 'hddtemp_smartctl' ]
+  when: host_is_container is defined or host_is_virtual is defined or host_is_pi is defined
+  notify: restart munin-node
+
 - name: new munin plugins
   copy:
     src: "/etc/munin/plugins/{{ item }}"
@@ -50,15 +67,6 @@
   when: not ( host_is_container is defined or host_is_virtual is defined or host_is_pi is defined )
   notify: restart munin-node
 
-- name: remove extraneous munin plugins (virtual machines)
-  file:
-    dest: "/etc/munin/plugins/{{ item }}"
-    state: absent
-  become: true
-  with_items: [ 'hddtemp_smartctl' ]
-  when: host_is_container is defined or host_is_virtual is defined or host_is_pi is defined
-  notify: restart munin-node
-  
 - name: munin ipmi plugins without params
   file:
     src: "/usr/share/munin/plugins/ipmi_"
@@ -77,14 +85,6 @@
   become: true
   with_items: [ 'sensors_temp' ]
   when: host_is_dell_server is defined
-  notify: restart munin-node
-
-- name: remove extaneous munin tests
-  file:
-    dest: "/etc/munin/plugins/{{ item }}"
-    state: absent
-  become: true
-  with_items: [ 'ntp_kernel_err', 'ntp_kernel_pll_freq', 'ntp_kernel_pll_off', 'ntp_offset', 'ntp_states', 'squid_requests', 'squid_objectsize', 'squid_cache', 'squid_traffic' ]
   notify: restart munin-node
 
 - name: existing munin plugins with params
@@ -189,7 +189,7 @@
       user root
   become: true
   notify: restart munin-node
-  
+
 - name: Ensure apt_all doesn't trigger every 5 minutes
   lineinfile:
     path: "/etc/cron.d/munin-node"

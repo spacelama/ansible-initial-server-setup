@@ -223,8 +223,8 @@
 
 - name: copy /usr/local/bin/get_conf_info
   copy:
-    dest: /usr/local/bin/get_conf_info
     src: ./src/cron/cron.daily_get_conf_info
+    dest: /usr/local/bin/get_conf_info
     owner: root
     group: root
     mode: 0755
@@ -261,8 +261,8 @@
 
 - name: copy /usr/local/bin/backuppc_check_backups
   copy:
-    dest: /usr/local/bin/backuppc_check_backups
     src: ./src/cron/cron.daily_backuppc_check_backups
+    dest: /usr/local/bin/backuppc_check_backups
     owner: root
     group: root
     mode: 0755

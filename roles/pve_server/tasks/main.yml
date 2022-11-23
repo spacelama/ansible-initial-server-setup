@@ -1,10 +1,4 @@
 ---
-- name: Setup pve users
-  copy:
-     content: "user:root@pam:1:0:::tim.w.connors@gmail.com::\n"
-     dest: /etc/pve/user.cfg
-  become: true
-
 - name: determine if enterprise pve subscription exists
   stat: path=/etc/apt/apt.conf.d/86pve-nags
   register: pve_enterprise_nag_buster
@@ -348,6 +342,12 @@
 
 # if need to regenerate pve grub config because of new disks,
 # procedure is here: https://pve.proxmox.com/wiki/Host_Bootloader
+
+- name: Setup pve users
+  copy:
+     content: "user:root@pam:1:0:::tim.w.connors@gmail.com:::\n{{ pve_users | join('\n') }}\n"
+     dest: /etc/pve/user.cfg
+  become: true
 
 - name: "Install root crontab"
   copy:
