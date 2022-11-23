@@ -301,7 +301,7 @@
   stat: path=/etc/systemd/logind.conf
   register: systemd_logind
 
-- name: Unscrew systemd login defaults
+- name: Unscrew systemd login defaults - handlepowerkey
   lineinfile:
     dest: /etc/systemd/logind.conf
     line: HandlePowerKey=suspend
@@ -311,7 +311,7 @@
   when: systemd_logind.stat.exists
   notify: restart systemd-logind
 
-- name: Unscrew systemd login defaults
+- name: Unscrew systemd login defaults - kill user processes
   lineinfile:
     dest: /etc/systemd/logind.conf
     line: KillUserProcesses=no
