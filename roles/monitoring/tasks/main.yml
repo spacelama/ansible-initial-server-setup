@@ -1,5 +1,19 @@
 ---
-- name: find extraneous munin checks
+- name: determine if any hardware monitors exist
+  stat: path=/sys/class/hwmon/hwmon0
+  register: hwmon0
+
+- name: find possibly extraneous munin checks (hwmon wildcard)
+  find:
+    paths: /etc/munin/plugins
+    patterns:
+      - sensors_*
+    file_type: link
+  register: munin_plugins_to_possibly_delete_hwmon
+
+  #FIXME: might need to go chrony instead of NTP if thats how we get
+  #VMs working
+- name: find extraneous munin checks (wildcard)
   find:
     paths: /etc/munin/plugins
     patterns:
@@ -8,15 +22,22 @@
     file_type: link
   register: munin_plugins_to_delete
 
-  #FIXME: might need to go chrony instead of NTP if thats how we get VMs working
-
-- name: remove extraneous munin checks
+- name: remove extraneous munin checks (wildcard)
   file:
     path: "{{ item.path }}"
     state: absent
   with_items: "{{ munin_plugins_to_delete.files }}"
   become: true
   notify: restart munin-node
+
+- name: remove extraneous munin checks (hwmon wildcard)
+  file:
+    path: "{{ item.path }}"
+    state: absent
+  with_items: "{{ munin_plugins_to_possibly_delete_hwmon.files }}"
+  become: true
+  notify: restart munin-node
+  when: not hwmon0.stat.exists
 
 - name: remove extraneous munin tests (all)
   file:
