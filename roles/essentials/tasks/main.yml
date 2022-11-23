@@ -368,7 +368,7 @@
   lineinfile:
     dest: "/etc/default/smartmontools"
     regexp: '^(smartd_opts=.*)'
-    line: 'smartd_opts="--interval=86400"'
+    line: 'smartd_opts="--interval=604800"'
   become: true
   notify: restart smartmontools
   when: smartmontools.stat.exists
