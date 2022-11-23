@@ -84,14 +84,14 @@
 
 - name: remove prohibited packages
   apt:
-    name: ['os-prober', 'linux-headers-amd64']
+    name: ['os-prober', 'linux-headers-*', 'linux-image-*']
     state: absent
   become: true
 
 - name: Install virtual host tools
   apt:
     # https://pve.proxmox.com/wiki/Install_Proxmox_VE_on_Debian_Jessie
-    name: ['proxmox-ve', 'ssh', 'postfix', 'ksm-control-daemon', 'open-iscsi', 'systemd-sysv', 'munin-libvirt-plugins', 'targetcli-fb', 'powertop'] # 'virt-goodies',
+    name: ['proxmox-ve', 'ssh', 'postfix', 'ksm-control-daemon', 'open-iscsi', 'systemd-sysv', 'munin-libvirt-plugins', 'targetcli-fb', 'powertop', 'libguestfs-tools', 'hwloc'] # 'virt-goodies',
 #, 'swapspace']
 #    FIXME: run tuned-adm profile powersave or perhaps virtual-host # https://www.reddit.com/r/Proxmox/comments/uc53m7/4port_j4125_pc_how_to_run_proxmox_with_lowpower/
     update_cache: yes
