@@ -3,3 +3,4 @@
 *.retry
 files/main.*.passwd
 host_vars
+tmp/
