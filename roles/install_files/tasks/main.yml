@@ -1,0 +1,12 @@
+---
+# installs arrays of files
+
+- name: install list of files
+  become: true
+  copy:
+    src: "{{ item.source }}"
+    dest: "{{ item.dest }}"
+    mode: "{{ item.mode }}"
+  with_items:
+    "{{ install_files }}"
+  become: true

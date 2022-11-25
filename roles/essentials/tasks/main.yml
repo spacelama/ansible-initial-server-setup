@@ -226,24 +226,6 @@
     - { key: "XKBOPTIONS", value: "{{ XKBOPTIONS | default('ctrl:nocaps,terminate:ctrl_alt_bksp,compose:rwin') }}" }
   when: host_is_container is not defined
 
-- name: install hddtemp wrapper
-  copy:
-    src: ./usr_local_bin/hddtemp
-    dest: /usr/local/bin/hddtemp
-    owner: root
-    group: root
-    mode: 0755
-  become: true
-
-- name: copy /usr/local/bin/get_conf_info
-  copy:
-    src: ./src/cron/cron.daily_get_conf_info
-    dest: /usr/local/bin/get_conf_info
-    owner: root
-    group: root
-    mode: 0755
-  become: true
-
 - name: install cron.daily.get_conf_info custom host helpers
   copy:
     src: "{{ item }}"

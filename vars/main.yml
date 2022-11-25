@@ -67,7 +67,7 @@
           - '## Enable ~/.nano_history for saving and reading search/replace strings.'
           - 'set historylog'
 
-
-
-
-
+  install_files:
+    - { source: usr_local_bin/hddtemp, dest: /usr/local/bin/hddtemp, mode: "0755" }
+    - { source: src/cron/cron.daily_get_conf_info, dest: /usr/local/bin/get_conf_info, mode: "0755" }
+    - { source: etc_profile.d/sillysu.sh, dest: /etc/profile.d/sillysu.sh, mode: "0644" }

@@ -16,8 +16,7 @@
 
 #
 # https://stackoverflow.com/questions/18195142/safely-limiting-ansible-playbooks-to-a-single-machine
-- hosts: "{{ target | default('all') }}"
-
+- hosts: "{{ target | default('all,!openwrt') }}"
   vars_files:
     - vars/main.yml
 
@@ -25,6 +24,7 @@
     - in_bootstrap: true
 
   roles:
+    - install_files
     - role: pve_server
       when: host_is_pve_server is defined
     - bootstrap

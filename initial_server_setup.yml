@@ -8,6 +8,7 @@
 
   roles:
     #FIXME: would ideally also include bootstap here with become: true
+    - install_files
     - role: management
       when: host_is_mgmt is defined
     - user
