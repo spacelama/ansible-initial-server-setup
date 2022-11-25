@@ -115,7 +115,7 @@
 
 - name: install munin zfs_*
   copy:
-    src: ./src/monitoring/munin/{{ item }}
+    src: monitoring/munin/{{ item }}
     dest: /etc/munin/plugins/{{ item }}
     owner: root
     group: root
@@ -144,7 +144,7 @@
 
 - name: install munin zfs_*_
   copy:
-    src: ./src/monitoring/munin/{{ item }}
+    src: monitoring/munin/{{ item }}
     dest: /usr/share/munin/plugins/{{ item }}
     owner: root
     group: root

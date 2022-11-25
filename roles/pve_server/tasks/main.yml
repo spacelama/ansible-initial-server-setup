@@ -128,7 +128,7 @@
 
 - name: install suspend-all
   copy:
-    src: ./src/pve_server/{{ item }}
+    src: pve_server/{{ item }}
     dest: /usr/local/bin/{{ item }}
     owner: root
     group: root

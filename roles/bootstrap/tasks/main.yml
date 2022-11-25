@@ -22,7 +22,7 @@
 
 #- name: Enable unattended upgrades
 #  copy:
-#    src: ./src/apt/10periodic
+#    src: apt/10periodic
 #    dest: /etc/apt/apt.conf.d/10periodic
 #    owner: root
 #    group: root
@@ -43,7 +43,7 @@
 
 - name: set up ansible_adm sudoers
   copy:
-    src: ./src/user/sudoers.d.ansible_adm
+    src: user/sudoers.d.ansible_adm
     dest: /etc/sudoers.d/ansible_adm
     owner: root
     group: root

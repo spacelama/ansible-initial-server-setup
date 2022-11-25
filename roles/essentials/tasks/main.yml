@@ -1,7 +1,7 @@
 ---
 - name: Enable default set of repositories
   copy:
-    src: ./src/apt/sources.list
+    src: apt/sources.list
     dest: /etc/apt/sources.list
     owner: root
     group: root
@@ -11,7 +11,7 @@
 
 - name: Enable apt backports
   copy:
-    src: ./src/apt/sources.list.d.backports.list
+    src: apt/sources.list.d.backports.list
     dest: /etc/apt/sources.list.d/backports.list
     owner: root
     group: root
@@ -157,7 +157,7 @@
 
 #- name: Enable unattended upgrades
 #  copy:
-#    src: ./src/apt/10periodic
+#    src: apt/10periodic
 #    dest: /etc/apt/apt.conf.d/10periodic
 #    owner: root
 #    group: root
@@ -235,7 +235,7 @@
     mode: 0755
   become: true
   with_fileglob:
-    - "./src/cron/cron.daily_get_conf_info.{{ hostname }}*"
+    - "cron/cron.daily_get_conf_info.{{ hostname }}*"
 
 - name: install cron.daily switch password conf file if defined for this host
   copy:
@@ -257,7 +257,7 @@
 
 - name: copy /usr/local/bin/backuppc_check_backups
   copy:
-    src: ./src/cron/cron.daily_backuppc_check_backups
+    src: cron/cron.daily_backuppc_check_backups
     dest: /usr/local/bin/backuppc_check_backups
     owner: root
     group: root

@@ -1,7 +1,7 @@
 ---
 - name: Install /etc/genders
   copy:
-    src: ./src/management/genders
+    src: management/genders
     dest: /etc/genders
     owner: root
     group: root

@@ -1,7 +1,7 @@
 ---
 - name: install logrotate.d/[wb]tmp
   copy:
-    src: ./src/logrotate/{{ item }}
+    src: logrotate/{{ item }}
     dest: /etc/logrotate.d/{{ item }}
     owner: root
     group: root

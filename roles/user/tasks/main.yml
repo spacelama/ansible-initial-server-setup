@@ -79,7 +79,7 @@
 
 - name: copy sudoers
   copy:
-    src: "./src/user/sudoers.d.{{ item.key }}"
+    src: "user/sudoers.d.{{ item.key }}"
     dest: "/etc/sudoers.d/{{ item.key }}"
     #FIXME: needs to ignore this (outputting info message that theres no sudoers for this user) clause when src file not exist
     owner: root
