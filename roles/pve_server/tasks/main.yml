@@ -400,4 +400,44 @@
     mode: 0755
   become: true
 
+
+- name: "search for LVM blacklist"
+  register: lvm_conf_ansible_marker_exists
+  check_mode: yes # cause this to become just a test.  If there's already
+                  # an ANSIBLE marker, then this will think line is
+                  # being replaced, and changed will become true (but we
+                  # force it to false to not output a line saying
+                  # "changed"), and msg will become "line added", else
+                  # changed stays false, and msg does not contain "line
+                  # added" (it contains "line replaced")
+  lineinfile:
+    dest: /etc/lvm/lvm.conf
+    line: lvm.conf already has our rules present
+    regexp: 'ANSIBLE_RULES_AFTER'
+    state: present
+  changed_when: false
+
+- name: debug lvm_conf_ansible_marker_exists
+  debug:
+    msg: "lvm_conf_ansible_marker_exists = {{ lvm_conf_ansible_marker_exists.msg }}"
+
+- name: "append ansible marker to lvm conf"
+  when: (lvm_conf_ansible_marker_exists.msg == "line added")
+  lineinfile:
+    dest: /etc/lvm/lvm.conf
+    backrefs: yes
+    regexp: '^(\s*global_filter=.*)"\]'
+    line: '\1, "r|ANSIBLE_RULES_AFTER|"]'
+    state: present
+  become: true
+
+- name: disks presented through to other VMs blacklisted from local lvm
+  lineinfile:
+    dest: /etc/lvm/lvm.conf
+    backrefs: yes
+    regexp: '^(.*global_filter=.*, "r\|ANSIBLE_RULES_AFTER\|").*\]'
+    line: '\1, "r|/dev/disk/by-id/scsi-35000.*|"]'
+    state: present
+  become: true
+
 # FIXME: install QemuServer hook to call this hook
