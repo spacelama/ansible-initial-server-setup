@@ -427,10 +427,11 @@
     dest: /etc/lvm/lvm.conf
     backrefs: yes
     regexp: '^(\s*global_filter=.*)"\]'
-    line: '\1, "r|ANSIBLE_RULES_AFTER|"]'
+    line: '\1", "r|ANSIBLE_RULES_AFTER|"]'
     state: present
   become: true
 
+  # https://forum.proxmox.com/threads/disk-prevent-from-spinning-down-because-of-pvestatd.53237/
 - name: disks presented through to other VMs blacklisted from local lvm
   lineinfile:
     dest: /etc/lvm/lvm.conf
