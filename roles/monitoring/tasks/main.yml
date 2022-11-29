@@ -142,7 +142,7 @@
   when: host_is_zfs is defined
   notify: restart munin-node
 
-- name: install munin zfs_*_
+- name: install custom numa and zfs etc munin monitoring plugins
   copy:
     src: monitoring/munin/{{ item }}
     dest: /usr/share/munin/plugins/{{ item }}
@@ -162,12 +162,29 @@
     loop_var: munin_plugin
   with_items:
     - zfs_usage_
-    - zfsonlinux_stats_
     - numa_
     - smart_
     - sensors_
     - tasmota_
+    - if_
 #    - ipmi_  # wants to set all 4 on all hosts, so define them in dell instead
+
+- name: existing munin plugins with params
+  file:
+    src: "/usr/share/munin/plugins/{{ item.dest }}"
+    dest: "/etc/munin/plugins/{{ item.src }}"
+    state: link
+  become: true
+  with_items:
+    - { src: 'zfsonlinux_stats_efficiency', dest: 'zfsonlinux_stats_' }
+    - { src: 'zfsonlinux_stats_cachehitlist', dest: 'zfsonlinux_stats_' }
+    - { src: 'zfsonlinux_stats_cachehitdtype', dest: 'zfsonlinux_stats_' }
+    - { src: 'zfsonlinux_stats_dmuprefetch', dest: 'zfsonlinux_stats_' }
+    - { src: 'zfsonlinux_stats_utilization', dest: 'zfsonlinux_stats_' }
+    - { src: 'zfsonlinux_stats_l2utilization', dest: 'zfsonlinux_stats_' }
+    - { src: 'zfsonlinux_stats_l2efficiency', dest: 'zfsonlinux_stats_' }
+  when: host_is_zfs is defined
+  notify: restart munin-node
 
 - name: allow munin-node from fs
   lineinfile:
