@@ -167,6 +167,7 @@
     - sensors_
     - tasmota_
     - if_
+    - if_err_
 #    - ipmi_  # wants to set all 4 on all hosts, so define them in dell instead
 
 - name: existing munin plugins with params
