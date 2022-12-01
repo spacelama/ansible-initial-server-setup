@@ -131,7 +131,7 @@
     - zfs-prefetch
     - zfsarc-l1
     - zfsarc-l2
-    - zfs-filesystem-graph
+#    - zfs-filesystem-graph
     - zfs_arcstats
     - zfs_cache_efficiency
     - zfs_list
