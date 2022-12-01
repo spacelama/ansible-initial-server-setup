@@ -1,12 +1,19 @@
 ---
 # installs arrays of files
 
-- name: install list of files
-  become: true
-  copy:
-    src: "{{ item.source }}"
-    dest: "{{ item.dest }}"
+- debug: msg="bashrc_files = {{ bashrc_files }}"
+- debug: msg="install_files = {{ install_files }}"
+
+- name: install list of directories
+  file:
+    path: "{{ item.dir }}"
     mode: "{{ item.mode }}"
-  with_items:
-    "{{ install_files }}"
+    state: directory
+  with_items: "{{ install_dirs }}"
   become: true
+
+- name: install list of files
+  include_tasks: install_list_files.yml
+  loop: "{{ install_files }}"
+  loop_control:
+    loop_var: file_details

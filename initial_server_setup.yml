@@ -2,13 +2,20 @@
 # https://stackoverflow.com/questions/18195142/safely-limiting-ansible-playbooks-to-a-single-machine
 - hosts: "{{ target | default('all,!openwrt') }}"
   remote_user: ansible_adm
+  gather_facts: no
+  vars_files:
+    - vars/main.yml
+  roles:
+    - install_files
+
+- hosts: "{{ target | default('all,!openwrt') }}"
+  remote_user: ansible_adm
 
   vars_files:
     - vars/main.yml
 
   roles:
     #FIXME: would ideally also include bootstap here with become: true
-    - install_files
     - role: management
       when: host_is_mgmt is defined
     - user
