@@ -66,3 +66,5 @@ if [ -d /etc/bash.bashrc.d ]; then
   done
   unset i
 fi
+
+finalise_prompt

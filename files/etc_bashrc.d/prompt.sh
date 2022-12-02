@@ -6,20 +6,7 @@
 # only those that are truly running at one point in time when
 # backgrounded
 PTS=`readlink /dev/fd/0` ; PTS="${PTS#/dev/}"
-SAVED_PROMPT_COMMAND="handleprompt"
-PROMPT_COMMAND="$SAVED_PROMPT_COMMAND"
-
-#function is_on_git() {
-#    timeout 1 git rev-parse 2> /dev/null
-#}
-#
-#function parse_git_dirty() {
-#    [[ $(timeout 1 git status 2> /dev/null | tail -n1) != *"working directory clean"* ]] && echo "±"   #FIXME: Don't know whether PS1 will not like the fact that "±" is two bytes, but \[ can only suppress the space of a non-printing character, not 2 characters that take up one character of screen real-estate
-#}
-#
-#function parse_git_branch() {
-#    timeout 1 git branch --no-color 2> /dev/null | sed -e '/^[^*]/d' -e "s/* \(.*\)/\1$(parse_git_dirty)/"
-#}
+PROMPT_COMMAND=handleprompt # likely to get overriden by git plugins later on
 
 function handleprompt () {
     retcode=$?
@@ -33,15 +20,6 @@ function handleprompt () {
     else
         statusbeep $retcode 1$SECONDS 1$CMD_START_SECONDS
     fi
-
-    #        echo "BASH_COMMAND=$BASH_COMMAND" 1>&2
-    #        case "${BASH_COMMAND%% *}" in
-    #            generatetitlefromhistory|setprompt|handleprompt)
-    ##                echo returning: "${BASH_COMMAND}"
-    #                return
-    #                ;;
-    #        esac
-    ##        echo not returning: "${BASH_COMMAND}"
     generatetitlefromhistory
     setprompt
     return $retcode
@@ -52,8 +30,6 @@ if [ "$TERM" = xterm ] ; then
         if [ -t 2 ] ; then
             echo -ne  '\033]2;'"$1"'\007' 1>&2
         fi
-        #            echo "resetting titleprevline"
-        titleprevline=
     }
     function iconname  () {
         if [ -t 2 ] ; then
@@ -118,6 +94,11 @@ if [ "$SMALLPROMPT" = yes ] ; then
         # when we start an xterm as subshell to smallxterm, it
         # inherits a proper PROMPT
     }
+    function finalise_prompt() {
+        # ESC=`echo -ne '\033'`
+        # . ~/bash-git-prompt/gitprompt.sh
+        PROMPT_COMMAND=handleprompt
+    }
 else
     function generatetitle () {
         str="$*"
@@ -136,7 +117,6 @@ else
         fi
         winname  "$EXTRA_TITLE`date +%d/%m-%H:%M:%S` -- $PTS -- $cmd -- ${me}: `chomp --escapechars --right ... $((COLUMNS-60)) ${shortpwd}`" ;
         iconname "$EXTRA_TITLE`date +%d/%m-%H:%M:%S` -- $PTS -- $cmd -- ${me}: `chomp --escapechars --right ... 20 ${shortpwd}`"
-        titleprevline="$str"
         writetohistory
     }
     function generatetitlefromhistory () {
@@ -199,9 +179,12 @@ else
         #            echo have set title
     }
 
-    titleprevline=
-    ESC=`echo -ne '\033'`
-    . ~/bash-git-prompt/gitprompt.sh
-    PROMPT_COMMAND="$SAVED_PROMPT_COMMAND"
+    function finalise_prompt() {
+        if [ -z "$GIT_PROMPT_HAS_RUN" ] ; then
+            ESC=`echo -ne '\033'`
+            . ~/bash-git-prompt/gitprompt.sh
+            GIT_PROMPT_HAS_RUN=true
+        fi
+        PROMPT_COMMAND=handleprompt # was likely just overriden
+    }
 fi
-
