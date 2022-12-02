@@ -1,0 +1,157 @@
+#!/usr/bin/env perl
+# -*- Mode: perl -*-
+#template by ~tconnors/bin/newplscript
+#Tue Aug 31 20:09:38 EST 2004
+
+# $Revision: 1.17 $ $Date: 2022/12/02 02:00:58 $
+# $Id: colorgrep,v 1.17 2022/12/02 02:00:58 tconnors Exp $
+# $Header: /home/tconnors/cvsroot/bin/colorgrep,v 1.17 2022/12/02 02:00:58 tconnors Exp $
+# $RCSfile: colorgrep,v $
+
+# This program colourises lines that have a matched RE in them
+# Accepts many of the flags that normal grep accepts, and then adds some
+
+# Copyright Tim Connors (2004).
+# tconnors+colorgrep@remove.the.spam.astro.swin.edu.au
+# GPL v2 license applies:
+# http://www.gnu.org/licenses/gpl.txt
+
+use strict;
+use warnings;
+
+my (@SAVEARGV)=@ARGV;
+
+sub usageerror(;$) {
+  my ($error)=(@_);
+  if (defined($error)) {
+    print STDERR "Usage error: $error\n";
+    print STDERR "Usage was: $0 @SAVEARGV\n";
+  }
+  usage(1);
+}
+
+sub usage(;$) {
+  my ($exit)=(@_);
+  print STDERR "Usage: $0 [--exact-match|-X] [--ignore-case|-i] [--partial|-p] [--invert-match|-v] [--ignore-lines-no-match (implies --partial)|-N] <re> <files>\n";
+  $exit=defined($exit) ? $exit : 0;
+  exit $exit;
+}
+
+my ($exactmatch,$re,$fullline,$invertmatch,$nocase,$ignorelinesnomatch,$colour);
+
+sub parseinput() {
+  $fullline=1;
+  $invertmatch=0;
+  $nocase=0;
+  $ignorelinesnomatch=0;
+  $exactmatch=0;
+  $colour="red";
+
+  while (defined($_= shift (@ARGV))) {
+    /^--exact-match$|^-X$/ && do { $exactmatch=1 ; 1; } ||
+    /^--ignore-lines-no-match$|^-N$/ && do { $ignorelinesnomatch=1 ; $fullline=0 ; 1; } ||
+    /^--ignore-case$|^-i$/ && do { $nocase=1 ; 1; } ||
+    /^--partial$|^-p$/ && do { $fullline=0 ; 1; } ||
+    /^--invert-match$|^-v$/ && do { $invertmatch=1 ; 1; } ||
+    /^--colour$|^-c$/ && do { $colour=shift(@ARGV) ; 1; } ||
+    /^--help$/ && usage() ||
+    /^--$/ && do { $_=shift(@ARGV) ; last ; } ||
+    /^-/ && usageerror("Unrecognised switch: $_") ||
+    last;
+  }
+  defined($_) && unshift @ARGV, $_;
+  if (!defined ($re=shift(@ARGV))) {
+    usageerror("no RE supplied");
+  }
+#  if (!@ARGV) {
+#    usageerror("No files supplied");
+#  }
+}
+
+#########################
+
+# ANSI sequences for colours
+my %colour;
+$colour{white}       = "\033[1;37m";
+$colour{yellow}      = "\033[1;33m";
+$colour{green}       = "\033[1;32m";
+$colour{blue}        = "\033[1;34m";
+$colour{cyan}        = "\033[1;36m";
+$colour{red}         = "\033[1;31m";
+$colour{magenta}     = "\033[1;35m";
+$colour{black}       = "\033[1;30m";
+$colour{darkwhite}   = "\033[0;37m";
+$colour{darkyellow}  = "\033[0;33m";
+$colour{darkgreen}   = "\033[0;32m";
+$colour{darkblue}    = "\033[0;34m";
+$colour{darkcyan}    = "\033[0;36m";
+$colour{darkred}     = "\033[0;31m";
+$colour{darkmagenta} = "\033[0;35m";
+$colour{darkblack}   = "\033[0;30m";
+$colour{OFF}         = "\033[0;0m";
+
+parseinput();
+
+
+my $match=$colour{$colour};
+my $normal=$colour{OFF};
+my $line;
+if ($invertmatch) {   #grep -v: a bit of a hack, but seems to
+                      #work. When you're printing out every line
+                      #anyway, is a invertmatch switch really needed?
+  ($match,$normal)=($normal, $match);
+  print "$normal";
+}
+my $exit=1;
+my $manyfiles = (@ARGV > 1);
+my $file=$ARGV[0];
+while (defined ($line=<>)) {
+  #if line first tests for the RE and then a case sensitive version of
+  #the RE, if appropriate. Then theres that special condition that if
+  #we are both inverting the match, and only printing out lines that
+  #actually match (like grep -v normally works), in which case we
+  #negate the above. This latter condition is not really necessary for
+  #a colorgrep, since it makes colorgrep redundant, but if people want
+  #to use this as a replacement for normal grep (alias grep='colorgrep
+  #-p -N'), we might as well cater for that possibility.
+  my $prepend = $manyfiles ? "$file: " : "";
+  if (((!$exactmatch && ($line =~ /$re/ || ($nocase && $line =~ /$re/i))) ||
+       ($exactmatch && (index($line,$re) != -1)))
+      ^ ($ignorelinesnomatch && $invertmatch)) {
+    $exit=0;
+    if ($exactmatch) {
+      $line = "$match$line$normal";
+    } elsif ($fullline) {
+      if ($nocase) {
+        $line =~ s/(.*$re.*)/$match$1$normal/i;
+      } else {
+        $line =~ s/(.*$re.*)/$match$1$normal/;
+      }
+    } else {
+      if ($nocase) {
+        $line =~ s/($re)/$match$1$normal/gi;
+      } else {
+        $line =~ s/($re)/$match$1$normal/g;
+      }
+    }
+    print "$prepend$line";
+    #And now, if we did fall through above (there was not a match, or
+    #there was a match, and we are both inverted, and only printing
+    #out matches (non matches, since inverted)), then we only print
+    #out if we are printing non-matches (default case)
+  } elsif (!$ignorelinesnomatch) {
+    print "$prepend$line";
+  }
+} continue {
+  if (eof) {    #reset line numbering, and find out what file we are now
+              #dealing with -- see man perlfunc, eof
+    close ARGV;
+    $file=$ARGV[0];
+  }
+}
+
+if ($invertmatch) {
+  print "$match";
+}
+
+exit $exit;
