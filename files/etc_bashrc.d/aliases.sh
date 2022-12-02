@@ -28,6 +28,7 @@ alias ll='ls -lA'
 alias ls='ls $enablecolor'
 alias l-ft='ls -lA --time-style=full-iso'
 alias l-lt='ls -lA --time-style=long-iso'
+alias p='pstree -ap tconnors'
 alias pavucontrol='DBUS_SESSION_BUS_ADDRESS= pavucontrol'  # https://gitlab.freedesktop.org/pulseaudio/pavucontrol/-/issues/75#note_1467143
 alias bc='bc -l'
 alias -- +='pushd .'
