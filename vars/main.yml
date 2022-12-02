@@ -78,4 +78,4 @@
     - { source: cron/cron.daily_get_conf_info, dest: /usr/local/bin/get_conf_info, mode: "0755" }
     - { source: bin/colorgrep, dest: /usr/local/bin/colorgrep, mode: "0755" }
     - { source: etc_bashrc.d/bash.bashrc, dest: /etc/bash.bashrc, mode: "0644" }
-    - { files: "{{ bashrc_files }}", dir: /etc/bash.bashrc.d/, mode: "0644" }
+    - { files: "{{ bashrc_files | flatten }}", dir: /etc/bash.bashrc.d/, mode: "0644" }

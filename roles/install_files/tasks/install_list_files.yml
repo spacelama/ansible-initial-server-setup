@@ -13,7 +13,7 @@
     dest: "{{ file_details.dir }}/{{ file | basename }}"
     mode: "{{ file_details.mode }}"
   become: true
-  when: file_details.dir is defined
-  loop: "{{ file_details.files | flatten }}"
+  when: file_details.files is defined
+  loop: "{{ file_details.files }}"
   loop_control:
     loop_var: file
