@@ -22,12 +22,16 @@ PROMPT_COMMAND="$SAVED_PROMPT_COMMAND"
 #}
 
 function handleprompt () {
+    retcode=$?
+
     # At the very first invocation for this shell, lets initialise
     # some shell stuff first
     if [ -z "$BASHRC_LAST_INVOKED" ] ; then
         # echo invoking bashrc_last
         bashrc_last
         BASHRC_LAST_INVOKED=true
+    else
+        statusbeep $retcode 1$SECONDS 1$CMD_START_SECONDS
     fi
 
     #        echo "BASH_COMMAND=$BASH_COMMAND" 1>&2
@@ -38,11 +42,6 @@ function handleprompt () {
     #                ;;
     #        esac
     ##        echo not returning: "${BASH_COMMAND}"
-    retcode=$?
-    (
-        statusbeep \$retcode 1\$SECONDS 1\$OLDSECONDS
-    )
-    OLDSECONDS=\$SECONDS
     generatetitlefromhistory
     setprompt
     return $retcode
