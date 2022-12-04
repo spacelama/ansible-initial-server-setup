@@ -1,0 +1,52 @@
+---
+  ssid: Asio2.4
+  psk: "{{ lookup('file', 'main.tasmota-psk.passwd') }}"
+  syslog: 192.168.1.17
+  ntp1: 192.168.1.17
+  ntp2: 192.168.1.2
+  ntp3: "0.au.pool.ntp.org"
+  mqtthost: 192.168.1.2
+
+  tasmota_commands:
+    - command: SSId1
+      value: "{{ ssid }}"
+
+#    - command: Password1
+#      value: "{{ psk }}"
+#      no_log: True
+# be nice if there was a clean way of disabling this by default so doesn't register erroneous changes, but allow it be temporarily enabled
+
+    - command: SSId2
+      value: "{{ ssid2 }}"
+
+#    - command: Password2
+#      value: "{{ psk }}"
+#      no_log: True
+# be nice if there was a clean way of disabling this by default so doesn't register erroneous changes, but allow it be temporarily enabled
+
+    - command: LogHost
+      value: "{{ syslog }}"
+
+    - command: NtpServer1
+      value: "{{ ntp1 }}"
+
+    - command: NtpServer2
+      value: "{{ ntp2 }}"
+
+    - command: NtpServer3
+      value: "{{ ntp3 }}"
+
+    - command: Hostname
+      value: "{{ inventory_hostname }}"
+
+    - command: DeviceName
+      value: "{{ inventory_hostname }}"
+
+    - command: MqttClient
+      value: "{{ inventory_hostname }}"
+
+    - command: Topic
+      value: "{{ inventory_hostname | regex_replace('-', '_') }}"
+
+    - command: MqttHost
+      value: "{{ mqtthost }}"

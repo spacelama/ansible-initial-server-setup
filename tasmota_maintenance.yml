@@ -1,0 +1,10 @@
+---
+# https://stackoverflow.com/questions/18195142/safely-limiting-ansible-playbooks-to-a-single-machine
+- hosts: "{{ target | default('tasmota') }}"
+  #  strategy: free
+  # gather_facts currently not possible
+  gather_facts: no
+  vars_files:
+    - vars/tasmota.yml
+  roles:
+    - tobias_richter.tasmota
