@@ -11,7 +11,7 @@
   #https://tasmota.github.io/docs/Commands/timezone_table/#management
   timezone: 99
   timestd: "1,1,4,1,3,600"
-  timedst: ""
+  timedst: "1,1,10,1,2,660"
 
   psk_setting:
     - command: Password1
@@ -22,15 +22,16 @@
       no_log: True
   no_psk_setting: []
 
+  syslog_setting:
+    - command: SysLog
+      # this always gets marked as Changed, so don't run it by default
+      value: 2
+  no_syslog_setting: []
+
   psk_setting_enabled: "{{ setpsk is defined | ternary(psk_setting, no_psk_setting) }}"
+  syslog_setting_enabled: "{{ setsyslog is defined | ternary(syslog_setting, no_syslog_setting) }}"
 
   compulsory_tasmota_commands:
-    - command: SSId1
-      value: "{{ ssid }}"
-
-    - command: SSId2
-      value: "{{ ssid2 }}"
-
     - command: LogHost
       value: "{{ syslog }}"
 
@@ -49,6 +50,10 @@
     - command: DeviceName
       value: "{{ inventory_hostname }}"
 
+      # enable MQTT
+    - command: SetOption3
+      value: 1
+
     - command: MqttClient
       value: "{{ inventory_hostname }}"
 
@@ -64,13 +69,6 @@
     - command: Longitude
       value: "{{ longitude }}"
 
-    - command: SysLog
-      value: 2
-
-      # enable MQTT
-    - command: SetOption3
-      value: 1
-
     - command: Timezone
       value: "{{ timezone }}"
 
@@ -80,4 +78,10 @@
     - command: TimeDst
       value: "{{ timedst }}"
 
-  tasmota_commands: "{{ compulsory_tasmota_commands | union(psk_setting_enabled) }}"
+    - command: SSId1
+      value: "{{ ssid }}"
+
+    - command: SSId2
+      value: "{{ ssid2 }}"
+
+  tasmota_commands: "{{ compulsory_tasmota_commands | union(syslog_setting_enabled) | union(psk_setting_enabled) }}"
