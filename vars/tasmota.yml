@@ -6,23 +6,30 @@
   ntp2: 192.168.1.2
   ntp3: "0.au.pool.ntp.org"
   mqtthost: 192.168.1.2
+  latitude: -37.720730
+  longitude: 144.964783
+  #https://tasmota.github.io/docs/Commands/timezone_table/#management
+  timezone: 99
+  timestd: "1,1,4,1,3,600"
+  timedst: ""
 
-  tasmota_commands:
+  psk_setting:
+    - command: Password1
+      value: "{{ psk }}"
+      no_log: True
+    - command: Password2
+      value: "{{ psk }}"
+      no_log: True
+  no_psk_setting: []
+
+  psk_setting_enabled: "{{ setpsk is defined | ternary(psk_setting, no_psk_setting) }}"
+
+  compulsory_tasmota_commands:
     - command: SSId1
       value: "{{ ssid }}"
 
-#    - command: Password1
-#      value: "{{ psk }}"
-#      no_log: True
-# be nice if there was a clean way of disabling this by default so doesn't register erroneous changes, but allow it be temporarily enabled
-
     - command: SSId2
       value: "{{ ssid2 }}"
-
-#    - command: Password2
-#      value: "{{ psk }}"
-#      no_log: True
-# be nice if there was a clean way of disabling this by default so doesn't register erroneous changes, but allow it be temporarily enabled
 
     - command: LogHost
       value: "{{ syslog }}"
@@ -50,3 +57,27 @@
 
     - command: MqttHost
       value: "{{ mqtthost }}"
+
+    - command: Latitude
+      value: "{{ latitude }}"
+
+    - command: Longitude
+      value: "{{ longitude }}"
+
+    - command: SysLog
+      value: 2
+
+      # enable MQTT
+    - command: SetOption3
+      value: 1
+
+    - command: Timezone
+      value: "{{ timezone }}"
+
+    - command: TimeStd
+      value: "{{ timestd }}"
+
+    - command: TimeDst
+      value: "{{ timedst }}"
+
+  tasmota_commands: "{{ compulsory_tasmota_commands | union(psk_setting_enabled) }}"
