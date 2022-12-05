@@ -6,8 +6,8 @@
   ntp2: 192.168.1.2
   ntp3: "0.au.pool.ntp.org"
   mqtthost: 192.168.1.2
-  latitude: -37.720730
-  longitude: 144.964783
+  latitude: -37.72
+  longitude: 144.965
   #https://tasmota.github.io/docs/Commands/timezone_table/#management
   timezone: 99
   timestd: "1,1,4,1,3,600"
