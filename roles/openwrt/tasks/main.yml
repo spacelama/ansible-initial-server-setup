@@ -28,7 +28,7 @@
   opkg:
     name: usteer
     state: present
-  when: openwrt_router_packages is not defined
+  when: type == "ap"
 
 - name: install full packages
   opkg:
@@ -39,8 +39,14 @@
 - name: setup dhcp reservations
   copy:
     dest: /etc/config/dhcp
-    content: "{{ lookup('file', 'roles/openwrt/files/dhcp.head.{{ type }}')}}\n\n{{lookup('file', 'roles/openwrt/files/dhcp.reservations') }}\n"
+    content: "{{ lookup('file', 'dhcp.head.{{ type }}')}}\n\n{{lookup('file', 'dhcp.reservations') }}\n"
   notify: restart dnsmasq
+
+- name: setup usteer
+  copy:
+    dest: "/etc/config/usteer"
+    src: "etc_config_usteer"
+  when: type == "ap"
 
 - name: setup some custom binaries
   copy:
