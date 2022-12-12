@@ -11,8 +11,6 @@ function setup_environment() {
         [ -e /etc/profile.d/bash_completion.sh ] && . /etc/profile.d/bash_completion.sh
     fi
 
-    umask 022
-
     #UID=`uid` ; export UID   #already set by bash readonly
     USER=`id_username` ; export USER
 
@@ -36,7 +34,24 @@ function setup_environment() {
     KERNEL=`uname -r | sed 's/-.*//'` ; export KERNEL
     OS=`uname -s` ; export OS
 
-    setpath PATH "/usr/lib/ccache:/usr/lib/colorgcc:/usr/local/bin:/usr/bin:/bin:/usr/bin/X11:/usr/games"
+#    case "$SYSTEM" in
+#        Darwin*)
+#            stty erase ^?
+#        ;;
+#        Linux*)
+#            stty erase ^?      #????!  Never needed this before AATPC2, and this has broken things in the past, but it seems that even logging into scuzzie from aatpc2 sets this
+#        ;;
+#        SunOS*)
+# #           stty istrip
+#            stty erase ^?
+#            alias ps='/usr/ucb/ps'
+#        ;;
+#        *)
+#            :
+#        ;;
+#     esac
+
+    setpath PATH "/usr/lib/ccache:/usr/lib/colorgcc:/usr/local/bin:/usr/bin:/bin:/usr/games"
     setpath PATH $HOME/bin:$HOME/bin/$SYSTEM-$KERNEL:$HOME/bin/$SYSTEM:$HOME/software/$SYSTEM/bin:PATH  #just set up an initial path with the essential private directories, to bootstrap ourselves -- the real paths are set in the .bash_profile.* files
     export PATH
 
@@ -95,10 +110,15 @@ function setup_environment() {
     export SHORTHOST=$(echo $LONGHOST | sed 's/\..*//')
     export HOSTNAME=$SHORTHOST
 
+    if [ $SHORTHOST = ds4 ] ; then
+        umask 077 # too sensitive to have otherwise
+    else
+        umask 022
+    fi
+
     #    set -xv
     setpath PATH PATH:/usr/local/mozilla/:\
-            /usr/local/ssh/bin:/usr/X11R6/bin:/usr/local/bin/X11/:\
-            /usr/bin/X11/demos/:/usr/lpp/dx/bin:/usr/sbin:/sbin
+            /usr/libexec/xscreensaver:/usr/lpp/dx/bin:/usr/sbin:/sbin
 
     setpath LD_LIBRARY_PATH LD_LIBRARY_PATH:$HOME/software/$SYSTEM/lib
     #    set +xv
@@ -255,14 +275,13 @@ function setup_environment() {
     #debian bug 505963 (may really be associated with UTF8 problem that show_types highlights:
     #export LIBXCB_ALLOW_SLOPPY_LOCK=yes
 
-    #slrn:
-
     TEXEDIT="$EDITOR +%d %s"
     #put a spare : somewhere - this is the default path
     BSTINPUTS=.:$HOME/latex/bstinputs/:
     BIBINPUTS=.:$HOME/latex/bib/:
     TEXPSHEADERS=.:$HOME/latex/texinputs:
-    TEXINPUTS=.:$HOME/latex/texinputs:$HOME/latex/texmf/tex/latex/preview:$HOME/.TeX:/usr/share/doc/.TeX:/usr/doc/.TeX:/usr/share/texmf/tex/latex/:$TEXINPUTS:
+    setpath TEXINPUTS .:$HOME/latex/texinputs:$HOME/latex/texmf/tex/latex/preview:$HOME/.TeX:/usr/share/doc/.TeX
+    setpath TEXINPUTS /usr/doc/.TeX:/usr/share/texmf/tex/latex/:TEXINPUTS:
     export TEXINPUTS BIBINPUTS BSTINPUTS TEXPSHEADERS TEXEDIT
 
     #export PERLLIB=$HOME/perllib:$PERLLIB
@@ -295,7 +314,7 @@ function setup_environment() {
     PERL_MB_OPT="--install_base \"$HOME/perl5\""; export PERL_MB_OPT;
     PERL_MM_OPT="INSTALL_BASE=$HOME/perl5"; export PERL_MM_OPT;
 
-    for i in /usr/share/X11/rgb.txt /usr/X11R6/lib/X11/rgb.txt ; do
+    for i in /usr/share/X11/rgb.txt ; do
         if [ -e $i ] ; then
             PGPLOT_RGB=$i
             export PGPLOT_RGB
