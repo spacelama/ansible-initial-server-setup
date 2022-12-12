@@ -51,7 +51,7 @@
 - name: setup some custom binaries
   copy:
     dest: "/root/bin/{{ item }}"
-    src: "{{ item }}"
+    src: "bin/{{ item }}"
   with_items:
     - add-batch-dhcp
     - add-dhcp

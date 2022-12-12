@@ -1,0 +1,8 @@
+#!/bin/sh
+
+# opkg search actually just searches for a file according to the
+# provided glob - not like apt-cache search for debian
+
+# https://unix.stackexchange.com/questions/628478/search-with-opkg
+
+opkg list | grep "$@"
