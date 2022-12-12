@@ -94,4 +94,44 @@ function setup_aliases() {
         fi
         command fg "$@"
     }
+
+    function uid () {
+        id | sed 's/^[^=]*=\([0-9]*\)(\([^ ]*\)).*/\1/' 
+    }
+
+    function addkeychain() {
+        keys=
+        for i in {id_dsa,id_rsa,identity} ; do
+            if [ -e $HOME/.ssh/$i ] ; then
+                keys="$keys $i"
+            fi
+        done
+        if [ "$1" = --withgpg ] ; then
+            #    set -xv
+            keys="$keys $( gpg --list-secret-keys | grep ^ssb | sed 's!/! !' | awk '{print $3}' )"
+            (
+                unset DISPLAY      # doesn't suffice to say --nogui, because there's a faut in keychain where it runs gpg_listmissing before unsetting DISPLAY, and listmissing ends up asking for the same authentication
+                GPG_TTY=$(tty) ; export GPG_TTY         # fall back to ncurses pinentry
+                
+                #    if ! timeout .3 keychain --quiet --agents gpg,ssh $keys ; then
+                #        echo "Enter gpg details:" 1>&2
+                keychain --quiet --agents gpg,ssh $keys
+                #    fi
+                #    set +xv
+            )
+            . $HOME/.keychain/$HOSTNAME-sh-gpg
+        else
+            keychain --quiet $keys
+        fi
+        . $HOME/.keychain/$HOSTNAME-sh
+    }
+}
+
+# some functions just always need to be defined
+function id_username () {
+    id | sed 's/^[^=]*=\([0-9]*\)(\([^ ]*\)).*/\2/'
+}
+
+function programexists () {
+    type -p "$1" >/dev/null
 }

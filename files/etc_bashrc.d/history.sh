@@ -48,8 +48,10 @@ function writetohistory() {
     if HISTTIMEFORMAT= history 2 | sed 's/^[ 0-9]*//' | uniq -d | grep -q . ; then
         #        echo duplicated history
         lasthist=$( history 1 | awk '{print $1}' )
-        hiliteStdErr echo "DEBUG: we found a duplicated history line - we will try to delete lasthist=$lasthist" 1>&2
-        history 10 | hiliteStdErr cat 1>&2
+#        hiliteStdErr echo "DEBUG: we found a duplicated history line - we will try to delete lasthist=$lasthist" 1>&2
+#        history 10 | hiliteStdErr cat 1>&2
+        echo "DEBUG: we found a duplicated history line - we will try to delete lasthist=$lasthist" 1>&2 >> /tmp/hist.$USER.dup
+        history 10 | hiliteStdErr cat 1>&2 >> /tmp/hist.$USER.dup
         history -d $lasthist
     fi
     history -a /dev/null   # clear the history since the append is done in a subshell

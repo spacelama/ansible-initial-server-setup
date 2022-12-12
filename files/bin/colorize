@@ -1,0 +1,174 @@
+#!/bin/bash
+# -*- Mode: shell-script -*-
+#template by ~tconnors/bin/newshscript
+#Thu May  1 17:20:13 EST 2008
+# $Revision: 1.8 $ $Date: 2011-07-20 06:37:00 $
+# $Id: colorize,v 1.8 2011-07-20 06:37:00 tconnors Exp $
+# $Header: /home/tconnors/cvsroot/bin/colorize,v 1.8 2011-07-20 06:37:00 tconnors Exp $
+# $RCSfile: colorize,v $
+
+# This program colorizes the text in the commandline args
+
+#set -x 
+
+function highlight() {
+    if [ -n "$notty" ] ; then
+        return
+    fi
+
+    esc="\033["
+    if [ "$2" = "y" ] ; then
+        bold=";1"
+    else
+        bold=
+    fi
+    case "$3" in
+        grey|black) back="40;"
+        ;;
+        red)        back="41;"
+        ;;
+        green)      back="42;"
+        ;;
+        yellow)     back="43;"
+        ;;
+        blue)       back="44;"
+        ;;
+        magenta|purple)    back="45;"
+        ;;
+        cyan)       back="46;"
+        ;;
+        white)      back="47;"
+        ;;
+        no|"")         back=
+        ;;
+        *)          echo -ne "${open}${esc}32;1m${close}"
+           return
+        ;;
+    esac
+    case "$1" in 
+        grey|black) echo -ne "${open}${esc}${back}30${bold}m${close}"
+        ;;
+        red)        echo -ne "${open}${esc}${back}31${bold}m${close}"
+        ;;
+        green)      echo -ne "${open}${esc}${back}32${bold}m${close}"
+        ;;
+        yellow)     echo -ne "${open}${esc}${back}33${bold}m${close}"
+        ;;
+        blue)       echo -ne "${open}${esc}${back}34${bold}m${close}"
+        ;;
+        magenta|purple)    echo -ne "${open}${esc}${back}35${bold}m${close}"
+        ;;
+        cyan)       echo -ne "${open}${esc}${back}36${bold}m${close}"
+        ;;
+        white)      echo -ne "${open}${esc}${back}37${bold}m${close}"
+        ;;
+        normal)     echo -ne "${open}${esc}0m${close}"
+        ;;
+        *)          echo -ne "${open}${esc}32;1m${close}"
+        ;;
+    esac
+}
+
+function directoutput () {
+    if [ -z "$stderr" ] ; then
+        exec cat
+    else
+        exec cat 1>&2
+    fi
+}
+
+function usage () {
+    echo "Usage: $0 [--stderr] [--notty] [--PS1prompt] [--background <bg>] <bright?> <color> <text>" 1>&2
+    if [ -n "$1" ] ; then
+        exit $1
+    fi
+    exit
+}
+
+function usageerror () {
+    if [ "$#" != 0 ] ; then
+        echo "Usage error: $@" 1>&2
+        echo "Usage was $ARGS" 1>&2
+    fi
+    usage 1
+}
+
+declare -a args
+function parseinput () {
+    ARGS="$*"
+    notty=
+    open=
+    close=
+    nolf=
+    hi=no
+    bg=no
+    colour=
+    stderr=
+    first=1
+    while : ; do
+        if [ $first != 1 ] ; then
+            shift
+        fi
+        if [ "$#" -eq 0 ] ; then    #god, I wish there was an unshift in bash
+            break
+        fi
+        first=0
+        arg="$1"
+        case "$arg" in
+            --notty)
+                if [ ! -t 1 ] ; then
+                    notty=1
+                fi
+            ;;
+            --PS1prompt)
+                open='\['
+                close='\]'
+                nolf=-n
+            ;;
+            --background)
+                bg="$2"
+                shift
+            ;;
+            --stderr)
+                stderr=1
+            ;;
+            --help)
+                usage
+            ;;
+            --)
+                shift
+                break
+            ;;
+            -*)
+                usageerror "Unknown option \"$arg\""
+            ;;
+            *)
+                break
+            ;;
+        esac
+    done
+    if [ "$#" -lt 2 ] ; then
+        usageerror "supply color and text"
+    fi
+    if [ "$1" = "bright" ] ; then
+	hi=y
+    fi
+    shift
+    colour=$1
+    shift
+
+    #assign all uneaten params to an array
+    i=0
+    for arg in "$@" ; do
+        args[i]="$arg"
+        i=$(($i+1))
+    done
+}
+
+parseinput "$@"
+
+( 
+    highlight "$colour" $hi $bg
+    echo $nolf "${args[@]}"
+    highlight normal y
+) | directoutput

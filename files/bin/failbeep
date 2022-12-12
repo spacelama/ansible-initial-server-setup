@@ -1,0 +1,18 @@
+#!/bin/sh
+# -*- Mode: shell-script -*-
+#template by ~tconnors/bin/newshscript
+#Sat May 24 00:45:58 EST 2003
+
+[ -z "$DISPLAY" ] && exit
+[ -e $HOME/.disablebeep ] && exit
+
+#( xset b 100 300 10 2>/dev/null
+#  echo -ne '\a'
+#  normalbeep ) &
+
+beep -f 300 -d 0.1 -v 0.05 > /dev/null &
+
+#if [[ "$DISPLAY" == :* ]] ; then
+#    blinkxdark 10 &
+#fi
+

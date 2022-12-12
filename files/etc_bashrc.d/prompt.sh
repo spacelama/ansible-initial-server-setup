@@ -1,11 +1,8 @@
-[ -z "$NONINTERACT" -a -z "$PBS_ENVIRONMENT" ] || return 0
-
 # the disown is so forked processes dont get a sighup -- but if you
 # background a program that needs the terminal, it wont be running
 # when the promt returns, so such programs will never be disowned -
 # only those that are truly running at one point in time when
 # backgrounded
-PTS=`readlink /dev/fd/0` ; PTS="${PTS#/dev/}"
 PROMPT_COMMAND=handleprompt # likely to get overriden by git plugins later on
 
 function handleprompt () {
@@ -182,7 +179,7 @@ else
     function finalise_prompt() {
         if [ -z "$GIT_PROMPT_HAS_RUN" ] ; then
             ESC=`echo -ne '\033'`
-            . ~/bash-git-prompt/gitprompt.sh
+            . /etc/bash-git-prompt/gitprompt.sh
             GIT_PROMPT_HAS_RUN=true
         fi
         PROMPT_COMMAND=handleprompt # was likely just overriden

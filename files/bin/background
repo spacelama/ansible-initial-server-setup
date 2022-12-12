@@ -1,0 +1,12 @@
+#!/bin/bash
+# -*- Mode: shell-script -*-
+#template by ~tconnors/bin/newshscript
+#Fri Jul 22 12:11:33 EST 2011
+# $Revision: 1.2 $ $Date: 2016/10/24 04:17:30 $
+# $Id: background,v 1.2 2016/10/24 04:17:30 tconnors Exp $
+# $Header: /home/tconnors/cvsroot/bin/background,v 1.2 2016/10/24 04:17:30 tconnors Exp $
+# $RCSfile: background,v $
+
+#http://invisible-island.net/xterm/ctlseqs/ctlseqs.pdf
+# see also: http://superuser.com/questions/157563/programmatic-access-to-current-xterm-background-color
+[ -t 1 ] && echo -en "\e]11;$*\a"

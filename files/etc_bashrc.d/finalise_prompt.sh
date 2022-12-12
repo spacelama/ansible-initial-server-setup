@@ -21,6 +21,7 @@ function bashrc_last() {
 
     setup_environment
     setup_precmd_hook
+    finalise_login
 }
 
 # generate title before each command is executed.  Ideally, we want
@@ -38,4 +39,8 @@ function setup_precmd_hook() {
 function precmd_hook() {
     generatetitlefromhistory
     CMD_START_SECONDS=$SECONDS
+}
+
+function finalise_login() {
+    [ ! -e /sys/class/power_supply/BAT0 ] || on_ac_power 2>/dev/null || ( apm_available 2>/dev/null && ( apm ; ibam ) || ( ibam --percentbattery ) 2>/dev/null )
 }

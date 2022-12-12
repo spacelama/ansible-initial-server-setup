@@ -82,7 +82,7 @@
 
 - name: Install essential packages (all)
   apt:
-    name: ['needrestart', 'rsync', 'munin-node']
+    name: ['needrestart', 'rsync', 'munin-node', 'procmail'] # procmail for lockfile
     autoremove: no
     state: present
   become: true
@@ -112,7 +112,7 @@
 
 - name: Install essential packages (not container)
   apt:
-    name: ['git', 'htop', 'iotop', 'smem', 'ethtool', 'net-tools', 'iperf3',  'aptitude', 'dlocate', 'vim', 'sysstat', 'nicstat', 'lshw', 'parted', 'sdparm', 'ntpdate', 'colordiff', 'ifstat', 'iftop', 'apt-listchanges', 'apt-show-versions', 'etckeeper', 'apt-listbugs', 'apt-listbugs', 'rlwrap', 'strace', 'procmail', 'make', 'keychain', 'libstring-shellquote-perl', 'dmidecode', 'expect'] # expect for unbuffer, pcp for dstat, but that results in cronjobs that spin up disks
+    name: ['git', 'htop', 'iotop', 'smem', 'ethtool', 'net-tools', 'iperf3',  'aptitude', 'dlocate', 'vim', 'sysstat', 'nicstat', 'lshw', 'parted', 'sdparm', 'ntpdate', 'colordiff', 'ifstat', 'iftop', 'apt-listchanges', 'apt-show-versions', 'etckeeper', 'apt-listbugs', 'apt-listbugs', 'rlwrap', 'strace', 'make', 'keychain', 'libstring-shellquote-perl', 'dmidecode', 'expect'] # expect for unbuffer, pcp for dstat, but that results in cronjobs that spin up disks
     # atop
     autoremove: no
     state: present
@@ -362,5 +362,16 @@
   with_items: "{{ systemd_overrides }}"
   become: true
   notify: restart systemd overrides
+
+- name: Synchronize (rsync) and delete files in /etc/bash-git-prompt
+  ansible.posix.synchronize:
+    src: etc_bash-git-prompt/
+    dest: /etc/bash-git-prompt/
+    delete: yes
+    recursive: yes
+    rsync_opts:
+      - "--exclude=.git"
+      - "--delete-excluded"
+  become: true
 
 # FIXME: should set up postfix for !host_is_mailserver

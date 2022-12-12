@@ -1,0 +1,46 @@
+#!/usr/bin/env perl
+# -*- Mode: perl -*-
+#template by ~tconnors/bin/newplscript
+#Sun May 18 01:05:12 EST 2003
+
+use strict;
+#use warnings;
+
+my ($subst,$str,$chars,$diff,$right,$left,$escapechars);
+
+if ( defined $ARGV[0] && ( $ARGV[0] eq "--escapechars" || $ARGV[0] eq "--stripnewline")) {
+  $escapechars=1;
+  shift;
+}
+if ( @ARGV < 4 or $ARGV[0] ne "--right" and $ARGV[0] ne "--left" ) {
+   print STDERR "Usage: $0 [--escapechars] <--right|--left> <subst> <chars> text\n";
+   exit 1;
+}
+
+if ( $ARGV[0] eq "--right" ) {
+    $right=1;
+}else{
+    $right=0;
+}
+shift;
+$subst=$ARGV[0] ; shift;
+$chars=$ARGV[0] ; shift;
+
+$str="@ARGV";
+if ($escapechars) {
+  $str =~ s/\n/;/g;
+  $str =~ s/\\/!/g;
+}
+#print STDERR "str -> $str\n";
+#sleep 1;
+$diff=length("$str") - $chars;
+if ($diff>0) {
+  $diff=length("$str$subst") - $chars;
+  if ( $right ) {
+    $str =~ s/^.{$diff}/$subst/;
+  } else {
+    $str =~ s/.{$diff}$/$subst/;
+  }
+}
+print "$str";
+

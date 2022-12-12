@@ -4,6 +4,19 @@
 # To enable the settings / commands in this file for login shells as well,
 # this file has to be sourced in /etc/profile.
 
+#echo 9 1>&2
+if [ -d /etc/bash.bashrc.d ]; then
+#echo 10 1>&2
+  for i in /etc/bash.bashrc.d/*.sh; do
+#      echo 11 $i 1>&2
+    if [ -r $i ]; then
+#      echo 12 $i 1>&2
+      . $i
+    fi
+  done
+  unset i
+fi
+
 # If not running interactively, don't do anything
 [ -z "$PS1" ] && return
 
@@ -56,15 +69,6 @@ if [ -x /usr/lib/command-not-found -o -x /usr/share/command-not-found/command-no
 		   return 127
 		fi
 	}
-fi
-
-if [ -d /etc/bash.bashrc.d ]; then
-  for i in /etc/bash.bashrc.d/*.sh; do
-    if [ -r $i ]; then
-      . $i
-    fi
-  done
-  unset i
 fi
 
 finalise_prompt
