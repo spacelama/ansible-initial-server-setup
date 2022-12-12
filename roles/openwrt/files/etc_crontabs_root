@@ -1,0 +1,6 @@
+# m h  dom mon dow   command
+
+0 4 * * * /root/bin/log-daily-config
+# 0 * * * * echo 3 > /proc/sys/vm/drop_caches
+
+#@reboot /root/bin/log-daily-config

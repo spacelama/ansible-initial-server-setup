@@ -11,4 +11,5 @@
     - vars/openwrt.yml
   roles:
     - gekmihesg.openwrt
+    - install_files
     - openwrt

@@ -12,6 +12,7 @@
     paths: "{{ file_details.dir }}"
     file_type: file
     excludes: "{{ file_details.files_not }}"
+  become: "{{ file_details.become | default(true) }}"
   register: files_to_delete
   when: file_details.files_not is defined
 
@@ -20,5 +21,5 @@
     path: "{{ item }}"
     state: absent
   with_items: "{{ files_to_delete.files | map(attribute='path') }}"
-  become: true
+  become: "{{ file_details.become | default(true) }}"
   when: file_details.files_not is defined

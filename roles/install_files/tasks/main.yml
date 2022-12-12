@@ -10,17 +10,20 @@
     path: "{{ item.dir }}"
     mode: "{{ item.mode }}"
     state: directory
-  with_items: "{{ install_dirs }}"
-  become: true
+  with_items: "{{ install_dirs | default([]) }}"
+  become: "{{ item.become | default(true) }}"
+  when: item.when | default("true")
 
 - name: install list of files
   include_tasks: install_list_files.yml
-  loop: "{{ install_files }}"
+  loop: "{{ install_files | default([]) }}"
   loop_control:
     loop_var: file_details
+  when: file_details.when | default("true")
 
 - name: remove files not in list
   include_tasks: remove_list_files.yml
-  loop: "{{ remove_files }}"
+  loop: "{{ remove_files | default([]) }}"
   loop_control:
     loop_var: file_details
+  when: file_details.when | default("true")

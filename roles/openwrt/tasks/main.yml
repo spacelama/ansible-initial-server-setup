@@ -42,11 +42,7 @@
     content: "{{ lookup('file', 'dhcp.head.{{ type }}')}}\n\n{{lookup('file', 'dhcp.reservations') }}\n"
   notify: restart dnsmasq
 
-- name: setup usteer
-  copy:
-    dest: "/etc/config/usteer"
-    src: "etc_config_usteer"
-  when: type == "ap"
+#FIXME:  system firewall
 
 - name: setup some custom binaries
   copy:

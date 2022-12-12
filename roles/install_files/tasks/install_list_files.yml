@@ -1,10 +1,11 @@
 ---
+
 - name: install {{ file_details.source }}
   copy:
     src: "{{ file_details.source }}"
     dest: "{{ file_details.dest }}"
     mode: "{{ file_details.mode }}"
-  become: true
+  become: "{{ file_details.become | default(true) }}"
   when: file_details.source is defined
 
 - name: install {{ file_details.files }} into {{ file_details.dir }}
@@ -12,7 +13,7 @@
     src: "{{ file }}"
     dest: "{{ file_details.dir }}/{{ file | basename }}"
     mode: "{{ file_details.mode }}"
-  become: true
+  become: "{{ file_details.become | default(true) }}"
   when: file_details.files is defined
   loop: "{{ file_details.files }}"
   loop_control:
