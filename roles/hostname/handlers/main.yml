@@ -3,5 +3,6 @@
 #  service:
 #    name: hostname
 #    state: restarted
+# happy not to reset the hostname until we reboot
   shell:
     hostname
