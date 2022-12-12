@@ -1,7 +1,7 @@
 ---
 - name: Set hostname
   hostname:
-    name: "{{ hostname }}"
+    name: "{{ hostname | default(inventory_hostname)}}"
   notify: restart hostname
   become: true
 
@@ -18,7 +18,7 @@
   lineinfile:
     dest: /etc/hosts
     line: hosts already has correct hostname
-    regexp: "^{{ ansible_default_ipv4.address }} {{ fqdn }} {{ hostname }}$"
+    regexp: "^{{ ansible_default_ipv4.address }} {{ fqdn | default( inventory_hostname ~ '.' ~ default_domain)}} {{ hostname | default(inventory_hostname)}}$"
     state: present
   changed_when: false
 
@@ -26,7 +26,7 @@
   when: hosts_line.msg == "line added"
   lineinfile:
     dest: /etc/hosts
-    regexp: "\\s{{ hostname }}$"
+    regexp: "\\s{{ hostname | default(inventory_hostname) }}$"
     state: absent
   become: true
 
@@ -35,7 +35,7 @@
   lineinfile:
     dest: /etc/hosts
     insertafter: '^127\.0\.0\.1\slocalhost'
-    line: "{{ ansible_default_ipv4.address }} {{ fqdn }} {{ hostname }}"
+    line: "{{ ansible_default_ipv4.address }} {{ fqdn | default( inventory_hostname ~ '.' ~ default_domain)}} }} {{ hostname | default(inventory_hostname) }}"
     state: present
   notify: restart hostname
   become: true

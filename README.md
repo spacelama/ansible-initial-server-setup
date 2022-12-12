@@ -32,7 +32,7 @@ Modify the variables in **_vars/main.yml_** according to your needs:
 
 **public_key:** the local path to your public SSH key
 
-**fqdn:** your chosen [FQDN](https://kb.iu.edu/d/aiuv)
+**default_domain:** your chosen domain
 
 **hostname:** your chosen hostname
 

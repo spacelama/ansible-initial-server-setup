@@ -229,13 +229,13 @@
 - name: install cron.daily.get_conf_info custom host helpers
   copy:
     src: "{{ item }}"
-    dest: "{{ item | regex_replace('.*get_conf_info.' + hostname, '/usr/local/bin/get_conf_info') }}"
+    dest: "{{ item | regex_replace('.*get_conf_info.' + hostname | default(inventory_hostname), '/usr/local/bin/get_conf_info') }}"
     owner: root
     group: root
     mode: 0755
   become: true
   with_fileglob:
-    - "cron/cron.daily_get_conf_info.{{ hostname }}*"
+    - "cron/cron.daily_get_conf_info.{{ hostname | default(inventory_hostname) }}*"
 
 - name: install cron.daily switch password conf file if defined for this host
   copy:

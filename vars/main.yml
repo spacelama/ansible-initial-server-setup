@@ -1,5 +1,6 @@
 ---
   my_public_key: ~/.ssh/id_rsa.pub
+  default_domain: rather.puzzling.org
 #  ssh_port: 22
   ansible_was_run_by: "{{ lookup('env','USER') }@{{ lookup('env','HOSTNAME') }}"
 
