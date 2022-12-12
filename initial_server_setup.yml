@@ -1,6 +1,6 @@
 ---
 # https://stackoverflow.com/questions/18195142/safely-limiting-ansible-playbooks-to-a-single-machine
-- hosts: "{{ target | default('all,!openwrt') }}"
+- hosts: "{{ target | default('all,!openwrt,!tasmota') }}"
   remote_user: ansible_adm
   gather_facts: no
   vars_files:
@@ -8,7 +8,7 @@
   roles:
     - install_files
 
-- hosts: "{{ target | default('all,!openwrt') }}"
+- hosts: "{{ target | default('all,!openwrt,!tasmota') }}"
   remote_user: ansible_adm
 
   vars_files:
