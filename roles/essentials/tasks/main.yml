@@ -82,7 +82,7 @@
 
 - name: Install essential packages (all)
   apt:
-    name: ['needrestart', 'rsync', 'munin-node', 'procmail'] # procmail for lockfile
+    name: ['needrestart', 'rsync', 'munin-node', 'sysstat', 'procmail'] # procmail for lockfile
     autoremove: no
     state: present
   become: true
@@ -112,7 +112,7 @@
 
 - name: Install essential packages (not container)
   apt:
-    name: ['git', 'htop', 'iotop', 'smem', 'ethtool', 'net-tools', 'iperf3',  'aptitude', 'dlocate', 'vim', 'sysstat', 'nicstat', 'lshw', 'parted', 'sdparm', 'ntpdate', 'colordiff', 'ifstat', 'iftop', 'apt-listchanges', 'apt-show-versions', 'etckeeper', 'apt-listbugs', 'apt-listbugs', 'rlwrap', 'strace', 'make', 'keychain', 'libstring-shellquote-perl', 'dmidecode', 'expect', 'initscripts'] # expect for unbuffer, initscripts for bootlogs, pcp for dstat, but that results in cronjobs that spin up disks
+    name: ['git', 'htop', 'iotop', 'smem', 'ethtool', 'net-tools', 'iperf3',  'aptitude', 'dlocate', 'vim', 'nicstat', 'lshw', 'parted', 'sdparm', 'ntpdate', 'colordiff', 'ifstat', 'iftop', 'apt-listchanges', 'apt-show-versions', 'etckeeper', 'apt-listbugs', 'apt-listbugs', 'rlwrap', 'strace', 'make', 'keychain', 'libstring-shellquote-perl', 'dmidecode', 'expect', 'initscripts'] # expect for unbuffer, initscripts for bootlogs, pcp for dstat, but that results in cronjobs that spin up disks
     # atop
     autoremove: no
     state: present
