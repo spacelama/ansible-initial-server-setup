@@ -1,0 +1,11 @@
+[Unit]
+Description=NetworkManager wifi keepalive/restart daemon
+
+[Service]
+ExecStart=/usr/local/bin/network-keep-alive.sh
+Restart=on-failure
+Type=simple
+
+[Install]
+Alias=network-keep-alive.service
+WantedBy=multi-user.target

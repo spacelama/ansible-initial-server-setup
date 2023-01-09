@@ -10,3 +10,11 @@
     name: systemd-logind
     state: restarted
   become: true
+
+- name: restart network-keep-alive
+  systemd:
+    name: "network-keep-alive"
+    state: restarted
+    daemon_reload: yes
+  become: true
+

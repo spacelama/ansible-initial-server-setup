@@ -131,3 +131,26 @@
     state: absent
   become: true
 
+- name: install network-keep-alive.sh
+  copy:
+    dest: /usr/local/bin/network-keep-alive.sh
+    src: network-keep-alive.sh
+    mode: 0755
+  become: true
+  notify: restart network-keep-alive
+
+- name: install network-keep-alive.service
+  copy:
+    dest: /etc/systemd/system/network-keep-alive.service
+    src: network-keep-alive.service
+  become: true
+  notify: restart network-keep-alive
+
+  # handler picks up when file is introduced or changed, and here we
+  # otherwise ensure it's at least started
+- name: start network-keep-alive
+  systemd:
+    name: "network-keep-alive"
+    state: started
+  become: true
+
