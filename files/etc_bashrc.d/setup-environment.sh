@@ -1,16 +1,6 @@
 # add all the other bash settings we care about, paths, etc, that
 # would normally have gone in .bash_profile
 function setup_environment() {
-    if [ -z "$NONINTERACT" ] ; then
-        setup_bash_settings
-        setup_aliases
-        setup_remote_aliases
-    fi
-
-    if [ -z "$NONINTERACT" -a -f /etc/bash_completion -a -z "$BASH_COMPLETION" ]; then
-        [ -e /etc/profile.d/bash_completion.sh ] && . /etc/profile.d/bash_completion.sh
-    fi
-
     #UID=`uid` ; export UID   #already set by bash readonly
     USER=`id_username` ; export USER
 
@@ -33,6 +23,18 @@ function setup_environment() {
     SYSTEM=`uname -s`-`uname -m | sed 's/ /_/g'` ; export SYSTEM
     KERNEL=`uname -r | sed 's/-.*//'` ; export KERNEL
     OS=`uname -s` ; export OS
+
+#    echo OS=$OS 1>&2
+
+    if [ -z "$NONINTERACT" ] ; then
+        setup_bash_settings
+        setup_aliases
+        setup_remote_aliases
+    fi
+
+    if [ -z "$NONINTERACT" -a -f /etc/bash_completion -a -z "$BASH_COMPLETION" ]; then
+        [ -e /etc/profile.d/bash_completion.sh ] && . /etc/profile.d/bash_completion.sh
+    fi
 
 #    case "$SYSTEM" in
 #        Darwin*)
@@ -384,7 +386,7 @@ function setup_environment() {
 
     #export FSHCLUSTERDEFAULT=ignis1
 
-    if ! [ -n "$SSH_AUTH_SOCK" -o -n "$GPG_AGENT_INFO" ] && [ -z "$NONINTERACT" -a -z "$PBS_ENVIRONMENT" -a -n "$DISPLAY" -a -t 0 -a $SHORTHOST != fs -a $SHORTHOST != pi ] && programexists keychain ; then
+    if ! [ -n "$SSH_AUTH_SOCK" ] && [ -z "$NONINTERACT" -a -z "$PBS_ENVIRONMENT" -a -n "$DISPLAY" -a -t 0 -a $SHORTHOST != fs -a $SHORTHOST != pi ] && programexists keychain ; then
         addkeychain
     fi
     #export HOSTALIASES=$HOME/.scuzzieaddress

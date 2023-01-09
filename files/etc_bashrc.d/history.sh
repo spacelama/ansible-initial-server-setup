@@ -12,6 +12,7 @@ function readfromhistory() {
 }
 
 function writetohistory() {
+    #FIXME: ideally detect when we're inside emacs TRAMP and do nothing
     #    bt
     history=$( history -a /dev/stdout ) # doesn't clear the history because in subshell
     # echo "********history=$history"
@@ -35,6 +36,7 @@ function writetohistory() {
         if [ -n "$history" ] ; then
             echo "$history" >> $HOME/.bash_fullhistory
             if [ -z "$1" ] ; then
+                #FIXME: I'm not sure anyone is using .bash_history anymore
                 echo "$history" >> $HOME/.bash_history
             fi
         fi
@@ -60,6 +62,7 @@ function writetohistory() {
 }
 
 function setup_bash_history_settings() {
+#    echo setup_bash_history_settings 1>&2
     export HISTSIZE=32768
     export HISTFILESIZE=32768
     #  unset HISTFILE               # don't store history between sessions
@@ -77,7 +80,8 @@ function setup_bash_history_settings() {
     # see /etc/inputrc for show-all-if-ambiguous
     if [ -e $HOME/.bash_fullhistory -a "$OS" = Linux ] ; then
         #        echo reading history
-        HISTSIZE2=$((HISTSIZE*2))
+        HISTSIZE2=$((HISTSIZE*2)) # only an approximation since we
+                                  # have multiline history
         tail -n $HISTSIZE2 $HOME/.bash_fullhistory > /tmp/hist.$USER.$$
         history -r /tmp/hist.$USER.$$
         command rm -f /tmp/hist.$USER.$$

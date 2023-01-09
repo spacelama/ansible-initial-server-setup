@@ -1,4 +1,5 @@
 setup_bash_settings() {
+#    echo setup_bash_settings 1>&2
     setup_bash_history_settings
 
     ulimit -c unlimited
