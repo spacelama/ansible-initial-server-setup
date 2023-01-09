@@ -168,6 +168,8 @@
     - tasmota_
     - if_
     - if_err_
+    - nutups_
+    - nutups2_
 #    - ipmi_  # wants to set all 4 on all hosts, so define them in dell instead
 
 - name: existing munin plugins with params
@@ -196,6 +198,31 @@
   with_items: [ 'cidr_allow 127.0.0.1/32', 'cidr_allow 192.168.1.2/24', 'cidr_deny  192.168.1.254/32' ]
   notify: restart munin-node
 
+- name: intercept spundown disks in hddtemp_smartctl
+  ini_file:
+    path: /etc/munin/plugin-conf.d/munin-node
+    section: "hddtemp_smartctl"
+    # no equals separating the key and value, so lets hack that up:
+    allow_no_value: true
+    option: "env.smartctl /usr/local/bin/smart-intercept-spindown"
+    state: present
+  become: true
+  notify: restart munin-node
+
+- name: intercept spundown disks in smart_*
+  ini_file:
+    path: /etc/munin/plugin-conf.d/munin-node
+    section: "smart_*"
+    # no equals separating the key and value, so lets hack that up:
+    allow_no_value: true
+    option: "env.smartpath /usr/local/bin/smart-intercept-spindown"
+    state: present
+  become: true
+  notify: restart munin-node
+
+  # FIXME: these should all be ini_file, I suspect, but do need to
+  # consider what happens when we change value, given we can't specify
+  # option and value
 - name: Ensure munin df excludes
   lineinfile:
     path: "/etc/munin/plugin-conf.d/munin-node"

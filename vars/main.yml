@@ -79,6 +79,7 @@
 
   install_files:
     - { source: usr_local_bin/hddtemp, dest: /usr/local/bin/hddtemp, mode: "0755" }
+    - { source: usr_local_bin/smart-intercept-spindown, dest: /usr/local/bin/smart-intercept-spindown, mode: "0755" }
     - { source: cron/cron.daily_get_conf_info, dest: /usr/local/bin/get_conf_info, mode: "0755" }
     - { source: etc_bashrc.d/bash.bashrc, dest: /etc/bash.bashrc, mode: "0644" }
     - { source: etc/bashcolors, dest: /etc/bashcolors, mode: "0644" }
