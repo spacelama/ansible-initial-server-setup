@@ -3,7 +3,7 @@
 # when the promt returns, so such programs will never be disowned -
 # only those that are truly running at one point in time when
 # backgrounded
-PROMPT_COMMAND=handleprompt # likely to get overriden by git plugins later on
+[ -z "$NONINTERACT" ] && PROMPT_COMMAND=handleprompt # likely to get overriden by git plugins later on
 
 function handleprompt () {
     retcode=$?
@@ -94,7 +94,7 @@ if [ "$SMALLPROMPT" = yes ] ; then
     function finalise_prompt() {
         # ESC=`echo -ne '\033'`
         # . ~/bash-git-prompt/gitprompt.sh
-        PROMPT_COMMAND=handleprompt
+        [ -z "$NONINTERACT" ] && PROMPT_COMMAND=handleprompt
     }
 else
     function generatetitle () {
@@ -182,6 +182,6 @@ else
             . /etc/bash-git-prompt/gitprompt.sh
             GIT_PROMPT_HAS_RUN=true
         fi
-        PROMPT_COMMAND=handleprompt # was likely just overriden
+        [ -z "$NONINTERACT" ] && PROMPT_COMMAND=handleprompt # was likely just overriden
     }
 fi
