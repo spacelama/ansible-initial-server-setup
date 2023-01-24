@@ -97,6 +97,12 @@ config host
 	option ip '192.168.1.33'
 
 config host
+	option mac 'AC:3E:B1:01:91:23'
+	option name 'pixel'
+	option dns '1'
+	option ip '192.168.1.32'
+
+config host
 	option ip '192.168.1.7'
 	option mac '00:14:fd:16:21:c4'
 	option name 'enclosure'
@@ -404,6 +410,18 @@ config host
 	option ip '192.168.1.79'
 
 config host
+	option mac '4c:eb:d6:d7:81:83'
+	option name 'patiofluro-power'
+	option dns '1'
+	option ip '192.168.1.80'
+
+config host
+	option mac 'e0:98:06:f1:86:10'
+	option name 'loungefrontlight-power'
+	option dns '1'
+	option ip '192.168.1.81'
+
+config host
 	option mac 'c4:4f:33:a8:eb:9b'
 	option name 'washingmachine-power'
 	option dns '1'
@@ -417,7 +435,7 @@ config host
 
 config host
 	option mac '50:02:91:11:CA:7E'
-	option name 'floatcharger-power'
+	option name 'panasonic-power'
 	option dns '1'
 	option ip '192.168.1.75'
 
