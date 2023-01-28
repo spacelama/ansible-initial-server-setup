@@ -44,7 +44,7 @@ config domain
 	option ip '192.168.1.253'
 
 config domain
-	option name 're450'
+	option name 'asusrtax53u'
 	option ip '192.168.1.252'
 
 config domain
