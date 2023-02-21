@@ -1,0 +1,45 @@
+---
+
+# many of these definitions created via convert_uci_to_ansible taking
+# input from 'uci changes' prior to uci commit
+
+- name: delete LAN, WAN, WAN6 interfaces
+  command:
+    cmd: "uci delete network.{{ item }}"
+  with_items:
+    - "lan"
+    - "wan"
+    - "wan6"
+  when: type == 'ap'
+  register: uci_delete_network
+  failed_when: false
+  changed_when: uci_delete_network.rc == 0
+  # note - the notify causes the commit to be done at a later date -
+  # specifically, if any of the tasks below fail to correctly add the
+  # required interfaces, the notify will not act, so we'll still have
+  # the old interface in place!
+  notify: uci commit
+
+# trying to follow along with: https://github.com/gekmihesg/ansible-openwrt/issues/6
+- name: try add interface windows7
+  uci:
+    command: add
+    config: network
+    type: interface
+    name: LANWINDOWS7
+  notify: uci commit
+
+- name: try setting option to interface windows7
+  uci:
+    command: set
+    key: network.LANWINDOWS7
+    value:
+      device: 'br-LANWINDOWS7'
+      proto: 'static'
+      ipaddr: '192.168.7.{{ inet_addr_suffix }}/24'
+      netmask: '255.255.255.0'
+      gateway: '192.168.7.254'
+      dns:
+        - '192.168.7.254'
+  notify: uci commit
+          

@@ -11,3 +11,11 @@
     name: dnsmasq
     state: restarted
   throttle: 1
+
+- name: uci commit
+  debug:
+    msg: "not running uci commit!"
+# FIXME: want to do this once we've finished debugging  uci:
+# FIXME: want to do this once we've finished debugging    command: commit
+#    notify: reload wifi
+

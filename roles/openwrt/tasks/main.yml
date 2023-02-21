@@ -1,4 +1,10 @@
 ---
+- name: include uci config
+  include_tasks: uci_config.yml
+
+- name: commit changes
+  meta: flush_handlers
+
 - name: remove conflicting and/or obsolete packages
   opkg:
     name: luci-app-dawn,dawn
