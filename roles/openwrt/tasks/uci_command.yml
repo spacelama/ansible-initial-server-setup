@@ -1,0 +1,12 @@
+---
+- name: "run uci native command '{{ uci_command }}'"
+  command:
+    cmd: "{{ uci_command }}"
+  register: uci_command
+  failed_when: false
+  changed_when: uci_command.rc == 0
+  # note - the notify causes the commit to be done at a later date -
+  # specifically, if any of the tasks below fail to correctly add the
+  # required interfaces, the notify will not act, so we'll still have
+  # the old interface in place!
+  notify: uci commit

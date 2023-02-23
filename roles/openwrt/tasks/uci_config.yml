@@ -4,21 +4,14 @@
 # input from 'uci changes' prior to uci commit
 
 - name: delete LAN, WAN, WAN6 interfaces
-  command:
-    cmd: "uci delete network.{{ item }}"
+  include_tasks: uci_command.yml
+  vars:
+    uci_command: "uci delete network.{{ item }}"
   with_items:
     - "lan"
     - "wan"
     - "wan6"
   when: type == 'ap'
-  register: uci_delete_network
-  failed_when: false
-  changed_when: uci_delete_network.rc == 0
-  # note - the notify causes the commit to be done at a later date -
-  # specifically, if any of the tasks below fail to correctly add the
-  # required interfaces, the notify will not act, so we'll still have
-  # the old interface in place!
-  notify: uci commit
 
 # trying to follow along with: https://github.com/gekmihesg/ansible-openwrt/issues/6
 - name: try add interface windows7
