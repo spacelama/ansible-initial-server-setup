@@ -1,6 +1,28 @@
 # https://wiki.debian.org/NetworkInterfaceNames
+# https://manpages.debian.org/testing/udev/systemd.link.5.en.html
+# https://manpages.debian.org/testing/systemd/systemd.net-naming-scheme.7.en.html
+
 [Match]
 MACAddress={{ mac_addr }}
 
+#OriginalName=*
+
 [Link]
-Name=lan0
+
+# Rename to eth0.  Yes, there are warnings everywhere not to do this,
+# but any alleged problems with systemd are vastly smaller than the
+# problems it causes proxmox not to have a predictable name that starts
+# with ens|eth|....
+# I tried renaming to lan0, but /usr/share/perl5/PVE/Network.pm
+# doesn't understand this (https://bugzilla.proxmox.com/show_bug.cgi?id=4125),
+# and it seems to break passing through of vlan trunk through to a VM
+
+Name=eth0
+WakeOnLan=magic
+
+# while we could go NamePolicy=mac and end up with predictable names
+# "enxAABBCCDDEEFF", when we try to append .vlan, we go over 15
+# characters, and things quietly fail:
+# https://forum.proxmox.com/threads/proxmox-network-interface-name-problems.92065/
+#NamePolicy=mac
+#MACAddressPolicy=persistent
