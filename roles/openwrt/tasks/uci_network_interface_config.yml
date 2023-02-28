@@ -1,0 +1,104 @@
+---
+# trying to follow along with: https://github.com/gekmihesg/ansible-openwrt/issues/6
+
+# FIXME: Seems these blank config device without a name (where uci
+# uses @device[-1]) aren't compatible with gekmihesg.openwrt, and it
+# can't detect that a resource already exists because it doesn't
+# appear in `uci show` output. So much like uci_config.yml, we're
+# going to have to run this on the basis that `uci show` shows
+# network.@device[*].name doesn't already have a matching entry, or
+# perhaps mirror code in uci_config.yml that adds unconditionally, but
+# ignores errors and says something changed only upon success
+# - name: try add device br-{{ interface.key }}
+#   uci:
+#     command: add
+#     config: network
+#     type: device
+#     find_by:
+#       name: "br-{{ interface.key }}"
+#   notify: uci commit
+
+# - name: try setting option for device br-{{ interface.key }} to eth0.{{ interface.value }}0
+#   uci:
+#     command: set
+#     key: "network.br-{{ interface.key }}"
+#     value:
+#       type: bridge
+#       list ports: 'eth0.{{ interface.value }}0'
+#   notify: uci commit
+
+- name: add device br-{{ interface.key }}
+  include_tasks: uci_command.yml
+  vars:
+    when:
+      "! uci show network | grep network.@device.*br-{{ interface.key }}"
+  loop_control:
+    loop_var: uci_command
+  with_items:
+    - "uci add network device ; uci set network.@device[-1].type='bridge' ; uci set network.@device[-1].name='br-{{ interface.key }}' ; uci add_list network.@device[-1].ports='eth0.{{ interface.value }}0'"
+  when: openwrt_dsa_switch_config is not defined
+
+# just adding the interface manually without creating a vlan first yields this in luci:
+# uci set network.LANWINDOWS7=interface
+# uci set network.LANWINDOWS7.proto='static'
+# uci set network.LANWINDOWS7.device='eth0.70'
+# uci set network.LANWINDOWS7.ipaddr='192.168.7.22'
+# uci set network.LANWINDOWS7.netmask='255.255.255.0'
+# uci set network.LANWINDOWS7.gateway='192.168.7.254'
+
+# adding the bridge later yields:
+# uci add network device # =cfg0b0f15
+# uci set network.@device[-1].type='bridge'
+# uci set network.@device[-1].name='br-LANWINDOWS7'
+# uci add_list network.@device[-1].ports='eth0.70'
+
+# then flicking the interface over to the bridge rather than directly to the vlan gives this:
+# uci set network.LANWINDOWS7.device='br-LANWINDOWS7'
+
+- name: add interface {{ interface.key }}
+  uci:
+    command: add
+    config: network
+    type: interface
+    name: "{{ interface.key }}"
+  notify: uci commit
+
+- name: set interface to br-{{ interface.key }}
+  uci:
+    command: set
+    key: "network.{{ interface.key }}"
+    value:
+      device: "br-{{ interface.key }}"
+  notify: uci commit
+  when: openwrt_dsa_switch_config is not defined
+
+- name: set interface for {{ interface.key }} to br0.{{ interface.value }}0
+  uci:
+    command: set
+    key: "network.{{ interface.key }}"
+    value:
+      device: "br0.{{ interface.value }}0"
+  notify: uci commit
+  when: openwrt_dsa_switch_config is defined
+
+- name: try setting option to interface {{ interface.key }}
+  uci:
+    command: set
+    key: "network.{{ interface.key }}"
+    value:
+      proto: "static"
+      ipaddr: "192.168.{{ interface.value }}.{{ inet_addr_suffix }}"
+      netmask: "255.255.255.0"
+  notify: uci commit
+
+- name: add gateway and DNS for APs
+  uci:
+    command: set
+    key: "network.{{ interface.key }}"
+    value:
+      gateway: "192.168.{{ interface.value }}.254"
+      dns:
+        - "192.168.{{ interface.value }}.254"
+  when: type == 'ap'
+  notify: uci commit
+

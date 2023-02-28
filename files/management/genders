@@ -52,5 +52,6 @@ switch                          network
 b1300                           network,openwrt
 archerd7                        network,openwrt,wifi
 archerc7                        network,openwrt,wifi
-wavlink                         network,openwrt,wifi
+#wavlink                         network,openwrt,wifi
+asusrtax53u                     network,openwrt,wifi
 fan-1                           iot,tuya

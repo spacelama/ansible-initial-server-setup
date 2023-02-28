@@ -1,12 +1,25 @@
 ---
-- name: "run uci native command '{{ uci_command }}'"
-  command:
-    cmd: "{{ uci_command }}"
-  register: uci_command
+- name: "determine if we need to run uci native command '{{ uci_command }}'"
+  shell: "{{ when }}"
+  register: check_condition
   failed_when: false
-  changed_when: uci_command.rc == 0
+  changed_when: false
+  when: when is defined
+
+# - debug:
+#     msg: "out={{ check_condition.stdout }}, rc={{ check_condition.rc }}"
+#   when: when is defined
+
+# this task will trigger a commit if it detects change
+- name: "run uci native command '{{ uci_command }}'"
+  shell:
+    cmd: "{{ uci_command }}"
+  register: uci_command_result
+  failed_when: false
+  changed_when: uci_command_result.rc == 0
   # note - the notify causes the commit to be done at a later date -
   # specifically, if any of the tasks below fail to correctly add the
   # required interfaces, the notify will not act, so we'll still have
   # the old interface in place!
   notify: uci commit
+  when: (when is not defined) or ((check_condition.rc is defined) and (check_condition.rc == 0))

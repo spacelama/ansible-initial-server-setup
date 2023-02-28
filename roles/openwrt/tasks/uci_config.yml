@@ -3,6 +3,13 @@
 # many of these definitions created via convert_uci_to_ansible taking
 # input from 'uci changes' prior to uci commit
 
+- name: initialises basic firewall
+  copy:
+    dest: /etc/config/firewall
+    content: "\nconfig defaults\n\toption input 'ACCEPT'\n\toption output 'ACCEPT'\n\toption drop_invalid '1'\n\toption synflood_protect '1'\n\toption forward 'REJECT'\n\n"
+  when: type == 'ap'
+  notify: restart firewall
+
 - name: delete LAN, WAN, WAN6 interfaces
   include_tasks: uci_command.yml
   vars:
@@ -13,26 +20,279 @@
     - "wan6"
   when: type == 'ap'
 
-# trying to follow along with: https://github.com/gekmihesg/ansible-openwrt/issues/6
-- name: try add interface windows7
-  uci:
-    command: add
-    config: network
-    type: interface
-    name: LANWINDOWS7
-  notify: uci commit
+- name: define network interfaces for {{ interface.key }}
+  include_tasks: uci_network_interface_config.yml
+  loop_control:
+    loop_var: interface
+  with_items:
+    - { key: LAN1, value: 1 }
+    - { key: LANGUEST3, value: 3 }
+    - { key: LANIOT4, value: 4 }
+    - { key: LANWINDOWS7, value: 7 }
 
-- name: try setting option to interface windows7
+- name: Set system hostname, timezone
   uci:
     command: set
-    key: network.LANWINDOWS7
+    key: system.@system[0]
     value:
-      device: 'br-LANWINDOWS7'
-      proto: 'static'
-      ipaddr: '192.168.7.{{ inet_addr_suffix }}/24'
-      netmask: '255.255.255.0'
-      gateway: '192.168.7.254'
-      dns:
-        - '192.168.7.254'
+      hostname: "{{ inventory_hostname }}"
+      zonename: Australia/Melbourne
+      timezone: 'AEST-10AEDT,M10.1.0,M4.1.0/3'
+      log_ip: "{{ syslog }}"
+      log_proto: 'udp'
+      conloglevel: '8'
+      cronloglevel: '5'
   notify: uci commit
-          
+
+- name: set system ntp
+  uci:
+    command: set
+    key: system.ntp
+    value:
+      enable_server: 1
+      server:
+    # FIXME: consider taking out the IP address of the current device from this list:
+        ['0.openwrt.pool.ntp.org', '1.openwrt.pool.ntp.org',
+        '2.openwrt.pool.ntp.org','3.openwrt.pool.ntp.org',
+        '192.168.1.2','192.168.1.17',
+        '192.168.1.250','192.168.1.251',
+        '192.168.1.252','192.168.1.253','192.168.1.254']
+  notify: uci commit
+
+- name: set dropbear.@dropbear[0].Interface
+  uci:
+    command: set
+    key: dropbear.@dropbear[0].Interface
+    value: 'LAN1'
+  notify: uci commit
+
+- name: set uhttpd.main.redirect_https
+  uci:
+    command: set
+    key: uhttpd.main.redirect_https
+    value: "1"
+  notify: uci commit
+
+- name: set firewall.@defaults[0]
+  uci:
+    command: set
+    key: firewall.@defaults[0]
+    value:
+      synflood_protect: 1
+      drop_invalid: 1
+  notify: uci commit
+
+- name: set radio0
+  uci:
+    command: set
+    key: wireless.radio0
+    value: "{{ default_wifi_device_settings | combine( {
+      'htmode': htmode_24ghz,
+      'cell_density': density_24ghz,
+      'distance': distance_24ghz,
+      'txpower': power_24ghz | default(omit),
+      'channel': channel_24ghz
+    } ) }}"
+  when: (type == 'ap') and (htmode_24ghz is defined)
+  notify: uci commit
+
+- name: set radio1
+  uci:
+    command: set
+    key: wireless.radio1
+    value: "{{ default_wifi_device_settings | combine( {
+      'htmode': htmode_5ghz,
+      'cell_density': density_5ghz,
+      'distance': distance_5ghz,
+      'txpower': power_5ghz | default(omit),
+      'channel': channel_5ghz
+    } ) }}"
+  when: (type == 'ap') and (htmode_5ghz is defined)
+  notify: uci commit
+
+- name: add default_radio0
+  uci:
+    command: add
+    config: wireless
+    type: wifi-iface
+    name: default_radio0
+  when: (type == 'ap') and (htmode_24ghz is defined)
+  notify: uci commit
+
+- name: set default_radio0
+  uci:
+    command: set
+    key: wireless.default_radio0
+    value: "{{ default_wifi_iface_settings | combine( {
+      'device': 'radio0',
+      'ssid': ssid1_24ghz,
+      'key': lookup('file', 'ap.wpa2.default_radio0.psk'),
+      'network': 'LAN1',
+      'ifname': 'wlan24-0',
+    } ) }}"
+  when: (type == 'ap') and (htmode_24ghz is defined)
+  notify: uci commit
+
+- name: add default_radio1
+  uci:
+    command: add
+    config: wireless
+    type: wifi-iface
+    name: default_radio1
+  when: (type == 'ap') and (htmode_5ghz is defined)
+  notify: uci commit
+
+- name: set default_radio1
+  uci:
+    command: set
+    key: wireless.default_radio1
+    value: "{{ default_wifi_iface_settings | combine( {
+      'device': 'radio1',
+      'ssid': ssid1_5ghz,
+      'key': lookup('file', 'ap.wpa2.default_radio1.psk'),
+      'network': 'LAN1',
+      'ifname': 'wlan5-0',
+    } ) }}"
+  when: (type == 'ap') and (htmode_5ghz is defined)
+  notify: uci commit
+
+- name: add wifinet4
+  uci:
+    command: add
+    config: wireless
+    type: wifi-iface
+    name: wifinet4
+  when: (type == 'ap') and (htmode_24ghz is defined)
+  notify: uci commit
+
+- name: set wifinet4
+  uci:
+    command: set
+    key: wireless.wifinet4
+    value: "{{ default_wifi_iface_settings | combine( {
+      'device': 'radio0',
+      'ssid': lookup('file', 'ap.wpa2.wifinet4.ssid'),
+      'key': lookup('file', 'ap.wpa2.wifinet4.psk'),
+      'network': 'LANIOT4',
+      'ifname': 'wlan24-1',
+      'isolate': '1',
+    } ) }}"
+  when: (type == 'ap') and (htmode_24ghz is defined)
+  notify: uci commit
+
+- name: add wifinet5
+  uci:
+    command: add
+    config: wireless
+    type: wifi-iface
+    name: wifinet5
+  when: (type == 'ap') and (htmode_5ghz is defined)
+  notify: uci commit
+
+- name: set wifinet5
+  uci:
+    command: set
+    key: wireless.wifinet5
+    value: "{{ default_wifi_iface_settings | combine( {
+      'device': 'radio1',
+      'ssid': lookup('file', 'ap.wpa2.wifinet5.ssid'),
+      'key': lookup('file', 'ap.wpa2.wifinet5.psk'),
+      'network': 'LANIOT4',
+      'ifname': 'wlan5-1',
+      'isolate': '1',
+    } ) }}"
+  when: (type == 'ap') and (htmode_5ghz is defined)
+  notify: uci commit
+
+- name: add wifinet6
+  uci:
+    command: add
+    config: wireless
+    type: wifi-iface
+    name: wifinet6
+  when: (type == 'ap') and (htmode_24ghz is defined)
+  notify: uci commit
+
+- name: set wifinet6
+  uci:
+    command: set
+    key: wireless.wifinet6
+    value: "{{ default_wifi_iface_settings | combine( {
+      'device': 'radio0',
+      'ssid': lookup('file', 'ap.wpa2.wifinet6.ssid'),
+      'key': lookup('file', 'ap.wpa2.wifinet6.psk'),
+      'network': 'LANWINDOWS7',
+      'ifname': 'wlan24-2',
+    } ) }}"
+  when: (type == 'ap') and (htmode_24ghz is defined)
+  notify: uci commit
+
+- name: add wifinet7
+  uci:
+    command: add
+    config: wireless
+    type: wifi-iface
+    name: wifinet7
+  when: (type == 'ap') and (htmode_5ghz is defined)
+  notify: uci commit
+
+- name: set wifinet7
+  uci:
+    command: set
+    key: wireless.wifinet7
+    value: "{{ default_wifi_iface_settings | combine( {
+      'device': 'radio1',
+      'ssid': lookup('file', 'ap.wpa2.wifinet7.ssid'),
+      'key': lookup('file', 'ap.wpa2.wifinet7.psk'),
+      'network': 'LANWINDOWS7',
+      'ifname': 'wlan5-2',
+    } ) }}"
+  when: (type == 'ap') and (htmode_5ghz is defined)
+  notify: uci commit
+
+- name: add wifinet11
+  uci:
+    command: add
+    config: wireless
+    type: wifi-iface
+    name: wifinet11
+  when: (type == 'ap') and (htmode_24ghz is defined)
+  notify: uci commit
+
+- name: set wifinet11
+  uci:
+    command: set
+    key: wireless.wifinet11
+    value: "{{ default_wifi_iface_settings | combine( {
+      'device': 'radio0',
+      'ssid': ssid2_24ghz,
+      'key': lookup('file', 'ap.wpa2.wifinet11.psk'),
+      'network': 'LAN1',
+      'ifname': 'wlan24-4',
+    } ) }}"
+  when: (type == 'ap') and (htmode_24ghz is defined)
+  notify: uci commit
+
+- name: add wifinet10
+  uci:
+    command: add
+    config: wireless
+    type: wifi-iface
+    name: wifinet10
+  when: (type == 'ap') and (htmode_5ghz is defined)
+  notify: uci commit
+
+- name: set wifinet10
+  uci:
+    command: set
+    key: wireless.wifinet10
+    value: "{{ default_wifi_iface_settings | combine( {
+      'device': 'radio1',
+      'ssid': ssid2_5ghz,
+      'key': lookup('file', 'ap.wpa2.wifinet10.psk'),
+      'network': 'LAN1',
+      'ifname': 'wlan5-4',
+    } ) }}"
+  when: (type == 'ap') and (htmode_5ghz is defined)
+  notify: uci commit
+

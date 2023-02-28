@@ -1,9 +1,7 @@
 ---
-- name: include uci config
-  include_tasks: uci_config.yml
-
-- name: commit changes
-  meta: flush_handlers
+- set_fact:
+    rootshadow: "{{ lookup('file', 'main.root.{{ type }}.passwd') }}"
+    no_log: true
 
 - name: remove conflicting and/or obsolete packages
   opkg:
@@ -38,7 +36,7 @@
 
 - name: install full packages
   opkg:
-    name: tcpdump,strace
+    name: tcpdump,strace,lsof,usbutils
     state: present
   when: openwrt_heavy_installation is defined
 
@@ -47,8 +45,6 @@
     dest: /etc/config/dhcp
     content: "{{ lookup('file', 'dhcp.head.{{ type }}')}}\n\n{{lookup('file', 'dhcp.reservations') }}\n"
   notify: restart dnsmasq
-
-#FIXME:  system firewall
 
 - name: setup some custom binaries
   copy:
@@ -61,3 +57,35 @@
     - list-installed-packages
     - log-daily-config
     - show_wifi_clients2.sh
+    - opkg-search
+
+- name: set root account passwd
+  lineinfile:
+    dest: /etc/passwd
+    regexp: "^root:"
+    line: "root:x:0:0:root:/root:/bin/bash"
+- name: set root account shadow
+  lineinfile:
+    dest: /etc/shadow
+    regexp: "^root:"
+    line: "root:{{ rootshadow }}:18868:0:99999:7:::"
+- name: set rootsh account passwd
+  lineinfile:
+    dest: /etc/passwd
+    regexp: "^rootsh:"
+    line: "rootsh:x:0:0:root:/root:/bin/ash"
+    insertafter: "^root:"
+- name: set rootsh account shadow
+  lineinfile:
+    dest: /etc/shadow
+    regexp: "^rootsh:"
+    line: "rootsh:{{ rootshadow }}:18868:0:99999:7:::"
+    insertafter: "^root:"
+
+- name: include uci config
+  include_tasks: uci_config.yml
+
+- name: commit changes
+  meta: flush_handlers
+
+#FIXME:  system firewall (only on router, not aps)

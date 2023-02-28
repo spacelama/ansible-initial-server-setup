@@ -1,5 +1,36 @@
 ---
+  install_dirs:
+    - { dir: "/root/bin", mode: "0755", become: false }
+
   install_files:
     - { source: "roles/openwrt/files/etc_config_usteer", dest: /etc/config/usteer, mode: "0644", when: "{{ type == 'ap'}}", become: false }
     - { source: "roles/openwrt/files/etc_dropbear_authorized_keys", dest: /etc/dropbear/authorized_keys, mode: "0644", become: false }
     - { source: "roles/openwrt/files/etc_crontabs_root", dest: /etc/crontabs/root, mode: "0644", become: false }
+    - { source: "roles/openwrt/files/etc_rc.local", dest: /etc/rc.local, mode: "0644", become: false }
+
+  syslog: 192.168.1.17
+
+  mobility_domain: "{{ lookup('file', 'ap.mobility_domain') }}"
+
+  default_wifi_device_settings:
+    country: 'AU'
+
+  default_wifi_iface_settings:
+    mobility_domain: "{{ mobility_domain }}"
+    encryption: psk2
+    ieee80211r: '1'
+    ft_over_ds: '1'
+    ft_psk_generate_local: '1'
+    wpa_disable_eapol_key_retries: '1'
+    mode: 'ap'
+    rsn_preauth: '1'
+    ieee80211k: '1'
+    #	bss_transition: '1'
+    ieee80211v: '1'
+    # following per https://openwrt.org/docs/guide-user/network/wifi/usteer
+    # bss_transition: '1'
+    # wnm_sleep_mode: '1'
+    time_advertisement: '2'
+    time_zone: 'GMT0'
+    rrm_neighbor_report: '1'
+    rrm_beacon_report: '1'

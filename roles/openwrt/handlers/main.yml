@@ -1,6 +1,8 @@
 ---
 - name: restart dnsmasq
-  # actually, remove reservations first
+  # actually, remove reservations first (but we have to keep this name
+  # because other callers call us on it.  Ideally these would just be
+  # a block)
   file:
     dest: /tmp/dhcp.leases
     state: absent
@@ -12,10 +14,15 @@
     state: restarted
   throttle: 1
 
+- name: restart firewall
+  service:
+    name: firewall
+    state: restarted
+
 - name: uci commit
-  debug:
-    msg: "not running uci commit!"
-# FIXME: want to do this once we've finished debugging  uci:
-# FIXME: want to do this once we've finished debugging    command: commit
+#  debug:
+#    msg: "not running uci commit!"
+  uci:
+    command: commit
 #    notify: reload wifi
 
