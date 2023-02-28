@@ -54,6 +54,7 @@
   copy:
     dest: "/root/bin/{{ item }}"
     src: "bin/{{ item }}"
+    mode: "0755"
   with_items:
     - add-batch-dhcp
     - add-dhcp

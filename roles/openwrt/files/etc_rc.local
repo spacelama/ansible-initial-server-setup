@@ -1,0 +1,21 @@
+# Put your custom commands here that should be executed once
+# the system init finished. By default this file does nothing.
+
+# wait enough time that network is up and time has been synced (is
+# done very late in the process!):
+
+(
+  sleep 30
+  date > /tmp/rebooted-at.log
+) &
+
+(
+    sleep 30
+    /root/bin/migrate-large-files-to-nfs
+    if ! [ -L /tmp/opkg-lists ] ; then
+        # only needed when lists aren't offloaded to NFS via symlinks
+        /root/bin/log-daily-config
+    fi
+) > /tmp/boot.rc.local.log 2>&1 &
+
+exit 0
