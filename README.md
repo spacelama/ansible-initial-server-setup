@@ -49,9 +49,32 @@ Modify the variables in **_vars/main.yml_** according to your needs:
 
 Modify **_hosts.yml_** with your various host settings
 
+## Bootstrapping
+
+Install the ansible_adm account and the sudo permissions for this account to escalate to root with:
+
+`$ ansible-playbook bootstrap.yml -u root -k --extra-vars "target=dirac-new" --ask-vault-pass`
+
+Just to renew ssh hostkeys etc, without having to first turn on ssh PermitRootLogin:
+
+`$ ansible-playbook bootstrap.yml -u ansible --extra-vars "target=dirac-new" --ask-vault-pass --become`
+
+Fix up an old installation:
+
+`$ ansible-playbook bootstrap.yml -u tconnors -k --extra-vars "target=maxwell" --ask-vault-pass --become --become-method=su -K`
+
+Fix up an lxc container:
+
+`$ ansible-playbook bootstrap.yml -u root --diff --extra-vars "target=zm"`
+
+
 ## Testing
 
-It's not foolproof, but try `--check` prior to each real ansible run
+It's not foolproof, but try `--check` prior to each real ansible.
+
+`--diff` is extremely handy, but not foolproof when also running --check.
+
+I frequently `--limit` to hosts or away from hosts.
 
 `$ ansible-playbook --ask-vault-pass initial_server_setup.yml --diff --check --limit='!dirac-new,!fs-new,!hass-debian,!mail'`
 
