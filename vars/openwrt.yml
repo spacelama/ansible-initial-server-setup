@@ -25,7 +25,6 @@
     mode: 'ap'
     rsn_preauth: '1'
     ieee80211k: '1'
-    #	bss_transition: '1'
     ieee80211v: '1'
     # following per https://openwrt.org/docs/guide-user/network/wifi/usteer
     # bss_transition: '1'
