@@ -7,3 +7,5 @@ use sudo, ansible
 packages: git cvs
 users: tconnors, backuppc
 hosts: fermi, pauli
+
+Ensure that secrets.yml are never commit unencryped: https://www.reddit.com/r/devops/comments/z2tucy/ensure_that_an_ansible_secretsyml_is_never/

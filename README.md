@@ -1,27 +1,34 @@
-# Ansible Playbook for Initial Server Setup with Debian
+# Ansible Playbook for setting up a proxmox cluster with some debian and container VMs, some tasmota IOT devices, and some Openwrt Access Points and Routers with VLAN separation of the radios
 
 A couple of [Ansible](http://docs.ansible.com/) playbooks which runs a series of configuration steps to set up an SOE based on Debian, in order to provide a solid foundation for subsequent actions.
 
 It borrows heavily from the work of: [Bryan Kennedy](https://plusbryan.com/my-first-5-minutes-on-a-server-or-essential-security-for-linux-servers), [Ryan Eschinger](http://ryaneschinger.com/blog/securing-a-server-with-ansible/),  [Ashley Rich](https://github.com/A5hleyRich/wordpress-ansible), and [Digital Ocean](https://www.digitalocean.com/community/tutorials/initial-server-setup-with-ubuntu-14-04)
 
 It will perform the following:
-* Create a new ansible "super user" with with root privileges and public key authentication
+* Create a new ansible "super user" with with root privileges and public key authentication on your proxmox and debian machines as well as the containers
 * Implement several SSH hardening techniques
 * Configure the timezone and enable time synchronization
 * Modify the hostname and hosts file
-* Install Fail2Ban
+* Install the admin's account with some nice .bashrc settings
+* Install a package baseline appropriate for laptops, desktops, virtualisation hosts, containers, as appropriate
+* Override some of debian's more annoying defaults
+* Manage tasmota settings on your IOT devices
+* Manage openwrt settings on your openwrt devices, including installing VLANs 10,30,40,70 and configuring radios on them
+
+Note that it won't set up your OpenWRT APs and tasmota configurations
+from scratch - but it does make it easier to wholesale change all of
+your SSIDs for example.
 
 ## Requirements
 
 * [Ansible](http://docs.ansible.com/ansible/intro_installation.html) installed locally on your machine
-* Root SSH access to a new Ubuntu 14.04 VPS
 
 ## Configuration
 
 Clone the repo
 
 ```
-$ git clone https://github.com/lukeharvey/ansible-initial-server-setup.git
+$ git clone https://github.com/spacelama/ansible-initial-server-setup.git
 ```
 
 Modify the variables in **_vars/main.yml_** according to your needs:
@@ -30,7 +37,7 @@ Modify the variables in **_vars/main.yml_** according to your needs:
 
 **password:** a [hashed](http://docs.ansible.com/ansible/faq.html#how-do-i-generate-crypted-passwords-for-the-user-module) sudo password
 
-**public_key:** the local path to your public SSH key
+**my_public_key:** the local path to your public SSH key that will be authorized on all remote hosts
 
 **default_domain:** your chosen domain
 
@@ -40,31 +47,21 @@ Modify the variables in **_vars/main.yml_** according to your needs:
 
 **ssh_port:** your chosen SSH port
 
+Modify **_hosts.yml_** with your various host settings
+
 ## Testing
 
-A Vagrantfile is provided which allows the playbook to be tested locally.
+It's not foolproof, but try `--check` prior to each real ansible run
 
-You will need Vagrant and Virtualbox installed, and you should uncomment the following lines in **_ansible.cfg_** to makes things work nicely.
-```
-# private_key_file = ~/.vagrant.d/insecure_private_key
-# host_key_checking = False
-```
-Then run `$ vagrant up` to generate your virtual machine.
-
-And then run the playbook:
-
-`$ ansible-playbook test_server_setup.yml`
+`$ ansible-playbook --ask-vault-pass initial_server_setup.yml --diff --check --limit='!dirac-new,!fs-new,!hass-debian,!mail'`
+`$ ansible-playbook -v openwrt_maintenance.yml --diff --check`
+`$ ansible-playbook tasmota_maintenance.yml --diff --check --limit patiofluro-power,loungefrontlight-power  --extra-vars "setpsk=true" --extra-vars "setsyslog=true"`
 
 ## Production
 
-Add your server's IP address to the **_hosts_** file
+Then run the playbooks:
 
-```
-[production]
-# e.g 192.168.1.1
-# or host.example.com
-```
+`$ ansible-playbook --ask-vault-pass initial_server_setup.yml --diff --limit='!dirac-new,!fs-new,!hass-debian,!mail'`
+`$ ansible-playbook -v openwrt_maintenance.yml --diff`
+`$ ansible-playbook tasmota_maintenance.yml --diff --limit patiofluro-power,loungefrontlight-power  --extra-vars "setpsk=true" --extra-vars "setsyslog=true"`
 
-Then run the playbook:
-
-`$ ansible-playbook initial_server_setup.yml --ask-pass`

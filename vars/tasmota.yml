@@ -18,6 +18,7 @@
       value: "{{ psk }}"
       no_log: True
     - command: Password2
+      # this always gets marked as Changed, so don't run it by default
       value: "{{ psk }}"
       no_log: True
   no_psk_setting: []
@@ -28,7 +29,9 @@
       value: 2
   no_syslog_setting: []
 
+  # this always gets marked as Changed, so don't run it by default
   psk_setting_enabled: "{{ setpsk is defined | ternary(psk_setting, no_psk_setting) }}"
+  # this always gets marked as Changed, so don't run it by default
   syslog_setting_enabled: "{{ setsyslog is defined | ternary(syslog_setting, no_syslog_setting) }}"
 
   compulsory_tasmota_commands:
