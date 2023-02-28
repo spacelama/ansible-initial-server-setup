@@ -54,7 +54,9 @@ Modify **_hosts.yml_** with your various host settings
 It's not foolproof, but try `--check` prior to each real ansible run
 
 `$ ansible-playbook --ask-vault-pass initial_server_setup.yml --diff --check --limit='!dirac-new,!fs-new,!hass-debian,!mail'`
+
 `$ ansible-playbook -v openwrt_maintenance.yml --diff --check`
+
 `$ ansible-playbook tasmota_maintenance.yml --diff --check --limit patiofluro-power,loungefrontlight-power  --extra-vars "setpsk=true" --extra-vars "setsyslog=true"`
 
 ## Production
@@ -62,6 +64,8 @@ It's not foolproof, but try `--check` prior to each real ansible run
 Then run the playbooks:
 
 `$ ansible-playbook --ask-vault-pass initial_server_setup.yml --diff --limit='!dirac-new,!fs-new,!hass-debian,!mail'`
+
 `$ ansible-playbook -v openwrt_maintenance.yml --diff`
+
 `$ ansible-playbook tasmota_maintenance.yml --diff --limit patiofluro-power,loungefrontlight-power  --extra-vars "setpsk=true" --extra-vars "setsyslog=true"`
 
