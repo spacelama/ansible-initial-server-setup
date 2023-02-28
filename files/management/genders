@@ -1,5 +1,5 @@
 dirac                           linux,intel
-#dirac-laptop                    linux,intel
+dirac-laptop                    linux,intel,not247
 maxwell                         linux,intel,not247
 fs                              linux,intel
 pve                             linux,intel
