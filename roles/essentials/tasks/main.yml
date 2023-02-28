@@ -112,7 +112,7 @@
 
 - name: Install essential packages (not container)
   apt:
-    name: ['git', 'htop', 'iotop', 'smem', 'ethtool', 'net-tools', 'iperf3',  'aptitude', 'dlocate', 'vim', 'nicstat', 'lshw', 'parted', 'sdparm', 'ntpdate', 'colordiff', 'ifstat', 'iftop', 'apt-listchanges', 'apt-show-versions', 'etckeeper', 'apt-listbugs', 'apt-listbugs', 'rlwrap', 'strace', 'make', 'keychain', 'libstring-shellquote-perl', 'dmidecode', 'expect', 'initscripts'] # expect for unbuffer, initscripts for bootlogs, pcp for dstat, but that results in cronjobs that spin up disks
+    name: ['git', 'htop', 'iotop', 'smem', 'ethtool', 'net-tools', 'iperf3',  'aptitude', 'dlocate', 'vim', 'nicstat', 'lshw', 'parted', 'sdparm', 'ntpdate', 'colordiff', 'ifstat', 'iftop', 'apt-listchanges', 'apt-show-versions', 'etckeeper', 'apt-listbugs', 'apt-listbugs', 'rlwrap', 'strace', 'make', 'keychain', 'libstring-shellquote-perl', 'dmidecode', 'expect', 'initscripts'] # expect for unbuffer, initscripts for bootlogs, pcp for dstat, but that results in pmlogger cronjobs that spin up disks on fs
     # atop
     autoremove: no
     state: present
@@ -155,6 +155,7 @@
   become: true
   when: host_is_intel is not defined and host_is_amd is not defined
 
+  # FIXME: actually want to disable periodic updates, but need to find out how it's done on vanilla debian first.  Expecting APT::Periodic::Unattended-Upgrade in /etc/apt/apt.conf.d/ somewhere
 #- name: Enable unattended upgrades
 #  copy:
 #    src: apt/10periodic
