@@ -441,4 +441,10 @@
     state: present
   become: true
 
+- name: turn off softdog watchdog reboot
+  copy:
+    content: "# https://forum.proxmox.com/threads/how-to-disable-fencing-for-debugging.59625/\noptions softdog soft_noboot=1\n"
+    dest: "/etc/modprobe.d/softdog.conf"
+  become: true
+
 # FIXME: install QemuServer hook to call this hook
