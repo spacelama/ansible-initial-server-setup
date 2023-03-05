@@ -183,5 +183,8 @@ else
             GIT_PROMPT_HAS_RUN=true
         fi
         [ -z "$NONINTERACT" ] && PROMPT_COMMAND=handleprompt # was likely just overriden
+        if [ -x /usr/bin/direnv ] ; then
+            eval "$(direnv hook bash)"
+        fi
     }
 fi
