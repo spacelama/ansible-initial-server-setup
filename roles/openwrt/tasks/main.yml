@@ -40,6 +40,12 @@
     state: present
   when: openwrt_heavy_installation is defined
 
+- name: install nut packages
+  opkg:
+    name: luci-app-nut,nut,nut-upscmd,nut-upsc,nut-upslog,nut-server,nut-driver-blazer_usb,nut-driver-usbhid-ups,nut-upssched,nut-avahi-service,nut-upsrw,nut-web-cgi
+    state: present
+  when: nut_install is defined
+
 - name: setup dhcp reservations
   copy:
     dest: /etc/config/dhcp
