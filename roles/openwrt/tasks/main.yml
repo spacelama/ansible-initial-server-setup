@@ -46,6 +46,15 @@
     state: present
   when: nut_install is defined
 
+- name: install nut munin plugins
+  file:
+    src: /root/bin/nutups_
+    dest: "/etc/munin/plugins/nutups_powershield_{{ item }}"
+    state: link
+    force: yes
+  with_items: [ charge,voltages,freq,current ]
+  when: nut_install is defined
+
 - name: setup dhcp reservations
   copy:
     dest: /etc/config/dhcp
@@ -64,6 +73,8 @@
     - log-daily-config
     - show_wifi_clients2.sh
     - opkg-search
+    - nutups_
+    - nutups2_
 
 - name: set root account passwd
   lineinfile:
