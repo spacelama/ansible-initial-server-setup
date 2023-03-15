@@ -8,7 +8,7 @@ cd "$data_dir" || exit 1
 mkdir -p tasmota
 cd tasmota || exit 1
 nodeattr -n tasmota | while read h ; do
-    decode-config.py --source "$h" | jq > $h.json
+    decode-config.py --source "$h" | jq > $h.json || echo failed: $h
 done
 
 cd "$data_dir" || exit 1
