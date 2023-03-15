@@ -24,6 +24,20 @@
   notify: restart fail2ban
   become: true
 
+- name: Copy custom fail2ban filter config
+  copy:
+    src: fail2ban/{{ item }}
+    dest: /etc/fail2ban/filter.d/{{ item }}
+    owner: root
+    group: root
+    mode: 0644
+  notify: restart fail2ban
+  become: true
+  with_items:
+    - sshd-ddos.conf
+    - sshd-root.conf
+    - sshd-b.conf
+
 - name: Ensure fail2ban starts on a fresh reboot
   service:
     name: fail2ban
