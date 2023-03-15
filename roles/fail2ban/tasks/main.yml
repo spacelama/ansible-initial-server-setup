@@ -7,10 +7,17 @@
     cache_valid_time: 3600
   become: true
 
+- name: remove previous version of jail.local
+  file:
+    path: /etc/fail2ban/jail.local
+    state: absent
+  notify: restart fail2ban
+  become: true
+
 - name: Copy custom fail2ban config
   copy:
     src: fail2ban/jail.local
-    dest: /etc/fail2ban/jail.local
+    dest: /etc/fail2ban/jail.d/local.conf
     owner: root
     group: root
     mode: 0644

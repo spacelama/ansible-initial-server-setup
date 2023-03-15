@@ -46,4 +46,4 @@
     - role: ssh
 #      when: host_is_legacy is not defined
     - role: fail2ban
-      when: host_is_legacy is not defined
+#      when: host_is_legacy is not defined
