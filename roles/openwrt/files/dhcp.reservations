@@ -453,6 +453,13 @@ config host
 	option ip '192.168.4.60'
 
 config host
+	# study fluro
+	option mac '70:03:9F:D2:62:1F'
+	option name 'study-fluro-1'
+	option dns '1'
+	option ip '192.168.4.61'
+
+config host
 	option mac '56:0f:c8:9f:b2:a4'
 	option name 'AngelaHssiPhone'
 	option dns '1'
