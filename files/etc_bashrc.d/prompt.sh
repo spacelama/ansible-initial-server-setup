@@ -5,6 +5,38 @@
 # backgrounded
 [ -z "$NONINTERACT" ] && PROMPT_COMMAND=handleprompt # likely to get overriden by git plugins later on
 
+# https://stackoverflow.com/questions/2575037/how-to-get-the-cursor-position-in-bash
+# https://stackoverflow.com/questions/62038398/bash-clearing-the-last-output-correctly/62040654#62040654
+# FIXME: oh, turns out zsh does this by default, and you can use that
+# to search better for people who dunnit before (and who fixed other
+# problems such as clearing in the input buffer):
+# https://stackoverflow.com/questions/19943482/configure-shell-to-always-print-prompt-on-new-line-like-zsh
+function fetch_cursor_position() {
+    local getCpos
+    local oldstty
+    local CURPOS
+
+    getCpos=$(tput u7)
+    oldstty=$(stty -g)
+    stty raw -echo min 0
+#    set -xv
+    echo -en "$getCpos"
+    read -sdR CURPOS
+    stty $oldstty
+    IFS=\; read row column <<<"${CURPOS#$'\e['}"
+}
+
+# calling fetch_cursor_position empties the tty buffer, which is
+# annoying when you've aleady partially typed out the next command, so
+# use this instead
+function print_to_eol() {
+    local extra_spaces
+    printf -v extra_spaces "%$((COLUMNS-1))s"
+    colorize --nolf --background white black " "
+    echo -n "$extra_spaces"
+    echo -ne '\r'
+}
+
 function handleprompt () {
     retcode=$?
 
@@ -156,6 +188,16 @@ else
         else
             shell="bash"
         fi
+
+        # move the cursor back to a newline if we're not at the start
+        # of a line when we start outputting the prompt
+        #fetch_cursor_position
+        #if [ $column != 1 ] ; then
+        #    colorize --background white black ' ' # %
+        #fi
+
+        print_to_eol
+
         #            echo 'setprompt ran?'
         PS1_PREV_EXIT_CODE="\`echo -n '\[$ESC' ; if [ \$retcode = 0 ]; then echo -n '[0;32m'; else echo -n '[0;31m'; fi ; echo -n '\]' ; echo -n \$retcode\`"
         PS1_PRE="#$PS1_PREV_EXIT_CODE\[$ESC[0m\]"'-\j-\t, \d '$(colorizeprompt)":\\w"
@@ -182,9 +224,11 @@ else
             . /etc/bash-git-prompt/gitprompt.sh
             GIT_PROMPT_HAS_RUN=true
         fi
-        [ -z "$NONINTERACT" ] && PROMPT_COMMAND=handleprompt # was likely just overriden
-        if [ -x /usr/bin/direnv ] ; then
-            eval "$(direnv hook bash)"
+        if [ -z "$NONINTERACT" ] ; then
+            PROMPT_COMMAND=handleprompt # was likely just overriden
+            if [ -x /usr/bin/direnv ] ; then
+                eval "$(direnv hook bash)"
+            fi
         fi
     }
 fi
