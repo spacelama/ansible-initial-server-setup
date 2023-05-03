@@ -88,5 +88,5 @@
     - { files: "{{ bashrc_files | flatten }}", dir: /etc/bash.bashrc.d/, mode: "0644" }
 
   remove_files:
-    - { files_not: "{{ bashrc_files | flatten | map('basename') }}", dir: /etc/bash.bashrc.d/ } # FIXME: should carefully consider those containers that actually provided files in that directory.
+    - { files_not: "{{ bashrc_files | flatten | map('basename') }}", dir: /etc/bash.bashrc.d/ } # FIXME: should carefully consider those containers that actually provided files in that directory, but I think the main concern is actually /etc/skel/.bashrc.d/ amd by extension ~/.bashrc.d/  We're not yet overriding that, so should be fine for now...
 #    - { files_not: "{{ bin_files | flatten | map('basename') }}", dir: /usr/local/bin/ } # Can't do this - lots of files in /usr/local/bin not controlled from here
