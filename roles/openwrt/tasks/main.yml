@@ -72,6 +72,8 @@
     - list-installed-packages
     - log-daily-config
     - show_wifi_clients2.sh
+    - show_wifi_clients2.sh.helper
+    - show_wifi_clients2.sh.helper2
     - opkg-search
     - nutups_
     - nutups2_
