@@ -4,6 +4,10 @@ config cname
 	option cname 'www.rather.puzzling.org'
 	option target 'rather.puzzling.org'
 
+config cname
+	option cname 'idrac.rather.puzzling.org'
+	option target 'idrac-r520.rather.puzzling.org'
+
 # a daemon running external to openwrt (monitor_iot.worker) monitors
 # our public IP and resets our internal DNS entry to this if it finds
 # it doesn't match
@@ -183,7 +187,13 @@ config host
 config host
 	option ip '192.168.1.10'
 	option mac 'f0:1f:af:d9:75:22'
-	option name 'idrac'
+	option name 'idrac-r520'
+	option dns '1'
+
+config host
+	option ip '192.168.1.11'
+	option mac '18:66:da:62:ce:a3'
+	option name 'idrac-r730xd'
 	option dns '1'
 
 config host
@@ -316,6 +326,12 @@ config host
 	option ip '192.168.1.5'
 	option mac 'f0:1f:af:d9:75:20'
 	option name 'pve'
+	option dns '1'
+
+config host
+	option ip '192.168.1.8'
+	option mac '18:66:da:e7:83:74'
+	option name 'pve1'
 	option dns '1'
 
 config host
