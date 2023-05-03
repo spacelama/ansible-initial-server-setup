@@ -1,0 +1,25 @@
+#!/bin/sh
+
+# /etc/show_wifi_clients.sh
+# Shows MAC, IP address and any hostname info for all connected wifi devices
+# written for openwrt 12.09 Attitude Adjustment
+
+# https://openwrt.org/faq/how_to_get_a_list_of_connected_clients
+
+# for each input mac addresses on stdin, get address
+
+#printf '%-12s %-15s %-60s %17s\n' "AP name:" "IP address" "name" "MAC address"
+#printf '%s %-15s %-60s %17s\n' "AP name:" "IP address" "name" "MAC address"
+
+while read ap mac
+do
+    # If a DHCP lease has been given out by dnsmasq,
+    # save it.
+    ip=`cat /proc/net/arp | awk '{print $1, $4}' | grep "$mac$" | awk '{print $1}'`
+    if [ -n "$ip" ] ; then
+        host=`nslookup "$ip" | sed -n 's/.*name = //p'`
+        # ... show the mac address:
+#        printf '%-12s %-15s %-60s %17s\n' "$ap" "$ip" "$host" "$mac"
+        printf '%-12s %-15s %-60s %17s\n' "$ap" "$ip" "$host" "$mac"
+    fi
+done
