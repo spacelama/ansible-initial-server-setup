@@ -84,7 +84,7 @@
 
 - name: Install dell tools
   apt:
-    name: ['srvadmin-all', 'ipmitool']
+    name: ['srvadmin-all', 'ipmitool', 'ledmon']
     update_cache: yes
     cache_valid_time: 0
     autoremove: no
