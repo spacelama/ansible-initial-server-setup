@@ -402,6 +402,12 @@
   become: true
   notify: "reload cron"
 
+- name: "Install guest snippets directory"
+  file:
+    path: "/var/lib/vz/snippets/"
+    state: directory
+  become: true
+
 - name: "Install guest snippets"
   copy:
     dest: /var/lib/vz/snippets/guest-hookscript.pl
