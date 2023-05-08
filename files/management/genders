@@ -3,6 +3,7 @@ dirac-laptop                    linux,intel,not247
 maxwell                         linux,intel,not247
 fs                              linux,intel
 pve                             linux,intel
+pve1                            linux,intel
 pve2                            linux,intel
 pi                              linux,arm
 gamow                           linux,intel,not247
