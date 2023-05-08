@@ -1,4 +1,12 @@
 ---
+- name: Gather the package facts
+  ansible.builtin.package_facts:
+    manager: auto
+
+#- name: Print the package facts
+#  ansible.builtin.debug:
+#    var: ansible_facts.packages
+
 - name: Install fail2ban
   apt:
     name: ['fail2ban']
@@ -23,6 +31,17 @@
     mode: 0644
   notify: restart fail2ban
   become: true
+
+- name: Copy custom fail2ban config if apache installed
+  copy:
+    src: fail2ban/jail-apache.local
+    dest: /etc/fail2ban/jail.d/local-apache.conf
+    owner: root
+    group: root
+    mode: 0644
+  notify: restart fail2ban
+  become: true
+  when: "'apache2' in ansible_facts.packages"
 
 - name: Copy custom fail2ban filter config
   copy:
