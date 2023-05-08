@@ -10,7 +10,6 @@
 
 - hosts: "{{ target | default('all,!openwrt,!tasmota') }}"
   remote_user: ansible_adm
-
   vars_files:
     - vars/main.yml
 

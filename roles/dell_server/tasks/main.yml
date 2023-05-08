@@ -33,31 +33,19 @@
     state=directory
   become: true
 
-- name: dell keyring exists?
-  stat: path=/etc/apt/keyrings/linux.dell.com.0x1285491434D8786F.gpg
-  register: dell_keyring
-  become: true
-
-  # https://forum.proxmox.com/threads/dell-openmanage-on-proxmox-6-x.57932/post-522534
-- name: install dell repository key
+# https://forum.proxmox.com/threads/dell-openmanage-on-proxmox-6-x.57932/post-522534
+# https://docs.ansible.com/ansible/latest/collections/ansible/builtin/apt_repository_module.html
+- name: Add dell openmanage repo
   block:
-    - name: download keyring
-      shell: 'wget -qO - https://linux.dell.com/repo/pgp_pubkeys/0x1285491434D8786F.asc | gpg --dearmor'
-      register: dell_keyring_gpg
+    - name: dell repo |no apt key
+      ansible.builtin.get_url:
+        url: https://linux.dell.com/repo/pgp_pubkeys/0x1285491434D8786F.asc
+        dest: /etc/apt/keyrings/linux.dell.com.0x1285491434D8786F.asc
 
-    - name: create repo file
-      copy:
-        dest: /etc/apt/keyrings/linux.dell.com.0x1285491434D8786F.gpg
-        content: "{{ dell_keyring_gpg.stdout }}"
-      become: true
-  when: not dell_keyring.stat.exists
-
-  # FIXME: should invalidate the old repo rather than just adding this
-- name: dell repository
-  apt_repository:
-    repo: "deb [signed-by=/etc/apt/keyrings/linux.dell.com.0x1285491434D8786F.gpg] https://linux.dell.com/repo/community/openmanage/{{ dell_omsa_version }} main"
-    state: present
-    filename: linux.dell.com.sources
+    - name: somerepo | apt source
+      copy: # should be apt_repository, but https://github.com/ansible/ansible/issues/58386 https://github.com/ansible/ansible/issues/61420 closed WONTFIX
+        content: "deb [arch=amd64 signed-by=/etc/apt/keyrings/linux.dell.com.0x1285491434D8786F.asc] https://linux.dell.com/repo/community/openmanage/{{ dell_omsa_version }} main\n"
+        dest: "/etc/apt/sources.list.d/linux.dell.com.sources.list"
   become: true
 
 #- name: Check if sfcb libcimcclient0 and libssl1.0.2 is installed
