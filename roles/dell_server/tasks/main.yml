@@ -26,16 +26,36 @@
     enabled: yes
     state: started
   become: true
-  
-- name: dell repository key
-  apt_key:
-    keyserver: pool.sks-keyservers.net
-    id: 1285491434D8786F
+
+- name: make apt keyrings directory
+  file:
+    path="/etc/apt/keyrings"
+    state=directory
   become: true
 
+- name: dell keyring exists?
+  stat: path=/etc/apt/keyrings/linux.dell.com.0x1285491434D8786F.gpg
+  register: dell_keyring
+  become: true
+
+  # https://forum.proxmox.com/threads/dell-openmanage-on-proxmox-6-x.57932/post-522534
+- name: install dell repository key
+  block:
+    - name: download keyring
+      shell: 'wget -qO - https://linux.dell.com/repo/pgp_pubkeys/0x1285491434D8786F.asc | gpg --dearmor'
+      register: dell_keyring_gpg
+
+    - name: create repo file
+      copy:
+        dest: /etc/apt/keyrings/linux.dell.com.0x1285491434D8786F.gpg
+        content: "{{ dell_keyring_gpg.stdout }}"
+      become: true
+  when: not dell_keyring.stat.exists
+
+  # FIXME: should invalidate the old repo rather than just adding this
 - name: dell repository
   apt_repository:
-    repo: deb http://linux.dell.com/repo/community/openmanage/910/stretch stretch main
+    repo: "deb [signed-by=/etc/apt/keyrings/linux.dell.com.0x1285491434D8786F.gpg] https://linux.dell.com/repo/community/openmanage/{{ dell_omsa_version }} main"
     state: present
     filename: linux.dell.com.sources
   become: true
