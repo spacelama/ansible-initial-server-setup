@@ -36,7 +36,7 @@
 
 - name: install full packages
   opkg:
-    name: tcpdump,strace,lsof,usbutils
+    name: tcpdump,strace,lsof,usbutils,ethtool
     state: present
   when: openwrt_heavy_installation is defined
 

@@ -84,9 +84,17 @@
 
 - name: remove prohibited packages
   apt:
-    name: ['os-prober', 'linux-headers-*', 'linux-image-*']
+    name: "{{ item }}"
     state: absent
   become: true
+  with_items:
+    - 'os-prober'
+    - 'linux-headers-*'
+    - 'linux-image-*'
+    # https://github.com/ansible/ansible/issues/62262 - can't do all
+    # these at once on the one invocation, because throws extraneous
+    # errors when the package was never installed
+  ignore_errors: true
 
 - name: Install virtual host tools
   apt:
