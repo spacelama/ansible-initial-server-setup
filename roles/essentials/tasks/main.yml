@@ -337,7 +337,19 @@
     state: present
   become: true
   with_items: { quiet, "   *" }
-  notify: "Regenerate grub config"
+  notify: "Regenerate boot config"
+  when: host_is_container is not defined and host_is_pi is not defined
+
+- name: "Remove undesired flags from systemdboot config"
+  lineinfile:
+    dest: /etc/kernel/cmdline
+    backrefs: yes
+    regexp: "(.*) *{{ item }} *(.*)"
+    line: "\\1\\2"
+    state: present
+  become: true
+  with_items: { quiet, "   *" }
+  notify: "Regenerate boot config"
   when: host_is_container is not defined and host_is_pi is not defined
 
 - name: fix defaults in grub config
@@ -349,7 +361,7 @@
     - "#debian bug #717586"
     - "#Is it 'info grub'->Configuration->Simple Configuration:"
     - "GRUB_DISABLE_SUBMENU=y"
-  notify: "Regenerate grub config"
+  notify: "Regenerate boot config"
   when: host_is_container is not defined and host_is_pi is not defined
 
 - name: determine if smartmontools config exists

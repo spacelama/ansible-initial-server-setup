@@ -1,6 +1,6 @@
 ---
-- name: "Append spectre unmitigations grub config"
-  include_tasks: add_grub_flag.yml
+- name: "Append spectre unmitigations boot config"
+  include_tasks: add_boot_flag.yml
   loop_control:
     loop_var: mitigation_flag
   vars:
@@ -8,6 +8,7 @@
   when: host_needs_no_spectre_mitigations is not defined
   with_items: { nopti, nospectre_v2, nospectre_v1, noibrs, noibpb, l1tf=off, nospec_store_bypass_disable, no_stf_barrier, mds=off, mitigations=off }
 
+# and take care of systemd-boot and grub for removals separately
 - name: "Remove spectre unmitigations grub config"
   when: host_needs_no_spectre_mitigations is defined
   lineinfile:
@@ -18,5 +19,17 @@
     state: present
   become: true
   with_items: { nopti, nospectre_v2, nospectre_v1, noibrs, noibpb, l1tf=off, nospec_store_bypass_disable, no_stf_barrier, mds=off, mitigations=off, "   *" }
-  notify: "Regenerate grub config"
+  notify: "Regenerate boot config"
+
+- name: "Remove spectre unmitigations systemdboot config"
+  when: host_needs_no_spectre_mitigations is defined
+  lineinfile:
+    dest: /etc/kernel/cmdline
+    backrefs: yes
+    regexp: "(.*) *{{ item }} *(.*)"
+    line: "\\1\\2"
+    state: present
+  become: true
+  with_items: { nopti, nospectre_v2, nospectre_v1, noibrs, noibpb, l1tf=off, nospec_store_bypass_disable, no_stf_barrier, mds=off, mitigations=off, "   *" }
+  notify: "Regenerate boot config"
 

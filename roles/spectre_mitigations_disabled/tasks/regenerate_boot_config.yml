@@ -1,0 +1,11 @@
+---
+- name: "Regenerate grub config"
+  shell: "/usr/sbin/update-grub"
+  become: true
+  when: host_is_pve_server is not defined
+
+  #FIXME: only machines to use systemd-boot so far is proxmox hosts
+- name: "Regenerate systemdboot config"
+  shell: "proxmox-boot-tool refresh" # not meant to use update-grub
+  become: true
+  when: host_is_pve_server is defined

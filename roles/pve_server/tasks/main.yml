@@ -222,6 +222,40 @@
     state: present
   changed_when: false
 
+- name: "Search for intel iommu systemd/boot config"
+  become: yes
+  register: intel_iommu_systemdboot_cmdline_exists
+  check_mode: yes # cause this to become just a test.  If there's already
+                  # iommu settings, then this will think line is
+                  # being replaced, and changed will become true (but we
+                  # force it to false to not output a line saying
+                  # "changed"), and msg will become "line added", else
+                  # changed stays false, and msg does not contain "line
+                  # added"
+  lineinfile:
+    dest: /etc/kernel/cmdline
+    line: systemdboot cmdline already has iommu mitigations disabled
+    regexp: "intel_iommu=on"
+    state: present
+  changed_when: false
+
+# https://pve.proxmox.com/wiki/Pci_passthrough
+- name: "Search for amd iommu systemd/boot config"
+  become: yes
+  register: amd_iommu_systemdboot_cmdline_exists
+  check_mode: yes # cause this to become just a test.  If there's already
+                  # iommu settings, then this will think line is
+                  # being replaced, and changed will become true (but we
+                  # force it to false to not output a line saying
+                  # "changed"), and msg will become "line added", else
+                  # changed stays false, and msg does not contain "line
+                  # added"
+  lineinfile:
+    dest: /etc/kernel/cmdline
+    line: systemdboot cmdline already has iommu mitigations disabled
+    regexp: "amd_iommu=on"
+    state: present
+  changed_when: false
 
   # test devices you want to pass through belong in separate IOMMUs:
 #https://www.reddit.com/r/SolusProject/comments/955osy/vfio_passthrough_quick_reference/
@@ -242,7 +276,7 @@
     line: 'GRUB_CMDLINE_LINUX_DEFAULT="\1 intel_iommu=on iommu=pt pcie_acs_override=downstream,multifunction"'
     state: present
   become: true
-  notify: "Regenerate pve grub config"
+  notify: "Regenerate boot config"
 
 - name: "Append amd_iommu=on grub config"
   when: (amd_iommu_grub_cmdline_exists.msg == "line added") and (host_is_amd is defined)
@@ -253,7 +287,29 @@
     line: 'GRUB_CMDLINE_LINUX_DEFAULT="\1 amd_iommu=on iommu=pt pcie_acs_override=downstream,multifunction"'
     state: present
   become: true
-  notify: "Regenerate pve grub config"
+  notify: "Regenerate boot config"
+
+- name: "Append intel_iommu=on systemdboot config"
+  when: (intel_iommu_systemdboot_cmdline_exists.msg == "line added") and (host_is_intel is defined)
+  lineinfile:
+    dest: /etc/kernel/cmdline
+    backrefs: yes
+    regexp: '(.*)'
+    line: '\1 intel_iommu=on iommu=pt pcie_acs_override=downstream,multifunction'
+    state: present
+  become: true
+  notify: "Regenerate boot config"
+
+- name: "Append amd_iommu=on systemdboot config"
+  when: (amd_iommu_systemdboot_cmdline_exists.msg == "line added") and (host_is_amd is defined)
+  lineinfile:
+    dest: /etc/kernel/cmdline
+    backrefs: yes
+    regexp: '(.*)'
+    line: '\1 amd_iommu=on iommu=pt pcie_acs_override=downstream,multifunction'
+    state: present
+  become: true
+  notify: "Regenerate boot config"
 
 # - name: "host modules blacklist (radeon, snd_hda_intel, amdgpu, usb3)"
 #   copy:
@@ -262,7 +318,7 @@
 #   become: true
 #   notify: "Update initramfs config"
 
-- name: "Search for modprobe blacklist"
+- name: "Search for grub modprobe blacklist"
   become: yes
   register: modprobe_blacklist_grub_cmdline_exists
   check_mode: yes # cause this to become just a test.  If there's already
@@ -279,6 +335,23 @@
     state: present
   changed_when: false
 
+- name: "Search for systemdboot modprobe blacklist"
+  become: yes
+  register: modprobe_blacklist_systemdboot_cmdline_exists
+  check_mode: yes # cause this to become just a test.  If there's already
+                  # blacklist settings, then this will think line is
+                  # being replaced, and changed will become true (but we
+                  # force it to false to not output a line saying
+                  # "changed"), and msg will become "line added", else
+                  # changed stays false, and msg does not contain "line
+                  # added"
+  lineinfile:
+    dest: /etc/kernel/cmdline
+    line: systemdboot cmdline already has modprobe blacklist applied
+    regexp: "modprobe.blacklist=.*radeon"
+    state: present
+  changed_when: false
+
 - name: "Append modprobe.blacklist=... grub config"
   when: modprobe_blacklist_grub_cmdline_exists.msg == "line added"
   lineinfile:
@@ -288,7 +361,18 @@
     line: 'GRUB_CMDLINE_LINUX_DEFAULT="\1 modprobe.blacklist=radeon,amdgpu,snd_hda_intel,xhci_hcd,xhci_pci"'
     state: present
   become: true
-  notify: "Regenerate pve grub config"
+  notify: "Regenerate boot config"
+
+- name: "Append modprobe.blacklist=... systemdboot config"
+  when: modprobe_blacklist_systemdboot_cmdline_exists.msg == "line added"
+  lineinfile:
+    dest: /etc/kernel/cmdline
+    backrefs: yes
+    regexp: '(.*)'
+    line: '\1 modprobe.blacklist=radeon,amdgpu,snd_hda_intel,xhci_hcd,xhci_pci'
+    state: present
+  become: true
+  notify: "Regenerate boot config"
 
 - name: "Search for grub failsafe cmdline"
   become: yes
@@ -316,7 +400,7 @@
     line: 'GRUB_CMDLINE_LINUX="\1 modprobe.blacklist=vfio_pci"'
     state: present
   become: true
-  notify: "Regenerate pve grub config"
+  notify: "Regenerate boot config"
 
 - name: "vfio module parameters"
   copy:
@@ -366,7 +450,7 @@
   become: true
   notify: "Update initramfs config"
 
-# if need to regenerate pve grub config because of new disks,
+# if need to regenerate pve boot config because of new disks,
 # procedure is here: https://pve.proxmox.com/wiki/Host_Bootloader
 
 - name: install ssh socket directory
