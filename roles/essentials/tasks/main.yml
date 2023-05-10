@@ -323,33 +323,18 @@
   when: host_is_container is not defined
 
 - name: fix up utterly braindead config file defaults
-  include_tasks: fixup_user_conf_files.yml
+  include_tasks: "{{ playbook_dir }}/roles/common/tasks/fixup_user_conf_files.yml"
   loop_control:
     loop_var: user
   with_items: "{{ fixup_conf_files.users }}"
 
 - name: "Remove undesired flags from grub config"
-  lineinfile:
-    dest: /etc/default/grub
-    backrefs: yes
-    regexp: "^GRUB_CMDLINE_LINUX_DEFAULT=\"(.*) *{{ item }} *(.*)\""
-    line: "GRUB_CMDLINE_LINUX_DEFAULT=\"\\1\\2\""
-    state: present
-  become: true
+  include_tasks: "{{ playbook_dir }}/roles/common/tasks/remove_boot_flag.yml"
+  loop_control:
+    loop_var: flag
+  vars:
+    variable: "GRUB_CMDLINE_LINUX_DEFAULT"
   with_items: { quiet, "   *" }
-  notify: "Regenerate boot config"
-  when: host_is_container is not defined and host_is_pi is not defined
-
-- name: "Remove undesired flags from systemdboot config"
-  lineinfile:
-    dest: /etc/kernel/cmdline
-    backrefs: yes
-    regexp: "(.*) *{{ item }} *(.*)"
-    line: "\\1\\2"
-    state: present
-  become: true
-  with_items: { quiet, "   *" }
-  notify: "Regenerate boot config"
   when: host_is_container is not defined and host_is_pi is not defined
 
 - name: fix defaults in grub config

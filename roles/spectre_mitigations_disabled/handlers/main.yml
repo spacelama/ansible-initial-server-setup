@@ -1,3 +1,0 @@
----
-- name: "Regenerate boot config"
-  include_tasks: "regenerate_boot_config.yml"

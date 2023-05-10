@@ -1,35 +1,18 @@
 ---
 - name: "Append spectre unmitigations boot config"
-  include_tasks: add_boot_flag.yml
+  include_tasks: "{{ playbook_dir }}/roles/common/tasks/add_boot_flag.yml"
   loop_control:
-    loop_var: mitigation_flag
+    loop_var: flag
   vars:
     variable: "GRUB_CMDLINE_LINUX_DEFAULT"
   when: host_needs_no_spectre_mitigations is not defined
   with_items: { nopti, nospectre_v2, nospectre_v1, noibrs, noibpb, l1tf=off, nospec_store_bypass_disable, no_stf_barrier, mds=off, mitigations=off }
 
-# and take care of systemd-boot and grub for removals separately
-- name: "Remove spectre unmitigations grub config"
+- name: "Remove spectre unmitigations boot config"
+  include_tasks: "{{ playbook_dir }}/roles/common/tasks/remove_boot_flag.yml"
+  loop_control:
+    loop_var: flag
+  vars:
+    variable: "GRUB_CMDLINE_LINUX_DEFAULT"
   when: host_needs_no_spectre_mitigations is defined
-  lineinfile:
-    dest: /etc/default/grub
-    backrefs: yes
-    regexp: "^GRUB_CMDLINE_LINUX_DEFAULT=\"(.*) *{{ item }} *(.*)\""
-    line: "GRUB_CMDLINE_LINUX_DEFAULT=\"\\1\\2\""
-    state: present
-  become: true
-  with_items: { nopti, nospectre_v2, nospectre_v1, noibrs, noibpb, l1tf=off, nospec_store_bypass_disable, no_stf_barrier, mds=off, mitigations=off, "   *" }
-  notify: "Regenerate boot config"
-
-- name: "Remove spectre unmitigations systemdboot config"
-  when: host_needs_no_spectre_mitigations is defined
-  lineinfile:
-    dest: /etc/kernel/cmdline
-    backrefs: yes
-    regexp: "(.*) *{{ item }} *(.*)"
-    line: "\\1\\2"
-    state: present
-  become: true
-  with_items: { nopti, nospectre_v2, nospectre_v1, noibrs, noibpb, l1tf=off, nospec_store_bypass_disable, no_stf_barrier, mds=off, mitigations=off, "   *" }
-  notify: "Regenerate boot config"
-
+  with_items: { nopti, nospectre_v2, nospectre_v1, noibrs, noibpb, l1tf=off, nospec_store_bypass_disable, no_stf_barrier, mds=off, mitigations=off }

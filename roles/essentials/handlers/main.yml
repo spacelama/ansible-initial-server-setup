@@ -53,3 +53,6 @@
   become: true
   with_items: "{{ systemd_overrides }}"
   ignore_errors: yes # for those units that aren't defined on this system
+
+- name: "Regenerate boot config"
+  include_tasks: "{{ playbook_dir }}/roles/common/tasks/regenerate_boot_config.yml"

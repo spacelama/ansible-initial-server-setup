@@ -1,9 +1,11 @@
 ---
-- name: "Search for spectre/meltdown unmitigation {{ mitigation_flag }} in grub config"
-  become: yes
+# when variable=GRUB_CMDLINE_LINUX_DEFAULT, we also munge /etc/kernel/cmdline in a similar way
+
+#FIXME: all these (and essentials, and spectre) grub commandline mungings should just be additions and deletions to file from /etc/default/grub.d/
+- name: "Search for {{ flag }} in grub config"
   register: grub_variable_line_exists
   check_mode: yes # cause this to become just a test.  If there's already
-                  # spectre settings, then this will think line is
+                  # relevant settings, then this will think line is
                   # being replaced, and changed will become true (but we
                   # force it to false to not output a line saying
                   # "changed"), and msg will become "line added", else
@@ -15,16 +17,16 @@
                   # not try to add the line
   lineinfile:
     dest: /etc/default/grub
-    line: grub cmdline already has spectre mitigation disabled
-    regexp: "^{{ variable }}=.*{{ mitigation_flag }}"
+    line: grub cmdline already has flag disabled
+    regexp: "^{{ variable }}=.*{{ flag }}"
     state: present
+  become: true
   changed_when: false
 
-- name: "Search for spectre/meltdown unmitigation {{ mitigation_flag }} in systemdboot config"
-  become: yes
+- name: "Search for {{ flag }} in systemdboot config"
   register: systemdboot_variable_line_exists
   check_mode: yes # cause this to become just a test.  If there's already
-                  # spectre settings, then this will think line is
+                  # relevant settings, then this will think line is
                   # being replaced, and changed will become true (but we
                   # force it to false to not output a line saying
                   # "changed"), and msg will become "line added", else
@@ -36,29 +38,30 @@
                   # not try to add the line
   lineinfile:
     dest: /etc/kernel/cmdline
-    line: systemdboot cmdline already has spectre mitigation disabled
-    regexp: "{{ mitigation_flag }}"
+    line: systemdboot cmdline already has flag disabled
+    regexp: "{{ flag }}"
     state: present
+  become: true
   changed_when: false
 
-- name: "Append spectre unmitigation {{ mitigation_flag }} grub config"
+- name: "Append flag {{ flag }} grub config"
   when: grub_variable_line_exists.msg == "line added"
   lineinfile:
     dest: /etc/default/grub
     backrefs: yes
     regexp: "^{{ variable }}=\"(.*)\""
-    line: "{{ variable }}=\"\\1 {{ mitigation_flag }}\""
+    line: "{{ variable }}=\"\\1 {{ flag }}\""
     state: present
   become: true
   notify: "Regenerate boot config"
 
-- name: "Append spectre unmitigation {{ mitigation_flag }} systemdboot config"
-  when: systemdboot_variable_line_exists.msg == "line added"
+- name: "Append flag {{ flag }} systemdboot config"
+  when: (systemdboot_variable_line_exists.msg == "line added") and (no_modify_systemdboot is not defined)
   lineinfile:
     dest: /etc/kernel/cmdline
     backrefs: yes
     regexp: "(.*)"
-    line: "\\1 {{ mitigation_flag }}"
+    line: "\\1 {{ flag }}"
     state: present
   become: true
   notify: "Regenerate boot config"
