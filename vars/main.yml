@@ -67,7 +67,10 @@
           - 'set suspend'
           - '## Enable ~/.nano_history for saving and reading search/replace strings.'
           - 'set historylog'
-
+      - name: .bashrc.d/override-turnkey-prompt.sh
+        lines:
+          - 'if [ -e /etc/turnkey_version ] ; then PROMPT_COMMAND=handleprompt ; fi '
+        mode: "0755"
   bashrc_files:
     - "{{ lookup('fileglob', 'etc_bashrc.d/*.sh', wantlist=True) }}"
   bin_files:
