@@ -119,7 +119,7 @@
 
 - name: mount media transcodes
   mount:
-    path: /transcodes
+    path: /media_transcodes
     src: fs:/home/tconnors/movies/media_transcodes
     fstype: nfs4
     opts: defaults,_netdev,x-systemd.automount
