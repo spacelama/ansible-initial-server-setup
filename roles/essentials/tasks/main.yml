@@ -213,6 +213,16 @@
   become: true
   notify: restart sysctl
 
+- name: stop restricting sysrq
+  copy:
+    dest: /etc/sysctl.d/99-sysrq.conf
+    content: "kernel.sysrq=1\n"
+    owner: root
+    group: root
+    mode: 0644
+  become: true
+  notify: restart sysctl
+
 - name: Set /etc/default/keyboard
   lineinfile:
     dest: /etc/default/keyboard
