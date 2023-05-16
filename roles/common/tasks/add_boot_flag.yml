@@ -23,7 +23,12 @@
   become: true
   changed_when: false
 
+- name: determine if /etc/kernel/cmdline exists
+  stat: path=/etc/kernel/cmdline
+  register: systemdboot_cmdline
+
 - name: "Search for {{ flag }} in systemdboot config"
+  when: (systemdboot_cmdline.stat.exists) and (no_modify_systemdboot is not defined)
   register: systemdboot_variable_line_exists
   check_mode: yes # cause this to become just a test.  If there's already
                   # relevant settings, then this will think line is
@@ -56,7 +61,7 @@
   notify: "Regenerate boot config"
 
 - name: "Append flag {{ flag }} systemdboot config"
-  when: (systemdboot_variable_line_exists.msg == "line added") and (no_modify_systemdboot is not defined)
+  when: (systemdboot_cmdline.stat.exists) and (no_modify_systemdboot is not defined) and (systemdboot_variable_line_exists.msg == "line added")
   lineinfile:
     dest: /etc/kernel/cmdline
     backrefs: yes

@@ -12,7 +12,12 @@
   become: true
   notify: "Regenerate boot config"
 
+- name: determine if /etc/kernel/cmdline exists
+  stat: path=/etc/kernel/cmdline
+  register: systemdboot_cmdline
+
 - name: "Remove {{ flag }} from systemdboot config"
+  when: (systemdboot_cmdline.stat.exists) and (no_modify_systemdboot is not defined)
   lineinfile:
     dest: /etc/kernel/cmdline
     backrefs: yes
@@ -21,4 +26,3 @@
     state: present
   become: true
   notify: "Regenerate boot config"
-  when: no_modify_systemdboot is not defined
