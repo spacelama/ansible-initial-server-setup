@@ -10,7 +10,7 @@
 
 - name: Install ansible bootstrap packages (not containers)
   apt:
-    name: ['ntp', 'mlocate', 'aptitude']
+    name: ['ntp', 'aptitude']
     update_cache: no # can't - proxmox enterprise might be a repo, and isn't valid yet
     cache_valid_time: 3600
     autoremove: no
