@@ -48,6 +48,7 @@ function setup_aliases() {
     #https://stackoverflow.com/questions/15292391/is-it-possible-to-perform-a-grep-search-in-all-the-branches-of-a-git-project
     alias grep_git_all_branches="git branch -a | tr -d \* | sed '/->/d' | xargs git grep"
     alias grep_git_all_commits="git rev-list --all | tr -d \* | sed '/->/d' | xargs git grep"
+    alias grep_git_show_commits="git log -p --all -G"
 
     #safeify commands
     #    alias rm='echo rm override deprecated 2>&1 ; command rm -i'
