@@ -24,7 +24,7 @@ ac-power                        tasmota,medion,powermon,accurate
 loungeroomlights-power          tasmota,sonoffs26
 bedroomlights-power             tasmota,sonoffs26
 garagelights-power              tasmota,sonoffs26
-#externalgaragelights-power      tasmota,sonoffs26
+heatedseat-power                tasmota,sonoffs26,not247,solidstate
 studio-power                    tasmota,arlecswitchindiv4board
 studio-power2                   tasmota,sonoffs26
 patiolights-power               tasmota,sonoffs26

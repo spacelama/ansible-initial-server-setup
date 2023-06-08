@@ -235,7 +235,7 @@ config host
 config host
 	option ip '192.168.1.67'
 	option mac 'a4:cf:12:b7:93:df'
-	option name 'externalgaragelights-power'
+	option name 'heatedseat-power'
 	option dns '1'
 
 config host
