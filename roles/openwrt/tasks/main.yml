@@ -15,7 +15,7 @@
 
 - name: install router packages
   opkg:
-    name: luci-app-sqm,avahi-dbus-daemon,adblock,luci-app-adblock,msmtp,crelay,ethtool,arp-scan,ifstat
+    name: luci-app-sqm,avahi-dbus-daemon,adblock,luci-app-adblock,msmtp,crelay,ethtool,arp-scan,ifstat # instead of port mirroring, perhaps we can configure ecowitt mirroring of port 8000->homeassistant:4199 via port forwards ,port-mirroring
     state: present
   when: openwrt_router_packages is defined
 
@@ -36,7 +36,7 @@
 
 - name: install full packages
   opkg:
-    name: tcpdump,strace,lsof,usbutils,ethtool
+    name: tcpdump,strace,lsof,usbutils,ethtool,psmisc,procps-ng-ps,procps-ng-watch,procps-ng-vmstat,iftop,htop
     state: present
   when: openwrt_heavy_installation is defined
 
@@ -107,4 +107,4 @@
 - name: commit changes
   meta: flush_handlers
 
-#FIXME:  system firewall (only on router, not aps)
+#FIXME:  system firewall (only on router, not aps -- except maybe we do want firewall on APs so we can port mirror from ecowitt to multiple places, except that we can't mirror TCP streams because of handshakes)
