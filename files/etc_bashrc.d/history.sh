@@ -31,7 +31,7 @@ function writetohistory() {
         history=$(
             if [ -n "$1" ] ; then
                 echo "#"$(date +%s)
-                echo "#######################"
+                #                    echo "#######################"  # doesn't seem to be necessary in 2023 anymore - don't end up with history composed of dates anymore
             else
                 echo "$history"
             fi | sed "/^#[0-9][0-9][0-9][0-9][0-9][0-9][0-9][0-9][0-9][0-9]$/s!\$! $PTS ${OPVIEW_VIEW:+$OPVIEW_VIEW/$OPVIEW_ITEM }$PWDENC$1!"
@@ -61,6 +61,10 @@ function setup_bash_history_file() {
         tail -n $HISTSIZE2 "$BASH_FULLHIST" > /tmp/hist.$USER.$$
         history -r /tmp/hist.$USER.$$
         command rm -f /tmp/hist.$USER.$$
+
+        #        if HISTTIMEFORMAT= history 1 | grep '^[0-9]*  *#######################$' ; then
+        #            history -d -1
+        #        fi
     else
         touch "$BASH_FULLHIST"
         chmod 600 "$BASH_FULLHIST"
