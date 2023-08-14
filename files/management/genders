@@ -40,7 +40,8 @@ valveamp-power                  tasmota,newkogan,powermon,accurate,usbport
 stereo-power                    tasmota,oldkogan,powermon,accurate,disabledusbport
 chromecast-lounge-power         tasmota,oldkogan,powermon,currentoffset
 panasonic-power                 tasmota,newkogan,powermon,accurate
-patiofluro-power                tasmota,athom,powermon
+electricblanket-power           tasmota,athom,powermon
+study-power                     beken,jinvooswitchindiv4boardusb
 loungefrontlight-power          tasmota,athom,powermon
 fishtank-temperature            tasmota,DS18B20temp
 pantech                         iot

@@ -433,7 +433,7 @@ config host
 
 config host
 	option mac '4c:eb:d6:d7:81:83'
-	option name 'patiofluro-power'
+	option name 'electricblanket-power'
 	option dns '1'
 	option ip '192.168.1.80'
 
@@ -442,6 +442,12 @@ config host
 	option name 'loungefrontlight-power'
 	option dns '1'
 	option ip '192.168.1.81'
+
+config host
+	option mac '84:e3:42:e4:f1:1e'
+	option name 'study-power'
+	option dns '1'
+	option ip '192.168.1.82'
 
 config host
 	option mac 'c4:4f:33:a8:eb:9b'

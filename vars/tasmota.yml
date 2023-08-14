@@ -66,6 +66,9 @@
     - command: MqttHost
       value: "{{ mqtthost }}"
 
+    - command: SetOption65
+      value: "{{ disable_default_reset_on_power_reset7 | default(0) }}"
+
     - command: Latitude
       value: "{{ latitude }}"
 
