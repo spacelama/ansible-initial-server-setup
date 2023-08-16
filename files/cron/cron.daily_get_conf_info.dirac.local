@@ -8,29 +8,12 @@ cd "$data_dir" || exit 1
 mkdir -p tasmota
 cd tasmota || exit 1
 nodeattr -n tasmota | while read h ; do
-    decode-config.py --source "$h" | jq > $h.json || echo failed: $h
+    error=$( ( decode-config.py --source "$h" | jq > $h.json || echo jq failed: $h ) 2>&1 )
+    if [ -n "$error" ] && ! nodeattr -l $h | grep -q not247 ; then
+        echo "$error"
+    fi
 done
 
 cd "$data_dir" || exit 1
-mkdir -p switch
-cd switch || exit 1
 
-# only cable-diag from 1-14 rather than 16 because web UI doesn't let
-# you do 15 and 16, and this seems to result in a port failure every
-# few days.  Actually removing altogether because still occasionally crashing:  "show cable-diagnostics interface gigabitEthernet 1/0/"{1,2,3,4,5,6,7,8,9,10,11,12,13,14}
-timeout -k 1 300 get_conf_info.switch "show running-config" "show system-time" "show system-info" "show vlan" "show mac address-table all" "show interface status" "show interface switchport" "copy startup-config tftp ip 192.168.1.17 filename switch-startup-config" > /dev/null
-
-cp "/var/lib/tftpboot/switch-startup-config.cfg" "show_startup-config"
-dos2unix "show_startup-config" 2>/dev/null
-
-sed 's/\r//g' "show_running-config" |
-    sed 's/Press any key to continue (Q to quit).                                      //' |
-    grep -v 'show running-config' |
-    head -n -3 > "show_running-config.munged"
-mv "show_running-config.munged" "show_running-config"
-
-# must be last command to give proper exit codes to caller
-if ! diff=$(diff --unified=1 "show_startup-config" "show_running-config" ) ; then
-    echo "$diff" | mail -s "switch difference: run-config and save-config" root
-fi
-rm copy_startup-config_tftp_ip_192.168.1.17_filename_switch-startup-config
+get_conf_info.switch

@@ -1,0 +1,60 @@
+#!/usr/bin/expect
+
+# login to TP-Link TL-SG3216 24 port 1gbit managed switch to grab
+# running-config vs start-config, and if there's a diff, warn us
+
+# expects to be invoked from get_conf_info.switch
+
+proc slurp {file} {
+    set fh [open $file r]
+    set ret [read $fh]
+    close $fh
+    return $ret
+}
+
+## Access CLI
+set loginUser "admin"
+set enablePassword [string trim [ slurp /usr/local/etc/get_conf_info.switch.pass ] ]
+set mgmtServerAddress "switch"
+
+## Expect Parameters
+set timeout 20
+set successMsg "Status: Success"
+set failureMsg "Status: Failure"
+
+spawn ssh -l $loginUser $mgmtServerAddress
+expect_after eof {exit 0}
+
+set timeout 10
+
+##interact with SSH
+##expect "yes/no" {send "yes\r"}
+expect "TL-SG3216>" {send "enable\r"}
+expect "Password:" {send "$enablePassword\r"}
+puts "\n## Starting Gather Script... ##\n"
+set timeout 20
+
+expect "TL-SG3216#"
+for {set i 0} {$i < $argc} {incr i 1} {
+#   set chan [open "[lindex $argv $i]" w]
+   puts "\n## Parsing arg $i: [lindex $argv $i]"
+   send "[lindex $argv $i]\r"
+#   expect "show"
+   set log_filename "[lindex $argv $i]"
+   set log_filename [regsub -all { } $log_filename {_}]
+   set log_filename [regsub -all {/} $log_filename {_}]
+   log_file -noappend "$log_filename"
+   while { 1 } {
+      expect "TL-SG3216#" {
+         log_file
+         break
+      } "Press any key to continue (Q to quit)" {
+         send " "
+#         expect "\r"
+#      } "\r" {
+#         puts $chan "$expect_out(buffer)"
+      }
+   }
+#   close $chan
+}
+#send "exit\r"
