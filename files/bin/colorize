@@ -12,60 +12,61 @@
 #set -x 
 
 function highlight() {
-    if [ -n "$notty" ] ; then
+    if $notty ; then
         return
     fi
+    local hi="$2"
 
     esc="\033["
-    if [ "$2" = "y" ] ; then
+    if $hi ; then
         bold=";1"
     else
         bold=
     fi
     case "$3" in
-        grey|black) back="40;"
-        ;;
-        red)        back="41;"
-        ;;
-        green)      back="42;"
-        ;;
-        yellow)     back="43;"
-        ;;
-        blue)       back="44;"
-        ;;
-        magenta|purple)    back="45;"
-        ;;
-        cyan)       back="46;"
-        ;;
-        white)      back="47;"
-        ;;
-        no|"")         back=
-        ;;
-        *)          echo -ne "${open}${esc}32;1m${close}"
-           return
-        ;;
+        grey|black)     back="40;"
+                        ;;
+        red)            back="41;"
+                        ;;
+        green)          back="42;"
+                        ;;
+        yellow)         back="43;"
+                        ;;
+        blue)           back="44;"
+                        ;;
+        magenta|purple) back="45;"
+                        ;;
+        cyan)           back="46;"
+                        ;;
+        white)          back="47;"
+                        ;;
+        no|false|"")    back=
+                        ;;
+        *)              echo -ne "${open}${esc}32;1m${close}"
+                        return
+                        ;;
     esac
     case "$1" in 
-        grey|black) echo -ne "${open}${esc}${back}30${bold}m${close}"
-        ;;
-        red)        echo -ne "${open}${esc}${back}31${bold}m${close}"
-        ;;
-        green)      echo -ne "${open}${esc}${back}32${bold}m${close}"
-        ;;
-        yellow)     echo -ne "${open}${esc}${back}33${bold}m${close}"
-        ;;
-        blue)       echo -ne "${open}${esc}${back}34${bold}m${close}"
-        ;;
-        magenta|purple)    echo -ne "${open}${esc}${back}35${bold}m${close}"
-        ;;
-        cyan)       echo -ne "${open}${esc}${back}36${bold}m${close}"
-        ;;
-        white)      echo -ne "${open}${esc}${back}37${bold}m${close}"
-        ;;
-        normal)     echo -ne "${open}${esc}0m${close}"
-        ;;
-        *)          echo -ne "${open}${esc}32;1m${close}"
-        ;;
+        grey|black)     echo -ne "${open}${esc}${back}30${bold}m${close}"
+                        ;;
+        red)            echo -ne "${open}${esc}${back}31${bold}m${close}"
+                        ;;
+        green)          echo -ne "${open}${esc}${back}32${bold}m${close}"
+                        ;;
+        yellow)         echo -ne "${open}${esc}${back}33${bold}m${close}"
+                        ;;
+        blue)           echo -ne "${open}${esc}${back}34${bold}m${close}"
+                        ;;
+        magenta|purple) echo -ne "${open}${esc}${back}35${bold}m${close}"
+                        ;;
+        cyan)           echo -ne "${open}${esc}${back}36${bold}m${close}"
+                        ;;
+        white)          echo -ne "${open}${esc}${back}37${bold}m${close}"
+                        ;;
+        normal)         echo -ne "${open}${esc}0m${close}"
+                        ;;
+        *)              echo -ne "${open}${esc}32;1m${close}"
+                        ;;
     esac
 }
 
@@ -78,7 +79,7 @@ function directoutput () {
 }
 
 function usage () {
-    echo "Usage: $0 [--stderr] [--notty] [--PS1prompt] [--background <bg>] <bright?> <color> <text>" 1>&2
+    echo "Usage: $0 [--stderr] [--notty] [-n|--nolf] [--PS1prompt] [--background <bg>] (bright|dark)? <color> <text>" 1>&2
     if [ -n "$1" ] ; then
         exit $1
     fi
@@ -96,65 +97,74 @@ function usageerror () {
 declare -a args
 function parseinput () {
     ARGS="$*"
-    notty=
     open=
     close=
-    nolf=
-    hi=no
-    bg=no
+    nolf=false
     colour=
     stderr=
-    first=1
+    notty=false
+    hi=false
+    bg=false
+    first=true
     while : ; do
-        if [ $first != 1 ] ; then
+        if ! $first ; then
             shift
         fi
         if [ "$#" -eq 0 ] ; then    #god, I wish there was an unshift in bash
             break
         fi
-        first=0
+        first=false
         arg="$1"
         case "$arg" in
             --notty)
                 if [ ! -t 1 ] ; then
-                    notty=1
+                    notty=true
                 fi
-            ;;
+                ;;
+            -n|--nolf)
+                nolf=true
+                ;;
             --PS1prompt)
                 open='\['
                 close='\]'
-                nolf=-n
-            ;;
+                nolf=true
+                ;;
             --background)
                 bg="$2"
                 shift
-            ;;
+                ;;
             --stderr)
                 stderr=1
-            ;;
+                ;;
             --help)
                 usage
-            ;;
+                ;;
             --)
                 shift
                 break
-            ;;
+                ;;
             -*)
                 usageerror "Unknown option \"$arg\""
-            ;;
+                ;;
             *)
                 break
-            ;;
+                ;;
         esac
     done
     if [ "$#" -lt 2 ] ; then
         usageerror "supply color and text"
     fi
-    if [ "$1" = "bright" ] ; then
-	hi=y
-    fi
-    shift
-    colour=$1
+    case "$1" in
+        bright)
+	    hi=true
+            shift
+            ;;
+        dark)
+            hi=false
+            shift
+            ;;
+    esac
+    colour="$1"
     shift
 
     #assign all uneaten params to an array
@@ -169,6 +179,7 @@ parseinput "$@"
 
 ( 
     highlight "$colour" $hi $bg
-    echo $nolf "${args[@]}"
-    highlight normal y
+    echo -n "${args[@]}"
+    highlight normal false
+    $nolf || echo
 ) | directoutput

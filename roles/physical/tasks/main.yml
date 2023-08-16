@@ -1,7 +1,7 @@
 ---
 - name: Install tools required by physical hardware
   apt:
-    name: ['lm-sensors', 'sg3-utils', 'scsitools', 'bonnie++', 'apt-file', 'rasdaemon', 'linux-cpupower', 'nvme-cli']
+    name: ['lm-sensors', 'sg3-utils', 'scsitools', 'bonnie++', 'apt-file', 'rasdaemon', 'linux-cpupower', 'nvme-cli', 'numactl', 'numad', 'numatop']
     update_cache: yes
     cache_valid_time: 3600
     autoremove: no

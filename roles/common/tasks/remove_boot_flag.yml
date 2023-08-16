@@ -1,0 +1,28 @@
+---
+# when variable=GRUB_CMDLINE_LINUX_DEFAULT, we also munge /etc/kernel/cmdline in a similar way
+
+#FIXME: all these (and essentials, and spectre) grub commandline mungings should just be additions and deletions to file from /etc/default/grub.d/
+- name: "Remove {{ flag }} from grub config"
+  lineinfile:
+    dest: /etc/default/grub
+    backrefs: yes
+    regexp: "^{{ variable }}=\"(.*) *{{ flag }} *(.*)\""
+    line: "{{ variable }}=\"\\1\\2\""
+    state: present
+  become: true
+  notify: "Regenerate boot config"
+
+- name: determine if /etc/kernel/cmdline exists
+  stat: path=/etc/kernel/cmdline
+  register: systemdboot_cmdline
+
+- name: "Remove {{ flag }} from systemdboot config"
+  when: (systemdboot_cmdline.stat.exists) and (no_modify_systemdboot is not defined)
+  lineinfile:
+    dest: /etc/kernel/cmdline
+    backrefs: yes
+    regexp: "(.*) *{{ flag }} *(.*)"
+    line: "\\1\\2"
+    state: present
+  become: true
+  notify: "Regenerate boot config"

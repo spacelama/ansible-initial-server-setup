@@ -10,7 +10,7 @@
 
 - name: Install ansible bootstrap packages (not containers)
   apt:
-    name: ['ntp', 'mlocate', 'aptitude']
+    name: ['ntp', 'aptitude']
     update_cache: no # can't - proxmox enterprise might be a repo, and isn't valid yet
     cache_valid_time: 3600
     autoremove: no
@@ -107,6 +107,7 @@
     manage_dir: yes
     key: "{{ lookup('file', item) }}"
     #    comment: "{{ ansible_was_run_by }}"
+    # if user doesn't have a home directory, just dump the key into /tmp and otherwise let the system ignore it
     path: "{{ getent_passwd['ansible_adm'][4] is defined | ternary(omit, '/tmp/ansible_adm_ssh_authorized_keys') }}"
     exclusive: yes
   become: true

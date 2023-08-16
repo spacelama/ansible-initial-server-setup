@@ -1,8 +1,4 @@
 ---
-- name: "Regenerate pve grub config"
-  shell: "proxmox-boot-tool refresh" # not meant to use update-grub
-  become: true
-
 - name: "Update initramfs config"
   shell: "/usr/sbin/update-initramfs -u -k all"
   become: true

@@ -2,4 +2,7 @@
   systemd_overrides:
     - apache2.service
     - munin-node.service
+    - plocate-updatedb.timer
+  remove_systemd_overrides:
     - mlocate.timer
+    - plocate.timer

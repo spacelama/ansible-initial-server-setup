@@ -26,18 +26,26 @@
     enabled: yes
     state: started
   become: true
-  
-- name: dell repository key
-  apt_key:
-    keyserver: pool.sks-keyservers.net
-    id: 1285491434D8786F
+
+- name: make apt keyrings directory
+  file:
+    path="/etc/apt/keyrings"
+    state=directory
   become: true
 
-- name: dell repository
-  apt_repository:
-    repo: deb http://linux.dell.com/repo/community/openmanage/910/stretch stretch main
-    state: present
-    filename: linux.dell.com.sources
+# https://forum.proxmox.com/threads/dell-openmanage-on-proxmox-6-x.57932/post-522534
+# https://docs.ansible.com/ansible/latest/collections/ansible/builtin/apt_repository_module.html
+- name: Add dell openmanage repo
+  block:
+    - name: dell repo |no apt key
+      ansible.builtin.get_url:
+        url: https://linux.dell.com/repo/pgp_pubkeys/0x1285491434D8786F.asc
+        dest: /etc/apt/keyrings/linux.dell.com.0x1285491434D8786F.asc
+
+    - name: somerepo | apt source
+      copy: # should be apt_repository, but https://github.com/ansible/ansible/issues/58386 https://github.com/ansible/ansible/issues/61420 closed WONTFIX
+        content: "deb [arch=amd64 signed-by=/etc/apt/keyrings/linux.dell.com.0x1285491434D8786F.asc] https://linux.dell.com/repo/community/openmanage/{{ dell_omsa_version }} main\n"
+        dest: "/etc/apt/sources.list.d/linux.dell.com.sources.list"
   become: true
 
 #- name: Check if sfcb libcimcclient0 and libssl1.0.2 is installed
@@ -61,13 +69,13 @@
   copy:
     src: "/var/cache/apt/non-delete/{{ item }}"
     dest: "/home/{{ ansible_env.USER }}/Downloads/{{ item }}"
-#  when: archived_package_check_deb.rc == 0
+  #  when: archived_package_check_deb.rc == 0
   loop: "{{ srvadmin_depends }}"
 
 - name: Install archived_package
   apt: deb="/home/{{ ansible_env.USER }}/Downloads/{{ item }}"
   become: true
-#  when: archived_package_check_deb.rc == 0
+  #  when: archived_package_check_deb.rc == 0
   loop: "{{ srvadmin_depends }}"
 
 - name: Download megacli .deb files
@@ -84,7 +92,7 @@
 
 - name: Install dell tools
   apt:
-    name: ['srvadmin-all', 'ipmitool']
+    name: ['srvadmin-all', 'ipmitool', 'ledmon']
     update_cache: yes
     cache_valid_time: 0
     autoremove: no

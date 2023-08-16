@@ -1,4 +1,12 @@
 ---
+- name: Gather the package facts
+  ansible.builtin.package_facts:
+    manager: auto
+
+#- name: Print the package facts
+#  ansible.builtin.debug:
+#    var: ansible_facts.packages
+
 - name: Install fail2ban
   apt:
     name: ['fail2ban']
@@ -7,15 +15,47 @@
     cache_valid_time: 3600
   become: true
 
+- name: remove previous version of jail.local
+  file:
+    path: /etc/fail2ban/jail.local
+    state: absent
+  notify: restart fail2ban
+  become: true
+
 - name: Copy custom fail2ban config
   copy:
     src: fail2ban/jail.local
-    dest: /etc/fail2ban/jail.local
+    dest: /etc/fail2ban/jail.d/local.conf
     owner: root
     group: root
     mode: 0644
   notify: restart fail2ban
   become: true
+
+- name: Copy custom fail2ban config if apache installed
+  copy:
+    src: fail2ban/jail-apache.local
+    dest: /etc/fail2ban/jail.d/local-apache.conf
+    owner: root
+    group: root
+    mode: 0644
+  notify: restart fail2ban
+  become: true
+  when: "'apache2' in ansible_facts.packages"
+
+- name: Copy custom fail2ban filter config
+  copy:
+    src: fail2ban/{{ item }}
+    dest: /etc/fail2ban/filter.d/{{ item }}
+    owner: root
+    group: root
+    mode: 0644
+  notify: restart fail2ban
+  become: true
+  with_items:
+    - sshd-ddos.conf
+    - sshd-root.conf
+    - sshd-b.conf
 
 - name: Ensure fail2ban starts on a fresh reboot
   service:

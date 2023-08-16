@@ -1,65 +1,39 @@
 # Fail2Ban configuration file.
 
 [DEFAULT]
+# "ignoreip" whitelist can be an IP address, a CIDR mask or a DNS host
+ignoreip = 127.0.0.1/8 192.168.1.2 192.168.1.17 192.168.1.20 192.168.1.22 192.168.1.28 192.168.1.32 192.168.1.34 192.168.1.36 rather.puzzling.org 192.168.1.254 ; 134.178.0.0/16 
+# 192.168.1.254 only happens when http from inside the network to rather.puzzling.org
 
-ignoreip = 127.0.0.1/8
-bantime  = 86400 ; 1 day
-findtime = 86400 ; 1 day
-maxretry = 3
+bantime  = 3600 ; 1 hour
+findtime = 3600 ; time to look for matches = 1 hour
+maxretry = 4
 
-backend = auto
-
-usedns = warn
-
-destemail = root@localhost
 sendername = Fail2Ban
-banaction = iptables-multiport
-mta = sendmail
-protocol = tcp
-chain = INPUT
-
-action_ = %(banaction)s[name=%(__name__)s, port="%(port)s", protocol="%(protocol)s", chain="%(chain)s"]
-
-action_mw = %(banaction)s[name=%(__name__)s, port="%(port)s", protocol="%(protocol)s", chain="%(chain)s"]
-              %(mta)s-whois[name=%(__name__)s, dest="%(destemail)s", protocol="%(protocol)s", chain="%(chain)s", sendername="%(sendername)s"]
-
-action_mwl = %(banaction)s[name=%(__name__)s, port="%(port)s", protocol="%(protocol)s", chain="%(chain)s"]
-               %(mta)s-whois-lines[name=%(__name__)s, dest="%(destemail)s", logpath=%(logpath)s, chain="%(chain)s", sendername="%(sendername)s"]
-
-action = %(action_)s
-
-#
-# SSH
-#
 
 [ssh]
-
 enabled  = true
 port     = ssh
+mode     = aggressive
 filter   = sshd
 logpath  = /var/log/auth.log
+maxretry = 6
 
-[ssh-ddos]
-
-enabled  = true
-port     = ssh
-filter   = sshd-ddos
+[ssh-b]
+enabled = true
+port   = ssh
+filter = sshd-b
 logpath  = /var/log/auth.log
+maxretry = 6
 
-#
-# HTTP servers
-#
+[ssh-root]
+enabled = true
+port   = ssh
+filter = sshd-root
+logpath  = /var/log/auth.log
+maxretry = 3
 
-[php-url-fopen]
+[sshd-ddos]
+enabled  = true
+maxretry = 6
 
-enabled = false
-port    = http,https
-filter  = php-url-fopen
-logpath = /var/log/nginx/*access.log
-
-[nginx-http-auth]
-
-enabled = false
-port 	= http,https
-filter  = nginx-http-auth
-logpath = /var/log/nginx/*error.log

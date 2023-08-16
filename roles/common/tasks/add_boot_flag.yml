@@ -1,0 +1,72 @@
+---
+# when variable=GRUB_CMDLINE_LINUX_DEFAULT, we also munge /etc/kernel/cmdline in a similar way
+
+#FIXME: all these (and essentials, and spectre) grub commandline mungings should just be additions and deletions to file from /etc/default/grub.d/
+- name: "Search for {{ flag }} in grub config"
+  register: grub_variable_line_exists
+  check_mode: yes # cause this to become just a test.  If there's already
+                  # relevant settings, then this will think line is
+                  # being replaced, and changed will become true (but we
+                  # force it to false to not output a line saying
+                  # "changed"), and msg will become "line added", else
+                  # changed stays false, and msg does not contain "line
+                  # added"
+                  #
+                  # We need to use this strange form because backrefs
+                  # is used by next test, and modifies lineinfile to
+                  # not try to add the line
+  lineinfile:
+    dest: /etc/default/grub
+    line: grub cmdline already has flag disabled
+    regexp: "^{{ variable }}=.*{{ flag }}"
+    state: present
+  become: true
+  changed_when: false
+
+- name: determine if /etc/kernel/cmdline exists
+  stat: path=/etc/kernel/cmdline
+  register: systemdboot_cmdline
+
+- name: "Search for {{ flag }} in systemdboot config"
+  when: (systemdboot_cmdline.stat.exists) and (no_modify_systemdboot is not defined)
+  register: systemdboot_variable_line_exists
+  check_mode: yes # cause this to become just a test.  If there's already
+                  # relevant settings, then this will think line is
+                  # being replaced, and changed will become true (but we
+                  # force it to false to not output a line saying
+                  # "changed"), and msg will become "line added", else
+                  # changed stays false, and msg does not contain "line
+                  # added"
+                  #
+                  # We need to use this strange form because backrefs
+                  # is used by next test, and modifies lineinfile to
+                  # not try to add the line
+  lineinfile:
+    dest: /etc/kernel/cmdline
+    line: systemdboot cmdline already has flag disabled
+    regexp: "{{ flag }}"
+    state: present
+  become: true
+  changed_when: false
+
+- name: "Append flag {{ flag }} grub config"
+  when: grub_variable_line_exists.msg == "line added"
+  lineinfile:
+    dest: /etc/default/grub
+    backrefs: yes
+    regexp: "^{{ variable }}=\"(.*)\""
+    line: "{{ variable }}=\"\\1 {{ flag }}\""
+    state: present
+  become: true
+  notify: "Regenerate boot config"
+
+- name: "Append flag {{ flag }} systemdboot config"
+  when: (systemdboot_cmdline.stat.exists) and (no_modify_systemdboot is not defined) and (systemdboot_variable_line_exists.msg == "line added")
+  lineinfile:
+    dest: /etc/kernel/cmdline
+    backrefs: yes
+    regexp: "(.*)"
+    line: "\\1 {{ flag }}"
+    state: present
+  become: true
+  notify: "Regenerate boot config"

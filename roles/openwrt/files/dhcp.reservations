@@ -4,6 +4,10 @@ config cname
 	option cname 'www.rather.puzzling.org'
 	option target 'rather.puzzling.org'
 
+config cname
+	option cname 'idrac.rather.puzzling.org'
+	option target 'idrac-r520.rather.puzzling.org'
+
 # a daemon running external to openwrt (monitor_iot.worker) monitors
 # our public IP and resets our internal DNS entry to this if it finds
 # it doesn't match
@@ -72,6 +76,12 @@ config host
 	option ip '192.168.1.17'
 	option mac 'f6:7f:da:7d:af:30'
 	option name 'dirac'
+	option dns '1'
+
+config host
+	option ip '192.168.1.39'
+	option mac 'bc:d0:74:43:8d:03'
+	option name 'tims-mbp-2'
 	option dns '1'
 
 config host
@@ -183,7 +193,13 @@ config host
 config host
 	option ip '192.168.1.10'
 	option mac 'f0:1f:af:d9:75:22'
-	option name 'idrac'
+	option name 'idrac-r520'
+	option dns '1'
+
+config host
+	option ip '192.168.1.11'
+	option mac '18:66:da:62:ce:a3'
+	option name 'idrac-r730xd'
 	option dns '1'
 
 config host
@@ -225,7 +241,7 @@ config host
 config host
 	option ip '192.168.1.67'
 	option mac 'a4:cf:12:b7:93:df'
-	option name 'externalgaragelights-power'
+	option name 'heatedseat-power'
 	option dns '1'
 
 config host
@@ -316,6 +332,12 @@ config host
 	option ip '192.168.1.5'
 	option mac 'f0:1f:af:d9:75:20'
 	option name 'pve'
+	option dns '1'
+
+config host
+	option ip '192.168.1.8'
+	option mac '18:66:da:e7:83:74'
+	option name 'pve1'
 	option dns '1'
 
 config host
@@ -411,7 +433,7 @@ config host
 
 config host
 	option mac '4c:eb:d6:d7:81:83'
-	option name 'patiofluro-power'
+	option name 'electricblanket-power'
 	option dns '1'
 	option ip '192.168.1.80'
 
@@ -420,6 +442,12 @@ config host
 	option name 'loungefrontlight-power'
 	option dns '1'
 	option ip '192.168.1.81'
+
+config host
+	option mac '84:e3:42:e4:f1:1e'
+	option name 'study-power'
+	option dns '1'
+	option ip '192.168.1.82'
 
 config host
 	option mac 'c4:4f:33:a8:eb:9b'
@@ -451,6 +479,13 @@ config host
 	option name 'fan-1'
 	option dns '1'
 	option ip '192.168.4.60'
+
+config host
+	# study fluro
+	option mac '70:03:9F:D2:62:1F'
+	option name 'study-fluro-1'
+	option dns '1'
+	option ip '192.168.4.61'
 
 config host
 	option mac '56:0f:c8:9f:b2:a4'

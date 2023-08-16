@@ -4,10 +4,49 @@
     dest: /etc/ssh/sshd_config
     regexp: '^PermitRootLogin'
     # pve in cluster mode automatically enables PermitRootLogin
-    line: "{{ host_is_in_pve_cluster is defined | ternary ('PermitRootLogin yes', 'PermitRootLogin no # ANSIBLE CONFIGURED') }}"
+    line: "{{ ( ( host_is_in_pve_cluster | default(false) ) or ( permit_root_login | default(false) ) ) | ternary ('PermitRootLogin yes # ANSIBLE CONFIGURED', 'PermitRootLogin no # ANSIBLE CONFIGURED') }}"
     state: present
   notify: restart ssh
   become: true
+
+- name: ensure /etc/ssh/{ssh_config.d,sshd_config.d} sourced
+  lineinfile:
+    dest: "{{ item }}"
+    line: "Include {{ item }}.d/*.conf"
+    insertbefore: ^[A-Za-z]
+    firstmatch: true
+  when: item != omit
+  # trick from https://docs.ansible.com/ansible/latest/playbook_guide/complex_data_manipulation.html
+  with_items:
+    - "/etc/ssh/ssh_config"
+    - "{{ (host_is_container is defined) | ternary (omit, '/etc/ssh/sshd_config') }}"
+  notify: restart ssh
+  become: true
+
+- name: create /etc/ssh/{ssh_config.d,sshd_config.d}
+  file:
+    path: "{{ item }}"
+    state: directory
+  become: true
+  with_items:
+    - /etc/ssh/ssh_config.d
+    - /etc/ssh/sshd_config.d
+
+- name: install /etc/ssh/ssh_config.d/local.conf
+  copy:
+    src: etc_ssh/ssh_config.d/local.conf
+    dest: /etc/ssh/ssh_config.d/local.conf
+    mode: 0644
+  become: true
+
+- name: install /etc/ssh/sshd_config.d/local.conf
+  template:
+    src: etc_ssh/sshd_config.d/local.conf
+    dest: /etc/ssh/sshd_config.d/local.conf
+    mode: 0644
+  notify: restart ssh
+  become: true
+  when: host_is_container is not defined # our containers are still Debian buster, whose sshd doesn't support Include
 
 #- name: Disable password authentication
 #  lineinfile:

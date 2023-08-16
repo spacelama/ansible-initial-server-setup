@@ -15,7 +15,7 @@
 
 - name: install router packages
   opkg:
-    name: luci-app-sqm,avahi-dbus-daemon,adblock,luci-app-adblock,msmtp,crelay,ethtool,arp-scan,ifstat
+    name: luci-app-sqm,avahi-dbus-daemon,adblock,luci-app-adblock,msmtp,crelay,ethtool,arp-scan,ifstat # instead of port mirroring, perhaps we can configure ecowitt mirroring of port 8000->homeassistant:4199 via port forwards ,port-mirroring
     state: present
   when: openwrt_router_packages is defined
 
@@ -36,9 +36,24 @@
 
 - name: install full packages
   opkg:
-    name: tcpdump,strace,lsof,usbutils
+    name: tcpdump,strace,lsof,usbutils,ethtool,psmisc,procps-ng-ps,procps-ng-watch,procps-ng-vmstat,iftop,htop
     state: present
   when: openwrt_heavy_installation is defined
+
+- name: install nut packages
+  opkg:
+    name: luci-app-nut,nut,nut-upscmd,nut-upsc,nut-upslog,nut-server,nut-driver-blazer_usb,nut-driver-usbhid-ups,nut-upssched,nut-avahi-service,nut-upsrw,nut-web-cgi
+    state: present
+  when: nut_install is defined
+
+- name: install nut munin plugins
+  file:
+    src: /root/bin/nutups_
+    dest: "/etc/munin/plugins/nutups_powershield_{{ item }}"
+    state: link
+    force: yes
+  with_items: [ charge,voltages,freq,current ]
+  when: nut_install is defined
 
 - name: setup dhcp reservations
   copy:
@@ -57,7 +72,11 @@
     - list-installed-packages
     - log-daily-config
     - show_wifi_clients2.sh
+    - show_wifi_clients2.sh.helper
+    - show_wifi_clients2.sh.helper2
     - opkg-search
+    - nutups_
+    - nutups2_
 
 - name: set root account passwd
   lineinfile:
@@ -88,4 +107,4 @@
 - name: commit changes
   meta: flush_handlers
 
-#FIXME:  system firewall (only on router, not aps)
+#FIXME:  system firewall (only on router, not aps -- except maybe we do want firewall on APs so we can port mirror from ecowitt to multiple places, except that we can't mirror TCP streams because of handshakes)

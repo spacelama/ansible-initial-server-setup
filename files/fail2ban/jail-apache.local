@@ -1,0 +1,28 @@
+[apache-auth]
+enabled = true
+
+[apache-badbots]
+enabled = true
+
+[apache-noscript]
+enabled = true
+maxretry = 6
+
+[apache-overflows]
+enabled = true
+
+[apache-nohome]
+enabled = true
+
+[apache-botsearch]
+enabled = true
+
+[apache-fakegooglebot]
+enabled = true
+
+[apache-modsecurity]
+enabled = true
+
+[apache-shellshock]
+enabled = true
+

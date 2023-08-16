@@ -110,9 +110,17 @@
     - name: Make sure all handlers run
       meta: flush_handlers
 
+- name: Set plocate group
+  group:
+    name: "plocate"
+    gid: 172
+    state: present
+  become: true
+  when: host_is_container is not defined
+
 - name: Install essential packages (not container)
   apt:
-    name: ['git', 'htop', 'iotop', 'smem', 'ethtool', 'net-tools', 'iperf3',  'aptitude', 'dlocate', 'vim', 'nicstat', 'lshw', 'parted', 'sdparm', 'ntpdate', 'colordiff', 'ifstat', 'iftop', 'apt-listchanges', 'apt-show-versions', 'etckeeper', 'apt-listbugs', 'apt-listbugs', 'rlwrap', 'strace', 'make', 'keychain', 'libstring-shellquote-perl', 'dmidecode', 'expect', 'initscripts'] # expect for unbuffer, initscripts for bootlogs, pcp for dstat, but that results in pmlogger cronjobs that spin up disks on fs
+    name: ['git', 'htop', 'iotop', 'smem', 'ethtool', 'net-tools', 'iperf3',  'aptitude', 'dlocate', 'plocate', 'vim', 'nicstat', 'lshw', 'parted', 'sdparm', 'ntpdate', 'colordiff', 'ifstat', 'iftop', 'apt-listchanges', 'apt-show-versions', 'etckeeper', 'apt-listbugs', 'apt-listbugs', 'rlwrap', 'strace', 'make', 'keychain', 'libstring-shellquote-perl', 'dmidecode', 'expect', 'initscripts'] # expect for unbuffer, initscripts for bootlogs, pcp for dstat, but that results in pmlogger cronjobs that spin up disks on fs
     # atop
     autoremove: no
     state: present
@@ -207,6 +215,16 @@
   copy:
     dest: /etc/sysctl.d/10-local.conf
     content: "kernel.dmesg_restrict = 0\n"
+    owner: root
+    group: root
+    mode: 0644
+  become: true
+  notify: restart sysctl
+
+- name: stop restricting sysrq
+  copy:
+    dest: /etc/sysctl.d/99-sysrq.conf
+    content: "kernel.sysrq=1\n"
     owner: root
     group: root
     mode: 0644
@@ -323,21 +341,18 @@
   when: host_is_container is not defined
 
 - name: fix up utterly braindead config file defaults
-  include_tasks: fixup_user_conf_files.yml
+  include_tasks: "{{ playbook_dir }}/roles/common/tasks/fixup_user_conf_files.yml"
   loop_control:
     loop_var: user
   with_items: "{{ fixup_conf_files.users }}"
 
 - name: "Remove undesired flags from grub config"
-  lineinfile:
-    dest: /etc/default/grub
-    backrefs: yes
-    regexp: "^GRUB_CMDLINE_LINUX_DEFAULT=\"(.*) *{{ item }} *(.*)\""
-    line: "GRUB_CMDLINE_LINUX_DEFAULT=\"\\1\\2\""
-    state: present
-  become: true
+  include_tasks: "{{ playbook_dir }}/roles/common/tasks/remove_boot_flag.yml"
+  loop_control:
+    loop_var: flag
+  vars:
+    variable: "GRUB_CMDLINE_LINUX_DEFAULT"
   with_items: { quiet, "   *" }
-  notify: "Regenerate grub config"
   when: host_is_container is not defined and host_is_pi is not defined
 
 - name: fix defaults in grub config
@@ -349,7 +364,7 @@
     - "#debian bug #717586"
     - "#Is it 'info grub'->Configuration->Simple Configuration:"
     - "GRUB_DISABLE_SUBMENU=y"
-  notify: "Regenerate grub config"
+  notify: "Regenerate boot config"
   when: host_is_container is not defined and host_is_pi is not defined
 
 - name: determine if smartmontools config exists
@@ -367,6 +382,14 @@
   become: true
   notify: restart smartmontools
   when: smartmontools.stat.exists
+
+- name: remove stale systemd overrides
+  file:
+    path: "/etc/systemd/system/{{ item }}.d/"
+    state: absent
+  with_items: "{{ remove_systemd_overrides }}"
+  become: true
+  notify: restart systemd overrides
 
 - name: setup systemd overrides
   copy:

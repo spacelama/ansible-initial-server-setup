@@ -84,9 +84,17 @@
 
 - name: remove prohibited packages
   apt:
-    name: ['os-prober', 'linux-headers-*', 'linux-image-*']
+    name: "{{ item }}"
     state: absent
   become: true
+  with_items:
+    - 'os-prober'
+    - 'linux-headers-*'
+    - 'linux-image-*'
+    # https://github.com/ansible/ansible/issues/62262 - can't do all
+    # these at once on the one invocation, because throws extraneous
+    # errors when the package was never installed
+  ignore_errors: true
 
 - name: Install virtual host tools
   apt:
@@ -111,7 +119,7 @@
 
 - name: mount media transcodes
   mount:
-    path: /transcodes
+    path: /media_transcodes
     src: fs:/home/tconnors/movies/media_transcodes
     fstype: nfs4
     opts: defaults,_netdev,x-systemd.automount
@@ -155,7 +163,7 @@
   with_items: { a, b, c, d, e, f, g, h, i, j, k, l, m, n }
   when: in_bootstrap is not defined
 
-- name: disable pve-ha-lrm/pve-ha-crm on a non HA setup, to alleviate constant disk writes by pmxcfs to SSD
+- name: set pve-ha-lrm/pve-ha-crm disabled when on HA or enabled when on HA, to alleviate constant disk writes by pmxcfs to SSD
   # https://forum.proxmox.com/threads/pmxcfs-writing-to-disk-all-the-time.35828/ https://www.reddit.com/r/Proxmox/comments/i8e5fi/excessive_nvme_wear_out/g193xr2/
   service:
     name: "{{ item }}"
@@ -177,43 +185,7 @@
 # (but primarily, suspect most writes are coming from rrd in fs)
 
 
-#FIXME: all these (and essentials, and spectre) grub commandline mungings should just be additions and deletions to file from /etc/default/grub.d/
 # https://pve.proxmox.com/wiki/Pci_passthrough
-- name: "Search for intel iommu grub config"
-  become: yes
-  register: intel_iommu_grub_cmdline_exists
-  check_mode: yes # cause this to become just a test.  If there's already
-                  # iommu settings, then this will think line is
-                  # being replaced, and changed will become true (but we
-                  # force it to false to not output a line saying
-                  # "changed"), and msg will become "line added", else
-                  # changed stays false, and msg does not contain "line
-                  # added"
-  lineinfile:
-    dest: /etc/default/grub
-    line: grub cmdline already has iommu mitigations disabled
-    regexp: "^GRUB_CMDLINE_LINUX_DEFAULT=.*intel_iommu=on"
-    state: present
-  changed_when: false
-
-# https://pve.proxmox.com/wiki/Pci_passthrough
-- name: "Search for amd iommu grub config"
-  become: yes
-  register: amd_iommu_grub_cmdline_exists
-  check_mode: yes # cause this to become just a test.  If there's already
-                  # iommu settings, then this will think line is
-                  # being replaced, and changed will become true (but we
-                  # force it to false to not output a line saying
-                  # "changed"), and msg will become "line added", else
-                  # changed stays false, and msg does not contain "line
-                  # added"
-  lineinfile:
-    dest: /etc/default/grub
-    line: grub cmdline already has iommu mitigations disabled
-    regexp: "^GRUB_CMDLINE_LINUX_DEFAULT=.*amd_iommu=on"
-    state: present
-  changed_when: false
-
 
   # test devices you want to pass through belong in separate IOMMUs:
 #https://www.reddit.com/r/SolusProject/comments/955osy/vfio_passthrough_quick_reference/
@@ -225,27 +197,23 @@
 #    lspci -nns "${d##*/}"
 #done;
 
-- name: "Append intel_iommu=on grub config"
-  when: (intel_iommu_grub_cmdline_exists.msg == "line added") and (host_is_intel is defined)
-  lineinfile:
-    dest: /etc/default/grub
-    backrefs: yes
-    regexp: '^GRUB_CMDLINE_LINUX_DEFAULT="(.*)"'
-    line: 'GRUB_CMDLINE_LINUX_DEFAULT="\1 intel_iommu=on iommu=pt pcie_acs_override=downstream,multifunction"'
-    state: present
-  become: true
-  notify: "Regenerate pve grub config"
+- name: "Append intel_iommu=on boot config"
+  include_tasks: "{{ playbook_dir }}/roles/common/tasks/add_boot_flag.yml"
+  loop_control:
+    loop_var: flag
+  vars:
+    variable: "GRUB_CMDLINE_LINUX_DEFAULT"
+  when: host_is_intel is defined
+  with_items: { "intel_iommu=on", "iommu=pt", "pcie_acs_override=downstream,multifunction" }
 
-- name: "Append amd_iommu=on grub config"
-  when: (amd_iommu_grub_cmdline_exists.msg == "line added") and (host_is_amd is defined)
-  lineinfile:
-    dest: /etc/default/grub
-    backrefs: yes
-    regexp: '^GRUB_CMDLINE_LINUX_DEFAULT="(.*)"'
-    line: 'GRUB_CMDLINE_LINUX_DEFAULT="\1 amd_iommu=on iommu=pt pcie_acs_override=downstream,multifunction"'
-    state: present
-  become: true
-  notify: "Regenerate pve grub config"
+- name: "Append amd_iommu=on boot config"
+  include_tasks: "{{ playbook_dir }}/roles/common/tasks/add_boot_flag.yml"
+  loop_control:
+    loop_var: flag
+  vars:
+    variable: "GRUB_CMDLINE_LINUX_DEFAULT"
+  when: host_is_amd is defined
+  with_items: { "amd_iommu=on", "iommu=pt", "pcie_acs_override=downstream,multifunction" }
 
 # - name: "host modules blacklist (radeon, snd_hda_intel, amdgpu, usb3)"
 #   copy:
@@ -254,61 +222,23 @@
 #   become: true
 #   notify: "Update initramfs config"
 
-- name: "Search for modprobe blacklist"
-  become: yes
-  register: modprobe_blacklist_grub_cmdline_exists
-  check_mode: yes # cause this to become just a test.  If there's already
-                  # blacklist settings, then this will think line is
-                  # being replaced, and changed will become true (but we
-                  # force it to false to not output a line saying
-                  # "changed"), and msg will become "line added", else
-                  # changed stays false, and msg does not contain "line
-                  # added"
-  lineinfile:
-    dest: /etc/default/grub
-    line: grub cmdline already has modprobe blacklist applied
-    regexp: "^GRUB_CMDLINE_LINUX_DEFAULT=.*modprobe.blacklist=.*radeon"
-    state: present
-  changed_when: false
+# there'll be times we want to add or remove items from this list, so add_boot_flag should be generalised to look for regexps
+- name: "Append modprobe blacklist boot config"
+  include_tasks: "{{ playbook_dir }}/roles/common/tasks/add_boot_flag.yml"
+  loop_control:
+    loop_var: flag
+  vars:
+    variable: "GRUB_CMDLINE_LINUX_DEFAULT"
+  with_items: { "modprobe.blacklist=radeon,amdgpu,snd_hda_intel,xhci_hcd,xhci_pci" }
 
-- name: "Append modprobe.blacklist=... grub config"
-  when: modprobe_blacklist_grub_cmdline_exists.msg == "line added"
-  lineinfile:
-    dest: /etc/default/grub
-    backrefs: yes
-    regexp: '^GRUB_CMDLINE_LINUX_DEFAULT="(.*)"'
-    line: 'GRUB_CMDLINE_LINUX_DEFAULT="\1 modprobe.blacklist=radeon,amdgpu,snd_hda_intel,xhci_hcd,xhci_pci"'
-    state: present
-  become: true
-  notify: "Regenerate pve grub config"
-
-- name: "Search for grub failsafe cmdline"
-  become: yes
-  register: failsafe_grub_cmdline_exists
-  check_mode: yes # cause this to become just a test.  If there's already
-                  # blacklist settings, then this will think line is
-                  # being replaced, and changed will become true (but we
-                  # force it to false to not output a line saying
-                  # "changed"), and msg will become "line added", else
-                  # changed stays false, and msg does not contain "line
-                  # added"
-  lineinfile:
-    dest: /etc/default/grub
-    line: grub cmdline already has failsafe grub cmdline applied
-    regexp: "^GRUB_CMDLINE_LINUX=.*modprobe.blacklist=vfio_pci"
-    state: present
-  changed_when: false
-
-- name: "Append modprobe.blacklist=vfio_pci grub config"
-  when: failsafe_grub_cmdline_exists.msg == "line added"
-  lineinfile:
-    dest: /etc/default/grub
-    backrefs: yes
-    regexp: '^GRUB_CMDLINE_LINUX="(.*)"'
-    line: 'GRUB_CMDLINE_LINUX="\1 modprobe.blacklist=vfio_pci"'
-    state: present
-  become: true
-  notify: "Regenerate pve grub config"
+- name: "Add modprobe blacklist to failsafe boot config"
+  include_tasks: "{{ playbook_dir }}/roles/common/tasks/add_boot_flag.yml"
+  loop_control:
+    loop_var: flag
+  vars:
+    variable: "GRUB_CMDLINE_LINUX"
+    no_modify_systemdboot: true
+  with_items: { "modprobe.blacklist=vfio_pci" }
 
 - name: "vfio module parameters"
   copy:
@@ -358,7 +288,7 @@
   become: true
   notify: "Update initramfs config"
 
-# if need to regenerate pve grub config because of new disks,
+# if need to regenerate pve boot config because of new disks,
 # procedure is here: https://pve.proxmox.com/wiki/Host_Bootloader
 
 - name: install ssh socket directory
@@ -386,12 +316,19 @@
 - name: "Install root crontab"
   copy:
     dest: /var/spool/cron/crontabs/root
-    content: "@reboot echo ondemand | tee /sys/devices/system/cpu/cpu*/cpufreq/scaling_governor\n"
+    content: "@reboot echo schedutil | tee /sys/devices/system/cpu/cpu*/cpufreq/scaling_governor\n"
+#    content: "@reboot echo ondemand | tee /sys/devices/system/cpu/cpu*/cpufreq/scaling_governor\n"
 #    content: "@reboot echo powersave | tee /sys/devices/system/cpu/cpu*/cpufreq/scaling_governor\n"
 #    content: "\n"
     mode: 0600
   become: true
   notify: "reload cron"
+
+- name: "Install guest snippets directory"
+  file:
+    path: "/var/lib/vz/snippets/"
+    state: directory
+  become: true
 
 - name: "Install guest snippets"
   copy:
