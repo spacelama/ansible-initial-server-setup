@@ -208,7 +208,7 @@ else
         GIT_PROMPT_END_USER="$PS1_POST"
         GIT_PROMPT_END_ROOT="$GIT_PROMPT_END_USER"
         GIT_PROMPT_LAST_COMMAND_STATE=0  # just a dummy we don't care about
-        setGitPrompt  # from ~/bash-git-prompt/
+        [ -z "$IGNORE_GIT_PROMPT" ] && setGitPrompt  # from ~/bash-git-prompt/
         #huh?                NO_PROMPT_VARS=1
         if [ -n "$EXTRA_TITLE" ] ; then
             EXTRA_TITLE="$EXTRA_TITLE -- "  # this is a local  settings - just pretty things up a little
