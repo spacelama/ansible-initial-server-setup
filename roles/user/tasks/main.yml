@@ -68,15 +68,8 @@
     database: passwd
 
 - name: copy ssh keys
-  authorized_key:
-    user: "{{ item.key }}"
-    key: "{{ item.value.sshkey }}"
-    state: "{{ item.value.state }}"
-    # if user doesn't have a home directory, just dump the key into /tmp and otherwise let the system ignore it
-    path: "{{ getent_passwd[item.key][4] is defined | ternary(omit, '/tmp/' ~ item.key ~ '_ssh_authorized_keys') }}"
-#    comment: "{{ item.value.comment }}"
+  include_tasks: add_ssh_authorized_keys.yml
   loop: "{{ lookup('dict', my_users) }}"
-  become: true
 
 - name: copy sudoers
   copy:
