@@ -30,6 +30,7 @@ function setup_environment() {
         setup_bash_settings
         setup_aliases
         setup_remote_aliases
+#        setup_cmd
     fi
 
     if [ -z "$NONINTERACT" -a -f /etc/bash_completion -a -z "$BASH_COMPLETION" ]; then
@@ -261,6 +262,8 @@ function setup_environment() {
         export CVS_RSH=ssh
     fi
 
+    LESSHISTSIZE=20480
+    export LESSHISTSIZE
     LESS="-i -M -R -P%t?f%f:stdin .?pb%pb\%:?lbLine %lb:?bbByte %bb:-..."  #no -X - because this disables cursor movement (when and where was this? Works on debian unstable 20070130, mind you, it seems to be reasonably annoying when viewing multiple files in querybts and the previous file isnt cleared off the screen until you scroll, so it becomes hard to tell where the old file ends and the new file starts)
     #FIXME: -g has been disabled temporary because of bug #459335, 460171
     case $OS in
