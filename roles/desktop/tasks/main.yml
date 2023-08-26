@@ -18,7 +18,7 @@
 
 - name: Remove wayland, gnome etc
   apt:
-    name: ['desktop-base', 'gnome', 'xwayland', 'hunspell-en-us', 'nautilus', 'unattended-upgrades', 'evolution', 'evince', 'gnome-shell', 'gnome-software', 'gnome-terminal', 'gnome-backgrounds', 'gnome-online-miners', 'mutter', 'gnome-settings-daemon-common', 'gnome-keyring', 'gedit', 'gnome-themes-extra', 'gnome-accessibility-themes']
+    name: ['desktop-base', 'gnome', 'xwayland', 'hunspell-en-us', 'nautilus', 'unattended-upgrades', 'evolution', 'evince', 'gnome-shell', 'gnome-software', 'gnome-terminal', 'gnome-backgrounds', 'gnome-online-miners', 'mutter', 'gnome-settings-daemon-common', 'gnome-keyring', 'gedit', 'gnome-themes-extra', 'gnome-accessibility-themes', 'ibus', 'ibus-gtk3', 'ibus-gtk', 'im-config']
     state: absent
     autoremove: yes
     purge: yes
