@@ -10,20 +10,26 @@ function readfromhistory() {
     history -r
 }
 
-function writetohistory() {
-    #FIXME: ideally detect when we're inside emacs TRAMP and do nothing
-    #    bt
-    local BASH_FULLHIST="${BASH_FULL_HISTFILE:-$HOME/.bash_fullhistory}"
-    if [ "$BASH_FULL_HISTFILE_LAST" != "$BASH_FULLHIST" ] ; then
-        # time to read from the new file we're just setting, and start writing to it
-        BASH_FULL_HISTFILE_LAST="$BASH_FULLHIST"
-        setup_bash_history_file
-    fi
-    history=$( history -a /dev/stdout ) # doesn't clear the history because in subshell
-    if [ -z "$1" -a -z "$history" ] ; then
-        return
-    fi
-    ( (
+# ever since we put direnv in, we get this as an ugly jobs output:
+#: 33290,37; jobs
+#[1]   Done                    apt-cache policy bash
+#[2]   Exit 1                  apt-cache policy bash | apt-cache policy bash | apt-cache policy bash | apt-cache policy bash
+# since jobs should only be outputting running and stopped jobs
+# because we've previously told jobs to output status immediately upon
+# exit, we should just be able to get same output from this:
+function jobs() {
+    command jobs -r
+    command jobs -s
+}
+
+# if we didn't have the above jobs() function override, we'd have to
+# offload this to a shell script because no matter how we try to
+# double fork and background this shell, it always appears in the
+# jobs() output as "Exit: "...
+
+function write_history_in_background() {
+(
+    (
         # writing history...
         mkdir -p /tmp/$USER
         lockfile -1 -r 30 -l 60 /tmp/$USER/.bash_history.lock
@@ -40,7 +46,24 @@ function writetohistory() {
             echo "$history" >> "$BASH_FULLHIST"
         fi
         command rm -f /tmp/$USER/.bash_history.lock
-    ) & )
+    ) &
+)
+}
+
+function writetohistory() {
+    #FIXME: ideally detect when we're inside emacs TRAMP and do nothing
+    #    bt
+    local BASH_FULLHIST="${BASH_FULL_HISTFILE:-$HOME/.bash_fullhistory}"
+    if [ "$BASH_FULL_HISTFILE_LAST" != "$BASH_FULLHIST" ] ; then
+        # time to read from the new file we're just setting, and start writing to it
+        BASH_FULL_HISTFILE_LAST="$BASH_FULLHIST"
+        setup_bash_history_file
+    fi
+    history=$( history -a /dev/stdout ) # doesn't clear the history because in subshell
+    if [ -z "$1" -a -z "$history" ] ; then
+        return
+    fi
+    write_history_in_background "$1" # "$BASH_FULLHIST" "$history" "$PTS"
     if HISTTIMEFORMAT= history 2 | sed 's/^[ 0-9]*//' | uniq -d | grep -q . ; then
         # duplicated history
         lasthist=$( history 1 | awk '{print $1}' )
