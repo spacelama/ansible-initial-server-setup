@@ -44,6 +44,7 @@ function setup_aliases() {
     alias crontab='crontab -i'
     alias ecrontab='crontab -e'
     alias info=pinfo
+    alias c='yes "" | head -n28'
 
     #https://stackoverflow.com/questions/15292391/is-it-possible-to-perform-a-grep-search-in-all-the-branches-of-a-git-project
     alias grep_git_all_branches="git branch -a | tr -d \* | sed '/->/d' | xargs git grep"
