@@ -90,6 +90,7 @@ config host
 	option dns '1'
 
 config host
+        # allow both mac addresses to get this IP
 	option ip '192.168.1.123'
 	option mac 'a0:a8:cd:2d:d4:df 00:90:f5:e7:b0:7a'
 	option name 'dirac-laptop'
