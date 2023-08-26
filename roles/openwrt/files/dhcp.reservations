@@ -8,6 +8,11 @@ config cname
 	option cname 'idrac.rather.puzzling.org'
 	option target 'idrac-r520.rather.puzzling.org'
 
+config cname
+	option cname 'pve.rather.puzzling.org'
+	option target 'pve1.rather.puzzling.org'
+# does not work:	option target 'pve1.rather.puzzling.org pve2.rather.puzzling.org'
+
 # a daemon running external to openwrt (monitor_iot.worker) monitors
 # our public IP and resets our internal DNS entry to this if it finds
 # it doesn't match
@@ -331,7 +336,7 @@ config host
 config host
 	option ip '192.168.1.5'
 	option mac 'f0:1f:af:d9:75:20'
-	option name 'pve'
+	option name 'pve0'
 	option dns '1'
 
 config host
