@@ -73,6 +73,12 @@
     state: absent
   become: true
 
+- name: Remove once-installed-but-annoying packages
+  apt:
+    name: ['apt-listdifferences']
+    state: absent
+  become: true
+
 - name: Update APT Package Manager
   apt:
     update_cache: yes
