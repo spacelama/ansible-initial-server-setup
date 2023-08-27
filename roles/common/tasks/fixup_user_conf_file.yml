@@ -1,5 +1,5 @@
 ---
-- name: "fixup conf file {{ file.name }} for user {{ user }}"
+- name: "fixup line in conf file {{ file.name }} for user {{ user }}"
   lineinfile:
     dest: "~{{ user }}/{{ file.name }}"
     owner: "{{ user }}"
@@ -9,6 +9,18 @@
     create: yes
   become: true
   with_items: "{{ file.lines }}"
+  when: file.lines is defined
+
+- name: "fixup conf file {{ file.name }} for user {{ user }}"
+  copy:
+    dest: "~{{ user }}/{{ file.name }}"
+    owner: "{{ user }}"
+    group: "{{ user }}"
+    src: "{{ item }}"
+    mode: "{{ file.mode | default(omit) }}"
+  become: true
+  with_items: "{{ file.source }}"
+  when: file.source is defined
 
 #- name: "ensure permissions are correct on {{ file.name }} for user {{ user }}"
 #  when: file.mode is defined  # stop spurious messages about "changed" when the file is a symlink to common-files/

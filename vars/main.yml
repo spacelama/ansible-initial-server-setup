@@ -65,36 +65,11 @@
       - root
     files:
       - name: .vimrc
-        lines:
-          - '" We don''t need to be compatible with vi'
-          - 'set nocompatible'
-          - '" Turn on syntax highlighting'
-          - 'syntax on'
-          - 'set background=dark'
-          - '" Many Colours don''t set using the following check with :hi'
-          - 'let g:hybrid_use_Xresources = 1'
-          - '" mouse support in terminals was invented by a moron: https://unix.stackexchange.com/questions/44513/disabling-mouse-support-in-vim-in-a-gnome-terminal-environment'
-          - 'set mouse='
+        source: homes/.vimrc
       - name: .nanorc
-        lines:
-          - '## Disable mouse support, so that mouse clicks can be used to set the'
-          - '## mark and run shortcuts.'
-          - 'unset mouse'
-          - '## Constantly update the cursor position'
-          - 'set constantshow'
-          - '## Don''t display the help lists at the bottom of the screen'
-          - 'set nohelp'
-          - '## Don''t wrap text at all'
-          - 'set nowrap'
-          - '## Use smooth scrolling as the default'
-          - 'set smooth'
-          - '## Allow nano to be suspended with ^Z'
-          - 'set suspend'
-          - '## Enable ~/.nano_history for saving and reading search/replace strings.'
-          - 'set historylog'
+        source: homes/.nanorc
       - name: .bashrc.d/override-turnkey-prompt.sh
-        lines:
-          - 'if [ -e /etc/turnkey_version ] ; then PROMPT_COMMAND=handleprompt ; fi '
+        source: homes/.bashrc.d/override-turnkey-prompt.sh
         mode: "0755"
   bashrc_files:
     - "{{ lookup('fileglob', 'etc_bashrc.d/*.sh', wantlist=True) }}"
@@ -112,9 +87,10 @@
     - { source: etc_bashrc.d/bash.bashrc, dest: /etc/bash.bashrc, mode: "0644" }
     - { source: etc/bashcolors, dest: /etc/bashcolors, mode: "0644" }
     - { source: etc/inputrc, dest: /etc/inputrc, mode: "0644" }
+
     - { files: "{{ bin_files | flatten }}", dir: /usr/local/bin/, mode: "0755" }
     - { files: "{{ bashrc_files | flatten }}", dir: /etc/bash.bashrc.d/, mode: "0644" }
 
   remove_files:
-    - { files_not: "{{ bashrc_files | flatten | map('basename') }}", dir: /etc/bash.bashrc.d/ } # FIXME: should carefully consider those containers that actually provided files in that directory, but I think the main concern is actually /etc/skel/.bashrc.d/ amd by extension ~/.bashrc.d/  We're not yet overriding that, so should be fine for now...
+    - { files_not: "{{ bashrc_files | flatten | map('basename') }}", dir: /etc/bash.bashrc.d/ } # FIXME: should carefully consider those containers that actually provided files in that directory, but I think the main concern is actually /etc/skel/.bashrc.d/ and by extension ~/.bashrc.d/  We're not yet overriding that, so should be fine for now...
 #    - { files_not: "{{ bin_files | flatten | map('basename') }}", dir: /usr/local/bin/ } # Can't do this - lots of files in /usr/local/bin not controlled from here
