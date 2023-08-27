@@ -350,7 +350,7 @@
   include_tasks: "{{ playbook_dir }}/roles/common/tasks/fixup_user_conf_files.yml"
   loop_control:
     loop_var: user
-  with_items: "{{ fixup_conf_files.users }}"
+  with_items: "{{ fixup_user_conf_files.users }}"
 
 - name: "Remove undesired flags from grub config"
   include_tasks: "{{ playbook_dir }}/roles/common/tasks/remove_boot_flag.yml"

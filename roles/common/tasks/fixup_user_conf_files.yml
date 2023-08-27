@@ -3,5 +3,5 @@
   include_tasks: fixup_user_conf_file.yml
   loop_control:
     loop_var: file
-  with_items: "{{ fixup_conf_files.files }}"
+  with_items: "{{ fixup_user_conf_files.files }}"
 
