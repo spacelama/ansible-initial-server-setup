@@ -90,6 +90,8 @@
 
     - { files: "{{ bin_files | flatten }}", dir: /usr/local/bin/, mode: "0755" }
     - { files: "{{ bashrc_files | flatten }}", dir: /etc/bash.bashrc.d/, mode: "0644" }
+    - { source: etc/logrotate.d/btmp,          dest: /etc/logrotate.d/btmp,          mode: "0644" }
+    - { source: etc/logrotate.d/wtmp,          dest: /etc/logrotate.d/wtmp,          mode: "0644" }
 
   remove_files:
     - { files_not: "{{ bashrc_files | flatten | map('basename') }}", dir: /etc/bash.bashrc.d/ } # FIXME: should carefully consider those containers that actually provided files in that directory, but I think the main concern is actually /etc/skel/.bashrc.d/ and by extension ~/.bashrc.d/  We're not yet overriding that, so should be fine for now...
