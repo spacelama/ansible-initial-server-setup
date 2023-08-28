@@ -1,0 +1,7 @@
+
+29 sep NOT RELEVANT ANYMORE? ansible: `echo "block/sdX/queue/scheduler = deadline" >> /etc/sysfs.conf` on all ssd devices
+29 sep NOT RELEVANT ANYMORE? ansible: or # set deadline scheduler for non-rotating disks
+ACTION=="add|change", KERNEL=="sd[a-z]", ATTR{queue/rotational}=="0", ATTR{queue/scheduler}="deadline" per https://wiki.debian.org/SSDOptimization
+29 sep NOT RELEVANT ANYMORE? pve: set non-rotational on appropriate disks and test with: `grep . /sys/block/sd?/queue/rotational` again
+
+29 sep following maybe not relevant since all schedulers are /sys/block/sd?/queue/scheduler:[mq-deadline] none
