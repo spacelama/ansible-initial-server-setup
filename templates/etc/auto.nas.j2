@@ -1,0 +1,28 @@
+# -o fsc comes from /usr/share/doc/cachefilesd/howto.txt.gz
+/home/tconnors/p -hard,noacl,nodev,nosuid,rw,strictatime,actimeo=600,async fs:/home/tconnors/p
+/var/cache/apt/archives.nfs -hard,noacl,nodev,nosuid,rw,strictatime,async fs:/var/cache/apt/archives
+/home/tconnors/movies -hard,noacl,nodev,nosuid,rw,strictatime,async fs:/home/tconnors/movies
+/home/tconnors/mp3 -hard,noacl,nodev,nosuid,rw,strictatime,async fs:/home/tconnors/mp3
+/home/tconnors/.mp3.low_qual -hard,noacl,nodev,nosuid,rw,strictatime,async fs:/home/tconnors/.mp3.low_qual
+/home/tconnors/photos -hard,noacl,nodev,nosuid,rw,strictatime,async fs:/home/tconnors/photos
+/home/tconnors/background -hard,noacl,nodev,nosuid,rw,strictatime,async fs:/home/tconnors/background
+/home/tconnors/qBT_dir -hard,noacl,nodev,nosuid,rw,strictatime,async fs:/home/tconnors/qBT_dir
+/home/tconnors/thesis -hard,noacl,nodev,nosuid,rw,strictatime,async fs:/home/tconnors/thesis
+/home/tconnors/not_backed_up -hard,noacl,nodev,nosuid,rw,strictatime,async fs:/home/tconnors/not_backed_up
+/home/tconnors/not_backed_up.tank -hard,noacl,nodev,nosuid,rw,strictatime,async fs:/home/tconnors/not_backed_up.tank
+/home/tconnors/oppo -hard,noacl,nodev,nosuid,rw,strictatime,async fs:/home/tconnors/oppo
+/home/tconnors/pixel -hard,noacl,nodev,nosuid,rw,strictatime,async fs:/home/tconnors/pixel
+/home/tconnors/public_html -hard,noacl,nodev,nosuid,rw,strictatime,async fs:/home/tconnors/global_public_html
+
+{% if inventory_hostname != 'pi' %}
+/pi/boot -hard,noacl,nodev,nosuid,rw,strictatime,async pi:/pi/boot
+{% endif %}
+
+{# commented out:
+  #/backuppc -hard,noacl,nodev,nosuid,rw,async fs:/backuppc
+  #/home/tconnors/sysadmin -hard,noacl,nodev,nosuid,rw,strictatime,async fs:/home/tconnors/sysadmin
+  #/var/spool/news -hard,noacl,nodev,nosuid,rw,strictatime,async fs:/var/spool/news
+
+  ##/home/tconnors/movies/kaffeine -fstype=nfs4,hard,noacl,nodev,nosuid,rw,strictatime,async fs:/home/tconnors/movies/kaffeine
+  #/var/sid-386-chroot -hard,noacl,nodev,nosuid,rw,strictatime,async fs:/raid0/data/_NAS_NFS_Exports_/sid-386-chroot
+#}
