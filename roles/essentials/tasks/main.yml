@@ -1,4 +1,8 @@
 ---
+- name: Gather the package facts
+  ansible.builtin.package_facts:
+    manager: auto
+
 - name: Enable default set of repositories
   copy:
     src: apt/sources.list
@@ -314,10 +318,6 @@
     state: directory
   become: true
 
-- name: determine if systemd login needs tweaking
-  stat: path=/etc/systemd/logind.conf
-  register: systemd_logind
-
 - name: Unscrew systemd login defaults - handlepowerkey
   lineinfile:
     dest: /etc/systemd/logind.conf
@@ -325,7 +325,7 @@
     regexp: ^HandlePowerKey=
     state: present
   become: true
-  when: systemd_logind.stat.exists
+  when: "'systemd' in ansible_facts.packages"
   notify: restart systemd-logind
 
 - name: Unscrew systemd login defaults - kill user processes
@@ -335,7 +335,7 @@
     regexp: ^KillUserProcesses=
     state: present
   become: true
-  when: systemd_logind.stat.exists
+  when: "'systemd' in ansible_facts.packages"
   notify: restart systemd-logind
 
 - name: Unscrew systemd login defaults - disable ctrl-alt-delete
@@ -383,10 +383,6 @@
   notify: "Regenerate boot config"
   when: host_is_container is not defined and host_is_pi is not defined
 
-- name: determine if smartmontools config exists
-  stat: path=/etc/default/smartmontools
-  register: smartmontools
-
 - name: poll smartmontools only once per day
   # we want this so SAS disks are allowed to spin down (smartmontools
   # only ignores spundown ATA disks)
@@ -396,8 +392,8 @@
     regexp: '^(smartd_opts=.*)'
     line: 'smartd_opts="--interval=604800"'
   become: true
+  when: "'smartmontools' in ansible_facts.packages"
   notify: restart smartmontools
-  when: smartmontools.stat.exists
 
 - name: remove stale systemd overrides
   file:
