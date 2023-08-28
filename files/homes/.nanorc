@@ -1,5 +1,5 @@
 ## Sample initialization file for GNU nano
-## Please note that you must have configured nano with 
+## Please note that you must have configured nano with
 ## --enable-nanorc for this file to be read!
 ##
 ## To make sure a value is not enabled, use "unset <option>"
@@ -60,7 +60,7 @@ set nowrap
 ## You can get old nano quoted-justify behavior via:
 # set quotestr "(> )+"
 
-## Do regular expression searches by default 
+## Do regular expression searches by default
 # set regexp
 
 ## Use smooth scrolling as the default
@@ -108,7 +108,7 @@ set historylog
 ### to set the background color to black or white.
 ###
 #syntax "c-file" "\.(c|C|cc|cpp|cxx|h|H|hh|hpp|hxx)$"
-#color red "\<[A-Z_]{2,}\>" 
+#color red "\<[A-Z_]{2,}\>"
 #color green "\<(float|double|bool|char|int|short|long|sizeof|enum|void|static|const|struct|union|typedef|extern|signed|unsigned|inline)\>"
 #color green "\<(class|namespace|template|public|protected|private|typename|this|friend|virtual|using|mutable|volatile|register|explicit)\>"
 #color brightyellow "\<(for|if|while|do|else|case|default|switch|goto|continue|break|return)\>"

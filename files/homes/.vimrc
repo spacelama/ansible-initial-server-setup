@@ -15,7 +15,7 @@ let mapleader=','
 " Check the leader is working by using ,t
 nnoremap <leader>t :echo("\<leader\> works! It is set to <leader>")<CR>
 
-" Enable pathogen for easy plugin management 
+" Enable pathogen for easy plugin management
 call pathogen#infect()
 
 set title
@@ -72,7 +72,7 @@ set noswapfile "Don't create .swp files
 nnoremap <space> za
 vnoremap <space> zf
 
-" paste mode toggle 
+" paste mode toggle
 nnoremap <F3> :set invpaste<CR>
 set pastetoggle=<F3>
 
@@ -91,10 +91,10 @@ set pastetoggle=<F3>
 " Change parenthesis highlighting
 :hi MatchParen cterm=underline ctermbg=none ctermfg=none
 
-" UltiSnips 
-let g:UltiSnipsExpandTrigger="<tab>"                                            
-let g:UltiSnipsJumpForwardTrigger="<tab>"                                       
-let g:UltiSnipsJumpBackwardTrigger="<s-tab>" 
+" UltiSnips
+let g:UltiSnipsExpandTrigger="<tab>"
+let g:UltiSnipsJumpForwardTrigger="<tab>"
+let g:UltiSnipsJumpBackwardTrigger="<s-tab>"
 let g:UltiSnipsListSnippets = '<f2>'
 let g:UltiSnipsEditSplit = 'horizontal'
 nmap <f2> :UltiSnipsEdit<CR>
@@ -102,7 +102,7 @@ nmap <f2> :UltiSnipsEdit<CR>
 " .md is markdown
 autocmd BufRead,BufNewFile *.md set filetype=markdown
 
-" .json is json 
+" .json is json
 au! BufRead,BufNewFile *.json set filetype=json
 
 " html is html
@@ -138,8 +138,8 @@ map <C-n> :NERDTreeToggle<CR>
 let NERDTreeQuitOnOpen=1
 
 "neocomplcache
-" Launches neocomplcache automatically on vim startup. 
-"let g:neocomplcache_enable_at_startup = 1 
+" Launches neocomplcache automatically on vim startup.
+"let g:neocomplcache_enable_at_startup = 1
 "
 " inoremap <expr><TAB>  pumvisible() ? "\<C-n>" : "\<TAB>"
 " let g:neocomplcache_enable_auto_select = 1

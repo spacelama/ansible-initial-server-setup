@@ -41,7 +41,7 @@ stereo-power                    tasmota,oldkogan,powermon,accurate,disabledusbpo
 chromecast-lounge-power         tasmota,oldkogan,powermon,currentoffset
 panasonic-power                 tasmota,newkogan,powermon,accurate
 electricblanket-power           tasmota,athom,powermon
-study-power                     beken,jinvooswitchindiv4boardusb
+study-power                     beken,jinvooswitchindiv4boardusb,not247,1W_all_off,5W_all_on
 loungefrontlight-power          tasmota,athom,powermon
 fishtank-temperature            tasmota,DS18B20temp
 pantech                         iot
