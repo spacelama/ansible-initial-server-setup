@@ -215,7 +215,9 @@ function setup_environment() {
     if [ -z "$EMAIL" ] ; then
         export EMAIL=tconnors@rather.puzzling.org
     fi
+    # for reportbug so we can keep an otherwise vanilla file
     export REPORTBUGEMAIL=reportbug@rather.puzzling.org
+    export DEBFULLNAME="Tim Connors"
     #export WEBPAGE=http://www.astronomy.swin.edu.au/staff/tconnors
     #export WEBPAGE=http://tau-iota-mu-c.livejournal.com/
 
