@@ -8,6 +8,15 @@
   become: "{{ file_details.become | default(true) }}"
   when: file_details.source is defined
 
+- name: install {{ file_details.template }} per template
+  template:
+    src: "{{ file_details.template }}"
+    dest: "{{ file_details.dest }}"
+    mode: "{{ file_details.mode }}"
+    #FIXME: owner,group?
+  become: "{{ file_details.become | default(true) }}"
+  when: file_details.template is defined
+
 - name: install {{ file_details.files }} into {{ file_details.dir }}
   copy:
     src: "{{ file }}"
