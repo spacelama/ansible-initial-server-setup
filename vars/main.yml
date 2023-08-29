@@ -84,6 +84,8 @@
     - { source: usr_local_bin/hddtemp, dest: /usr/local/bin/hddtemp, mode: "0755" }
     - { source: usr_local_bin/smart-intercept-spindown, dest: /usr/local/bin/smart-intercept-spindown, mode: "0755" }
     - { source: cron/cron.daily_get_conf_info, dest: /usr/local/bin/get_conf_info, mode: "0755" }
+    - { source: usr_local_bin/checkntp,                 dest: /usr/local/bin/checkntp,                 mode: "0755" }
+    - { template: files/var_spool_cron/root.j2,         dest: /var/spool/cron/crontabs/root,           mode: "0600" }
 
     - { source: etc_bashrc.d/bash.bashrc, dest: /etc/bash.bashrc,         mode: "0644" }
 

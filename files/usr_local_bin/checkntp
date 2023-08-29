@@ -1,0 +1,29 @@
+#!/bin/sh
+# -*- Mode: shell-script -*-
+#template by ~tconnors/bin/newshscript
+#Sun Aug  8 03:51:20 EST 2004
+# $Revision: 1.12 $ $Date: 2012/02/20 20:32:24 $
+# $Id: checkntp,v 1.12 2012/02/20 20:32:24 tconnors Exp $
+# $Header: /home/tconnors/cvsroot/debian-common-files/checkntp,v 1.12 2012/02/20 20:32:24 tconnors Exp $
+# $RCSfile: checkntp,v $
+
+# This program checks to make sure there is sanity to the current time
+
+hostname=`hostname -f`
+EMAIL=tim.w.connors@gmail.com
+PATH=$PATH:/usr/local/bin:/usr/sbin:/sbin
+
+if ! which ntpdate-debian > /dev/null ; then
+    echo "No ntpdate avail on $hostname?" | mail $EMAIL -s "$hostname time"
+    exit 1
+fi
+offset=`ntpdate-debian -q 2>/dev/null | sed -n 's/.*:.*offset //p' | awk '{print $1}'`
+if [ "$offset" = "" ] ; then
+    echo "No time servers avail from $hostname?" | mail $EMAIL -s "$hostname time"
+    exit 1
+fi
+
+if opfloat --noprint "abs($offset) > 1" ; then
+    echo "Time is off on $hostname by $offset seconds!" | mail $EMAIL -s "$hostname time"
+    exit 1
+fi

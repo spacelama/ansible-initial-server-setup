@@ -1,0 +1,18 @@
+# ANSIBLE CONTROLLED
+#
+# m h  dom mon dow   command
+MAILTO=tconnors
+
+@reboot mail -s "$(/bin/hostname) reboot at $(/bin/date)" root < /dev/null > /dev/null
+
+{% inventory_hostname is regex('^pve')%}
+@reboot if hostname | grep -q ^pve ; then echo schedutil | tee /sys/devices/system/cpu/cpu*/cpufreq/scaling_governor ; fi
+{% endif %}
+{% inventory_hostname is regex('^pi')%}
+* * * * * /root/bin/restart-nut-driver
+{% endif %}
+00 4    * * *   /usr/local/bin/checkntp
+
+{# commented out:
+  #00 04 * * * ( df -lP 2>&1 | grep -v "/.cache/doc: Operation not permitted" ) | tail -n +2 | awk '{print $6}' | while read a ; do ls -lA $a > /dev/null 2>/dev/null ; [ $? -le 1 ] || echo "$a mount has failed" ; done
+#}
