@@ -1,5 +1,20 @@
 ---
-- name: "fixup line in conf file {{ file.name }} for user {{ user }}"
+- name: "Does   {{ ( '~' ~ user ~ '/' ~ file.name ) | dirname }} exist?"
+  stat:
+    path:      "{{ ( '~' ~ user ~ '/' ~ file.name ) | dirname }}"
+  become: true
+  register: dirtest
+
+- name: "Create {{ ( '~' ~ user ~ '/' ~ file.name ) | dirname }}/"
+  file:
+    path:      "{{ ( '~' ~ user ~ '/' ~ file.name ) | dirname }}"
+    state: directory
+    owner: "{{ user }}"
+    group: "{{ user }}"
+  become: true
+  when: not dirtest.stat.exists
+
+- name: "fixup line in conf file: ~{{ user }}/{{ file.name }}"
   lineinfile:
     dest: "~{{ user }}/{{ file.name }}"
     owner: "{{ user }}"
@@ -11,26 +26,24 @@
   with_items: "{{ file.lines }}"
   when: file.lines is defined
 
-- name: "fixup conf file {{ file.name }} for user {{ user }}"
+- name: "fixup conf file: ~{{ user }}/{{ file.name }}"
   copy:
     dest: "~{{ user }}/{{ file.name }}"
     owner: "{{ user }}"
     group: "{{ user }}"
-    src: "{{ item }}"
+    src: "{{ file.source }}"
     mode: "{{ file.mode | default(omit) }}"
   become: true
-  with_items: "{{ file.source }}"
   when: file.source is defined
 
-- name: "fixup conf file {{ file.name }} for user {{ user }} per template"
+- name: "fixup conf file per template: ~{{ user }}/{{ file.name }} "
   template:
     dest: "~{{ user }}/{{ file.name }}"
     owner: "{{ user }}"
     group: "{{ user }}"
-    src: "{{ item }}"
+    src: "{{ file.template }}"
     mode: "{{ file.mode | default(omit) }}"
   become: true
-  with_items: "{{ file.template }}"
   when: file.template is defined
 
 #- name: "ensure permissions are correct on {{ file.name }} for user {{ user }}"
