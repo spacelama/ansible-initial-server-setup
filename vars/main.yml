@@ -49,7 +49,6 @@
       group: 'ansible_adm'
       groups: 'ansible_adm'
       uid: 9999
-      uid: 9999
       state: 'present'
       password: '*'
       sshkeys:

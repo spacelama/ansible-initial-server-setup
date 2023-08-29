@@ -13,7 +13,6 @@
     src: "{{ file_details.template }}"
     dest: "{{ file_details.dest }}"
     mode: "{{ file_details.mode }}"
-    #FIXME: owner,group?
   become: "{{ file_details.become | default(true) }}"
   when: file_details.template is defined
 
