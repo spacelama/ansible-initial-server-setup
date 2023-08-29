@@ -74,6 +74,8 @@ config domain
 
 config host
 	option ip '192.168.1.20'
+        # allow both mac addresses to get this IP
+	option mac '00:13:e8:9b:36:d7 00:1c:23:91:cc:69'
 	option name 'gamow'
 	option dns '1'
 
@@ -90,8 +92,8 @@ config host
 	option dns '1'
 
 config host
-        # allow both mac addresses to get this IP
 	option ip '192.168.1.123'
+        # allow both mac addresses to get this IP
 	option mac 'a0:a8:cd:2d:d4:df 00:90:f5:e7:b0:7a'
 	option name 'dirac-laptop'
 	option dns '1'
@@ -353,10 +355,11 @@ config host
 	option dns '1'
 
 config host
-	option mac '00:21:70:A7:FD:30 7C:5C:F8:E5:6E:CE'
-	option dns '1'
 	option ip '192.168.1.22'
+        # allow both mac addresses to get this IP
+	option mac '00:21:70:A7:FD:30 7C:5C:F8:E5:6E:CE'
 	option name 'maxwell'
+	option dns '1'
 
 config host
 	option mac 'D6:ED:7A:5B:80:73'
