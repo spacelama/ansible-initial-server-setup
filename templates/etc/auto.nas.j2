@@ -1,3 +1,4 @@
+{% if inventory_hostname != 'fs' %}
 # -o fsc comes from /usr/share/doc/cachefilesd/howto.txt.gz
 /home/tconnors/p -hard,noacl,nodev,nosuid,rw,strictatime,actimeo=600,async fs:/home/tconnors/p
 /var/cache/apt/archives.nfs -hard,noacl,nodev,nosuid,rw,strictatime,async fs:/var/cache/apt/archives
@@ -13,6 +14,7 @@
 /home/tconnors/oppo -hard,noacl,nodev,nosuid,rw,strictatime,async fs:/home/tconnors/oppo
 /home/tconnors/pixel -hard,noacl,nodev,nosuid,rw,strictatime,async fs:/home/tconnors/pixel
 /home/tconnors/public_html -hard,noacl,nodev,nosuid,rw,strictatime,async fs:/home/tconnors/global_public_html
+{% endif %}
 
 {% if inventory_hostname != 'pi' %}
 /pi/boot -hard,noacl,nodev,nosuid,rw,strictatime,async pi:/pi/boot
