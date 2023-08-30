@@ -5,3 +5,5 @@ ACTION=="add|change", KERNEL=="sd[a-z]", ATTR{queue/rotational}=="0", ATTR{queue
 29 sep NOT RELEVANT ANYMORE? pve: set non-rotational on appropriate disks and test with: `grep . /sys/block/sd?/queue/rotational` again
 
 29 sep following maybe not relevant since all schedulers are /sys/block/sd?/queue/scheduler:[mq-deadline] none
+
+Ensure that secrets.yml are never commit unencryped: https://www.reddit.com/r/devops/comments/z2tucy/ensure_that_an_ansible_secretsyml_is_never/
