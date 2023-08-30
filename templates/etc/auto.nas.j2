@@ -13,11 +13,11 @@
 /home/tconnors/not_backed_up.tank -hard,noacl,nodev,nosuid,rw,strictatime,async fs:/home/tconnors/not_backed_up.tank
 /home/tconnors/oppo -hard,noacl,nodev,nosuid,rw,strictatime,async fs:/home/tconnors/oppo
 /home/tconnors/pixel -hard,noacl,nodev,nosuid,rw,strictatime,async fs:/home/tconnors/pixel
-/home/tconnors/public_html -hard,noacl,nodev,nosuid,rw,strictatime,async fs:/home/tconnors/global_public_html
 {% endif %}
 
 {% if inventory_hostname != 'pi' %}
 /pi/boot -hard,noacl,nodev,nosuid,rw,strictatime,async pi:/pi/boot
+/home/tconnors/public_html -hard,noacl,nodev,nosuid,rw,strictatime,async fs:/home/tconnors/global_public_html
 {% endif %}
 
 {# commented out:
