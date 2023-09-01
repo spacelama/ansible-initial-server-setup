@@ -1,9 +1,9 @@
 /var/log/sleep-browser.log {
-  daily
-  missingok
-  rotate 5
-  compress
-  delaycompress
-  notifempty
-  create 0644 tconnors tconnors
+	daily
+	missingok
+	rotate 5
+	compress
+	delaycompress
+	notifempty
+	create 0644 tconnors tconnors
 }

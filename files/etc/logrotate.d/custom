@@ -2,36 +2,36 @@
 /var/log/sensord.log
 /var/log/dhcp.log
 {
-    missingok
-    compress
-    delaycompress
-    daily
-    create 0640 root adm
-    rotate 10
-    notifempty
-    sharedscripts
-    postrotate
-        /usr/lib/rsyslog/rsyslog-rotate
-    endscript
+	missingok
+	compress
+	delaycompress
+	daily
+	create 0640 root adm
+	rotate 10
+	notifempty
+	sharedscripts
+	postrotate
+		/usr/lib/rsyslog/rsyslog-rotate
+	endscript
 }
 
 #/var/log/squid.log {
-#    missingok
-#    compress
-#    delaycompress
-#    daily
-#    create 0640 root adm
-#    postrotate
-#        invoke-rc.d rsyslog rotate > /dev/null
-#    endscript
-#    rotate 5
+#	missingok
+#	compress
+#	delaycompress
+#	daily
+#	create 0640 root adm
+#	postrotate
+#		invoke-rc.d rsyslog rotate > /dev/null
+#	endscript
+#	rotate 5
 #}
 
 /var/log/lvm_snapshot_check_and_backup.*.log {
-    missingok
-    weekly
-    create 0644 root adm
-    rotate 10
-    compress
+	missingok
+	weekly
+	create 0644 root adm
+	rotate 10
+	compress
 }
 
