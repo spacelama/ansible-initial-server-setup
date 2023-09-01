@@ -428,6 +428,14 @@
   become: true
   when: "'debsecan' in ansible_facts.packages"
 
+- name: set daily reporting false in debsecan
+  lineinfile:
+    dest: "/etc/default/debsecan"
+    regexp: '^(REPORT=.*)'
+    line: 'REPORT=false'
+  become: true
+  when: "'debsecan' in ansible_facts.packages"
+
 - name: Synchronize (rsync) and delete files in /etc/bash-git-prompt
   ansible.posix.synchronize:
     src: etc_bash-git-prompt/
