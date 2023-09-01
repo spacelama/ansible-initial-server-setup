@@ -95,7 +95,7 @@
     - { source: etc/idmapd.conf,          dest: /etc/idmapd.conf,         mode: "0644" }
     - { source: etc/bashcolors,           dest: /etc/bashcolors,          mode: "0644" }
     - { source: etc/inputrc,              dest: /etc/inputrc,             mode: "0644" }
-    - { source: etc/rkhunter.conf,        dest: /etc/rkhunter.conf,       mode: "0644" }
+    - { template: etc/rkhunter.conf.j2,   dest: /etc/rkhunter.conf,       mode: "0644" }
     - { source: etc/reportbug.conf,       dest: /etc/reportbug.conf,      mode: "0644", when_pkg_installed: "reportbug" }
     - { source: etc/fuse.conf,            dest: /etc/fuse.conf,           mode: "0640", when_pkg_installed: "fuse3"  }
     - { source: etc/cron.d/munin-node,    dest: /etc/cron.d/munin-node,   mode: "0644" }

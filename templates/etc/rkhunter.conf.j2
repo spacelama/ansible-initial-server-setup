@@ -305,7 +305,11 @@ AUTO_X_DETECT=1
 # The default value is 'no'.
 #
 #ALLOW_SSH_ROOT_USER=no
-ALLOW_SSH_ROOT_USER=yes
+{% if (( host_is_in_pve_cluster | default(false) ) or ( permit_root_login | default(false) ) ) %}
+ALLOW_SSH_ROOT_USER=yes # ANSIBLE CONFIGURED
+{% else %}
+ALLOW_SSH_ROOT_USER=no # ANSIBLE CONFIGURED
+{% endif %}
 
 #
 # Set this option to '1' to allow the use of the SSH-1 protocol, but note
@@ -782,7 +786,9 @@ ALLOWIPCPROC=/usr/lib/firefox-esr/firefox-esr
 # The default value is the null string.
 #
 #INETD_CONF_PATH=/etc/inetd.conf
+{% if ( "openbsd-inetd" in ansible_facts.packages ) %}
 INETD_CONF_PATH=/etc/inetd.conf
+{% endif %}
 
 #
 # This option allows the specified enabled inetd services.
