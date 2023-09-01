@@ -99,6 +99,7 @@
     - { source: etc/reportbug.conf,       dest: /etc/reportbug.conf,      mode: "0644", when_pkg_installed: "reportbug" }
     - { source: etc/fuse.conf,            dest: /etc/fuse.conf,           mode: "0640", when_pkg_installed: "fuse3"  }
     - { source: etc/cron.d/munin-node,    dest: /etc/cron.d/munin-node,   mode: "0644" }
+    - { source: etc/cron.daily/cron.daily_check-cmos-battery, dest: /etc/cron.daily/cron.daily_check-cmos-battery,   mode: "0755", when: "{{ host_is_physical is defined }}" }
     - { source: etc/needrestart/notify.conf,   dest: /etc/needrestart/notify.conf,   mode: "0644" }
 
     - { source: etc/logrotate.d/btmp,          dest: /etc/logrotate.d/btmp,          mode: "0644" }
