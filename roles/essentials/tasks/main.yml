@@ -89,6 +89,7 @@
     regexp: '^\s*issue_discards = 0'
     line: '	issue_discards = 1'
   become: true
+  when: "'lvm2' in ansible_facts.packages"
 
 - name: Remove erroneous packages
   apt:
@@ -446,5 +447,17 @@
       - "--exclude=.git"
       - "--delete-excluded"
   become: true
+
+- name: install host specific packages
+  apt:
+    name: "{{ packages_to_install }}"
+    # atop
+    autoremove: no
+    state: present
+#    install_recommends: yes
+    install_recommends: no
+  become: true
+  when: packages_to_install is defined
+
 
 # FIXME: should set up postfix for !host_is_mailserver

@@ -367,6 +367,12 @@ config host
 	option dns '1'
 	option ip '192.168.1.201'
 
+config host
+	option mac '22:46:AA:EB:A5:91'
+	option name 'zm12'
+	option dns '1'
+	option ip '192.168.1.202'
+
 #config host
 #	option mac '92:B6:AF:F3:0B:19'
 #	option name 'media'

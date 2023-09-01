@@ -78,6 +78,7 @@
 
   install_dirs:
     - { dir: "/etc/bash.bashrc.d", mode: "0755" }
+    - { dir: "/etc/needrestart", mode: "0755" }
 
   install_files:
     - { source: usr_local_bin/hddtemp,                  dest: /usr/local/bin/hddtemp,                  mode: "0755" }
