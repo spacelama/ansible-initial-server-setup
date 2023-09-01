@@ -1,0 +1,2 @@
+# ANSIBLE CONFIGURED
+deb http://ftp.au.debian.org/debian/ bookworm-backports main non-free non-free-firmware contrib

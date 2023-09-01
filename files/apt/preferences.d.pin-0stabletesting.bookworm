@@ -1,0 +1,37 @@
+# consult 
+# /var/lib/apt/lists/mirror.internode.on.net_pub_debian_dists_stable_Release 
+# /var/lib/apt/lists/archive.zfsonlinux.org_debian_dists_wheezy_Release 
+# /var/lib/apt/lists/archive.zfsonlinux.org_debian_dists_wheezy-daily_Release 
+# etc for these style lines:
+# Origin: Debian
+# Label: Debian
+# Suite: stable
+
+
+# apt-cache policy <packagename> will reveal what priorities you should set here to keep a 
+# desired distribution installed.  Use in conjunction with default release settting in 
+# /etc/apt/apt.conf.d/release.  We're sticking with stable at quite a low priority right now, 
+# because we have to include it for puppet, but want the rest of the machine to still be lenny
+# Note that "stable" works as a release here, whereas "squeeze" doesn't seem to work.
+Package: *
+Pin: release a=stable, o=Debian
+Pin-Priority: 500
+#   (default could be set by apt.conf: Apt::Default-Release "stable";)
+
+Package: *
+Pin: release a=testing, o=Debian
+Pin-Priority: 5
+
+Package: *
+Pin: release a=unstable, o=Debian
+Pin-Priority: 2
+
+# 1001: allow downgrade
+#Package: puppet puppetmaster puppet-common facter
+#Pin: release a=oldstable
+#Pin-Priority: 1001
+
+Package: *
+Pin: release a=oldstable, o=Debian
+Pin-Priority: 1
+
