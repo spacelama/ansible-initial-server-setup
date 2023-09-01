@@ -23,7 +23,9 @@ if [ "$offset" = "" ] ; then
     exit 1
 fi
 
-if opfloat --noprint "abs($offset) > 1" ; then
+# bc doesn't have abs(), so use sqrt(x^2) instead (but ignore the sqrt
+# because we're comparing 1.0)
+if [ `bc -l <<< "(-$offset^2) > 1^2"` = 1 ] ; then
     echo "Time is off on $hostname by $offset seconds!" | mail $EMAIL -s "$hostname time"
     exit 1
 fi
