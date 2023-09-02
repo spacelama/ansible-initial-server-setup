@@ -10,16 +10,24 @@ pi                              linux,arm
 gamow                           linux,intel,not247
 pauli                           linux,intel,not247
 fermi                           linux,intel
-zm                              linux,intel,lxc
-media                           linux,intel,lxc
+zm                              linux,intel,lxc,turnkey
+media                           linux,intel,lxc,turnkey
+zm12                            linux,intel,lxc
+jellyfin                        linux,intel,lxc
+syslog                          linux,intel,lxc
+
 #idrac                           drac
 idrac-r730xd                    drac
 #idrac-r520                      drac
+
 loungeroomlifx                  lifx
 bedroomlifx                     lifx
+
 #ledstrip                        esp8266
 netclock                        esp8266
 ac                              esp8266
+esp32cam                        esp8266
+
 ac-power                        tasmota,medion,powermon,accurate
 loungeroomlights-power          tasmota,sonoffs26
 bedroomlights-power             tasmota,sonoffs26
@@ -41,9 +49,10 @@ stereo-power                    tasmota,oldkogan,powermon,accurate,disabledusbpo
 chromecast-lounge-power         tasmota,oldkogan,powermon,currentoffset
 panasonic-power                 tasmota,newkogan,powermon,accurate
 electricblanket-power           tasmota,athom,powermon
-study-power                     beken,jinvooswitchindiv4boardusb,not247,1W_all_off,5W_all_on
 loungefrontlight-power          tasmota,athom,powermon
 fishtank-temperature            tasmota,DS18B20temp
+study-power                     beken,jinvooswitchindiv4boardusb,not247,1W_all_off,5W_all_on
+
 pantech                         iot
 ecowitt                         iot
 study-rm4                       iot
@@ -52,10 +61,12 @@ fishtank-rm4                    iot
 chromecast-lounge               iot
 cam-garage                      iot
 cam-rear                        iot
+
+fan-1                           iot,tuya
+
 switch                          network
 b1300                           network,openwrt
 archerd7                        network,openwrt,wifi
 archerc7                        network,openwrt,wifi
 #wavlink                         network,openwrt,wifi
 asusrtax53u                     network,openwrt,wifi
-fan-1                           iot,tuya

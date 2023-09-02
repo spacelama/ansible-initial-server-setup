@@ -373,6 +373,18 @@ config host
 	option dns '1'
 	option ip '192.168.1.202'
 
+config host
+	option mac '76:FF:0B:38:8D:F8'
+	option name 'jellyfin'
+	option dns '1'
+	option ip '192.168.7.203'
+
+config host
+	option mac 'EA:0D:29:A1:EE:D1'
+	option name 'syslog'
+	option dns '1'
+	option ip '192.168.1.204'
+
 #config host
 #	option mac '92:B6:AF:F3:0B:19'
 #	option name 'media'
