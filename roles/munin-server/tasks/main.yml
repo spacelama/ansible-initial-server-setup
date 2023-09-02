@@ -1,0 +1,20 @@
+---
+- name: setup a munin.conf entry for each linux, openwrt node
+  ini_file:
+    path: /etc/munin/munin.conf
+    section: "{{ item }}"
+    # no equals separating the key and value, so lets hack that up:
+    allow_no_value: true
+    option: "    address {{ item }}"
+  loop: "{{ query('inventory_hostnames', 'laptops,containers,desktops,servers,openwrt') }}"
+  become: true
+
+- name: setup a munin.conf entry for each linux, openwrt node
+  ini_file:
+    path: /etc/munin/munin.conf
+    section: "{{ item }}"
+    # no equals separating the key and value, so lets hack that up:
+    allow_no_value: true
+    option: "    use_node_name yes"
+  loop: "{{ query('inventory_hostnames', 'laptops,containers,desktops,servers,openwrt') }}"
+  become: true
