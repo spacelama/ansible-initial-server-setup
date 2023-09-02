@@ -108,9 +108,12 @@
     - { source: etc/logrotate.d/custom,        dest: /etc/logrotate.d/custom,        mode: "0644" }
     - { source: etc/logrotate.d/sleep-browser, dest: /etc/logrotate.d/sleep-browser, mode: "0644" }
     - { source: etc/logrotate.d/apache2,       dest: /etc/logrotate.d/apache2,       mode: "0644", when_pkg_installed: "apache2" }
+    - { source: etc/logrotate.d/iot,           dest: /etc/logrotate.d/iot,           mode: "0644", when: "{{ host_is_syslog is defined }}" }
 
     - { source: etc/rsyslog.conf,              dest: /etc/rsyslog.conf,              mode: "0644" }
-    - { source: etc/rsyslog.d/remote.conf,     dest: /etc/rsyslog.d/remote.conf,     mode: "0644", when: "{{ inventory_hostname != 'dirac' }}" }
+    - { source: etc/rsyslog.d/remote.conf,           dest: /etc/rsyslog.d/remote.conf,           mode: "0644", when: "{{ host_is_syslog is not defined }}" }
+    - { source: etc/rsyslog.d/syslog-collector.conf, dest: /etc/rsyslog.d/syslog-collector.conf, mode: "0644", when: "{{ host_is_syslog is defined }}" }
+    - { source: etc/rsyslog.d/iot.conf,              dest: /etc/rsyslog.d/iot.conf,              mode: "0644", when: "{{ host_is_syslog is defined }}" }
     - { source: etc/rsyslog.d/zz-0-allsyslog.conf,                  dest: /etc/rsyslog.d/zz-0-allsyslog.conf,                  mode: "0644" }
     - { source: etc/rsyslog.d/zz-1-nosync.conf,                     dest: /etc/rsyslog.d/zz-1-nosync.conf,                     mode: "0644" }
     - { source: etc/rsyslog.d/zz-2-news-and-mail.conf,              dest: /etc/rsyslog.d/zz-2-news-and-mail.conf,              mode: "0644" }

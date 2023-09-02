@@ -150,7 +150,7 @@
 
 - name: Install essential packages (not container)
   apt:
-    name: ['git', 'htop', 'iotop', 'smem', 'ethtool', 'net-tools', 'iperf3',  'aptitude', 'dlocate', 'plocate', 'vim', 'nicstat', 'lshw', 'parted', 'sdparm', 'ntpdate', 'colordiff', 'ifstat', 'iftop', 'apt-listchanges', 'apt-show-versions', 'etckeeper', 'apt-listbugs', 'apt-listbugs', 'rlwrap', 'strace', 'make', 'keychain', 'libstring-shellquote-perl', 'dmidecode', 'expect', 'initscripts', 'colordiff', 'direnv', 'rkhunter'] # expect for unbuffer, initscripts for bootlogs, pcp for dstat, but that results in pmlogger cronjobs that spin up disks on fs
+    name: ['rsyslog', 'git', 'htop', 'iotop', 'smem', 'ethtool', 'net-tools', 'iperf3',  'aptitude', 'dlocate', 'plocate', 'vim', 'nicstat', 'lshw', 'parted', 'sdparm', 'ntpdate', 'colordiff', 'ifstat', 'iftop', 'apt-listchanges', 'apt-show-versions', 'etckeeper', 'apt-listbugs', 'apt-listbugs', 'rlwrap', 'strace', 'make', 'keychain', 'libstring-shellquote-perl', 'dmidecode', 'expect', 'initscripts', 'colordiff', 'direnv', 'rkhunter'] # expect for unbuffer, initscripts for bootlogs, pcp for dstat, but that results in pmlogger cronjobs that spin up disks on fs
     # atop
     autoremove: no
     state: present
