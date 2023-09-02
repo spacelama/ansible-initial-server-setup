@@ -305,10 +305,11 @@ AUTO_X_DETECT=1
 # The default value is 'no'.
 #
 #ALLOW_SSH_ROOT_USER=no
+#  ANSIBLE CONFIGURED:
 {% if (( host_is_in_pve_cluster | default(false) ) or ( permit_root_login | default(false) ) ) %}
-ALLOW_SSH_ROOT_USER=yes # ANSIBLE CONFIGURED
+ALLOW_SSH_ROOT_USER=yes
 {% else %}
-ALLOW_SSH_ROOT_USER=no # ANSIBLE CONFIGURED
+ALLOW_SSH_ROOT_USER=no
 {% endif %}
 
 #

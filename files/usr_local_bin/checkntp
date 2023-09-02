@@ -18,14 +18,17 @@ if ! which ntpdate-debian > /dev/null ; then
     exit 1
 fi
 offset=`ntpdate-debian -q 2>/dev/null | sed -n 's/.*:.*offset //p' | awk '{print $1}'`
-if [ "$offset" = "" ] ; then
+if [ -z "$offset" ] ; then
     echo "No time servers avail from $hostname?" | mail $EMAIL -s "$hostname time"
     exit 1
 fi
 
-# bc doesn't have abs(), so use sqrt(x^2) instead (but ignore the sqrt
-# because we're comparing 1.0)
-if (( $(bc -l <<< "$offset^2 > 1^2"$) )) ; then
+# offset can be +, - or just a number.  bc can't deal with "+", so
+# strip that.  Also, bc doesn't have abs(), so dealing with negative
+# would be a pain anyway
+offset=`echo "$offset" | sed 's/^[+-]//'`
+
+if (( $(bc -l <<< "$offset > 1") )) ; then
     echo "Time is off on $hostname by $offset seconds!" | mail $EMAIL -s "$hostname time"
     exit 1
 fi
