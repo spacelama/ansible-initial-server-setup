@@ -1,7 +1,7 @@
 ---
   ssid: Asio2.4
   psk: "{{ lookup('file', 'main.tasmota-psk.passwd') }}"
-  syslog: 192.168.1.17
+  syslog: 192.168.1.204
   ntp1: 192.168.1.17
   ntp2: 192.168.1.2
   ntp3: "0.au.pool.ntp.org"

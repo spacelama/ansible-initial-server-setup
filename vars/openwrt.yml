@@ -8,7 +8,7 @@
     - { source: "roles/openwrt/files/etc_crontabs_root", dest: /etc/crontabs/root, mode: "0644", become: false }
     - { source: "roles/openwrt/files/etc_rc.local", dest: /etc/rc.local, mode: "0644", become: false }
 
-  syslog: 192.168.1.17
+  syslog: 192.168.1.204
 
   mobility_domain: "{{ lookup('file', 'ap.mobility_domain') }}"
 
