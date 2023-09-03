@@ -152,7 +152,7 @@ config host
 
 config host
 	option ip '192.168.1.52'
-	option mac 'd0:73:d5:30:f2:93'
+	option mac 'd0:73:d5:30:f2:94'
 	option name 'loungeroomlifx'
 	option dns '1'
 
