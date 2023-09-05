@@ -79,6 +79,7 @@
   install_dirs:
     - { dir: "/etc/bash.bashrc.d", mode: "0755" }
     - { dir: "/etc/needrestart", mode: "0755" }
+    - { dir: "/etc/X11/xorg.conf.d", mode: "0755" }
 
   install_files:
     - { source: usr_local_bin/hddtemp,                  dest: /usr/local/bin/hddtemp,                  mode: "0755" }
@@ -100,8 +101,9 @@
     - { source: etc/reportbug.conf,       dest: /etc/reportbug.conf,      mode: "0644", when_pkg_installed: "reportbug" }
     - { source: etc/fuse.conf,            dest: /etc/fuse.conf,           mode: "0640", when_pkg_installed: "fuse3"  }
     - { source: etc/cron.d/munin-node,    dest: /etc/cron.d/munin-node,   mode: "0644" }
-    - { source: etc/cron.daily/cron.daily_check-cmos-battery, dest: /etc/cron.daily/cron.daily_check-cmos-battery,   mode: "0755", when: "{{ host_is_physical is defined }}" }
-    - { source: etc/needrestart/notify.conf,   dest: /etc/needrestart/notify.conf,   mode: "0644" }
+    - { source: etc/cron.daily/cron.daily_check-cmos-battery, dest: /etc/cron.daily/cron.daily_check-cmos-battery, mode: "0755", when: "{{ host_is_physical is defined }}" }
+    - { source: etc/needrestart/notify.conf,                  dest: /etc/needrestart/notify.conf,                  mode: "0644" }
+    - { source: etc/X11/xorg.conf.d/80-maxclients.conf,       dest: /etc/X11/xorg.conf.d/80-maxclients.conf,       mode: "0644" }
 
     - { source: etc/logrotate.d/btmp,          dest: /etc/logrotate.d/btmp,          mode: "0644" }
     - { source: etc/logrotate.d/wtmp,          dest: /etc/logrotate.d/wtmp,          mode: "0644" }
