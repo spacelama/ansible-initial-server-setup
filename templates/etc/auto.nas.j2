@@ -17,6 +17,8 @@
 
 {% if inventory_hostname != 'pi' %}
 /pi/boot -hard,noacl,nodev,nosuid,rw,strictatime,async pi:/pi/boot
+{% endif %}
+{% if (inventory_hostname != 'pi') and (inventory_hostname != 'fs') %}
 /home/tconnors/public_html -hard,noacl,nodev,nosuid,rw,strictatime,async fs:/home/tconnors/global_public_html
 {% endif %}
 
