@@ -10,6 +10,7 @@ pi                              linux,arm
 gamow                           linux,intel,not247
 pauli                           linux,intel,not247
 fermi                           linux,intel
+homeassistant                   linux,intel,hassio
 zm                              linux,intel,lxc,turnkey
 media                           linux,intel,lxc,turnkey
 zm12                            linux,intel,lxc
