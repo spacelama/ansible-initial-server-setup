@@ -325,6 +325,9 @@ ALLOW_SSH_ROOT_USER=no
 # The default value is '0'.
 #
 #ALLOW_SSH_PROT_V1=0
+# try to disable the false positive that rkhunter keeps on putting out
+# since it's not parsing our #included ssh_config.d files
+ALLOW_SSH_PROT_V1=2
 
 #
 # This setting tells rkhunter the directory containing the SSH configuration
@@ -633,6 +636,7 @@ ALLOWHIDDENDIR=/dev/.udev
 ALLOWHIDDENDIR=/dev/.static
 ALLOWHIDDENDIR=/dev/.initramfs
 ALLOWHIDDENDIR=/etc/.java
+ALLOWHIDDENDIR=/etc/.git
 
 #
 # Allow the specified hidden file to be whitelisted.
@@ -656,6 +660,8 @@ ALLOWHIDDENDIR=/etc/.java
 ALLOWHIDDENFILE=/etc/.serial.conf.old
 ALLOWHIDDENFILE=/dev/.mdadm.map
 ALLOWHIDDENFILE=/dev/.tmp-block-*:*
+ALLOWHIDDENFILE=/etc/.etckeeper
+ALLOWHIDDENFILE=/etc/.gitignore
 
 #
 # Allow the specified process to use deleted files. The process name may be
@@ -736,6 +742,10 @@ ALLOWDEVFILE=/dev/shm/resolvconf/interface/lo.pdnsd
 # The default value is the null string.
 #
 ALLOWIPCPROC=/usr/lib/firefox-esr/firefox-esr
+ALLOWIPCPROC=/usr/bin/x11vnc
+ALLOWIPCPROC=/usr/bin/mpv
+ALLOWIPCPROC=/usr/bin/pavucontrol
+ALLOWIPCPROC=/usr/sbin/apache2
 #ALLOWIPCPROC=/usr/bin/vlc
 
 #
@@ -819,7 +829,8 @@ INETD_CONF_PATH=/etc/inetd.conf
 # The default value is the null string.
 #
 #INETD_ALLOWED_SVC=echo
-INETD_ALLOWED_SVC=nntp
+#INETD_ALLOWED_SVC=nntp
+#INETD_ALLOWED_SVC=/usr/sbin/tcpd
 
 #
 # This option tells rkhunter where the xinetd configuration file is located.
