@@ -58,7 +58,7 @@
 - name: setup dhcp reservations
   copy:
     dest: /etc/config/dhcp
-    content: "{{ lookup('file', 'dhcp.head.{{ type }}')}}\n\n{{lookup('file', 'dhcp.reservations') }}\n"
+    content: "{{ lookup('template', 'dhcp.head.{{ type }}.j2')}}\n\n{{lookup('template', 'dhcp.reservations.j2') }}\n"
   notify: restart dnsmasq
 
 - name: setup some custom binaries
