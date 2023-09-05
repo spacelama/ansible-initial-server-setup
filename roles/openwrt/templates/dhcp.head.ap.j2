@@ -11,6 +11,8 @@ config dnsmasq
 	option local '/rather.puzzling.org/'
 	option authoritative '1'
 	option resolvfile '/tmp/resolv.conf.d/resolv.conf.auto'
+        list addnhosts '/etc/dnsmasq.tmphosts'
+        list addnhosts '/etc/dnsmasq.hosts'
 
 config dhcp 'LAN1'
 	option interface 'LAN1'
@@ -37,4 +39,3 @@ config odhcpd 'odhcpd'
 	option leasefile '/tmp/hosts/odhcpd'
 	option leasetrigger '/usr/sbin/odhcpd-update'
 	option loglevel '4'
-

@@ -1,0 +1,18 @@
+192.168.1.249 switch
+192.168.1.254 gateway
+192.168.1.254 gw
+192.168.1.254 b1300
+192.168.1.253 wavlink
+192.168.1.252 asusrtax53u
+192.168.1.251 archerd7
+192.168.1.250 archerc7
+192.168.1.248 billion
+192.168.1.247 huawei
+{#
+  First pve entry is to ensure reverse DNS is correct (even though
+  that IP is already defined in DHCP reservations, for the sake of
+  DHCP MAC mappings), and second entry is for the multiple records
+  in A record.
+#}
+192.168.1.6 pve2 pve
+192.168.1.8 pve1 pve

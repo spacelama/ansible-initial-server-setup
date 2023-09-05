@@ -61,6 +61,12 @@
     content: "{{ lookup('template', 'dhcp.head.{{ type }}.j2')}}\n\n{{lookup('template', 'dhcp.reservations.j2') }}\n"
   notify: restart dnsmasq
 
+- name: setup dnsmasq hosts
+  template:
+    dest: /etc/dnsmasq.hosts
+    src: dnsmasq.hosts.j2
+  notify: restart dnsmasq
+
 - name: setup some custom binaries
   copy:
     dest: "/root/bin/{{ item }}"

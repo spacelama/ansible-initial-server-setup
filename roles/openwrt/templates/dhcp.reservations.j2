@@ -1,82 +1,38 @@
-# tftpd, MX split horizon DNS, CNAMEs etc all documented here: https://openwrt.org/docs/guide-user/base-system/dhcp_configuration
+{#
+  tftpd, MX split horizon DNS, CNAMEs etc all documented here: https://openwrt.org/docs/guide-user/base-system/dhcp_configuration
 
+  multiple IPs in A record: https://unix.stackexchange.com/questions/52933/how-to-assign-multiple-fixed-ip-address-for-one-domain https://unix.stackexchange.com/questions/414824/how-can-i-get-dns-ip-resolution-for-an-internet-domain-name-pointing-to-a-locall
+
+#}
 config cname
 	option cname 'www.rather.puzzling.org'
 	option target 'rather.puzzling.org'
 
-config cname
-	option cname 'idrac.rather.puzzling.org'
-	option target 'idrac-r520.rather.puzzling.org'
-
-config cname
-	option cname 'pve.rather.puzzling.org'
-	option target 'pve1.rather.puzzling.org'
-# does not work:	option target 'pve1.rather.puzzling.org pve2.rather.puzzling.org'
-
-# a daemon running external to openwrt (monitor_iot.worker) monitors
-# our public IP and resets our internal DNS entry to this if it finds
-# it doesn't match
-config domain
-	option name 'rather.puzzling.org'
-	option ip '0.0.0.0'
-
-# config domain
-#	option name 'www.rather.puzzling.org'
-#	option ip '192.168.1.17'
-
-# config domain
-#	option name 'angelahughes.org'
-#	option ip '192.168.1.17'
-
-# config domain
-#	option name 'www.angelahughes.org'
-#	option ip '192.168.1.17'
-
-config domain
-	option name 'switch'
-	option ip '192.168.1.249'
-
-config domain
-	option name 'gateway'
-	option ip '192.168.1.254'
-
-config domain
-	option name 'gw'
-	option ip '192.168.1.254'
-
-config domain
-	option name 'b1300'
-	option ip '192.168.1.254'
-
-config domain
-	option name 'wavlink'
-	option ip '192.168.1.253'
-
-config domain
-	option name 'asusrtax53u'
-	option ip '192.168.1.252'
-
-config domain
-	option name 'billion'
-	option ip '192.168.1.248'
-
-config domain
-	option name 'huawei'
-	option ip '192.168.1.247'
-
-config domain
-	option name 'archerd7'
-	option ip '192.168.1.251'
-
-config domain
-	option name 'archerc7'
-	option ip '192.168.1.250'
+config host
+	option ip '192.168.1.123'
+{#	allow both mac addresses to get this IP #}
+	option mac 'a0:a8:cd:2d:d4:df 00:90:f5:e7:b0:7a'
+	option name 'dirac-laptop'
+	option dns '1'
 
 config host
 	option ip '192.168.1.20'
-        # allow both mac addresses to get this IP
+{#	allow both mac addresses to get this IP #}
 	option mac '00:13:e8:9b:36:d7 00:1c:23:91:cc:69'
 	option name 'gamow'
+	option dns '1'
+
+config host
+	option ip '192.168.1.22'
+{#	allow both mac addresses to get this IP #}
+	option mac '00:21:70:A7:FD:30 7C:5C:F8:E5:6E:CE'
+	option name 'maxwell'
+	option dns '1'
+
+config host
+	option ip '192.168.1.36'
+	option mac '74:40:bb:d4:48:07'
+	option name 'fermi'
 	option dns '1'
 
 config host
@@ -84,23 +40,6 @@ config host
 	option mac 'f6:7f:da:7d:af:30'
 	option name 'dirac'
 	option dns '1'
-
-config host
-	option ip '192.168.1.39'
-	option mac 'bc:d0:74:43:8d:03'
-	option name 'tims-mbp-2'
-	option dns '1'
-
-config host
-	option ip '192.168.1.123'
-        # allow both mac addresses to get this IP
-	option mac 'a0:a8:cd:2d:d4:df 00:90:f5:e7:b0:7a'
-	option name 'dirac-laptop'
-	option dns '1'
-
-#config host
-#	option name 'sony'
-#	option dns '1'
 
 config host
 	option name 'zte'
@@ -119,6 +58,12 @@ config host
 	option name 'pixel'
 	option dns '1'
 	option ip '192.168.1.32'
+
+config host
+	option ip '192.168.1.34'
+	option mac 'd0:13:fd:63:dc:3c'
+	option name 'lg'
+	option dns '1'
 
 config host
 	option ip '192.168.1.7'
@@ -145,12 +90,6 @@ config host
 	option dns '1'
 
 config host
-	option ip '192.168.1.34'
-	option mac 'd0:13:fd:63:dc:3c'
-	option name 'lg'
-	option dns '1'
-
-config host
 	option ip '192.168.1.52'
 	option mac 'd0:73:d5:30:f2:94'
 	option name 'loungeroomlifx'
@@ -166,12 +105,6 @@ config host
 	option ip '192.168.1.58'
 	option mac '84:f3:eb:59:e6:ae'
 	option name 'ledstrip'
-	option dns '1'
-
-config host
-	option ip '192.168.1.36'
-	option mac '74:40:bb:d4:48:07'
-	option name 'fermi'
 	option dns '1'
 
 config host
@@ -208,6 +141,12 @@ config host
 	option ip '192.168.1.11'
 	option mac '18:66:da:62:ce:a3'
 	option name 'idrac-r730xd'
+	option dns '1'
+
+config host
+	option ip '192.168.1.12'
+	option mac '44:A8:42:15:1F:4B'
+	option name 'idrac-r730xd2'
 	option dns '1'
 
 config host
@@ -349,16 +288,15 @@ config host
 	option dns '1'
 
 config host
-	option ip '192.168.1.6'
-	option mac '04:42:1a:2d:76:29'
-	option name 'pve2'
+	option ip '192.168.1.9'
+	option mac '44:a8:42:03:69:d0'
+	option name 'pve1a'
 	option dns '1'
 
 config host
-	option ip '192.168.1.22'
-        # allow both mac addresses to get this IP
-	option mac '00:21:70:A7:FD:30 7C:5C:F8:E5:6E:CE'
-	option name 'maxwell'
+	option ip '192.168.1.6'
+	option mac '04:42:1a:2d:76:29'
+	option name 'pve2'
 	option dns '1'
 
 config host
@@ -385,17 +323,18 @@ config host
 	option dns '1'
 	option ip '192.168.1.204'
 
-#config host
-#	option mac '92:B6:AF:F3:0B:19'
-#	option name 'media'
-#	option dns '1'
-#	option ip '192.168.1.201'
+{# config host
+	option mac '92:B6:AF:F3:0B:19'
+	option name 'media'
+	option dns '1'
+	option ip '192.168.1.201'
+#}
 
 config host
 	option mac '92:B6:AF:F3:0B:20'
 	option name 'media'
 	option dns '1'
-#	option ip '192.168.1.157'
+{#	option ip '192.168.1.157' #}
 	option ip '192.168.7.157'
 
 config host
@@ -501,14 +440,14 @@ config host
 	option ip '192.168.1.89'
 
 config host
-	# bedroom fan
+{#	bedroom fan #}
 	option mac '50:8a:06:34:cc:1a'
 	option name 'fan-1'
 	option dns '1'
 	option ip '192.168.4.60'
 
 config host
-	# study fluro
+{#	study fluro #}
 	option mac '70:03:9F:D2:62:1F'
 	option name 'study-fluro-1'
 	option dns '1'
