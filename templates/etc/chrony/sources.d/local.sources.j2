@@ -1,0 +1,9 @@
+{% for host in query('inventory_hostnames', 'openwrt') %}
+server {{ host }} iburst
+{% endfor %}
+server ntp.superloop.com iburst
+server ntp.internode.on.net iburst
+server 0.au.pool.ntp.org iburst
+server 1.au.pool.ntp.org iburst
+server 2.au.pool.ntp.org iburst
+server 3.au.pool.ntp.org iburst

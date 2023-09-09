@@ -1,7 +1,9 @@
 [General]
 
 Verbosity = 0
+{% if deb_release | default('bullseye') == 'bullseye' %}
 Pipefs-Directory = /run/rpc_pipefs
+{% endif %}
 # set your own domain here, if it differs from FQDN minus hostname
 # Domain = localdomain
 

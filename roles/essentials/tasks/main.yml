@@ -61,16 +61,6 @@
     - name: Make sure all handlers run
       meta: flush_handlers
 
-- name: Ensure ntp starts on a fresh reboot
-  service:
-    name: ntp
-    state: started
-    enabled: yes
-  become: true
-  when: host_is_container is not defined
-
-  #FIXME: might need to go chrony instead of NTP if thats how we get VMs working
-
   # ideally want to disable other fs level forms of trim because TRIM
   # is a non-queued SCSI command.  Keep lvm though because want
   # immediate response to something done manually, rarely
@@ -82,19 +72,25 @@
     enabled: yes
   become: true
   when: host_is_container is not defined
+  ignore_errors: true  # fails when not in systemd, or still in the
+                       # installation environment, etc
 
 - name: set discards in lvm.conf
   lineinfile:
     dest: "/etc/lvm/lvm.conf"
     regexp: '^\s*issue_discards = 0'
     line: '	issue_discards = 1'
+    insertafter: 'issue_discards = 0'  # which is commented out if
+                                       # above regexp didn't match
   become: true
   when: "'lvm2' in ansible_facts.packages"
 
-- name: Remove erroneous packages
+  #ntpsec removed in favour of chrony finally, because it starts network coming up on pve 8
+- name: Remove (and purge) erroneous packages
   apt:
-    name: ['locales-all', 'tuned', 'tuned-utils', 'tuned-utils-systemtap', 'hddtemp', 'bootlogd']
+    name: ['locales-all', 'tuned', 'tuned-utils', 'tuned-utils-systemtap', 'hddtemp', 'bootlogd', 'ntp', 'ntpdate', 'ntpsec', 'ntpsec-ntpdate', 'ntpsec-ntpdig']
     state: absent
+    purge: true
   become: true
 
 - name: Remove once-installed-but-annoying packages
@@ -150,11 +146,19 @@
 
 - name: Install essential packages (not container)
   apt:
-    name: ['git', 'htop', 'iotop', 'smem', 'ethtool', 'net-tools', 'iperf3',  'aptitude', 'dlocate', 'plocate', 'vim', 'nicstat', 'lshw', 'parted', 'sdparm', 'ntpdate', 'colordiff', 'ifstat', 'iftop', 'apt-listchanges', 'apt-show-versions', 'etckeeper', 'apt-listbugs', 'apt-listbugs', 'rlwrap', 'strace', 'make', 'keychain', 'libstring-shellquote-perl', 'dmidecode', 'expect', 'initscripts', 'colordiff', 'direnv', 'rkhunter'] # expect for unbuffer, initscripts for bootlogs, pcp for dstat, but that results in pmlogger cronjobs that spin up disks on fs
+    name: ['git', 'htop', 'iotop', 'smem', 'ethtool', 'net-tools', 'iperf3',  'aptitude', 'dlocate', 'plocate', 'vim', 'nicstat', 'lshw', 'parted', 'sdparm', 'chrony', 'colordiff', 'ifstat', 'iftop', 'apt-listchanges', 'apt-show-versions', 'etckeeper', 'apt-listbugs', 'apt-listbugs', 'rlwrap', 'strace', 'make', 'keychain', 'libstring-shellquote-perl', 'dmidecode', 'expect', 'initscripts', 'colordiff', 'direnv', 'rkhunter', 'libdata-validate-ip-perl'] # expect for unbuffer, initscripts for bootlogs, libdata-validate-ip-perl needed for chronyc munin plugin, pcp for dstat, but that results in pmlogger cronjobs that spin up disks on fs
     # atop
     autoremove: no
     state: present
     install_recommends: no
+  become: true
+  when: host_is_container is not defined
+
+- name: Ensure chrony starts on a fresh reboot
+  service:
+    name: chrony
+    state: started
+    enabled: yes
   become: true
   when: host_is_container is not defined
 

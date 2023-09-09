@@ -10,15 +10,13 @@
 
 - name: Install ansible bootstrap packages (not containers)
   apt:
-    name: ['ntp', 'aptitude']
+    name: ['chrony', 'aptitude']
     update_cache: no # can't - proxmox enterprise might be a repo, and isn't valid yet
     cache_valid_time: 3600
     autoremove: no
     state: present
   become: true
   when: host_is_container is not defined
-
-  #FIXME: might need to go chrony instead of NTP if thats how we get VMs working
 
 #- name: Enable unattended upgrades
 #  copy:

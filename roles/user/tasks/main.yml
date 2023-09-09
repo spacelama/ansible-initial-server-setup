@@ -28,6 +28,14 @@
 #    key: "{{ lookup('file', item) }}"
 #  with_items: "{{ public_key }}"
 
+- name: override debian (bookworm) default to user home dir permissions
+  lineinfile:
+    dest: /etc/adduser.conf
+    state: present
+    regexp: "^DIR_MODE="
+    line: "DIR_MODE=0755 # ANSIBLE configured"
+  become: true
+
 # https://opensource.com/article/18/7/sysadmin-tasks-ansible
 - name: all groups in the department
   group:

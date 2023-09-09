@@ -1,0 +1,42 @@
+#!/bin/bash
+#
+# munin plugin to monitor difference between system time and a random
+# upstream ntp server, to pick up those cases where local ntp server
+# has dropped all its upstreams, so can no longer query status of a
+# fixed server within that pool
+#
+# Origional Author: Tim Connors
+# Contributors: none
+# Version: 1.2 Adaption to chronyc
+# Version: 1.1 single-shot ntpdate against a chosen target
+#
+#%# family=contrib
+#%# capabilities=autoconf
+
+. $MUNIN_LIBDIR/plugins/plugin.sh
+
+server=au.pool.ntp.org
+
+case $1 in
+    autoconf)
+	echo yes
+	exit 0
+	;;
+    config)
+        echo 'graph_title NTP real offset'
+        #        echo 'graph_args --base 1000 -l 0 '
+#        echo 'graph_scale no'
+        echo 'graph_vlabel offset (seconds)'
+        echo 'graph_category time'
+
+        echo "offset.label $server"
+
+        echo
+
+        exit 0
+	;;
+esac
+
+#offset=$( timeout 10 ntpdate -q -p 1 $server | sed -n 's/.*adjust.time.server \(.*\) offset \(.*\) sec/\2/p')
+offset=$( timeout 10 chronyd -Q 'server au.pool.ntp.org iburst' 2>&1 | sed -n 's/.*System clock wrong by \([0-9.]*\) seconds.*/\1/p' )
+[ -n "$offset" ] && echo offset.value $offset

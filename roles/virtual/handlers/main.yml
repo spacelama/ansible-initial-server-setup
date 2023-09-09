@@ -1,6 +1,6 @@
 ---
-- name: restart ntp
+- name: restart chrony
   service:
-    name: ntp
+    name: chrony
     state: restarted
   become: true

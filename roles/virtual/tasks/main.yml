@@ -25,14 +25,11 @@
      dest: /etc/udev/rules.d/90-SMR-drive-timeout.rules
   become: true
 
-- name: Configure ntp for VMs
-  blockinfile:
-    path: /etc/ntp.conf
-    marker: "# {mark} ansible VM ntp configuration"
-    block: |2
-      # ensure ntp doesnt bail if vmware gains or loses too many ticks
-      tinker panic 0
-      tinker step 1
-      tinker stepout 0
+- name: Configure chrony for VMs
+  copy:
+    dest: /etc/chrony/conf.d/vm.conf
+    content: |2
+      # ensure chrony doesn't bail if vmware gains or loses too many ticks
+      makestep 1 -1
   become: true
-  notify: restart ntp
+  notify: restart chrony

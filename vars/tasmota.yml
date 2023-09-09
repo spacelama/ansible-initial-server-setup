@@ -77,12 +77,15 @@
 
     - command: Timezone
       value: "{{ timezone }}"
+      ignore_errors: yes   #seems to be ignored and errors out on openbeken
 
     - command: TimeStd
       value: "{{ timestd }}"
+      ignore_errors: yes   #seems to be ignored and errors out on openbeken
 
     - command: TimeDst
       value: "{{ timedst }}"
+      ignore_errors: yes   #seems to be ignored and errors out on openbeken
 
     - command: SSId1
       value: "{{ ssid }}"

@@ -76,10 +76,14 @@
     - "{{ lookup('fileglob', 'bin/*', wantlist=True) }}"
     - "{{ lookup('fileglob', \"bin.Linux-{{ arch | default ('x86_64') }}/*\", wantlist=True) }}"
 
-  install_dirs:
+  install_dirs: # these directories would normally be created by the
+                # packages we later install, but we want to be able to
+                # install these files before the package is
     - { dir: "/etc/bash.bashrc.d", mode: "0755" }
     - { dir: "/etc/needrestart", mode: "0755" }
     - { dir: "/etc/X11/xorg.conf.d", mode: "0755" }
+    - { dir: "/etc/munin/plugins", mode: "0755" }
+    - { dir: "/etc/chrony/sources.d", mode: "0755" }
 
   install_files:
     - { source: usr_local_bin/hddtemp,                  dest: /usr/local/bin/hddtemp,                  mode: "0755" }
@@ -94,7 +98,7 @@
     - { template: etc/auto.nas.j2,        dest: /etc/auto.nas,            mode: "0644" }
     - { source: etc/autofs.conf,          dest: /etc/autofs.conf,         mode: "0644" }
 #    - { source: etc/default/autofs,       dest: /etc/default/autofs,      mode: "0644" }   MOUNT_NFS_DEFAULT_PROTOCOL seems to be ignored, and not causing me problems anyway, these days
-    - { source: etc/idmapd.conf,          dest: /etc/idmapd.conf,         mode: "0644" }
+    - { template: etc/idmapd.conf.j2,     dest: /etc/idmapd.conf,         mode: "0644" }
     - { source: etc/bashcolors,           dest: /etc/bashcolors,          mode: "0644" }
     - { source: etc/inputrc,              dest: /etc/inputrc,             mode: "0644" }
     - { template: etc/rkhunter.conf.j2,   dest: /etc/rkhunter.conf,       mode: "0644" }
@@ -104,6 +108,8 @@
     - { source: etc/cron.daily/cron.daily_check-cmos-battery, dest: /etc/cron.daily/cron.daily_check-cmos-battery, mode: "0755", when: "{{ host_is_physical is defined }}" }
     - { source: etc/needrestart/notify.conf,                  dest: /etc/needrestart/notify.conf,                  mode: "0644" }
     - { source: etc/X11/xorg.conf.d/80-maxclients.conf,       dest: /etc/X11/xorg.conf.d/80-maxclients.conf,       mode: "0644" }
+    - { template: etc/chrony/sources.d/local.sources.j2,      dest: /etc/chrony/sources.d/local.sources,           mode: "0644" }
+    - { source: etc/munin/plugins/ntp_thirdparty,             dest: /etc/munin/plugins/ntp_thirdparty,             mode: "0755" }
 
     - { source: etc/logrotate.d/btmp,          dest: /etc/logrotate.d/btmp,          mode: "0644" }
     - { source: etc/logrotate.d/wtmp,          dest: /etc/logrotate.d/wtmp,          mode: "0644" }

@@ -45,6 +45,20 @@
   when: in_bootstrap is not defined and ( not pve_enterprise_nag_buster.stat.exists or pve_nag_buster_changed.changed )
   register: pve_nag_installed
 
+- name: Purge some incompatible packages
+  apt:
+    name: ['ifupdown']   # some stale config files left from automatic
+                         # removal of ifupdown stop network from
+                         # coming up, so make sure the package is
+                         # purged first (ifupdown2 needs to be
+                         # reinstalled afterwards, so let's just try
+                         # to do it second anyway.  Could leave with
+                         # an unbootable system if that fails!)
+    state: absent
+    purge: true
+  become: true
+  when: in_bootstrap is not defined
+
 - name: Install pve prereq packages
   apt:
     name: ['dkms', 'pve-headers', 'ifupdown2']
@@ -97,6 +111,15 @@
     # these at once on the one invocation, because throws extraneous
     # errors when the package was never installed
   ignore_errors: true
+
+- name: Install bootstrap requirements
+  apt:
+    name: ['lvm2']
+    update_cache: yes
+    cache_valid_time: 3600
+    autoremove: no
+    state: present
+  become: true
 
 - name: Install virtual host tools
   apt:
@@ -246,6 +269,17 @@
     variable: "GRUB_CMDLINE_LINUX_DEFAULT"
   with_items: { "modprobe.blacklist=radeon,amdgpu,snd_hda_intel,xhci_hcd,xhci_pci" }
 
+  # our default pve passes through USB ports via vfio, so you can't
+  # use a keyboard in a rescue situation!  Make the boot rescue entry
+  # not load vfio and not blacklist the USB modules.  Other rescue
+  # boot flag possibilities are: "systemd.unit=rescue.target", "1",
+  # "systemd.unit=emergency.target", or rescue via some other means
+  # and add a debug shell to tty9 via `systemctl enable
+  # debug-shell.service`: https://wiki.debian.org/systemd (other debug
+  # tips can be found here:
+  # https://freedesktop.org/wiki/Software/systemd/Debugging/ Help on
+  # systemd targets found here:
+  # https://opensource.com/article/20/5/systemd-startup )
 - name: "Add modprobe blacklist to failsafe boot config"
   include_tasks: "{{ playbook_dir }}/roles/common/tasks/add_boot_flag.yml"
   loop_control:
@@ -310,6 +344,14 @@
   file:
     path: "/root/.ssh/cm_master"
     state: directory
+  become: true
+
+- name: ensure ssh config exists
+  file:
+    path: /root/.ssh/config
+    state: touch
+    modification_time: preserve
+    access_time: preserve
   become: true
 
 - name: install ssh config

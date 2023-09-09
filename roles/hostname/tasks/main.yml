@@ -4,6 +4,8 @@
     name: "{{ hostname | default(inventory_hostname)}}"
   notify: restart hostname
   become: true
+  ignore_errors: true  # fails when not in systemd, or still in the
+                       # installation environment, etc
 
 - name: "Search for correct hosts line"
   become: yes

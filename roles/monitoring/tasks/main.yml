@@ -11,8 +11,6 @@
     file_type: link
   register: munin_plugins_to_possibly_delete_hwmon
 
-  #FIXME: might need to go chrony instead of NTP if thats how we get
-  #VMs working
 - name: find extraneous munin checks (wildcard)
   find:
     paths: /etc/munin/plugins
@@ -56,7 +54,39 @@
   when: host_is_container is defined or host_is_virtual is defined or host_is_pi is defined
   notify: restart munin-node
 
-- name: new munin plugins
+- name: install custom numa,zfs,chrony etc munin monitoring plugins from munin-contrib, that take arguments
+  copy:
+    src: monitoring/munin/{{ item }}
+    dest: /usr/share/munin/plugins/{{ item }}
+    owner: root
+    group: root
+    mode: 0755
+    local_follow: true
+  become: true
+  with_items:
+    - zfs_usage_
+    - zfsonlinux_stats_
+    - numa_
+    - chrony_
+
+- name: install custom chrony etc munin monitoring plugins from munin-contrib, that don't take arguments
+  copy:
+    src: monitoring/munin/{{ item }}
+    dest: /etc/munin/plugins/{{ item }}
+    owner: root
+    group: root
+    mode: 0755
+    local_follow: true
+  become: true
+  with_items:
+   - chrony_sourcestats
+   - chrony_status
+   - chrony
+   - chrony_drift
+  when: host_is_container is not defined
+  notify: restart munin-node
+
+- name: new munin plugins copied from ansible host
   copy:
     src: "/etc/munin/plugins/{{ item }}"
     dest: "/etc/munin/plugins/{{ item }}"
@@ -76,7 +106,6 @@
   with_items: [ 'df_abs', 'iostat', 'iostat_ios', 'netstat' ]
   when: host_is_container is not defined
   notify: restart munin-node
-
 
 - name: existing munin plugins without params (physical machines)
   file:
@@ -110,10 +139,11 @@
     - { src: 'ping_gamow', dest: 'ping_' }
     - { src: 'ping_gw', dest: 'ping_' }
     - { src: 'ping_www.google.com.au', dest: 'ping_' }
+    - { src: 'chrony_ntp.internode.com.au', dest: 'chrony_' }
   when: host_is_container is not defined
   notify: restart munin-node
 
-- name: install munin zfs_*
+- name: install custom zfs_* munin monitoring plugins that don't take arguments
   copy:
     src: monitoring/munin/{{ item }}
     dest: /etc/munin/plugins/{{ item }}
@@ -141,20 +171,6 @@
     - zpool_iostat
   when: host_is_zfs is defined
   notify: restart munin-node
-
-- name: install custom numa and zfs etc munin monitoring plugins
-  copy:
-    src: monitoring/munin/{{ item }}
-    dest: /usr/share/munin/plugins/{{ item }}
-    owner: root
-    group: root
-    mode: 0755
-    local_follow: true
-  become: true
-  with_items:
-    - zfs_usage_
-    - zfsonlinux_stats_
-    - numa_
 
 - name: gather and implement munin suggests
   include_tasks: munin_suggest_plugin.yml
@@ -233,16 +249,29 @@
   become: true
   notify: restart munin-node
 
-- name: Ensure munin df excludes
+- name: munin node conf - diskstats and chrony config
   blockinfile:
     path: "/etc/munin/plugin-conf.d/munin-node"
     marker: "# {mark} ANSIBLE MANAGED BLOCK"
     backup: yes
     block: |
-      
+
       #for nice devicemapper names
       [diskstats]
       user root
+
+      # settings docuemnted in chrony_* executables
+      [chrony_*]
+      user _chrony
+      env.timesources 2.debian.pool.ntp.org 2.debian.pool.ntp.org 2.debian.pool.ntp.org 2.debian.pool.ntp.org 192.168.1.254 ntp.superloop.com ntp.internode.com.au
+      env.chrony /usr/bin/chronyc
+      env.chronycpath /usr/bin/chronyc
+      env.driftfile /var/lib/chrony/chrony.drift
+      env.freqlimit 0.7
+      env.freqskewlimit 0.3
+      env.offsetlimit 0.005
+      env.stddevlimit 0.001
+
   become: true
   notify: restart munin-node
 
