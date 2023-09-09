@@ -169,3 +169,162 @@
      unsafe_writes: true # needed because of the /etc/pve fuse filesystem
   become: true
 
+#FIXME: keep monitoring lifetime left, and if drops below 0 (or Percent_Lifetime_Remain raw value goes above 100 on its way to 255, which then makes lifetime writes somewhere around 264TB, which is much closer to TBW), then it's just a SMART bug and we can back out this timeout back to default 5.  Also, if doesn't drop its rate, might as well back it out too and find some other source of write amplification in the fs VM # https://www.reddit.com/r/zfs/comments/cott44/how_can_i_check_to_make_sure_i_dont_have_a_write/ewqjld0/
+- name: "zfs module parameters"
+  copy:
+    dest: /etc/modprobe.d/zfs-custom.conf
+    content: "# ansible controlled to ensure SSD doesn't have too many writes, by pve_server/main.yml\noptions zfs zfs_txg_timeout=15\n"
+  become: true
+  notify: "Update initramfs config"
+
+# if need to regenerate pve boot config because of new disks,
+# procedure is here: https://pve.proxmox.com/wiki/Host_Bootloader
+
+- name: install ssh socket directory
+  file:
+    path: "/root/.ssh/cm_master"
+    state: directory
+  become: true
+
+- name: ensure ssh config exists
+  file:
+    path: /root/.ssh/config
+    state: touch
+    modification_time: preserve
+    access_time: preserve
+  become: true
+
+- name: install ssh config
+  lineinfile:
+    dest: /root/.ssh/config
+    line: "{{ item }}"
+  with_items:
+    - "ControlMaster auto"
+    - "ControlPath ~/.ssh/cm_master/%r@%h:%p"
+    - "ControlPersist yes"
+  become: true
+
+- name: "Install guest snippets directory"
+  file:
+    path: "/var/lib/vz/snippets/"
+    state: directory
+  become: true
+
+- name: "Install guest snippets"
+  copy:
+    dest: /var/lib/vz/snippets/guest-hookscript.pl
+    src: guest-hookscript.pl
+    mode: 0755
+  become: true
+
+
+  # FIXME: consider also reducing rrd writes: https://forum.proxmox.com/threads/reducing-rrdcached-writes.64473/
+# (but primarily, suspect most writes are coming from rrd in fs)
+
+
+# https://pve.proxmox.com/wiki/Pci_passthrough
+
+  # test devices you want to pass through belong in separate IOMMUs:
+#https://www.reddit.com/r/SolusProject/comments/955osy/vfio_passthrough_quick_reference/
+##!/bin/bash
+#shopt -s nullglob
+#for d in /sys/kernel/iommu_groups/*/devices/*; do
+#    n=${d#*/iommu_groups/*}; n=${n%%/*}
+#    printf 'IOMMU Group %s ' "$n"
+#    lspci -nns "${d##*/}"
+#done;
+
+- name: "Append intel_iommu=on boot config"
+  include_tasks: "{{ playbook_dir }}/roles/common/tasks/add_boot_flag.yml"
+  loop_control:
+    loop_var: flag
+  vars:
+    variable: "GRUB_CMDLINE_LINUX_DEFAULT"
+  when: host_is_intel is defined
+  with_items: { "intel_iommu=on", "iommu=pt", "pcie_acs_override=downstream,multifunction" }
+
+- name: "Append amd_iommu=on boot config"
+  include_tasks: "{{ playbook_dir }}/roles/common/tasks/add_boot_flag.yml"
+  loop_control:
+    loop_var: flag
+  vars:
+    variable: "GRUB_CMDLINE_LINUX_DEFAULT"
+  when: host_is_amd is defined
+  with_items: { "amd_iommu=on", "iommu=pt", "pcie_acs_override=downstream,multifunction" }
+
+# - name: "host modules blacklist (radeon, snd_hda_intel, amdgpu, usb3)"
+#   copy:
+#     dest: /etc/modprobe.d/pve-custom-blacklist.conf
+#     content: "# ansible controlled for RX550 by pve_server/main.yml\nblacklist radeon\nblacklist amdgpu\nblacklist snd_hda_intel\nblacklist xhci_hcd\nblacklist xhci_pci\n"
+#   become: true
+#   notify: "Update initramfs config"
+
+# there'll be times we want to add or remove items from this list, so add_boot_flag should be generalised to look for regexps
+- name: "Append modprobe blacklist boot config"
+  include_tasks: "{{ playbook_dir }}/roles/common/tasks/add_boot_flag.yml"
+  loop_control:
+    loop_var: flag
+  vars:
+    variable: "GRUB_CMDLINE_LINUX_DEFAULT"
+  with_items: { "modprobe.blacklist=radeon,amdgpu,snd_hda_intel,xhci_hcd,xhci_pci" }
+
+  # our default pve passes through USB ports via vfio, so you can't
+  # use a keyboard in a rescue situation!  Make the boot rescue entry
+  # not load vfio and not blacklist the USB modules.  Other rescue
+  # boot flag possibilities are: "systemd.unit=rescue.target", "1",
+  # "systemd.unit=emergency.target", or rescue via some other means
+  # and add a debug shell to tty9 via `systemctl enable
+  # debug-shell.service`: https://wiki.debian.org/systemd (other debug
+  # tips can be found here:
+  # https://freedesktop.org/wiki/Software/systemd/Debugging/ Help on
+  # systemd targets found here:
+  # https://opensource.com/article/20/5/systemd-startup )
+- name: "Add modprobe blacklist to failsafe boot config"
+  include_tasks: "{{ playbook_dir }}/roles/common/tasks/add_boot_flag.yml"
+  loop_control:
+    loop_var: flag
+  vars:
+    variable: "GRUB_CMDLINE_LINUX"
+    no_modify_systemdboot: true
+  with_items: { "modprobe.blacklist=vfio_pci" }
+
+- name: "vfio module parameters"
+  copy:
+    dest: /etc/modprobe.d/vfio-custom.conf
+    # locations obtained with lspci -nvvv
+    content: "# ansible controlled to passthrough amdgpu and usb card, by pve_server/main.yml\noptions vfio-pci {{ vfio_ids }}\n"
+  become: true
+  notify: "Update initramfs config"
+  when: vfio_ids is defined
+
+- name: "Ensure vfio, vendor-reset in /etc/modules"
+  lineinfile:
+    dest: /etc/modules
+    line: "{{ item }}"
+    state: present
+  become: true
+  notify: "Update initramfs config"
+  with_items:
+    - "# ansible controlled for GPU passthrough and reset by pve_server/main.yml"
+    - vfio
+    - vfio_iommu_type1
+    - vfio_pci
+    - vfio_virqfd
+    - vendor-reset
+    - "# following modules are blacklisted on the kernel commandline to stop from autoloading, but now that vfio is loaded reserving the appropriate devices, we are free to load them again (nope, have to probe them manually)"
+    - "#xhci_pci"
+    - "#xhci_hcd"
+
+# persistent network names (lan0): https://wiki.debian.org/NetworkInterfaceNames
+- name: install systemd network persistent net link
+  template:
+    src: systemd-network-persistent-net-link.j2
+    dest: /etc/systemd/network/10-persistent-net.link
+  become: true
+
+- name: install network interfaces
+  template:
+    src: network-interfaces.j2
+    dest: /etc/network/interfaces
+  become: true
+
