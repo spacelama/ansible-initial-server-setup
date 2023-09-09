@@ -17,6 +17,10 @@ MACAddress={{ mac_addr }}
 # doesn't understand this (https://bugzilla.proxmox.com/show_bug.cgi?id=4125),
 # and it seems to break passing through of vlan trunk through to a VM
 
+{#
+  eth0 can safely become eno1 or en1 again in pve 8, but we still have pve 7
+  instances, and systemd would probably screw up auto-naming on the old r520 too
+#}
 Name=eth0
 WakeOnLan=magic
 

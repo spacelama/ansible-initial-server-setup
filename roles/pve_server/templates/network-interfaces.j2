@@ -39,8 +39,9 @@ iface eno4 inet manual
 # VM.  So we're following closely to advice here:
 # https://forum.proxmox.com/threads/proxmox-network-interface-name-problems.92065/
 
+#}
 auto vmbr0
-iface vmbr0 inet static
+iface vmbr0 inet manual
 	bridge-ports eth0
 	bridge-stp off
 	bridge-fd 0
@@ -48,7 +49,9 @@ iface vmbr0 inet static
 	bridge-vids 2-4094
 #All VLANs trunked
 
+{#
 # possibly want native vlan untagged on switch: https://www.reddit.com/r/Proxmox/comments/iu24ld/vlan_trunking_on_a_single_interface/g5iwt4v/
+#}
 auto vmbr0.5
 iface vmbr0.5 inet static
 	address 192.168.0.{{ inet_addr_suffix }}/24
@@ -61,19 +64,18 @@ iface vmbr0.10 inet static
 #VLAN 10 LAN
 
 auto vmbr0.30
-iface vmbr0.30 inet static
-	address 192.168.3.{{ inet_addr_suffix }}/24
+iface vmbr0.30 inet manual
 #VLAN 30 GUEST
 
 auto vmbr0.40
-iface vmbr0.40 inet static
-	address 192.168.4.{{ inet_addr_suffix }}/24
+iface vmbr0.40 inet manual
 #VLAN 40 IOT
 
 auto vmbr0.70
-iface vmbr0.70 inet static
-	address 192.168.7.{{ inet_addr_suffix }}/24
+iface vmbr0.70 inet manual
 #VLAN 70 WINDOWS
 
-#iface wlp5s0 inet manual
-#iface eno2 inet manual
+{#
+# iface wlp5s0 inet manual
+# iface eno2 inet manual
+#}
