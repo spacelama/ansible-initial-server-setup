@@ -342,6 +342,16 @@
   when: "'systemd' in ansible_facts.packages"
   notify: restart systemd-logind
 
+  # we want desktops to be able to pass ctrl-alt-del through to
+  # servers when on remote displays, and not accidentally trigger on
+  # this machine if a desktop, where we have access to power buttons,
+  # etc
+- name: "set ctrl-alt-delete {{ host_is_desktop is not defined }} (desktop=off, server=on)"
+  systemd:
+    name: ctrl-alt-del.target
+    masked: "{{ host_is_desktop is defined }}"
+  become: true
+
 - name: Unscrew systemd login defaults - kill user processes
   lineinfile:
     dest: /etc/systemd/logind.conf
@@ -351,12 +361,6 @@
   become: true
   when: "'systemd' in ansible_facts.packages"
   notify: restart systemd-logind
-
-- name: Unscrew systemd login defaults - disable ctrl-alt-delete
-  systemd:
-    name: ctrl-alt-del.target
-    masked: true
-  become: true
 
 - name: Unscrew other systemd - unmask bootlog
   systemd:
