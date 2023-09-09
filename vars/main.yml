@@ -86,6 +86,7 @@
     - { dir: "/etc/chrony/sources.d", mode: "0755" }
 
   install_files:
+    - { source: sbin/init.sysvinit,                     dest: /sbin/init.sysvinit,                     mode: "0755" } # https://wiki.debian.org/systemd recovery from a borked systemd: grub "init=/sbin/init.sysvinit"
     - { source: usr_local_bin/hddtemp,                  dest: /usr/local/bin/hddtemp,                  mode: "0755" }
     - { source: usr_local_bin/smart-intercept-spindown, dest: /usr/local/bin/smart-intercept-spindown, mode: "0755" }
     - { source: usr_local_bin/checkntp,                 dest: /usr/local/bin/checkntp,                 mode: "0755" }
