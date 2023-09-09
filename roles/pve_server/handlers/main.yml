@@ -3,3 +3,5 @@
   shell: "/usr/sbin/update-initramfs -u -k all"
   become: true
 
+- name: "Regenerate boot config"
+  include_tasks: "{{ playbook_dir }}/roles/common/tasks/regenerate_boot_config.yml"

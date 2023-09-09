@@ -81,6 +81,8 @@
   # want to rethink this, but in check_mode, we can't hope to unpack
   # the archive when the archive isn't yet unpacked
   when: not ansible_check_mode and in_bootstrap is not defined and ( not vendor_reset_dkms.stat.exists or vendor_reset_changed.changed )
+  ignore_errors: true  # fails when not in systemd, or still in the
+                       # installation environment, etc
 
 - name: remove prohibited packages
   apt:
@@ -107,6 +109,7 @@
     autoremove: no
     state: present
   become: true
+  when: in_bootstrap is not defined
 
 - name: mount media
   mount:
@@ -116,6 +119,9 @@
     opts: defaults,_netdev,x-systemd.automount
     state: mounted
   become: true
+  when: in_bootstrap is not defined
+  ignore_errors: true  # fails when not in systemd, or still in the
+                       # installation environment, etc
 
 - name: mount media transcodes
   mount:
@@ -125,6 +131,9 @@
     opts: defaults,_netdev,x-systemd.automount
     state: mounted
   become: true
+  when: in_bootstrap is not defined
+  ignore_errors: true  # fails when not in systemd, or still in the
+                       # installation environment, etc
 
 - name: ensure SMR drives have a longer timeout
   copy:
@@ -133,6 +142,7 @@
      # also tells you whether it appended RUN appropriately
      dest: /etc/udev/rules.d/90-SMR-drive-timeout.rules
   become: true
+  when: in_bootstrap is not defined
 
 - name: install suspend-all
   copy:
@@ -144,6 +154,7 @@
   become: true
   with_items:
     - suspend-all
+  when: in_bootstrap is not defined
 
   # FIXME: there are no non-zfs partitions on pve where there's enough space for swapspace to operate
 #- name: Ensures /var/lib/swapspace 0700
@@ -173,6 +184,9 @@
   with_items:
     - pve-ha-lrm
     - pve-ha-crm
+  when: in_bootstrap is not defined
+  ignore_errors: true  # fails when not in systemd, or still in the
+                       # installation environment, etc
 
 - name: reduce frequent writes by pvesr.timer
   # https://forum.proxmox.com/threads/replication-runner-syslog.35600/
@@ -180,6 +194,7 @@
     content: "[Unit]\nDescription=Proxmox VE replication runner\n\n[Timer]\nAccuracySec=1\nRemainAfterElapse=no\n\n[Timer]\nOnCalendar=*:0/15\n\n[Install]\nWantedBy=timers.target\n"
     dest: /etc/systemd/system/pvesr.timer
   become: true
+  when: in_bootstrap is not defined
 
   # FIXME: consider also reducing rrd writes: https://forum.proxmox.com/threads/reducing-rrdcached-writes.64473/
 # (but primarily, suspect most writes are coming from rrd in fs)
@@ -311,7 +326,10 @@
   copy:
      content: "user:root@pam:1:0:::tim.w.connors@gmail.com:::\n{{ pve_users | join('\n') }}\n"
      dest: /etc/pve/user.cfg
+     mode: "0640"
+     unsafe_writes: true # needed because of the /etc/pve fuse filesystem
   become: true
+  when: in_bootstrap is not defined
 
 - name: "Install guest snippets directory"
   file:
@@ -373,4 +391,4 @@
     dest: "/etc/modprobe.d/softdog.conf"
   become: true
 
-# FIXME: install QemuServer hook to call this hook
+# FIXME: install QemuServer hook to call the guest hook
