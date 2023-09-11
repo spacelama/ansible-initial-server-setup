@@ -15,7 +15,12 @@
 
 . $MUNIN_LIBDIR/plugins/plugin.sh
 
-server=au.pool.ntp.org
+set -e
+
+offset_line=$( timeout 10 chronyc -c sources | sed 's/,/ /g' | grep '^^ \* ' )
+read a b ip stratum e f last current_offset measured_offset err <<< "$offset_line"
+
+server=$( dig -x "$ip" +short | sed 's/\.$//' )
 
 case $1 in
     autoconf)
@@ -37,6 +42,4 @@ case $1 in
 	;;
 esac
 
-#offset=$( timeout 10 ntpdate -q -p 1 $server | sed -n 's/.*adjust.time.server \(.*\) offset \(.*\) sec/\2/p')
-offset=$( timeout 10 chronyd -Q 'server au.pool.ntp.org iburst' 2>&1 | sed -n 's/.*System clock wrong by \([0-9.]*\) seconds.*/\1/p' )
-[ -n "$offset" ] && echo offset.value $offset
+[ -n "$current_offset" ] && echo offset.value $current_offset
