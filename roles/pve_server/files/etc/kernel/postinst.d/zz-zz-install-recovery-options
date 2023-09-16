@@ -1,0 +1,75 @@
+#!/bin/bash
+
+# Tim Connors
+#
+# 2023/09/14 install some recovery options without so much vfio pci
+# redirection to VMs
+
+# copied setup from /etc/kernel/postinst.d/zz-proxmox-boot
+
+. /usr/share/proxmox-kernel-helper/scripts/functions
+
+update_esps() {
+	if [ ! -f "${ESP_LIST}" ]; then
+	    warn "No ${ESP_LIST} found, skipping ESP sync."
+	    exit 0
+	fi
+	if ! [ -f /etc/kernel/cmdline ] || ! [ -d /etc/default/grub.d ] ; then
+            warn "WARN: not creating a recovery boot option because /etc/kernel/cmdline or /etc/default/grub.d doesn't exist"
+            return
+        fi
+        loop_esp_list update_esp_func
+}
+
+update_esp_func() {
+        # construct GRUB_CMDLINE_LINUX and GRUB_CMDLINE_LINUX_DEFAULT.
+        # A full boot uses:
+        # "$GRUB_CMDLINE_LINUX $GRUB_CMDLINE_LINUX_DEFAULT",
+        # but proxmox boots this by default.  We will end up copying the
+        # profile that generates that, but just using $GRUB_CMDLINE_LINUX
+        # instead
+
+        local GRUB_CMDLINE_LINUX
+        local GRUB_CMDLINE_LINUX_DEFAULT
+        for i in  /etc/default/grub.d/*.cfg ; do
+            . $i
+        done
+
+	if ! (echo "${curr_uuid}" | grep -qE '[0-9a-fA-F]{4}-[0-9a-fA-F]{4}'); then
+		warn "WARN: ${curr_uuid} read from ${ESP_LIST} does not look like a VFAT-UUID - skipping"
+		return
+	fi
+
+	path="/dev/disk/by-uuid/$curr_uuid"
+	if [ ! -e "${path}" ]; then
+		warn "WARN: ${path} does not exist - clean '${ESP_LIST}'! - skipping"
+		return
+	fi
+
+	mountpoint="${MOUNTROOT}/${curr_uuid}"
+	mkdir -p "${mountpoint}" || \
+		{ warn "creation of mountpoint ${mountpoint} failed - skipping"; return; }
+	mount "${path}" "${mountpoint}" || \
+		{ warn "mount of ${path} failed - skipping"; return; }
+
+        shopt -s nullglob
+        # most of the checking will be done by proxmox boot generator
+        # scripts - these conf files simply will not exist if they
+        # detected an unsuitable system
+        for conffile in "${mountpoint}/loader/entries/"proxmox-*-pve.conf ; do
+                echo Munging "$conffile" to nopci version
+                out_conffile="${conffile%.conf}"-nopci.conf
+                sed "s!^\\(version.*\\)!\\1-nopci! ; s!^options .*!options  $GRUB_CMDLINE_LINUX!" "$conffile" > "$out_conffile"
+
+                echo Munging "$conffile" to rescue version
+                out_conffile="${conffile%.conf}"-rescue.conf
+                sed "s!^\\(version.*\\)!\\1-rescue! ; s!^options .*!options  $GRUB_CMDLINE_LINUX systemd.unit=rescue.target!" "$conffile" > "$out_conffile"
+        done
+
+	umount "${mountpoint}" || \
+		{ warn "umount of ${path} failed - failure"; exit 0; }
+
+	rmdir "${mountpoint}" || true
+}
+
+update_esps

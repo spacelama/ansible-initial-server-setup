@@ -5,7 +5,11 @@
   when: host_is_pve_server is not defined
 
   #FIXME: only machines to use systemd-boot so far is proxmox hosts
-- name: "Regenerate systemdboot config"
-  shell: "proxmox-boot-tool refresh" # not meant to use update-grub
+- name: "Regenerate systemdboot config on pve_server"
+  # not meant to use update-grub, but also, proxmox-boot-tool only
+  # hooks into an explicit list of hooks, so while our hook goods
+  # executed at every kernel dpkg install, it doesn't get executed
+  # here unless we call it ourselves
+  shell: "proxmox-boot-tool refresh && /etc/kernel/postinst.d/zz-zz-install-recovery-options"
   become: true
   when: host_is_pve_server is defined

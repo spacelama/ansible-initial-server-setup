@@ -1,28 +1,38 @@
 ---
-# when variable=GRUB_CMDLINE_LINUX_DEFAULT, we also munge /etc/kernel/cmdline in a similar way
+# We munge individual files in /etc/default/grub.d/, although that
+# doesn't appear well documented anyway (other than at
+# https://pve.proxmox.com/wiki/Host_Bootloader ) and might not be
+# guaranteed; the man page doesn't guarantee anything more than shell
+# syntax key=value pairs.  But the source for grub-mkconfig shows it
+# currently sourcing *.cfg
 
-#FIXME: all these (and essentials, and spectre) grub commandline mungings should just be additions and deletions to file from /etc/default/grub.d/
-- name: "Remove {{ flag }} from grub config"
-  lineinfile:
-    dest: /etc/default/grub
-    backrefs: yes
-    regexp: "^{{ variable }}=\"(.*) *{{ flag }} *(.*)\""
-    line: "{{ variable }}=\"\\1\\2\""
-    state: present
+- name: calculate flags
+  include_tasks: calculate_flag_variables.yml
+
+- name: "Remove flag {{ grub_setflag }} from grub config"
+  file:
+    path: "/etc/default/grub.d/ansible.{{ grub_key }}-{{ grub_variable }}.cfg"
+    state: absent
   become: true
   notify: "Regenerate boot config"
+
+  # now do the systemd-boot stuff:
 
 - name: determine if /etc/kernel/cmdline exists
   stat: path=/etc/kernel/cmdline
   register: systemdboot_cmdline
 
-- name: "Remove {{ flag }} from systemdboot config"
-  when: (systemdboot_cmdline.stat.exists) and (no_modify_systemdboot is not defined)
+- name: "Remove {{ grub_setflag_re }} from systemdboot config"
+  when: (systemdboot_cmdline.stat.exists) and (recovery_systemdboot is not defined)
   lineinfile:
     dest: /etc/kernel/cmdline
     backrefs: yes
-    regexp: "(.*) *{{ flag }} *(.*)"
-    line: "\\1\\2"
+    regexp: "(.*) *{{ grub_setflag_re }} *(.*)"
+    line: "\\1\\3"  # no space between these because 1st match is
+                    # greedy and captures the space.  We just
+                    # explicitly also match a space to be consistent.
+                    # We're using \3 and not \2 because there's
+                    # already an implicit bracket in grub_setflag_re
     state: present
   become: true
   notify: "Regenerate boot config"

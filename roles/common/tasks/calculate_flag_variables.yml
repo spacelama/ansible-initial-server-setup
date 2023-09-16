@@ -1,0 +1,35 @@
+---
+# sourced by add_boot_flag.yml and remove_boot_flag.yml to calculate
+# pre-requisite variables
+
+# FIXME: detect if an str flag with no .key and .value has an equals
+# in it, and flag an error (or break it up into key and value)
+
+# set flag="key=value" if key and value are supplied
+    # https://github.com/ansible/ansible/issues/78036
+- name: "set grub flags"
+  set_fact:
+    grub_setflag: "{{ flag.key + ( '=' + flag.value ) if flag.key is defined and flag.value is defined else flag }}"
+    # regular expression if we happen to want to remove it:
+    grub_setflag_re: "{{ flag.key + ( '=' + flag.value ) if flag.key is defined and flag.value is defined else ( flag.key + '(=[^ ]*)?' ) if flag.key is defined else ( flag + '(=[^ ]*)?' ) }}"
+    # set key to flag if the flag is just a flag
+    grub_key: "{{ flag.key if flag.key is defined else flag }}"
+    # set comment flag if supplied
+    comment_line: "{{ ( '# ' + comment + '\n' ) if comment is defined else ''}}"
+
+#- debug:
+#    msg: "{{ 'grub_setflag=' + grub_setflag + '\ngrub_setflag_re=' + grub_setflag_re + '\ngrub_key=' + grub_key + '\ncomment_line=' + comment_line }}"
+
+  # set_fact ignores conditional when: (according to "[WARNING]: noop
+  # task does not support when conditional")!
+  # https://docs.ansible.com/ansible/latest/collections/ansible/builtin/set_fact_module.html
+  # talks about ignore_conditional, but no one seems to be talking
+  # about it on the internet, so set this variable in the same way as
+  # above... except that the same warning gets emitted anyway...
+- name: "Set which boot variables to modify for normal boot"
+  set_fact:
+    grub_variable: "{{ 'GRUB_CMDLINE_LINUX' if recovery_systemdboot is defined else 'GRUB_CMDLINE_LINUX_DEFAULT' }}"
+    grub_file_ext: "{{ '-recovery' if recovery_systemdboot is defined else '' }}"
+
+#- debug:
+#    msg: "{{ 'grub_variable=' + grub_variable + '\ngrub_file_ext=' + grub_file_ext }}"

@@ -380,13 +380,14 @@
     loop_var: user
   with_items: "{{ fixup_user_conf_files.users }}"
 
-- name: "Remove undesired flags from grub config"
+- name: "Remove undesired flags and whitespace from grub config"
   include_tasks: "{{ playbook_dir }}/roles/common/tasks/remove_boot_flag.yml"
   loop_control:
     loop_var: flag
-  vars:
-    variable: "GRUB_CMDLINE_LINUX_DEFAULT"
-  with_items: { quiet, "   *" }
+  with_items: { quiet, "   *" }   #for the sake of
+                                  #/etc/kernel/cmdline, which doesn't
+                                  #have the individual files of
+                                  #/etc/default/boot.d/
   when: host_is_container is not defined and host_is_pi is not defined
 
 - name: fix defaults in grub config

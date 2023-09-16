@@ -1,34 +1,29 @@
 ---
-# when variable=GRUB_CMDLINE_LINUX_DEFAULT, we also munge /etc/kernel/cmdline in a similar way
+# We munge individual files in /etc/default/grub.d/, although that
+# doesn't appear well documented anyway (other than at
+# https://pve.proxmox.com/wiki/Host_Bootloader ) and might not be
+# guaranteed; the man page doesn't guarantee anything more than shell
+# syntax key=value pairs.  But the source for grub-mkconfig shows it
+# currently sourcing *.cfg
 
-#FIXME: all these (and essentials, and spectre) grub commandline mungings should just be additions and deletions to file from /etc/default/grub.d/
-- name: "Search for {{ flag }} in grub config"
-  register: grub_variable_line_exists
-  check_mode: yes # cause this to become just a test.  If there's already
-                  # relevant settings, then this will think line is
-                  # being replaced, and changed will become true (but we
-                  # force it to false to not output a line saying
-                  # "changed"), and msg will become "line added", else
-                  # changed stays false, and msg does not contain "line
-                  # added"
-                  #
-                  # We need to use this strange form because backrefs
-                  # is used by next test, and modifies lineinfile to
-                  # not try to add the line
-  lineinfile:
-    dest: /etc/default/grub
-    line: grub cmdline already has flag disabled
-    regexp: "^{{ variable }}=.*{{ flag }}"
-    state: present
+- name: calculate flags
+  include_tasks: calculate_flag_variables.yml
+
+- name: "Create flag {{ grub_setflag }} to grub config"
+  copy:
+    dest: "/etc/default/grub.d/ansible.{{ grub_key }}{{ grub_file_ext }}.cfg"
+    content: "{{ comment_line }}{{ grub_variable }}=\"${{ grub_variable }} {{ grub_setflag }}\"\n"
   become: true
-  changed_when: false
+  notify: "Regenerate boot config"
+
+  # now do the systemd-boot stuff:
 
 - name: determine if /etc/kernel/cmdline exists
   stat: path=/etc/kernel/cmdline
   register: systemdboot_cmdline
 
-- name: "Search for {{ flag }} in systemdboot config"
-  when: (systemdboot_cmdline.stat.exists) and (no_modify_systemdboot is not defined)
+- name: "Search for {{ grub_setflag }} in systemdboot config"
+  when: (systemdboot_cmdline.stat.exists) and (recovery_systemdboot is not defined)
   register: systemdboot_variable_line_exists
   check_mode: yes # cause this to become just a test.  If there's already
                   # relevant settings, then this will think line is
@@ -43,30 +38,19 @@
                   # not try to add the line
   lineinfile:
     dest: /etc/kernel/cmdline
-    line: systemdboot cmdline already has flag disabled
-    regexp: "{{ flag }}"
+    line: systemdboot cmdline already has flag
+    regexp: "{{ grub_setflag }}"
     state: present
   become: true
   changed_when: false
 
-- name: "Append flag {{ flag }} grub config"
-  when: grub_variable_line_exists.msg == "line added"
-  lineinfile:
-    dest: /etc/default/grub
-    backrefs: yes
-    regexp: "^{{ variable }}=\"(.*)\""
-    line: "{{ variable }}=\"\\1 {{ flag }}\""
-    state: present
-  become: true
-  notify: "Regenerate boot config"
-
-- name: "Append flag {{ flag }} systemdboot config"
-  when: (systemdboot_cmdline.stat.exists) and (no_modify_systemdboot is not defined) and (systemdboot_variable_line_exists.msg == "line added")
+- name: "Append flag {{ grub_setflag }} systemdboot config"
+  when: (systemdboot_cmdline.stat.exists) and (recovery_systemdboot is not defined) and (systemdboot_variable_line_exists.msg == "line added")
   lineinfile:
     dest: /etc/kernel/cmdline
     backrefs: yes
     regexp: "(.*)"
-    line: "\\1 {{ flag }}"
+    line: "\\1 {{ grub_setflag }}"
     state: present
   become: true
   notify: "Regenerate boot config"

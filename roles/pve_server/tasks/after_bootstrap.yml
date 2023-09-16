@@ -39,6 +39,18 @@
     install_recommends: no
   become: true
 
+  # zfs root systems in pve8 might need systemd-boot package:
+  # https://pve.proxmox.com/wiki/Roadmap#8.0-known-issues
+#  FIXME: pve7to8
+- name: Install pve prereq packages for pve8
+  apt:
+    name: ['systemd-boot']
+    autoremove: no
+    state: present
+    install_recommends: no
+  become: true
+  when: deb_release | default('bullseye') == 'bookworm'
+
 - name: Ensures ~ansible/Downloads/vendor-reset-225a49a dir exists
   file:
     path: "/home/{{ ansible_env.USER }}/Downloads/vendor-reset-225a49a"
@@ -117,8 +129,6 @@
   copy:
     src: pve_server/{{ item }}
     dest: /usr/local/bin/{{ item }}
-    owner: root
-    group: root
     mode: 0755
   become: true
   with_items:
@@ -212,11 +222,10 @@
 
 - name: "Install guest snippets"
   copy:
-    dest: /var/lib/vz/snippets/guest-hookscript.pl
     src: guest-hookscript.pl
+    dest: /var/lib/vz/snippets/guest-hookscript.pl
     mode: 0755
   become: true
-
 
   # FIXME: consider also reducing rrd writes: https://forum.proxmox.com/threads/reducing-rrdcached-writes.64473/
 # (but primarily, suspect most writes are coming from rrd in fs)
@@ -234,23 +243,33 @@
 #    lspci -nns "${d##*/}"
 #done;
 
+# FIXME: run `proxmox-boot-tool status` after pve7to8 before reboot!
+
 - name: "Append intel_iommu=on boot config"
   include_tasks: "{{ playbook_dir }}/roles/common/tasks/add_boot_flag.yml"
   loop_control:
     loop_var: flag
-  vars:
-    variable: "GRUB_CMDLINE_LINUX_DEFAULT"
   when: host_is_intel is defined
-  with_items: { "intel_iommu=on", "iommu=pt", "pcie_acs_override=downstream,multifunction" }
+  with_items:
+    - key: "intel_iommu"
+      value: "on"
+    - key: "iommu"
+      value: "pt"
+    - key: "pcie_acs_override"
+      value: "downstream,multifunction"
 
 - name: "Append amd_iommu=on boot config"
   include_tasks: "{{ playbook_dir }}/roles/common/tasks/add_boot_flag.yml"
   loop_control:
     loop_var: flag
-  vars:
-    variable: "GRUB_CMDLINE_LINUX_DEFAULT"
   when: host_is_amd is defined
-  with_items: { "amd_iommu=on", "iommu=pt", "pcie_acs_override=downstream,multifunction" }
+  with_items:
+    - key: "amd_iommu"
+      value: "on"
+    - key: "iommu"
+      value: "pt"
+    - key: "pcie_acs_override"
+      value: "downstream,multifunction"
 
 # - name: "host modules blacklist (radeon, snd_hda_intel, amdgpu, usb3)"
 #   copy:
@@ -264,9 +283,19 @@
   include_tasks: "{{ playbook_dir }}/roles/common/tasks/add_boot_flag.yml"
   loop_control:
     loop_var: flag
-  vars:
-    variable: "GRUB_CMDLINE_LINUX_DEFAULT"
-  with_items: { "modprobe.blacklist=radeon,amdgpu,snd_hda_intel,xhci_hcd,xhci_pci" }
+  with_items:
+    - key: modprobe.blacklist
+      value: "{{ modprobe_blacklist }}"
+      comment: "separate out all IOMMU groups, blacklist all the desktop functions we want to passthrough to VM, and override the blacklist from the rescue variable, GRUB_CMDLINE_LINUX"
+  when: modprobe_blacklist is defined
+
+- name: "Remove modprobe blacklist boot config"
+  include_tasks: "{{ playbook_dir }}/roles/common/tasks/remove_boot_flag.yml"
+  loop_control:
+    loop_var: flag
+  with_items:
+    - key: "modprobe.blacklist"
+  when: modprobe_blacklist is not defined
 
   # our default pve passes through USB ports via vfio, so you can't
   # use a keyboard in a rescue situation!  Make the boot rescue entry
@@ -284,9 +313,23 @@
   loop_control:
     loop_var: flag
   vars:
-    variable: "GRUB_CMDLINE_LINUX"
-    no_modify_systemdboot: true
-  with_items: { "modprobe.blacklist=vfio_pci" }
+    recovery_systemdboot: true # We're modifying the backup boot
+                               # option, $GRUB_CMDLINE_LINUX.
+                               # systemd-boot doesn't have this as
+                               # equivalent, so we're going to have to
+                               # modify our boot scripts (below)
+  with_items:
+    - key: "modprobe.blacklist"
+      value: "vfio_pci"
+      comment: "if vfio stops us from booting, allow rescue mode to boot up"
+
+- name: "Install custom boot flag generator"
+  copy:
+    src: etc/kernel/postinst.d/zz-zz-install-recovery-options
+    dest: /etc/kernel/postinst.d/zz-zz-install-recovery-options
+    mode: 0755
+  become: true
+  notify: "Regenerate boot config"
 
 - name: "vfio module parameters"
   copy:
