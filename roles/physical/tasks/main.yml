@@ -1,7 +1,7 @@
 ---
 - name: Install tools required by physical hardware
   apt:
-    name: ['lm-sensors', 'gparted', 'xauth', 'sg3-utils', 'scsitools', 'bonnie++', 'apt-file', 'rasdaemon', 'linux-cpupower', 'nvme-cli', 'numactl', 'numad', 'numatop'] # rasdaemon has taken over from mcelog which is no longer available
+    name: ['lm-sensors', 'gparted', 'xauth', 'powertop', 'sg3-utils', 'scsitools', 'bonnie++', 'apt-file', 'rasdaemon', 'linux-cpupower', 'nvme-cli', 'numactl', 'numad', 'numatop'] # rasdaemon has taken over from mcelog which is no longer available
     update_cache: yes
     cache_valid_time: 3600
     autoremove: no

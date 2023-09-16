@@ -60,14 +60,14 @@
   when: not ansible_check_mode and ( not vendor_reset_dkms.stat.exists or vendor_reset_changed.changed )
   # FIXME: we want to ignore errors, but above test will fail and we
   # then won't install a second time when we have a more favourable
-  # environment
+  # environment - see my notes in ~/diary FIXME:FIXME:
   ignore_errors: true  # fails when not in systemd, or still in the
                        # installation environment, etc
 
 - name: Install virtual host tools
   apt:
     # https://pve.proxmox.com/wiki/Install_Proxmox_VE_on_Debian_Jessie
-    name: ['proxmox-ve', 'ssh', 'postfix', 'ksm-control-daemon', 'open-iscsi', 'systemd-sysv', 'munin-libvirt-plugins', 'targetcli-fb', 'powertop', 'libguestfs-tools', 'hwloc', 'numad'] # 'virt-goodies',
+    name: ['proxmox-ve', 'ssh', 'postfix', 'ksm-control-daemon', 'open-iscsi', 'systemd-sysv', 'munin-libvirt-plugins', 'targetcli-fb', 'powertop', 'libguestfs-tools', 'hwloc', 'numad', 'emacs'] # 'virt-goodies', (emacs because big enough servers, and use it often enough...)
 #, 'swapspace']
 #    FIXME: run tuned-adm profile powersave or perhaps virtual-host # https://www.reddit.com/r/Proxmox/comments/uc53m7/4port_j4125_pc_how_to_run_proxmox_with_lowpower/
     update_cache: yes
