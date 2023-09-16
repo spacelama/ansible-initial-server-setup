@@ -1,6 +1,6 @@
 #!/bin/bash -l
 
-addkeychain
+. $HOME/.keychain/$HOSTNAME-sh
 
 data_dir="$1"
 
