@@ -23,6 +23,53 @@ function backup() {
     fi
 }
 
+function depth_dell_info() {
+    local in_dell_field="$1"
+    local dell_field
+
+    header_len=`echo "$in_dell_field" | wc -c`
+    printf "%$((header_len-1))s\\n" |tr " " "-"
+    echo "$in_dell_field"
+    printf "%$((header_len-1))s\\n" |tr " " "-"
+
+    local dell_fields=$( /opt/dell/srvadmin/sbin/racadm get "$in_dell_field" )
+    echo "$dell_fields" | while read dell_field ; do
+        if [[ "$dell_field" == "$in_dell_field".* ]] ; then
+            # sometimes you get the following, and only want
+            # the first argument:
+            # iDRAC.Users.1 [Key=iDRAC.Embedded.1#Users.1]
+
+            dell_field=${dell_field%% *}
+
+            # the field ends up printing itself plus some suffixes
+            depth_dell_info "$dell_field"
+        elif [ -n "$dell_field" ] && [[ "$dell_field" != *[\ =]* ]] ; then
+            # no spaces, but not a subset of the current input, means
+            # that you have to prepend the name of the input to these
+            # fields
+            depth_dell_info "$in_dell_field.$dell_field"
+        else
+            echo "$dell_field"
+        fi
+    done
+    echo
+}
+function get_dell_info() {
+    # this contains useful racadm commands:
+    # https://github.com/tin6150/psg/blob/master/script/hpc/racadmSetBios.sh
+#    local dell_fields=$( /opt/dell/srvadmin/sbin/racadm get ; echo BIOS )
+    local dell_fields=$( echo System ; echo LifeCycleController ; echo iDRAC ; echo BIOS )
+    local dell_field
+    echo "$dell_fields" | while read dell_field ; do
+        depth_dell_info "$dell_field"
+    done > $data_dir/dell_racadm
+
+    for omreport in 'chassis biossetup' 'chassis fans' 'chassis memory' 'chassis pwrsupplies' 'chassis pwrmanagement' 'chassis processors' 'chassis temps' 'chassis volts' 'chassis batteries' 'system summary' 'system version' 'storage pdisk controller=0' 'storage controller' 'storage battery' 'storage connector controller=0' ; do
+        out="${omreport// /_}"
+        /opt/dell/srvadmin/bin/omreport $omreport > $data_dir/dell_$out
+    done
+}
+
 LANG=POSIX ; export LANG
 PATH=/sbin:/bin:/usr/sbin:/usr/bin ; export PATH
 
@@ -119,7 +166,7 @@ fi
 
 # Dell
 if [ -e /opt/dell/srvadmin/bin/omreport ] ; then
-    /opt/dell/srvadmin/bin/omreport chassis biossetup> $data_dir/dell_biossetup
+    get_dell_info
 fi
 
 # Other
