@@ -17,9 +17,9 @@
 
 - hosts: "{{ target | default('all,!openwrt,!tasmota') }}"
   remote_user: ansible_adm
+#  gather_facts: no  # when doing a very quick debug run
   vars_files:
     - vars/main.yml
-
   roles:
     #FIXME: would ideally also include bootstap here with become: true
     - role: management

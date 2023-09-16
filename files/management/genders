@@ -1,15 +1,16 @@
-dirac                           linux,intel
+dirac                           linux,intel,amd              # AMD is not a strictly important flag yet, but reminds us where it is currently running.  Intel is also set just because it's compatible (again, not yet used)
 dirac-laptop                    linux,intel,not247
 maxwell                         linux,intel,not247
 fs                              linux,intel
 #pve                             linux,intel,pve
 pve1                            linux,intel,pve
-pve2                            linux,intel,pve
-enclosure                       linux,intel,pve,not247
+pve1a                           linux,intel,pve
+pve2                            linux,intel,amd,pve
+pve3                            linux,intel,pve
 pi                              linux,arm
 gamow                           linux,intel,not247
 pauli                           linux,intel,not247
-fermi                           linux,intel
+fermi                           linux,intel,amd
 homeassistant                   linux,intel,hassio
 zm                              linux,intel,lxc,turnkey
 media                           linux,intel,lxc,turnkey
@@ -27,9 +28,11 @@ bedroomlifx                     lifx
 #ledstrip                        esp8266
 netclock                        esp8266
 ac                              esp8266
-esp32cam                        esp8266
+
+esp32cam                        esp82
 
 ac-power                        tasmota,medion,powermon,accurate
+airmon1                         tasmota,tasmota_custom_build
 loungeroomlights-power          tasmota,sonoffs26
 bedroomlights-power             tasmota,sonoffs26
 garagelights-power              tasmota,sonoffs26

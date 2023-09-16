@@ -1,22 +1,4 @@
 ---
-- name: Ensures ~ansible/Downloads dir exists
-  file:
-    path: "/home/{{ ansible_env.USER }}/Downloads"
-    state: directory
-
-- name: copy pve-nag-buster/install.sh to pve
-  copy:
-    src: /home/tconnors/code/proxmox/pve-nag-buster/install.sh
-    dest: "/home/{{ ansible_env.USER }}/Downloads/pve-nag-buster-install.sh"
-    mode: 0755
-  register: pve_nag_buster_changed
-
-- name: install the pve nag buster
-  command: /home/{{ ansible_env.USER }}/Downloads/pve-nag-buster-install.sh --offline
-  become: true
-  when: not pve_enterprise_nag_buster.stat.exists or pve_nag_buster_changed.changed
-  register: pve_nag_installed
-
 - name: Purge some incompatible packages
   apt:
     name: ['ifupdown']   # some stale config files left from automatic
@@ -30,7 +12,6 @@
     purge: true
   become: true
 
-#  FIXME: pve7to8
 - name: Install pve prereq packages
   apt:
     name: ['dkms', 'pve-headers', 'ifupdown2']
@@ -353,6 +334,7 @@
     - vfio_iommu_type1
     - vfio_pci
     - vfio_virqfd
+    # following for amd video cards in VMs
     - vendor-reset
     - "# following modules are blacklisted on the kernel commandline to stop from autoloading, but now that vfio is loaded reserving the appropriate devices, we are free to load them again (nope, have to probe them manually)"
     - "#xhci_pci"

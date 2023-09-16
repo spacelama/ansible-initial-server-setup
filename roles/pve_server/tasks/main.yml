@@ -25,6 +25,24 @@
   become: true
   when: pve_enterprise_repository.stat.exists
 
+- name: Ensures ~ansible/Downloads dir exists
+  file:
+    path: "/home/{{ ansible_env.USER }}/Downloads"
+    state: directory
+
+- name: copy pve-nag-buster/install.sh to pve
+  copy:
+    src: /home/tconnors/code/proxmox/pve-nag-buster/install.sh
+    dest: "/home/{{ ansible_env.USER }}/Downloads/pve-nag-buster-install.sh"
+    mode: 0755
+  register: pve_nag_buster_changed
+
+- name: install the pve nag buster
+  command: /home/{{ ansible_env.USER }}/Downloads/pve-nag-buster-install.sh --offline
+  become: true
+  when: not pve_enterprise_nag_buster.stat.exists or pve_nag_buster_changed.changed
+  register: pve_nag_installed
+
 - name: remove prohibited packages
   apt:
     name: "{{ item }}"
@@ -94,6 +112,7 @@
     dest: "/etc/modprobe.d/softdog.conf"
   become: true
 
+- name: include after bootstrap tasks
   include_tasks: after_bootstrap.yml
   when: in_bootstrap is not defined
 
