@@ -22,6 +22,17 @@
   stat: path=/etc/kernel/cmdline
   register: systemdboot_cmdline
 
+- name: "Substitute flag {{ grub_setflag }} systemdboot config if already exists but needs updating"
+  when: (systemdboot_cmdline.stat.exists) and (recovery_systemdboot is not defined)
+  lineinfile:
+    dest: /etc/kernel/cmdline
+    backrefs: yes
+    regexp: "(.*){{ grub_setflag_re }}(.*)"
+    line: "\\1{{ grub_setflag }}\\3"  #\2 is the bracket embedded within grub_setflag_re
+    state: present
+  become: true
+  notify: "Regenerate boot config"
+
 - name: "Search for {{ grub_setflag }} in systemdboot config"
   when: (systemdboot_cmdline.stat.exists) and (recovery_systemdboot is not defined)
   register: systemdboot_variable_line_exists
@@ -35,7 +46,11 @@
                   #
                   # We need to use this strange form because backrefs
                   # is used by next test, and modifies lineinfile to
-                  # not try to add the line
+                  # not try to add the line.  It's a pity ansible
+                  # can't use backrefs that still work when there's no
+                  # match in the first place.  Other people have
+                  # solved it a different way:
+                  # https://stackoverflow.com/questions/58173877/ansible-lineinfile-module-using-regexp-and-backrefs
   lineinfile:
     dest: /etc/kernel/cmdline
     line: systemdboot cmdline already has flag

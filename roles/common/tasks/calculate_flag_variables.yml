@@ -31,16 +31,16 @@
   set_fact:
     grub_setflag: >-
       {{
-      flag.key + ( '=' + flag.value ) if flag.key is defined and flag.value is defined else
+      ( flag.key + '=' + flag.value ) if flag.key is defined and flag.value is defined else
       flag
       }}
     # regular expression if we happen to want to remove it:
     grub_setflag_re: >-
       {{
-      flag if grub_assignment_key != "not defiend" and grub_assignment_value != "not defined" else
-      flag.key + ( '=' + flag.value ) if flag.key is defined and flag.value is defined else
-      ( flag.key + '(=[^ ]*)?' ) if flag.key is defined else
-      ( flag + '(=[^ ]*)?' )
+      ( grub_assignment_key + '(=[^ ]*)?' ) if grub_assignment_key != "not defined" and grub_assignment_value != "not defined" else
+      ( flag.key +            '(=[^ ]*)?' ) if flag.key is defined and flag.value is defined else
+      ( flag.key +            '(=[^ ]*)?' ) if flag.key is defined else
+      ( flag +                '(=[^ ]*)?' )
       }}
 
     # set key to flag if the flag is just a flag

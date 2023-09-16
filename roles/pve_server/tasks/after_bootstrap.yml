@@ -247,7 +247,6 @@
 #   become: true
 #   notify: "Update initramfs config"
 
-# there'll be times we want to add or remove items from this list, so add_boot_flag should be generalised to look for regexps
 - name: "Append modprobe blacklist boot config"
   include_tasks: "{{ playbook_dir }}/roles/common/tasks/add_boot_flag.yml"
   loop_control:
