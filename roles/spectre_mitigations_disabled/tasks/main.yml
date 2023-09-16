@@ -6,7 +6,7 @@
   loop_control:
     loop_var: flag
   when: host_can_have_spectre_mitigations is not defined
-  with_items: [ nopti, nospectre_v2, nospectre_v1, noibrs, noibpb, nospec_store_bypass_disable, no_stf_barrier, { 'key': 'mds', 'value': 'off' }, { 'key': 'mitigations', 'value': 'off' }, { 'key': 'l1tf', 'value': 'off' } ]
+  with_items: [ nopti, nospectre_v2, nospectre_v1, noibrs, noibpb, nospec_store_bypass_disable, no_stf_barrier, 'mds=off', 'mitigations=off', 'l1tf=off' ]
 
 - name: "Remove spectre unmitigations boot config"
   include_tasks: "{{ playbook_dir }}/roles/common/tasks/remove_boot_flag.yml"

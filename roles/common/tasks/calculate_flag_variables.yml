@@ -2,34 +2,85 @@
 # sourced by add_boot_flag.yml and remove_boot_flag.yml to calculate
 # pre-requisite variables
 
-# FIXME: detect if an str flag with no .key and .value has an equals
-# in it, and flag an error (or break it up into key and value)
+# can say "key: foo, value: blah" or "key=blah"
 
 # set flag="key=value" if key and value are supplied
-    # https://github.com/ansible/ansible/issues/78036
+
+  # Have to screw around with "if blah else blah" because ansible
+  # doesn't yet deal with lazy evaluation:
+  # https://github.com/ansible/ansible/issues/78036 Also means have to
+  # play around with pseudo value "not defined" that you don't
+  # otherwise expect in your input, and look for it later instead of
+  # simply testing for definedness.
 - name: "set grub flags"
   set_fact:
-    grub_setflag: "{{ flag.key + ( '=' + flag.value ) if flag.key is defined and flag.value is defined else flag }}"
-    # regular expression if we happen to want to remove it:
-    grub_setflag_re: "{{ flag.key + ( '=' + flag.value ) if flag.key is defined and flag.value is defined else ( flag.key + '(=[^ ]*)?' ) if flag.key is defined else ( flag + '(=[^ ]*)?' ) }}"
-    # set key to flag if the flag is just a flag
-    grub_key: "{{ flag.key if flag.key is defined else flag }}"
-    # set comment flag if supplied
-    comment_line: "{{ ( '# ' + comment + '\n' ) if comment is defined else ''}}"
+    # ">-" is folding operator, strip newline that gets inserted at the end
+    # "|" vs ">" is literal block scalar vs folding block scalar
+    grub_assignment_key: >-
+      {{
+      flag.split('=')[0] if flag.key is not defined and flag.value is not defined and flag.split('=')[0] is defined else
+      "not defined"
+      }}
+    grub_assignment_value: >-
+      {{
+      flag.split('=')[1] if flag.key is not defined and flag.value is not defined and flag.split('=')[1] is defined else
+      "not defined"
+      }}
 
-#- debug:
-#    msg: "{{ 'grub_setflag=' + grub_setflag + '\ngrub_setflag_re=' + grub_setflag_re + '\ngrub_key=' + grub_key + '\ncomment_line=' + comment_line }}"
+- name: "set dependent grub flags"
+  set_fact:
+    grub_setflag: >-
+      {{
+      flag.key + ( '=' + flag.value ) if flag.key is defined and flag.value is defined else
+      flag
+      }}
+    # regular expression if we happen to want to remove it:
+    grub_setflag_re: >-
+      {{
+      flag if grub_assignment_key != "not defiend" and grub_assignment_value != "not defined" else
+      flag.key + ( '=' + flag.value ) if flag.key is defined and flag.value is defined else
+      ( flag.key + '(=[^ ]*)?' ) if flag.key is defined else
+      ( flag + '(=[^ ]*)?' )
+      }}
+
+    # set key to flag if the flag is just a flag
+    grub_key: >-
+      {{
+      grub_assignment_key if grub_assignment_key != "not defined" else
+      flag.key if flag.key is defined else
+      flag
+      }}
+
+    # set comment flag if supplied
+    comment_line: >-
+      {{
+      ( '# ' + comment + '\n' ) if comment is defined else
+      ''
+      }}
+
+- debug:
+    msg:
+      - flag(incoming)        = {{ flag }}
+      - grub_setflag          = {{ grub_setflag    }}
+      - grub_setflag_re       = {{ grub_setflag_re }}
+      - grub_key              = {{ grub_key        }}
+      - comment_line          = {{ comment_line    }}
+      - grub_assignment_key   = {{ grub_assignment_key }}
+      - grub_assignment_value = {{ grub_assignment_value }}
 
   # set_fact ignores conditional when: (according to "[WARNING]: noop
   # task does not support when conditional")!
   # https://docs.ansible.com/ansible/latest/collections/ansible/builtin/set_fact_module.html
   # talks about ignore_conditional, but no one seems to be talking
   # about it on the internet, so set this variable in the same way as
-  # above... except that the same warning gets emitted anyway...
+  # above... except that the same warning gets emitted anyway (haven't
+  # noticed it cause any harm yet)...
 - name: "Set which boot variables to modify for normal boot"
   set_fact:
     grub_variable: "{{ 'GRUB_CMDLINE_LINUX' if recovery_systemdboot is defined else 'GRUB_CMDLINE_LINUX_DEFAULT' }}"
     grub_file_ext: "{{ '-recovery' if recovery_systemdboot is defined else '' }}"
 
-#- debug:
-#    msg: "{{ 'grub_variable=' + grub_variable + '\ngrub_file_ext=' + grub_file_ext }}"
+- debug:
+    msg:
+      - grub_variable = {{ grub_variable }}
+      - grub_file_ext = {{ grub_file_ext }}

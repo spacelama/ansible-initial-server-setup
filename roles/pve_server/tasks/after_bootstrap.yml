@@ -231,26 +231,14 @@
   loop_control:
     loop_var: flag
   when: host_is_intel is defined
-  with_items:
-    - key: "intel_iommu"
-      value: "on"
-    - key: "iommu"
-      value: "pt"
-    - key: "pcie_acs_override"
-      value: "downstream,multifunction"
+  with_items: [ 'intel_iommu=on', 'iommu=pt', 'pcie_acs_override=downstream,multifunction' ]
 
 - name: "Append amd_iommu=on boot config"
   include_tasks: "{{ playbook_dir }}/roles/common/tasks/add_boot_flag.yml"
   loop_control:
     loop_var: flag
   when: host_is_amd is defined
-  with_items:
-    - key: "amd_iommu"
-      value: "on"
-    - key: "iommu"
-      value: "pt"
-    - key: "pcie_acs_override"
-      value: "downstream,multifunction"
+  with_items: [ 'amd_iommu=on', 'iommu=pt', 'pcie_acs_override=downstream,multifunction' ]
 
 # - name: "host modules blacklist (radeon, snd_hda_intel, amdgpu, usb3)"
 #   copy:
@@ -265,7 +253,7 @@
   loop_control:
     loop_var: flag
   with_items:
-    - key: modprobe.blacklist
+    - key: "modprobe.blacklist"
       value: "{{ modprobe_blacklist }}"
       comment: "separate out all IOMMU groups, blacklist all the desktop functions we want to passthrough to VM, and override the blacklist from the rescue variable, GRUB_CMDLINE_LINUX"
   when: modprobe_blacklist is defined
@@ -274,8 +262,7 @@
   include_tasks: "{{ playbook_dir }}/roles/common/tasks/remove_boot_flag.yml"
   loop_control:
     loop_var: flag
-  with_items:
-    - key: "modprobe.blacklist"
+  with_items: [ 'modprobe.blacklist' ]
   when: modprobe_blacklist is not defined
 
   # our default pve passes through USB ports via vfio, so you can't
