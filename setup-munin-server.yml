@@ -1,0 +1,8 @@
+---
+# https://stackoverflow.com/questions/18195142/safely-limiting-ansible-playbooks-to-a-single-machine
+- hosts: "{{ target | default('fs') }}"
+  gather_facts: no
+  remote_user: ansible_adm
+  roles:
+    - role: munin-server
+      when: inventory_hostname == 'fs'
