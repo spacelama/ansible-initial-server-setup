@@ -35,12 +35,17 @@
       flag
       }}
     # regular expression if we happen to want to remove it:
+
+    # RE looks like:
+    #
+    # word boundary followed by your key followed by optional "=value"
+    # followed by word boundary
     grub_setflag_re: >-
       {{
-      ( grub_assignment_key + '(=[^ ]*)?' ) if grub_assignment_key != "not defined" and grub_assignment_value != "not defined" else
-      ( flag.key +            '(=[^ ]*)?' ) if flag.key is defined and flag.value is defined else
-      ( flag.key +            '(=[^ ]*)?' ) if flag.key is defined else
-      ( flag +                '(=[^ ]*)?' )
+      ( '\b' + grub_assignment_key + '(=[^ ]*)?\b' ) if grub_assignment_key != "not defined" and grub_assignment_value != "not defined" else
+      ( '\b' + flag.key +            '(=[^ ]*)?\b' ) if flag.key is defined and flag.value is defined else
+      ( '\b' + flag.key +            '(=[^ ]*)?\b' ) if flag.key is defined else
+      ( '\b' + flag +                '(=[^ ]*)?\b' )
       }}
 
     # set key to flag if the flag is just a flag
