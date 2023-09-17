@@ -25,6 +25,7 @@
     - role: management
       when: host_is_mgmt is defined
     - user
+    - apt_repos
     - essentials
     - monitoring
     - role: spectre_mitigations_disabled
