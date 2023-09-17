@@ -1,6 +1,8 @@
 # /etc/inputrc - global inputrc for libreadline
 # See readline(3readline) and `info rluserman' for more information.
 
+# man 3 readline
+
 # useful things to remember:
 # rememeber that c-x c-r rereads this file
 # c-x p edits $PATH in bash, c-x l same for LD_LIBRARY_PATH
@@ -8,11 +10,14 @@
 # m-r   revert-line
 
 # Be 8 bit clean.
-set input-meta   on
-set output-meta  on
-set convert-meta off
+set input-meta on
+set output-meta on
 
-# set enable-meta-key off
+# To allow the use of 8bit-characters like the german umlauts, uncomment
+# the line below. However this makes the meta key not work as a meta key,
+# which is annoying to those which don't need to type in 8-bit characters.
+
+# set convert-meta off
 
 # try to enable the application keypad when it is called.  Some systems
 # need this to enable the arrow keys.
@@ -20,11 +25,64 @@ set convert-meta off
 
 # see /usr/share/doc/bash/inputrc.arrows for other codes of arrow keys
 
-# do not bell on tab-completion 
-# set bell-style none 
+# do not bell on tab-completion
+# set bell-style none
+# set bell-style visible
 
-# make completion less beepy
-#set show-all-if-ambiguous on
+# make autocompletion case insensitive and display suggestions
+# set completion-ignore-case On
+# set show-all-if-ambiguous On
+
+# some defaults / modifications for the emacs mode
+$if mode=emacs
+
+# allow the use of the Home/End keys
+"\e[1~": beginning-of-line
+"\e[4~": end-of-line
+
+# allow the use of the Delete/Insert keys
+"\e[3~": delete-char
+"\e[2~": quoted-insert
+
+# mappings for "page up" and "page down" to step to the beginning/end
+# of the history
+# "\e[5~": beginning-of-history
+# "\e[6~": end-of-history
+
+# alternate mappings for "page up" and "page down" to search the history
+# "\e[5~": history-search-backward
+# "\e[6~": history-search-forward
+
+# mappings for Ctrl-left-arrow and Ctrl-right-arrow for word moving
+"\e[1;5C": forward-word
+"\e[1;5D": backward-word
+"\e[5C": forward-word
+"\e[5D": backward-word
+"\e\e[C": forward-word
+"\e\e[D": backward-word
+
+# following is in debian bookworm, but we end up assigning some of
+# them to all terminal types later anyway
+$if term=rxvt
+"\e[7~": beginning-of-line
+"\e[8~": end-of-line
+"\eOc": forward-word
+"\eOd": backward-word
+$endif
+
+# for non RH/Debian xterm, can't hurt for RH/Debian xterm
+# "\eOH": beginning-of-line
+# "\eOF": end-of-line
+
+# for freebsd console
+# "\e[H": beginning-of-line
+# "\e[F": end-of-line
+
+$endif
+
+# Most non-standard customisations by tconnors are below here:
+
+set convert-meta off
 
 # Make sure we don't output everything on the 1 line
 set horizontal-scroll-mode Off
@@ -41,25 +99,16 @@ Control-q: quoted-insert
 Control-s: forward-search-history
 "\M-s": forward-search-history             #ctrl-s rebound to meta s
 
+# was already assigned for rxvt above, but we want it everywhere
 "\eOd": backward-word
 "\eOc": forward-word
-"\e[1;5D": backward-word   #for ssh-ing into something
-"\e[1;5C": forward-word
-
-# for linux console
-"\e[1~": beginning-of-line
-"\e[4~": end-of-line
 
 "\e[5~": beginning-of-history
 "\e[6~": end-of-history
-"\e[3~": delete-char
-"\e[2~": quoted-insert
 # for xterm
 "\eOH": beginning-of-line
 "\eOF": end-of-line
 #obtained by ctrl v ctl left etc in bash:
-"\e[5D": backward-word
-"\e[5C": forward-word
 "\e[3D": backward-word
 "\e[3C": forward-word
 "\e[1;3D": backward-word
@@ -78,6 +127,3 @@ $endif
 
 
 # End /etc/inputrc
-
-
-
