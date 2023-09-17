@@ -60,6 +60,10 @@
     state: absent
   become: true
 
+  # we update the cache, acknowledging that we might still have repos
+  # in there we don't want, that might fail, like enterprise proxmox
+  # repos (and we ignore the failures).  Subsequent apt calls will
+  # hopefully not want to refresh the cache
 - name: Update APT Package Manager
   apt:
     update_cache: yes
