@@ -95,6 +95,9 @@
 
     - { template: etc/modprobe.d/ansible-custom.conf.j2, dest: /etc/modprobe.d/ansible-custom.conf,    mode: "0644" }
 
+    - { source: etc/systemd/system/103.scope.d/override.conf, dest: /etc/systemd/system/103.scope.d/override.conf, mode: "0644", when: "{{ inventory_hostname == 'fs' }}" }
+
+
     - { source: etc_bashrc.d/bash.bashrc, dest: /etc/bash.bashrc,         mode: "0644" }
     - { source: etc/bashcolors,           dest: /etc/bashcolors,          mode: "0644" }
     - { source: etc/inputrc,              dest: /etc/inputrc,             mode: "0644" }
