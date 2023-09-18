@@ -1,4 +1,12 @@
 ---
+- name: determine if vendor-reset dkms module already exists
+  command: /usr/sbin/dkms status -m vendor-reset -k {{ ansible_kernel }}
+  register: vendor_reset_dkms
+  changed_when: false
+
+- debug:
+    msg: "dkms status vendor-reset: {{ vendor_reset_dkms.stdout }}"
+
 - name: Purge some incompatible packages
   apt:
     name: ['ifupdown']   # some stale config files left from automatic
@@ -57,7 +65,7 @@
   become: true
   # want to rethink this, but in check_mode, we can't hope to unpack
   # the archive when the archive isn't yet unpacked
-  when: not ansible_check_mode and ( not ( "added" in vendor_reset_dkms.stdout ) or vendor_reset_changed.changed )
+  when: not ansible_check_mode and ( not ( "installed" in vendor_reset_dkms.stdout ) or vendor_reset_changed.changed )
   ignore_errors: true  # fails when not in systemd, or still in the
                        # installation environment, etc
 
