@@ -12,8 +12,11 @@
   register: pve_enterprise_repository
 
 - name: determine if vendor-reset dkms module already exists
-  stat: path=/var/lib/dkms/vendor-reset/0.1.1
+  command: /usr/sbin/dkms status -m vendor-reset -k {{ ansible_kernel }}
   register: vendor_reset_dkms
+
+- debug:
+    msg: "dkms status vendor-reset: vendor_reset_dkms.stdout"
 
 - name: ensure old pve community repository removed
   command: mv /etc/apt/sources.list.d/pve-community.list /etc/apt/sources.list.d/pve-community.list.disabled

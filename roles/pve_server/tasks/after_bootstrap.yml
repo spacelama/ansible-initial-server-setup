@@ -47,7 +47,19 @@
   register: vendor_reset_changed
   # want to rethink this, but in check_mode, we can't hope to unpack
   # the archive when the user doesn't yet exist
-  when: not ansible_check_mode and not vendor_reset_dkms.stat.exists
+  when: not ansible_check_mode and not ( "installed" in vendor_reset_dkms.stdout )
+
+- name: work around bug in dkms where it can't install something that didn't build last time, even with --force supplied
+#  command: bash -c 'cd Downloads/vendor-reset-225a49a ; dkms install .'
+  command: dkms remove vendor-reset/0.1.1
+  args:
+    chdir: /home/{{ ansible_env.USER }}/Downloads/vendor-reset-225a49a
+  become: true
+  # want to rethink this, but in check_mode, we can't hope to unpack
+  # the archive when the archive isn't yet unpacked
+  when: not ansible_check_mode and ( not ( "added" in vendor_reset_dkms.stdout ) or vendor_reset_changed.changed )
+  ignore_errors: true  # fails when not in systemd, or still in the
+                       # installation environment, etc
 
 - name: install AMD graphics vendor-reset to pve
 #  command: bash -c 'cd Downloads/vendor-reset-225a49a ; dkms install .'
@@ -57,10 +69,7 @@
   become: true
   # want to rethink this, but in check_mode, we can't hope to unpack
   # the archive when the archive isn't yet unpacked
-  when: not ansible_check_mode and ( not vendor_reset_dkms.stat.exists or vendor_reset_changed.changed )
-  # FIXME: we want to ignore errors, but above test will fail and we
-  # then won't install a second time when we have a more favourable
-  # environment - see my notes in ~/diary FIXME:FIXME:
+  when: not ansible_check_mode and ( not ( "installed" in vendor_reset_dkms.stdout ) or vendor_reset_changed.changed )
   ignore_errors: true  # fails when not in systemd, or still in the
                        # installation environment, etc
 
