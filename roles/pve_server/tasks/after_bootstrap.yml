@@ -164,7 +164,7 @@
 - name: "zfs module parameters"
   copy:
     dest: /etc/modprobe.d/zfs-custom.conf
-    content: "# ansible controlled to ensure SSD doesn't have too many writes, by pve_server/main.yml\noptions zfs zfs_txg_timeout=15\n"
+    content: "# ANSIBLE CONTROLLED\n# to ensure SSD doesn't have too many writes, by pve_server/main.yml\noptions zfs zfs_txg_timeout=15\n"
   become: true
   notify: "Update initramfs config"
 

@@ -433,6 +433,15 @@
   become: true
   when: packages_to_install is defined
 
+- name: "Ensure custom modules in /etc/modules"
+  lineinfile:
+    dest: /etc/modules
+    line: "{{ item }}"
+    state: present
+  become: true
+  notify: "Update initramfs config"
+  loop: "{{ modprobe | default([]) }}"
+
 # FIXME: consider caching name server etc per https://wiki.debian.org/NetworkConfiguration
 
 # FIXME: should set up postfix for !host_is_mailserver

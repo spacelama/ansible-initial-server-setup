@@ -1,0 +1,4 @@
+---
+- name: "Update initramfs config"
+  shell: "/usr/sbin/update-initramfs -u -k all"
+  become: true

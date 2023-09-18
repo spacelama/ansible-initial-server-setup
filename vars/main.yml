@@ -93,17 +93,21 @@
     - { source: cron/cron.daily_get_conf_info,          dest: /usr/local/bin/get_conf_info,            mode: "0755" }
     - { template: var_spool_cron/root.j2,               dest: /var/spool/cron/crontabs/root,           mode: "0600" }
 
+    - { template: etc/modprobe.d/ansible-custom.conf.j2, dest: /etc/modprobe.d/ansible-custom.conf,    mode: "0644" }
+
     - { source: etc_bashrc.d/bash.bashrc, dest: /etc/bash.bashrc,         mode: "0644" }
+    - { source: etc/bashcolors,           dest: /etc/bashcolors,          mode: "0644" }
+    - { source: etc/inputrc,              dest: /etc/inputrc,             mode: "0644" }
 
     - { source: etc/auto.master,          dest: /etc/auto.master,         mode: "0644" }
     - { template: etc/auto.nas.j2,        dest: /etc/auto.nas,            mode: "0644" }
     - { source: etc/autofs.conf,          dest: /etc/autofs.conf,         mode: "0644" }
 #    - { source: etc/default/autofs,       dest: /etc/default/autofs,      mode: "0644" }   MOUNT_NFS_DEFAULT_PROTOCOL seems to be ignored, and not causing me problems anyway, these days
     - { template: etc/idmapd.conf.j2,     dest: /etc/idmapd.conf,         mode: "0644" }
-    - { source: etc/bashcolors,           dest: /etc/bashcolors,          mode: "0644" }
-    - { source: etc/inputrc,              dest: /etc/inputrc,             mode: "0644" }
+
     - { template: etc/rkhunter.conf.j2,   dest: /etc/rkhunter.conf,       mode: "0644" }
     - { source: etc/reportbug.conf,       dest: /etc/reportbug.conf,      mode: "0644", when_pkg_installed: "reportbug" }
+
     - { source: etc/fuse.conf,            dest: /etc/fuse.conf,           mode: "0640", when_pkg_installed: "fuse3"  }
     - { source: etc/cron.d/munin-node,    dest: /etc/cron.d/munin-node,   mode: "0644" }
     - { source: etc/cron.daily/cron.daily_check-cmos-battery, dest: /etc/cron.daily/cron.daily_check-cmos-battery, mode: "0755", when: "{{ host_is_physical is defined }}" }

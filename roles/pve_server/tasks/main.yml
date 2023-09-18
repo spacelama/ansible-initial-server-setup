@@ -107,8 +107,11 @@
   become: true
 
 - name: turn off softdog watchdog reboot
+  # I think this was in response to pve1 rebooting when I rebooted
+  # pve2, because I was running 2 node cluster.  But I don't care for
+  # protection against split-brain in my cluster
   copy:
-    content: "# https://forum.proxmox.com/threads/how-to-disable-fencing-for-debugging.59625/\noptions softdog soft_noboot=1\n"
+    content: "# ANSIBLE CONTROLLED\n# https://forum.proxmox.com/threads/how-to-disable-fencing-for-debugging.59625/\noptions softdog soft_noboot=1\n"
     dest: "/etc/modprobe.d/softdog.conf"
   become: true
 

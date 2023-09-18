@@ -1,0 +1,5 @@
+{% if modprobe_options is defined %}
+{% for key,value in modprobe_options.items() %}
+options {{ key }} {{ value }}
+{% endfor %}
+{% endif %}
