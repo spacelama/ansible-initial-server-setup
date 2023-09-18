@@ -214,6 +214,16 @@
   with_items: [ 'cidr_allow 127.0.0.1/32', 'cidr_allow 192.168.1.2/24', 'cidr_deny  192.168.1.254/32' ]
   notify: restart munin-node
 
+- name: workaround munin-node failing to start on debian bookworm on slow machines
+  # host * -> host 0.0.0.0
+  lineinfile:
+    path: "/etc/munin/munin-node.conf"
+    regexp: "^host"
+    line: "host 0.0.0.0"
+    state: present
+  become: true
+  notify: restart munin-node
+
 - name: intercept spundown disks in hddtemp_smartctl
   ini_file:
     path: /etc/munin/plugin-conf.d/munin-node
