@@ -4,7 +4,7 @@
   systemd:
     name: powertop-custom
     enabled: yes
-    state: started
+#    state: started # one-shot mode, would start every time we ran it if set here
   become: true
   ignore_errors: true  # fails when not in systemd, or still in the
                        # installation environment, etc

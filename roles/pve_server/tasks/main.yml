@@ -11,6 +11,27 @@
   stat: path=/etc/apt/sources.list.d/pve-enterprise.list
   register: pve_enterprise_repository
 
+- name: determine if ceph repository present
+  stat: path=/etc/apt/sources.list.d/ceph.list
+  register: ceph_enterprise_repository
+
+- name: determine if original no-sub ceph repository present
+  lineinfile:
+    regexp: enterprise$
+    state: absent # try a new way of finding out whether a matching
+                  # line exists in a file.  If there, this will try to
+                  # remove it, and changed will be set true.  else,
+                  # false
+    path: /etc/apt/sources.list.d/ceph.list
+  check_mode: true
+  register: ceph_enterprise_line_exists
+  when: ceph_enterprise_repository.stat.exists
+
+- name: no-sub line in ceph.list?
+  debug:
+    msg: The "enterprise" line was not found in /etc/apt/sources.list.d/ceph.list
+  when: ceph_enterprise_line_exists is defined and ceph_enterprise_line_exists.changed
+
 - name: ensure old pve community repository removed
   command: mv /etc/apt/sources.list.d/pve-community.list /etc/apt/sources.list.d/pve-community.list.disabled
   become: true
@@ -20,6 +41,28 @@
   command: mv /etc/apt/sources.list.d/pve-enterprise.list /etc/apt/sources.list.d/pve-enterprise.list.disabled
   become: true
   when: pve_enterprise_repository.stat.exists
+
+- name: ensure original ceph enterprise repository removed
+  command: mv /etc/apt/sources.list.d/ceph.list /etc/apt/sources.list.d/ceph-enterprise.list.disabled
+  become: true
+  when: ceph_enterprise_repository.stat.exists and ceph_enterprise_line_exists is defined and ceph_enterprise_line_exists.changed
+
+- name: ensure original ceph no-sub repository moved
+  command: mv /etc/apt/sources.list.d/ceph.list /etc/apt/sources.list.d/ceph-no-subscription.list
+  become: true
+  when: ceph_enterprise_repository.stat.exists and ceph_enterprise_line_exists is defined and not ceph_enterprise_line_exists.changed
+
+- name: insert our own pve no-sub file (pve-nag-buster may override it later, but we care to get the version right first)
+  template:
+    src: pve-no-subscription.list.j2
+    dest: /etc/apt/sources.list.d/pve-no-subscription.list
+  become: true
+
+- name: insert our own ceph no-sub file (pve-nag-buster may override it later, but we care to get the version right first)
+  template:
+    src: ceph-no-subscription.list.j2
+    dest: /etc/apt/sources.list.d/ceph-no-subscription.list
+  become: true
 
 - name: Ensures ~ansible/Downloads dir exists
   file:

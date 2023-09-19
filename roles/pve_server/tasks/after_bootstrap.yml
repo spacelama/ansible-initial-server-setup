@@ -6,6 +6,7 @@
 
 - debug:
     msg: "dkms status vendor-reset: {{ vendor_reset_dkms.stdout }}"
+  when: vendor_reset_dkms.stdout is defined
 
 - name: Purge some incompatible packages
   apt:

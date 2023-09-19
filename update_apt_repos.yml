@@ -5,5 +5,8 @@
 #  gather_facts: no  # when doing a very quick debug run
   vars_files:
     - vars/main.yml
+  vars:
+    - in_bootstrap: true
   roles:
     - apt_repos
+    - pve_server
