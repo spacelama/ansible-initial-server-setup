@@ -51,3 +51,4 @@
       when: host_is_desktop is defined
     - role: ssh
     - role: fail2ban
+    - role: power_saving

@@ -1,0 +1,9 @@
+[Unit]
+Description=Save a few watts on a desktop class machine (so far only a particular dell optiplex 9020sff)
+
+[Service]
+Type=oneshot
+ExecStart=/usr/local/bin/powertop-custom.sh
+
+[Install]
+WantedBy=multi-user.target

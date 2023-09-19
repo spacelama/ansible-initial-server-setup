@@ -1,0 +1,11 @@
+---
+- name: enable powertop-custom systemd target
+  # systemd rather than service because we're explicitly installing our own systemd units
+  systemd:
+    name: powertop-custom
+    enabled: yes
+    state: started
+  become: true
+  ignore_errors: true  # fails when not in systemd, or still in the
+                       # installation environment, etc
+  when: "inventory_hostname == 'pve3'"
