@@ -171,6 +171,7 @@
     - zpool_iostat
   when: host_is_zfs is defined
   notify: restart munin-node
+  ignore_errors: true # munin packages are on fs, which might not be alive
 
 - name: gather and implement munin suggests
   include_tasks: munin_suggest_plugin.yml

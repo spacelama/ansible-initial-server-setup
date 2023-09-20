@@ -23,7 +23,12 @@
 
 - name: Install pve prereq packages
   apt:
-    name: ['dkms', 'pve-headers', 'ifupdown2']
+    name:
+      - 'dkms'
+      - 'ifupdown2'
+      - >
+         {{ ( deb_release | default('bullseye') == 'bullseye' ) |
+         ternary ( 'pve-headers', 'proxmox-default-headers' )}}
     autoremove: no
     state: present
     install_recommends: no
@@ -31,7 +36,6 @@
 
   # zfs root systems in pve8 might need systemd-boot package:
   # https://pve.proxmox.com/wiki/Roadmap#8.0-known-issues
-#  FIXME: pve7to8
 - name: Install pve prereq packages for pve8
   apt:
     name: ['systemd-boot']
