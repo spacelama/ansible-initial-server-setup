@@ -1,8 +1,4 @@
 ---
-- set_fact:
-    rootshadow: "{{ lookup('file', 'main.root.{{ type }}.passwd') }}"
-    no_log: true
-
 - name: remove conflicting and/or obsolete packages
   opkg:
     name: luci-app-dawn,dawn
@@ -94,6 +90,7 @@
     dest: /etc/shadow
     regexp: "^root:"
     line: "root:{{ rootshadow }}:18868:0:99999:7:::"
+  no_log: true
 - name: set rootsh account passwd
   lineinfile:
     dest: /etc/passwd

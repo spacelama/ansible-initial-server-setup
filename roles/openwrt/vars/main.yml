@@ -1,0 +1,2 @@
+---
+  rootshadow: "{{ lookup('file', 'main.root.{{ type }}.passwd') }}"
