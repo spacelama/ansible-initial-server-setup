@@ -2,6 +2,6 @@
 - name: "fixup conf files for user {{ user }}"
   include_tasks: fixup_user_conf_file.yml
   loop_control:
-    loop_var: file
+    loop_var: file_or_template
   with_items: "{{ fixup_user_conf_files.files }}"
 

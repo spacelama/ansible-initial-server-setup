@@ -63,14 +63,20 @@ set nowrap
 ## Do regular expression searches by default
 # set regexp
 
+{% if deb_release | default('bullseye') == 'bullseye' %}
 ## Use smooth scrolling as the default
 set smooth
 
+{% endif %}
 ## Use this spelling checker instead of the default one
 # set speller aspell
 
 ## Allow nano to be suspended with ^Z
+{% if deb_release | default('bullseye') == 'bullseye' %}
 set suspend
+{% else %}
+bind ^Z suspend main
+{% endif %}
 
 ## Use this tab size instead of the default; it must be greater than 0
 # set tabsize 4

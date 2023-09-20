@@ -1,53 +1,57 @@
 ---
-- name: "Does   {{ ( '~' ~ user ~ '/' ~ file.name ) | dirname }} exist?"
+# allow the caller to supply {{ lines }} to ensure exist in the output
+# file, or a {{ source }} file or a {{ source.j2 }} template
+
+# ensure the destination file exists so we can add a line to it if necessary
+- name: "Does   {{ ( '~' ~ user ~ '/' ~ file_or_template.name ) | dirname }} exist?"
   stat:
-    path:      "{{ ( '~' ~ user ~ '/' ~ file.name ) | dirname }}"
+    path:      "{{ ( '~' ~ user ~ '/' ~ file_or_template.name ) | dirname }}"
   become: true
   register: dirtest
 
-- name: "Create {{ ( '~' ~ user ~ '/' ~ file.name ) | dirname }}/"
+- name: "Create {{ ( '~' ~ user ~ '/' ~ file_or_template.name ) | dirname }}/"
   file:
-    path:      "{{ ( '~' ~ user ~ '/' ~ file.name ) | dirname }}"
+    path:      "{{ ( '~' ~ user ~ '/' ~ file_or_template.name ) | dirname }}"
     state: directory
     owner: "{{ user }}"
     group: "{{ user }}"
   become: true
   when: not dirtest.stat.exists
 
-- name: "fixup line in conf file: ~{{ user }}/{{ file.name }}"
+- name: "fixup line in conf file: ~{{ user }}/{{ file_or_template.name }}"
   lineinfile:
-    dest: "~{{ user }}/{{ file.name }}"
+    dest: "~{{ user }}/{{ file_or_template.name }}"
     owner: "{{ user }}"
     group: "{{ user }}"
     line: "{{ item }}"
-    mode: "{{ file.mode | default(omit) }}"
+    mode: "{{ file_or_template.mode | default(omit) }}"
     create: yes
   become: true
-  with_items: "{{ file.lines }}"
-  when: file.lines is defined
+  with_items: "{{ file_or_template.lines }}"
+  when: file_or_template.lines is defined
 
-- name: "fixup conf file: ~{{ user }}/{{ file.name }}"
+- name: "fixup conf file: ~{{ user }}/{{ file_or_template.name }}"
   copy:
-    dest: "~{{ user }}/{{ file.name }}"
+    dest: "~{{ user }}/{{ file_or_template.name }}"
     owner: "{{ user }}"
     group: "{{ user }}"
-    src: "{{ file.source }}"
-    mode: "{{ file.mode | default(omit) }}"
+    src: "{{ file_or_template.source }}"
+    mode: "{{ file_or_template.mode | default(omit) }}"
   become: true
-  when: file.source is defined
+  when: file_or_template.source is defined and file_or_template.source is not regex(".*.j2$")
 
-- name: "fixup conf file per template: ~{{ user }}/{{ file.name }} "
+- name: "fixup conf file per template: ~{{ user }}/{{ file_or_template.name }} "
   template:
-    dest: "~{{ user }}/{{ file.name }}"
+    dest: "~{{ user }}/{{ file_or_template.name }}"
     owner: "{{ user }}"
     group: "{{ user }}"
-    src: "{{ file.template }}"
-    mode: "{{ file.mode | default(omit) }}"
+    src: "{{ file_or_template.source }}"
+    mode: "{{ file_or_template.mode | default(omit) }}"
   become: true
-  when: file.template is defined
+  when: file_or_template.source is defined and file_or_template.source is regex(".*.j2$")
 
-#- name: "ensure permissions are correct on {{ file.name }} for user {{ user }}"
-#  when: file.mode is defined  # stop spurious messages about "changed" when the file is a symlink to common-files/
+#- name: "ensure permissions are correct on {{ file_or_template.name }} for user {{ user }}"
+#  when: file_or_template.mode is defined  # stop spurious messages about "changed" when the file is a symlink to common-files/
 #  file:
-#    dest: "~{{ user }}/{{ file.name }}"
+#    dest: "~{{ user }}/{{ file_or_template.name }}"
 #  become: true

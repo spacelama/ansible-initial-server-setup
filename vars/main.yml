@@ -65,11 +65,12 @@
     files:
       - name: .vimrc
         source: homes/.vimrc
-      - name: .nanorc
-        source: homes/.nanorc
       - name: .bashrc.d/override-turnkey-prompt.sh
         source: homes/.bashrc.d/override-turnkey-prompt.sh
         mode: "0755"
+    # templates done by matching on .j2
+      - name: .nanorc
+        source: homes/.nanorc.j2
   bashrc_files:
     - "{{ lookup('fileglob', 'etc_bashrc.d/*.sh', wantlist=True) }}"
   bin_files:
