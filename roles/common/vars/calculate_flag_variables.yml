@@ -1,0 +1,64 @@
+---
+  # Have to screw around with "if blah else blah" because ansible
+  # doesn't yet deal with lazy evaluation:
+  # https://github.com/ansible/ansible/issues/78036 Also means have to
+  # play around with pseudo value "not defined" that you don't
+  # otherwise expect in your input, and look for it later instead of
+  # simply testing for definedness.
+
+  # ">-" is folding operator, strip newline that gets inserted at the end
+  # "|" vs ">" is literal block scalar vs folding block scalar
+  grub_assignment_key: >-
+    {{
+    flag.split('=')[0] if flag.key is not defined and flag.value is not defined and flag.split('=')[0] is defined else
+    "not defined"
+    }}
+  grub_assignment_value: >-
+    {{
+    flag.split('=')[1] if flag.key is not defined and flag.value is not defined and flag.split('=')[1] is defined else
+    "not defined"
+    }}
+
+  grub_setflag: >-
+    {{
+    ( flag.key + '=' + flag.value ) if flag.key is defined and flag.value is defined else
+    flag
+    }}
+  # regular expression if we happen to want to remove it:
+
+  # RE looks like:
+  #
+  # word boundary followed by your key followed by optional "=value"
+  # followed by word boundary
+  grub_setflag_re: >-
+    {{
+    ( '\b' + grub_assignment_key + '(=[^ ]*)?\b' ) if grub_assignment_key != "not defined" and grub_assignment_value != "not defined" else
+    ( '\b' + flag.key +            '(=[^ ]*)?\b' ) if flag.key is defined and flag.value is defined else
+    ( '\b' + flag.key +            '(=[^ ]*)?\b' ) if flag.key is defined else
+    ( '\b' + flag +                '(=[^ ]*)?\b' )
+    }}
+
+  # set key to flag if the flag is just a flag
+  grub_key: >-
+    {{
+    grub_assignment_key if grub_assignment_key != "not defined" else
+    flag.key if flag.key is defined else
+    flag
+    }}
+
+  # set comment flag if supplied
+  comment_line: >-
+    {{
+    ( '# ' + comment + '\n' ) if comment is defined else
+    ''
+    }}
+
+  # set_fact ignores conditional when: (according to "[WARNING]: noop
+  # task does not support when conditional")!
+  # https://docs.ansible.com/ansible/latest/collections/ansible/builtin/set_fact_module.html
+  # talks about ignore_conditional, but no one seems to be talking
+  # about it on the internet, so set this variable in the same way as
+  # above... except that the same warning gets emitted anyway (haven't
+  # noticed it cause any harm yet)...
+  grub_variable: "{{ 'GRUB_CMDLINE_LINUX' if recovery_systemdboot is defined else 'GRUB_CMDLINE_LINUX_DEFAULT' }}"
+  grub_file_ext: "{{ '-recovery' if recovery_systemdboot is defined else '' }}"
