@@ -1,4 +1,6 @@
 ---
+ # FIXME: remove deprecated keys
+# could also have multiple keys with exclusive: https://stackoverflow.com/questions/38879266/is-it-possible-to-use-ansible-authorized-key-exclusive-with-multiple-keys
 - name: Install authorized_keys for {{ item }}
   authorized_key:
     user: "{{ item.key }}"

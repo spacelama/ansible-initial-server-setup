@@ -30,3 +30,4 @@
     - role: pve_server
       when: host_is_pve_server is defined
     - ssh_bootstrap
+    - user
