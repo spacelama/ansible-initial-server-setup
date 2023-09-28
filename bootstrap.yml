@@ -24,6 +24,7 @@
     - in_bootstrap: true
 
   roles:
+    - common_handlers
     - install_files
     - bootstrap
     - role: pve_server

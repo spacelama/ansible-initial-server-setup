@@ -1,7 +1,6 @@
 ---
 - name: "Regenerate grub config"
   shell: "/usr/sbin/update-grub"
-  become: true
   when: host_is_pve_server is not defined
 
   #FIXME: only machines to use systemd-boot so far is proxmox hosts
@@ -11,5 +10,4 @@
   # executed at every kernel dpkg install, it doesn't get executed
   # here unless we call it ourselves
   shell: "proxmox-boot-tool refresh && /etc/kernel/postinst.d/zz-zz-install-recovery-options"
-  become: true
   when: host_is_pve_server is defined

@@ -1,6 +1,0 @@
----
-#- name: restart sysctl
-#  service:
-#    name: procps
-#    state: restarted
-#  become: true

@@ -1,10 +1,4 @@
 ---
-#- name: restart sysctl
-#  service:
-#    name: procps
-#    state: restarted
-#  become: true
-
 - name: restart smbd
   service:
     name: smbd

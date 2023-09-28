@@ -1,0 +1,40 @@
+---
+# If you want these handlers to run as root, the playbook has to be
+# running as root, or you have to include the role as root
+
+- name: "Update initramfs config"
+  shell: "/usr/sbin/update-initramfs -u -k all"
+
+- name: "Regenerate boot config"
+  include_tasks: "{{ playbook_dir }}/roles/common_handlers/handlers/regenerate_boot_config.yml"
+
+- name: restart cron
+  service:
+    name: cron
+    state: restarted
+
+- name: restart munin-node
+  service:
+    name: munin-node
+    state: restarted
+
+- name: "systemd daemon reload"
+  systemd:
+    daemon_reload: true
+
+- name: restart systemd-logind
+  service:
+    name: systemd-logind
+    state: restarted
+
+- name: restart ssh
+  service:
+    name: ssh
+    state: restarted
+  become: true
+
+- name: restart chrony
+  service:
+    name: chrony
+    state: restarted
+  become: true

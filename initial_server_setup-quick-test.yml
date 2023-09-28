@@ -6,6 +6,8 @@
 #   vars_files:
 #     - vars/main.yml
 #   roles:
+#     - role: common_handlers
+#       become: true # the whole role, including handlers, will become root
 #     - install_files
 
 - hosts: "{{ target | default('all,!openwrt,!tasmota') }}"
@@ -15,7 +17,11 @@
     - vars/main.yml
 
   roles:
-    #FIXME: would ideally also include bootstap here with become: true
+    - role: common_handlers
+      become: true # the whole role, including handlers, will become root
+    # - role: bootstrap
+    # - role: ssh_bootstrap
+    #   become: true
     # - role: management
     #   when: host_is_mgmt is defined
     # - user

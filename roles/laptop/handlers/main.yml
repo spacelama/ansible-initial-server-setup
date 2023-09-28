@@ -5,12 +5,6 @@
     state: restarted
   become: true
 
-- name: restart systemd-logind
-  service:
-    name: systemd-logind
-    state: restarted
-  become: true
-
 - name: restart network-keep-alive
   systemd:
     name: "network-keep-alive"
