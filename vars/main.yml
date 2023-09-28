@@ -118,7 +118,7 @@
     - { source: etc/cron.daily/cron.daily_check-cmos-battery, dest: /etc/cron.daily/cron.daily_check-cmos-battery, mode: "0755", when: "{{ host_is_physical is defined }}" }
     - { source: etc/needrestart/notify.conf,                  dest: /etc/needrestart/notify.conf,                  mode: "0644" }
     - { source: etc/X11/xorg.conf.d/80-maxclients.conf,       dest: /etc/X11/xorg.conf.d/80-maxclients.conf,       mode: "0644" }
-    - { template: etc/chrony/sources.d/local.sources.j2,      dest: /etc/chrony/sources.d/local.sources,           mode: "0644" }
+    - { template: etc/chrony/sources.d/local.sources.j2,      dest: /etc/chrony/sources.d/local.sources,           mode: "0644", notify: "restart chrony" }
     - { source: etc/munin/plugins/ntp_thirdparty,             dest: /etc/munin/plugins/ntp_thirdparty,             mode: "0755" }
 
     - { source: etc/logrotate.d/btmp,          dest: /etc/logrotate.d/btmp,          mode: "0644" }

@@ -7,6 +7,7 @@
     mode: "{{ file_details.mode }}"
   become: "{{ file_details.become | default(true) }}"
   when: file_details.source is defined
+  notify: "{{ file_details.notify | default(omit) }}"
 
 - name: install {{ file_details.template }} per template
   template:
@@ -15,6 +16,7 @@
     mode: "{{ file_details.mode }}"
   become: "{{ file_details.become | default(true) }}"
   when: file_details.template is defined
+  notify: "{{ file_details.notify | default(omit) }}"
 
 - name: install {{ file_details.files }} into {{ file_details.dir }}
   copy:
@@ -26,3 +28,4 @@
   loop: "{{ file_details.files }}"
   loop_control:
     loop_var: file
+  notify: "{{ file_details.notify | default(omit) }}"

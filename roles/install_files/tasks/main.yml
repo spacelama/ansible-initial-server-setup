@@ -17,7 +17,8 @@
     state: directory
   with_items: "{{ install_dirs | default([]) }}"
   become: "{{ item.become | default(true) }}"
-  when: item.when | default("true")
+  when: item.when | default(omit)
+  notify: "{{ item.notify | default(omit) }}"
 
 - name: install list of files
   include_tasks: install_list_files.yml
@@ -26,7 +27,7 @@
     loop_var: file_details
   when:
     # ANDED: allow user to supply when and when_pkg_installed -
-    - (file_details.when | default("true"))
+    - (file_details.when | default("true"))   # can't "omit" in a list, so since this is OR, default to true
     - (file_details.when_pkg_installed is defined) |
        ternary(file_details.when_pkg_installed | default("nil") in ansible_facts.packages | default([]), true)
 
@@ -35,4 +36,4 @@
   loop: "{{ remove_files | default([]) }}"
   loop_control:
     loop_var: file_details
-  when: file_details.when | default("true")
+  when: file_details.when | default(omit)
