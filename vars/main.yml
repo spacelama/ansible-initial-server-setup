@@ -96,9 +96,10 @@
 
     - { template: etc/modprobe.d/ansible-custom.conf.j2, dest: /etc/modprobe.d/ansible-custom.conf,    mode: "0644" }
 
-    - { source: etc_systemd/system/103.scope.d/override.conf, dest: /etc/systemd/system/103.scope.d/override.conf, mode: "0644", when: "{{ inventory_hostname == 'pve1' }}" }
-    - { source: usr_local_bin/powertop-custom.sh,             dest: /usr/local/bin/powertop-custom.sh,             mode: "0755", when: "{{ inventory_hostname == 'pve3' }}" }
-    - { source: etc_systemd/system/powertop-custom.service,   dest: /etc/systemd/system/powertop-custom.service,   mode: "0644", when: "{{ inventory_hostname == 'pve3' }}" }
+    - { source: etc_systemd/system/103.scope.d/override.conf,  dest: /etc/systemd/system/103.scope.d/override.conf,  mode: "0644", when: "{{ inventory_hostname == 'pve1' }}"  }
+    - { source: usr_local_bin/powertop-custom.sh,              dest: /usr/local/bin/powertop-custom.sh,              mode: "0755", when: "{{ inventory_hostname == 'pve3' }}"  }
+    - { source: etc_systemd/system/powertop-custom.service,    dest: /etc/systemd/system/powertop-custom.service,    mode: "0644", when: "{{ inventory_hostname == 'pve3' }}"  }
+    - { source: usr_local_bin/pve-forcerestart-lxc-if-running, dest: /usr/local/bin/pve-forcerestart-lxc-if-running, mode: "0755", when: "{{ host_is_pve_server is defined }}" }
 
     - { source: etc_bashrc.d/bash.bashrc, dest: /etc/bash.bashrc,         mode: "0644" }
     - { source: etc/bashcolors,           dest: /etc/bashcolors,          mode: "0644" }
