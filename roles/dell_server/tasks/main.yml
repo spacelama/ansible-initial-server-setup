@@ -104,6 +104,9 @@
 - name: Install dell tools
   apt:
     name: ['srvadmin-all', 'ipmitool', 'ledmon']
+#FIXME: do we only care about idracadm8, or do we need all the other stuff in -all?  -all needs a bunch of dependencies that might not work on pve1...
+# FIXME: yes, it appears we need all that to get dsm_*_* etc to report back OS data to the idrac
+#    name: ['srvadmin-idracadm8', 'ipmitool', 'ledmon']
     update_cache: yes
     cache_valid_time: 0
     autoremove: no
