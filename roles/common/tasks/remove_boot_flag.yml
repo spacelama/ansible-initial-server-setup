@@ -11,7 +11,7 @@
 
 - name: "Remove flag {{ grub_setflag }} from grub config"
   file:
-    path: "/etc/default/grub.d/ansible.{{ grub_key }}-{{ grub_variable }}.cfg"
+    path: "/etc/default/grub.d/ansible.{{ grub_key }}{{ grub_file_ext }}.cfg"
     state: absent
   become: true
   notify: "Regenerate boot config"
