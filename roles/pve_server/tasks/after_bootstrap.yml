@@ -137,6 +137,8 @@
   with_items:
     - suspend-all
 
+# FIXME: limit zfs RAM usage to 8GB on pve itself if the only timely stuff its going to host is on SSD anyway: https://pve.proxmox.com/wiki/ZFS_on_Linux#sysadmin_zfs_limit_memory_usage
+
   # FIXME: there are no non-zfs partitions on pve where there's enough space for swapspace to operate
 #- name: Ensures /var/lib/swapspace 0700
 #  file:
@@ -200,6 +202,7 @@
   become: true
 
 - name: ensure ssh config exists
+  #FIXME: The default in a fresh proxmox deploy is actually "Ciphers aes128-ctr,aes192-ctr,aes256-ctr,aes128-gcm@openssh.com,aes256-gcm@openssh.com,chacha20-poly1305@openssh.com"
   file:
     path: /root/.ssh/config
     state: touch

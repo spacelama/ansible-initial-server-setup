@@ -46,7 +46,11 @@
   become: true
   when: "'lvm2' in ansible_facts.packages"
 
-  #ntpsec removed in favour of chrony finally, because it starts network coming up on pve 8
+  #ntpsec removed in favour of chrony finally, because it stops
+  #network coming up on pve 8 (BTW, if ever go back to NTP, ntp.conf
+  #manpage says tinker settings should be at top of conf file before
+  #everything else, not at bottom where I had them originally)
+
 - name: Remove (and purge) erroneous packages
   apt:
     name: ['locales-all', 'tuned', 'tuned-utils', 'tuned-utils-systemtap', 'hddtemp', 'bootlogd', 'ntp', 'ntpdate', 'ntpsec', 'ntpsec-ntpdate', 'ntpsec-ntpdig']

@@ -267,7 +267,7 @@
     backup: yes
     block: |
 
-      #for nice devicemapper names
+      # for nice devicemapper names
       [diskstats]
       user root
 
