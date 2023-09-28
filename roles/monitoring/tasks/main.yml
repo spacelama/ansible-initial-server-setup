@@ -283,6 +283,14 @@
       env.offsetlimit 0.005
       env.stddevlimit 0.001
 
+      # If we've got ceph modules to run, run them as ceph
+      [ceph*]
+      user root # ceph isn't sufficient for one of the plugins - it appears to need to read the ceph conf file, which is owned root.www-data
+
+      # Need to talk to the fail2ban socket
+      [fail2ban*]
+      user root
+
   become: true
   notify: restart munin-node
 

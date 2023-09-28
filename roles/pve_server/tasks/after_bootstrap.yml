@@ -156,6 +156,21 @@
   become: true
   with_items: { a, b, c, d, e, f, g, h, i, j, k, l, m, n }
 
+- name: install ceph etc munin monitoring plugins from munin-contrib, that don't take arguments
+  copy:
+    src: munin/{{ item }}
+    dest: /etc/munin/plugins/{{ item }}
+    owner: root
+    group: root
+    mode: 0755
+    local_follow: true
+  become: true
+  with_items:
+   - ceph_osd
+   - ceph_capacity
+   - ceph-osd-info
+  notify: restart munin-node
+
 - name: set pve-ha-lrm/pve-ha-crm disabled when on HA or enabled when on HA, to alleviate constant disk writes by pmxcfs to SSD
   # https://forum.proxmox.com/threads/pmxcfs-writing-to-disk-all-the-time.35828/ https://www.reddit.com/r/Proxmox/comments/i8e5fi/excessive_nvme_wear_out/g193xr2/
   service:
