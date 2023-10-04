@@ -79,11 +79,12 @@
 
   install_dirs: # these directories would normally be created by the
                 # packages we later install, but we want to be able to
-                # install these files before the package is
-    - { dir: "/etc/bash.bashrc.d", mode: "0755" }
-    - { dir: "/etc/needrestart", mode: "0755" }
-    - { dir: "/etc/X11/xorg.conf.d", mode: "0755" }
-    - { dir: "/etc/munin/plugins", mode: "0755" }
+                # install these files before the package is.  Only
+                # really need to create the directories that hold
+                # files built by templates below, because templates
+                # need a full destination path specified, whereas
+                # "copy" files can just have the path specified, which
+                # implies the creation of that directory first
     - { dir: "/etc/chrony/sources.d", mode: "0755" }
 
   install_files:
@@ -92,59 +93,59 @@
     - { source: usr_local_bin/smart-intercept-spindown, dest: /usr/local/bin/smart-intercept-spindown, mode: "0755" }
     - { source: usr_local_bin/checkntp,                 dest: /usr/local/bin/checkntp,                 mode: "0755" }
     - { source: cron/cron.daily_get_conf_info,          dest: /usr/local/bin/get_conf_info,            mode: "0755" }
-    - { template: var_spool_cron/root.j2,               dest: /var/spool/cron/crontabs/root,           mode: "0600" }
+    - { template: var_spool_cron/root.j2,               dest: /var/spool/cron/crontabs/root,           mode: "0600", group: "crontab" }
 
-    - { template: etc/modprobe.d/ansible-custom.conf.j2, dest: /etc/modprobe.d/ansible-custom.conf,    mode: "0644" }
+    - { template: etc/modprobe.d/ansible-custom.conf.j2, dest: /etc/modprobe.d/ansible-custom.conf }
 
     - { source: etc_systemd/system/103.scope.d/override.conf,  dest: /etc/systemd/system/103.scope.d/override.conf,  mode: "0644", when: "{{ inventory_hostname == 'pve1' }}"  }
     - { source: usr_local_bin/powertop-custom.sh,              dest: /usr/local/bin/powertop-custom.sh,              mode: "0755", when: "{{ inventory_hostname == 'pve3' }}"  }
     - { source: etc_systemd/system/powertop-custom.service,    dest: /etc/systemd/system/powertop-custom.service,    mode: "0644", when: "{{ inventory_hostname == 'pve3' }}"  }
     - { source: usr_local_bin/pve-forcerestart-lxc-if-running, dest: /usr/local/bin/pve-forcerestart-lxc-if-running, mode: "0755", when: "{{ host_is_pve_server is defined }}" }
 
-    - { source: etc_bashrc.d/bash.bashrc, dest: /etc/bash.bashrc,         mode: "0644" }
-    - { source: etc/bashcolors,           dest: /etc/bashcolors,          mode: "0644" }
-    - { source: etc/inputrc,              dest: /etc/inputrc,             mode: "0644" }
+    - { source: etc_bashrc.d/bash.bashrc, dest: /etc/bash.bashrc }
+    - { source: etc/bashcolors,           dest: /etc/bashcolors  }
+    - { source: etc/inputrc,              dest: /etc/inputrc     }
 
-    - { source: etc/auto.master,          dest: /etc/auto.master,         mode: "0644" }
-    - { template: etc/auto.nas.j2,        dest: /etc/auto.nas,            mode: "0644" }
-    - { source: etc/autofs.conf,          dest: /etc/autofs.conf,         mode: "0644" }
-#    - { source: etc/default/autofs,       dest: /etc/default/autofs,      mode: "0644" }   MOUNT_NFS_DEFAULT_PROTOCOL seems to be ignored, and not causing me problems anyway, these days
-    - { template: etc/idmapd.conf.j2,     dest: /etc/idmapd.conf,         mode: "0644" }
+    - { source: etc/auto.master,          dest: /etc/auto.master }
+    - { template: etc/auto.nas.j2,        dest: /etc/auto.nas    }
+    - { source: etc/autofs.conf,          dest: /etc/autofs.conf }
+#    - { source: etc/default/autofs,       dest: /etc/default/autofs }   MOUNT_NFS_DEFAULT_PROTOCOL seems to be ignored, and not causing me problems anyway, these days
+    - { template: etc/idmapd.conf.j2,     dest: /etc/idmapd.conf }
 
-    - { template: etc/rkhunter.conf.j2,   dest: /etc/rkhunter.conf,       mode: "0644" }
-    - { source: etc/reportbug.conf,       dest: /etc/reportbug.conf,      mode: "0644", when_pkg_installed: "reportbug" }
+    - { template: etc/rkhunter.conf.j2,   dest: /etc/rkhunter.conf }
+    - { source: etc/reportbug.conf,       dest: /etc/reportbug.conf, when_pkg_installed: "reportbug" }
 
-    - { source: etc/fuse.conf,            dest: /etc/fuse.conf,           mode: "0640", when_pkg_installed: "fuse3"  }
-    - { source: etc/cron.d/munin-node,    dest: /etc/cron.d/munin-node,   mode: "0644" }
-    - { source: etc/cron.daily/cron.daily_check-cmos-battery, dest: /etc/cron.daily/cron.daily_check-cmos-battery, mode: "0755", when: "{{ host_is_physical is defined }}" }
-    - { source: etc/needrestart/notify.conf,                  dest: /etc/needrestart/notify.conf,                  mode: "0644" }
-    - { source: etc/X11/xorg.conf.d/80-maxclients.conf,       dest: /etc/X11/xorg.conf.d/80-maxclients.conf,       mode: "0644" }
-    - { template: etc/chrony/sources.d/local.sources.j2,      dest: /etc/chrony/sources.d/local.sources,           mode: "0644", notify: "restart chrony" }
-    - { source: etc/munin/plugins/ntp_thirdparty,             dest: /etc/munin/plugins/ntp_thirdparty,             mode: "0755" }
+    - { source: etc/munin/plugins/ntp_thirdparty,             dest: /etc/munin/plugins/,             mode: "0755" }
+    - { source: etc/fuse.conf,            dest: /etc/fuse.conf,      mode: "0640", when_pkg_installed: "fuse3"  }
+    - { source: etc/cron.d/munin-node,    dest: /etc/cron.d/munin-node }
+    - { source: etc/cron.daily/cron.daily_check-cmos-battery, dest: /etc/cron.daily/,    mode: "0755", when: "{{ host_is_physical is defined }}" }
+    - { source: etc/needrestart/notify.conf,                  dest: /etc/needrestart/ }
+    - { source: etc/X11/xorg.conf.d/80-maxclients.conf,       dest: /etc/X11/xorg.conf.d/ }
+    - { template: etc/chrony/sources.d/local.sources.j2,      dest: /etc/chrony/sources.d/local.sources,   notify: "restart chrony" }
 
-    - { source: etc/logrotate.d/btmp,          dest: /etc/logrotate.d/btmp,          mode: "0644" }
-    - { source: etc/logrotate.d/wtmp,          dest: /etc/logrotate.d/wtmp,          mode: "0644" }
-    - { source: etc/logrotate.d/custom,        dest: /etc/logrotate.d/custom,        mode: "0644" }
-    - { source: etc/logrotate.d/sleep-browser, dest: /etc/logrotate.d/sleep-browser, mode: "0644" }
-    - { source: etc/logrotate.d/apache2,       dest: /etc/logrotate.d/apache2,       mode: "0644", when_pkg_installed: "apache2" }
-    - { source: etc/logrotate.d/iot,           dest: /etc/logrotate.d/iot,           mode: "0644", when: "{{ host_is_syslog is defined }}" }
+    - { source: etc/logrotate.d/btmp,          dest: /etc/logrotate.d/ }
+    - { source: etc/logrotate.d/wtmp,          dest: /etc/logrotate.d/ }
+    - { source: etc/logrotate.d/custom,        dest: /etc/logrotate.d/ }
+    - { source: etc/logrotate.d/sleep-browser, dest: /etc/logrotate.d/ }
+    - { source: etc/logrotate.d/apache2,       dest: /etc/logrotate.d/, when_pkg_installed: "apache2"           }
+    - { source: etc/logrotate.d/iot,           dest: /etc/logrotate.d/, when: "{{ host_is_syslog is defined }}" }
 
-    - { source: etc/rsyslog.conf,              dest: /etc/rsyslog.conf,              mode: "0644" }
-    - { source: etc/rsyslog.d/remote.conf,           dest: /etc/rsyslog.d/remote.conf,           mode: "0644", when: "{{ host_is_syslog is not defined }}" }
-    - { source: etc/rsyslog.d/syslog-collector.conf, dest: /etc/rsyslog.d/syslog-collector.conf, mode: "0644", when: "{{ host_is_syslog is defined }}" }
-    - { source: etc/rsyslog.d/iot.conf,              dest: /etc/rsyslog.d/iot.conf,              mode: "0644", when: "{{ host_is_syslog is defined }}" }
-    - { source: etc/rsyslog.d/zz-0-allsyslog.conf,                  dest: /etc/rsyslog.d/zz-0-allsyslog.conf,                  mode: "0644" }
-    - { source: etc/rsyslog.d/zz-1-nosync.conf,                     dest: /etc/rsyslog.d/zz-1-nosync.conf,                     mode: "0644" }
-    - { source: etc/rsyslog.d/zz-2-news-and-mail.conf,              dest: /etc/rsyslog.d/zz-2-news-and-mail.conf,              mode: "0644" }
-    - { source: "etc/rsyslog.d/zz-3-local,dhcp,sensors,squid.conf", dest: "/etc/rsyslog.d/zz-3-local,dhcp,sensors,squid.conf", mode: "0644" }
-    - { source: etc/rsyslog.d/zz-4-catchall.conf,                   dest: /etc/rsyslog.d/zz-4-catchall.conf,                   mode: "0644" }
+    - { source: "etc/rsyslog.conf",                                 dest: /etc/rsyslog.conf }
+    - { source: "etc/rsyslog.d/remote.conf",                        dest: /etc/rsyslog.d/, when: "{{ host_is_syslog is not defined }}" }
+    - { source: "etc/rsyslog.d/syslog-collector.conf",              dest: /etc/rsyslog.d/, when: "{{ host_is_syslog is defined }}"     }
+    - { source: "etc/rsyslog.d/iot.conf",                           dest: /etc/rsyslog.d/, when: "{{ host_is_syslog is defined }}"     }
+    - { source: "etc/rsyslog.d/zz-0-allsyslog.conf",                dest: /etc/rsyslog.d/ }
+    - { source: "etc/rsyslog.d/zz-1-nosync.conf",                   dest: /etc/rsyslog.d/ }
+    - { source: "etc/rsyslog.d/zz-2-news-and-mail.conf",            dest: /etc/rsyslog.d/ }
+    - { source: "etc/rsyslog.d/zz-3-local,dhcp,sensors,squid.conf", dest: /etc/rsyslog.d/ }
+    - { source: "etc/rsyslog.d/zz-4-catchall.conf",                 dest: /etc/rsyslog.d/ }
 
-    - { source: etc/pulse/daemon.conf,    dest: /etc/pulse/daemon.conf,   mode: "0644", when_pkg_installed: "pulseaudio"  }
-    - { source: etc/pulse/system.pa,      dest: /etc/pulse/system.pa,     mode: "0644", when_pkg_installed: "pulseaudio"  }
-    - { source: etc/pulse/default.pa,     dest: /etc/pulse/default.pa,    mode: "0644", when_pkg_installed: "pulseaudio"  }
+    - { source: etc/pulse/daemon.conf,    dest: /etc/pulse/,   when_pkg_installed: "pulseaudio"  }
+    - { source: etc/pulse/system.pa,      dest: /etc/pulse/,   when_pkg_installed: "pulseaudio"  }
+    - { source: etc/pulse/default.pa,     dest: /etc/pulse/,   when_pkg_installed: "pulseaudio"  }
 
     - { files: "{{ bin_files | flatten }}", dir: /usr/local/bin/,         mode: "0755" }
-    - { files: "{{ bashrc_files | flatten }}", dir: /etc/bash.bashrc.d/,  mode: "0644" }
+    - { files: "{{ bashrc_files | flatten }}", dir: /etc/bash.bashrc.d/                }
 
   remove_files:
     - { files_not: "{{ bashrc_files | flatten | map('basename') }}", dir: /etc/bash.bashrc.d/ } # FIXME: should carefully consider those containers that actually provided files in that directory, but I think the main concern is actually /etc/skel/.bashrc.d/ and by extension ~/.bashrc.d/  We're not yet overriding that, so should be fine for now...
