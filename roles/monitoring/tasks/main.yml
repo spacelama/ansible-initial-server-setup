@@ -69,7 +69,7 @@
     - numa_
     - chrony_
 
-- name: install custom chrony etc munin monitoring plugins from munin-contrib, that don't take arguments
+- name: install custom chrony etc munin monitoring plugins from munin-contrib, that don't take arguments, for non-containers
   copy:
     src: monitoring/munin/{{ item }}
     dest: /etc/munin/plugins/{{ item }}
@@ -83,10 +83,11 @@
    - chrony_status
    - chrony
    - chrony_drift
+   - ntp_thirdparty
   when: host_is_container is not defined
   notify: restart munin-node
 
-- name: new munin plugins copied from ansible host
+- name: install custom munin monitoring plugins from eg munin-contrib, that don't take arguments, for all hosts
   copy:
     src: "/etc/munin/plugins/{{ item }}"
     dest: "/etc/munin/plugins/{{ item }}"
@@ -94,7 +95,10 @@
     group: root
     mode: 0755
   become: true
-  with_items: [ 'cpuidle', 'fail2ban_all_jails', 'ntp_thirdparty', 'fail2ban' ]
+  with_items:
+    - cpuidle
+    - fail2ban
+    - fail2ban_all_jails
   notify: restart munin-node
 
 - name: existing munin plugins without params
