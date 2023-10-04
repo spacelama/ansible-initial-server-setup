@@ -1,0 +1,147 @@
+#!/usr/bin/perl
+
+=head1 NAME
+
+cpuidle - Munin plugin to monitor usage of CPU idle states
+
+=head1 APPLICABLE SYSTEMS
+
+Linux systems with the C<cpuidle> framework enabled.  Requires a
+Multigraph-capable master (1.4 and later).
+
+=head1 CONFIGURATION
+
+None required.  There are no tunable parameters at this time.
+
+=head1 INTERPRETATION
+
+C<cpuidle> is a power-management framework for the Linux kernel, which allows
+the CPU to be placed in a low-power state when idle.  This can help reduce
+electricity and cooling costs, and extend battery life on laptops.
+
+(By contrast, C<cpufreq> keeps the processor operating, but lowers the core
+voltage and/or clock frequency.)
+
+There is a trade-off, however.  Higher C-states can dramatically lower
+power-consumption, but take significantly longer to resume from.
+
+/home/local/mlb/scratch/src/linux-2.6.34-rc4/drivers/cpuidle/governors/menu.c
+
+# does low CPU utilisation but low high-C-state usage mean there is something
+# wrong?  may be something preventing extended sleep.  powertop?  http://www.lesswatts.org/projects/powertop/powertop.php
+# cpufreq related, but may also be due to uneven loading of linked CPUsqw?
+
+For an overview of C<cpuidle>, see
+L<http://ols.fedoraproject.org/OLS/Reprints-2007/pallipadi-Reprint.pdf>
+
+=head1 MAGIC MARKERS
+
+#%# family=auto
+#%# capabilities=autoconf
+
+=head1 BUGS
+
+None known, but the code is very hacky and should probably to be
+rewritten.
+
+Tested on Fedora 12.
+
+=head1 AUTHOR
+
+Copyright (C) 2010 Matthew Boyle
+
+=head1 LICENSE
+
+GPLv2 or (at your option) any later version.
+
+=cut
+
+use strict;
+use warnings;
+
+use Munin::Plugin;
+
+# desc : Small description about the idle state (string)
+# latency : Latency to exit out of this idle state (in microseconds)
+# name : Name of the idle state (string)
+# power : Power consumed while in this idle state (in milliwatts)
+# time : Total time spent in this idle state (in microseconds)
+# usage : Number of times this state was entered (count)
+
+need_multigraph;
+
+# autoconf
+if ($ARGV[0] and $ARGV[0] eq 'autoconf') {
+    glob ("/sys/devices/system/cpu/cpu*/cpuidle/")
+        ?  print "yes\n"
+        :  print "no (/sys/devices/system/cpu/cpu*/cpuidle/ missing)\n";
+    exit 0;
+}
+
+
+my @idle_info;
+
+{
+    local @ARGV = glob ("/sys/devices/system/cpu/cpu*/cpuidle/state*/*");
+    while (<>) {
+        my ($cpu, $state, $field) = ($ARGV =~ m{/sys/devices/system/cpu/cpu(\d+)/cpuidle/state(\d+)/(\w+)});
+        warn "processing '$field' for state $state on cpu $cpu\n"
+            if $Munin::Plugin::DEBUG;
+        chomp($idle_info[$cpu][$state]{$field} = $_);
+    }
+}
+
+
+# config
+if ($ARGV[0] and $ARGV[0] eq 'config') {
+    my $cpu_index = 0;
+    foreach my $cpu (@idle_info) {
+        print "multigraph cpuidle_time_cpu$cpu_index\n";
+        print "graph_title Time spent in idle states by CPU $cpu_index\n";
+        print "graph_vlabel microseconds\n";
+        print "graph_args --logarithmic\n";
+        print "graph_category System\n";
+        print "graph_info Total time CPU $cpu_index spent in each idle state\n";
+        foreach my $state (@$cpu) {
+            print "$state->{name}.label $state->{name}\n";
+            print "$state->{name}.type  COUNTER\n";
+            print "$state->{name}.min   0\n";
+            print "$state->{name}.draw  AREASTACK\n";
+        }
+
+        print "multigraph cpuidle_usage_cpu$cpu_index\n";
+        print "graph_title Usage of idle states by CPU $cpu_index\n";
+        print "graph_vlabel \${graph_period}\n";
+        print "graph_args --logarithmic\n";
+        print "graph_category System\n";
+        print "graph_info Number of times CPU $cpu_index entered each state\n";
+        foreach my $state (@$cpu) {
+            print "$state->{name}.label $state->{name}\n";
+            print "$state->{name}.type  COUNTER\n";
+            print "$state->{name}.min   0\n";
+            print "$state->{name}.draw  LINESTACK1\n";
+        }
+
+        $cpu_index++;
+    }
+
+    exit 0;
+}
+
+# fetch
+my $cpu_index = 0;
+foreach my $cpu (@idle_info) {
+    print "multigraph cpuidle_time_cpu$cpu_index\n";
+    foreach my $state (@$cpu) {
+        print "$state->{name}.value $state->{time}\n";
+    }
+
+    print "multigraph cpuidle_usage_cpu$cpu_index\n";
+    foreach my $state (@$cpu) {
+        print "$state->{name}.value $state->{usage}\n";
+    }
+
+    $cpu_index++;
+}
+
+# vim: sw=4 : ts=4 : et
