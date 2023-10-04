@@ -327,6 +327,11 @@
       user root
       env.PATH /bin:/sbin:/opt/MegaRAID/MegaCli
 
+      # [proxmox_count]
+      [proxmox_vm_count]
+      user root
+      group root
+
   become: true
   notify: restart munin-node
 
