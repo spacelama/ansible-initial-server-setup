@@ -54,10 +54,10 @@
   when: host_is_container is defined or host_is_virtual is defined or host_is_pi is defined
   notify: restart munin-node
 
-- name: install custom numa,zfs,chrony etc munin monitoring plugins from munin-contrib, that take arguments
+- name: install custom numa,zfs,chrony etc munin monitoring plugins from munin-contrib, that take arguments, all hosts
   copy:
-    src: monitoring/munin/{{ item }}
-    dest: /usr/share/munin/plugins/{{ item }}
+    src: "monitoring/munin/{{ item }}"
+    dest: "/usr/share/munin/plugins/"
     owner: root
     group: root
     mode: 0755
@@ -68,32 +68,36 @@
     - zfsonlinux_stats_
     - numa_
     - chrony_
+    - nvme_
+  notify: restart munin-node
 
 - name: install custom chrony etc munin monitoring plugins from munin-contrib, that don't take arguments, for non-containers
   copy:
-    src: monitoring/munin/{{ item }}
-    dest: /etc/munin/plugins/{{ item }}
+    src: "monitoring/munin/{{ item }}"
+    dest: "/etc/munin/plugins/"
     owner: root
     group: root
     mode: 0755
     local_follow: true
   become: true
   with_items:
-   - chrony_sourcestats
-   - chrony_status
-   - chrony
-   - chrony_drift
-   - ntp_thirdparty
+    - chrony_sourcestats
+    - chrony_status
+    - chrony
+    - chrony_drift
+    - ntp_thirdparty
+    - raid
   when: host_is_container is not defined
   notify: restart munin-node
 
 - name: install custom munin monitoring plugins from eg munin-contrib, that don't take arguments, for all hosts
   copy:
-    src: "/etc/munin/plugins/{{ item }}"
-    dest: "/etc/munin/plugins/{{ item }}"
+    src: "monitoring/munin/{{ item }}"
+    dest: "/etc/munin/plugins/"
     owner: root
     group: root
     mode: 0755
+    local_follow: true
   become: true
   with_items:
     - cpuidle
@@ -149,8 +153,8 @@
 
 - name: install custom zfs_* munin monitoring plugins that don't take arguments
   copy:
-    src: monitoring/munin/{{ item }}
-    dest: /etc/munin/plugins/{{ item }}
+    src: "monitoring/munin/{{ item }}"
+    dest: "/etc/munin/plugins/"
     owner: root
     group: root
     mode: 0755

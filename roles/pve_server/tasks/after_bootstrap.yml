@@ -184,7 +184,7 @@
 - name: install ceph etc munin monitoring plugins from munin-contrib, that don't take arguments
   copy:
     src: munin/{{ item }}
-    dest: /etc/munin/plugins/{{ item }}
+    dest: /etc/munin/plugins/
     owner: root
     group: root
     mode: 0755
