@@ -287,6 +287,9 @@
     backup: yes
     block: |
 
+      [nvme_*]
+      user root
+
       # to transform smartctl nvme output to more resemble traditional
       # output so existing munin plugins can monitor it
       [smart_nvme*]

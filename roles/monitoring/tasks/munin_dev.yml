@@ -11,3 +11,9 @@
   include_tasks: munin_suggest_plugin_item.yml
   when: dev_exists.stat.exists
 
+- name: install munin nvme_ files for /dev/{{ item }}
+  vars:
+    munin_plugin: nvme_
+    suggest_item: "{{ item }}"
+  include_tasks: munin_suggest_plugin_item.yml
+  when: dev_exists.stat.exists
