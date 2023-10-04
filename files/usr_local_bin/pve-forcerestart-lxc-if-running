@@ -27,7 +27,7 @@ if [ -n "$id" ] ; then
         pct stop "$id" || exit 1
         attempt=1
         current_state
-        while ( [ -z "$state" ] || [ "$state" = running ] ) && [ "$attempt" -lt 20 ] ; do
+        while ( [ -z "$state" ] || [ "$state" = running ] ) && [ "$attempt" -lt 60 ] ; do
             sleep 1
             current_state
             attempt=$((attempt+1))
