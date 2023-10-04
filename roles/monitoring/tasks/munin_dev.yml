@@ -1,0 +1,13 @@
+---
+- name: test whether /dev/{{ item }} exists
+  stat:
+    path: '/dev/{{ item }}'
+  register: dev_exists
+
+- name: install munin smart_ files for /dev/{{ item }}
+  vars:
+    munin_plugin: smart_
+    suggest_item: "{{ item }}"
+  include_tasks: munin_suggest_plugin_item.yml
+  when: dev_exists.stat.exists
+

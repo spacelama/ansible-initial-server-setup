@@ -214,6 +214,18 @@
   when: host_is_zfs is defined
   notify: restart munin-node
 
+# these smart_ links are in addition to those handled by
+# munin_suggest_plugin.yml, which appears to ignore devices that are
+# sent through to VMs (where we still have to run the smart queries
+# from).  Nope - it's ignoring SAS devices, because it can't parse the
+# smartctl output of them.  That just leaves nvme devices, for which
+# we have a translator configured in the monitoring role (but again,
+# is not detected in the `suggests` phase.
+- name: ensure all special munin links are in place for /dev files
+  include_tasks: munin_dev.yml
+#  with_items: { sda, sdb, sdc, sdd, sde, sdf, sdg, sdh, sdi, sdj, sdk, sdl, sdm, sdn, nvme0n1 }
+  with_items: { nvme0n1, nvme0n2 }
+
 - name: allow munin-node from fs
   lineinfile:
     path: "/etc/munin/munin-node.conf"
@@ -274,6 +286,12 @@
     marker: "# {mark} ANSIBLE MANAGED BLOCK"
     backup: yes
     block: |
+
+      # to transform smartctl nvme output to more resemble traditional
+      # output so existing munin plugins can monitor it
+      [smart_nvme*]
+      user root
+      env.smartpath /usr/local/bin/smartctlnvme
 
       # for nice devicemapper names
       [diskstats]

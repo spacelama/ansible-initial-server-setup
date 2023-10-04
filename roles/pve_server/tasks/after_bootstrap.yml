@@ -172,15 +172,6 @@
 #    mode=0700
 #  become: true
 
-# these smart_ links are in addition to those handled by munin_suggest_plugin.yml, which appears to ignore devices that are sent through to VMs (where we still have to run the smart queries from)
-- name: ensure all munin smart links are in place
-  file:
-    src: /usr/share/munin/plugins/smart_
-    dest: "/etc/munin/plugins/smart_sd{{ item }}"
-    state: link
-  become: true
-  with_items: { a, b, c, d, e, f, g, h, i, j, k, l, m, n }
-
 - name: install ceph etc munin monitoring plugins from munin-contrib, that don't take arguments
   copy:
     src: munin/{{ item }}
