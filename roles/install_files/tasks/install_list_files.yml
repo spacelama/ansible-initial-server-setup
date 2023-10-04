@@ -4,7 +4,10 @@
   copy:
     src: "{{ file_details.source }}"
     dest: "{{ file_details.dest }}"
-    mode: "{{ file_details.mode }}"
+    mode: "{{ file_details.mode | default('0644') }}"
+    local_follow: "{{ file_details.local_follow | default(omit) }}"
+    owner: "{{ file_details.owner | default('root') }}"
+    group: "{{ file_details.group | default('root') }}"
   become: "{{ file_details.become | default(true) }}"
   when: file_details.source is defined
   notify: "{{ file_details.notify | default(omit) }}"
@@ -13,7 +16,9 @@
   template:
     src: "{{ file_details.template }}"
     dest: "{{ file_details.dest }}"
-    mode: "{{ file_details.mode }}"
+    mode: "{{ file_details.mode | default('0644') }}"
+    owner: "{{ file_details.owner | default('root') }}"
+    group: "{{ file_details.group | default('root') }}"
   become: "{{ file_details.become | default(true) }}"
   when: file_details.template is defined
   notify: "{{ file_details.notify | default(omit) }}"
@@ -22,7 +27,10 @@
   copy:
     src: "{{ file }}"
     dest: "{{ file_details.dir }}/{{ file | basename }}"
-    mode: "{{ file_details.mode }}"
+    mode: "{{ file_details.mode | default('0644') }}"
+    local_follow: "{{ file_details.local_follow | default(omit) }}"
+    owner: "{{ file_details.owner | default('root') }}"
+    group: "{{ file_details.group | default('root') }}"
   become: "{{ file_details.become | default(true) }}"
   when: file_details.files is defined
   loop: "{{ file_details.files }}"
