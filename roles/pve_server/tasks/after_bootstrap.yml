@@ -188,6 +188,26 @@
    - proxmox_vm_count
   notify: restart munin-node
 
+- name: install some extra ceph monitoring plugins
+  copy:
+    src: monitoring/{{ item }}
+    dest: /usr/local/bin/nagios/
+    owner: root
+    group: root
+    mode: 0755
+    local_follow: true
+  become: true
+  with_items:
+   - check_ceph_df
+   - check_ceph_health
+   - check_ceph_mds
+   - check_ceph_mgr
+   - check_ceph_mon
+   - check_ceph_osd
+   - check_ceph_osd_db
+   - check_ceph_osd_df
+   - check_ceph_overall
+
 - name: set pve-ha-lrm/pve-ha-crm disabled when on HA or enabled when on HA, to alleviate constant disk writes by pmxcfs to SSD
   # https://forum.proxmox.com/threads/pmxcfs-writing-to-disk-all-the-time.35828/ https://www.reddit.com/r/Proxmox/comments/i8e5fi/excessive_nvme_wear_out/g193xr2/
   service:
