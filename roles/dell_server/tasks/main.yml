@@ -112,3 +112,42 @@
     autoremove: no
     state: present
   become: true
+
+- name: install megacli etc munin monitoring plugins from munin-contrib, that don't take arguments
+  copy:
+    src: monitoring/munin/{{ item }}
+    dest: /etc/munin/plugins/{{ item }}
+    owner: root
+    group: root
+    mode: 0755
+    local_follow: true
+  become: true
+  with_items:
+   - megacli_hdd-temperature-using-megacli
+  notify: restart munin-node
+
+- name: install megacli etc munin monitoring plugins from munin-contrib, that take arguments
+  copy:
+    src: monitoring/munin/{{ item }}
+    dest: /usr/share/munin/plugins/{{ item }}
+    owner: root
+    group: root
+    mode: 0755
+    local_follow: true
+  become: true
+  with_items:
+    - MegaRaid_
+  notify: restart munin-node
+
+- name: existing munin plugins with params
+  file:
+    src: "/usr/share/munin/plugins/{{ item.dest }}"
+    dest: "/etc/munin/plugins/{{ item.src }}"
+    state: link
+  become: true
+  with_items:
+    - { src: 'MegaRaid_0_error',      dest: 'MegaRaid_' }
+    - { src: 'MegaRaid_0_other',      dest: 'MegaRaid_' }
+    - { src: 'MegaRaid_0_temp',       dest: 'MegaRaid_' }
+    - { src: 'MegaRaid_0_predictive', dest: 'MegaRaid_' }
+  notify: restart munin-node

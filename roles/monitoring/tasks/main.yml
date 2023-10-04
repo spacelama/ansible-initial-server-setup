@@ -299,6 +299,13 @@
       [fail2ban*]
       user root
 
+      [megacli*]
+      user root
+
+      [MegaRaid*]
+      user root
+      env.PATH /bin:/sbin:/opt/MegaRAID/MegaCli
+
   become: true
   notify: restart munin-node
 
