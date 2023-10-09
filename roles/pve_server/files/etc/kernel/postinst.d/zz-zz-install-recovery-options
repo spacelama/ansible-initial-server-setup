@@ -53,6 +53,8 @@ update_esp_func() {
 		{ warn "mount of ${path} failed - skipping"; return; }
 
         shopt -s nullglob
+        echo "Removing old nopci and rescue boot entries"
+        rm -f "${mountpoint}/loader/entries/"proxmox-*-pve-nopci.conf  "${mountpoint}/loader/entries/"proxmox-*-pve-rescue.conf
         # most of the checking will be done by proxmox boot generator
         # scripts - these conf files simply will not exist if they
         # detected an unsuitable system
