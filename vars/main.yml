@@ -116,8 +116,11 @@
     - { template: etc/rkhunter.conf.j2,   dest: /etc/rkhunter.conf }
     - { source: etc/reportbug.conf,       dest: /etc/reportbug.conf, when_pkg_installed: "reportbug" }
 
-    - { source: etc/fuse.conf,            dest: /etc/fuse.conf,      mode: "0640", when_pkg_installed: "fuse3"  }
     - { source: etc/cron.d/munin-node,    dest: /etc/cron.d/munin-node }
+#    - { source: etc/fuse.conf,            dest: /etc/fuse.conf,                          mode: "0640", group: "{{ 'fuse' if inventory_hostname == 'fs' else 'root' }}", when_pkg_installed: "fuse3"  }
+#    - { source: etc/fuse.conf,            dest: /etc/fuse.conf,                          mode: "0640", group: "fuse", when: "{{ inventory_hostname == 'fs' }}" }
+#    - { source: etc/fuse.conf,            dest: /etc/fuse.conf,                          mode: "0640", group: "root", when: "{{ inventory_hostname != 'fs' }}" }
+    - { source: etc/fuse.conf,            dest: /etc/fuse.conf,                          mode: "0644", group: "root" }
     - { source: etc/cron.daily/cron.daily_check-cmos-battery, dest: /etc/cron.daily/,    mode: "0755", when: "{{ host_is_physical is defined }}" }
     - { source: etc/needrestart/notify.conf,                  dest: /etc/needrestart/ }
     - { source: etc/X11/xorg.conf.d/80-maxclients.conf,       dest: /etc/X11/xorg.conf.d/ }
