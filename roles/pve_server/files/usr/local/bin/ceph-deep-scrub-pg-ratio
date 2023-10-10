@@ -1,0 +1,123 @@
+#!/bin/bash
+
+# https://forum.proxmox.com/threads/ceph-schedule-deep-scrubs-to-prevent-service-degradation.38499/
+
+# /etc/cron.d/ceph-scrub-deep
+#  0 1 * * 0,1 root /root/ceph-deep-scrub-pg-ratio 4
+#  0 1 * * 2-6 root /root/ceph-deep-scrub-pg-ratio 10
+#    Scrub 25% of placement groups that were last scrubbed the longest time ago, starting at 1am Sunday and Monday
+#    Scrub 10% of placement groups that were last scrubbed the longest time ago, starting at 1am Tuesday through Saturday
+
+set -o nounset
+set -o errexit
+
+CEPH=/usr/bin/ceph
+AWK=/usr/bin/awk
+SORT=/usr/bin/sort
+HEAD=/usr/bin/head
+DATE=/bin/date
+SED=/bin/sed
+GREP=/bin/grep
+PYTHON=/usr/bin/python3
+
+
+DEEPMARK="scrubbing+deep";              # What string matches a deep scrubing state in ceph pg's output?
+MAXSCRUBS=2;                            # Max concurrent deep scrubs operations
+
+workratio=$1;
+[ "x$workratio" == x ] && workratio=7;  # Set work ratio from first arg; fall back to '7'.
+
+
+function isNewerThan() {
+    # Args: [PG] [TIMESTAMP]
+    # Output: None
+    # Returns: 0 if changed; 1 otherwise
+    # Desc: Check if a placement group "PG" deep scrub stamp has changed
+    # (i.e != "TIMESTAMP")
+    pg=$1;
+    ots=$2;
+    ndate=$($CEPH pg $pg query -f json-pretty | \
+        $PYTHON -c 'import json;import sys; print(json.load(sys.stdin)["info"]["stats"]["last_deep_scrub_stamp"])');
+    nts=$($DATE -d "$ndate" +%s);
+    [ $ots -ne $nts ] && return 0;
+    return 1;
+}
+
+function scrubbingCount() {
+    # Args: None
+    # Output: int
+    # Returns: 0
+    # Desc: Outputs concurent deep scrubbing tasks.
+    cnt=$($CEPH -s | $GREP $DEEPMARK | $AWK '{ print $1; }');
+    [ "x$cnt" == x ] && cnt=0;
+    echo $cnt;
+    return 0;
+}
+
+function waitForScrubSlot() {
+    # Args: None
+    # Output: Informative text
+    # Returns: true
+    # Desc: Idle loop waiting for a free deepscrub slot.
+    while [ $(scrubbingCount) -ge $MAXSCRUBS ]; do
+        sleep 1;
+    done
+    return 0;
+}
+
+function deepScrubPg() {
+    # Args: [PG]
+    # Output: Informative text
+    # Return: 0 when PG is effectively deep scrubing
+    # Desc: Start a PG "PG" deep-scrub
+    $CEPH pg deep-scrub $1 >& /dev/null;
+    # Must sleep as ceph does not immediately start scrubbing
+    # So we wait until wanted PG effectively goes into deep scrubbing state...
+    local emergencyCounter=0;
+    while ! $CEPH pg $1 query | $GREP state | $GREP -q $DEEPMARK; do
+        isNewerThan $1 $2 && break;
+        test $emergencyCounter -gt 150 && break;
+        sleep 1;
+        emergencyCounter=$[ $emergencyCounter +1 ];
+    done
+    sleep 2;
+    return 0;
+}
+
+
+function getOldestScrubs() {
+    # Args: [num_res]
+    # Output: [num_res] PG ids
+    # Return: 0
+    # Desc: Get the "num_res" oldest deep-scrubbed PGs
+    numres=$1;
+    [ x$numres == x ] && numres=20;
+    $CEPH pg dump pgs 2>/dev/null | \
+        $AWK '/^[0-9]+\.[0-9a-z]+/ { if($12 == "active+clean") {  print $1,$23 ; }; }' | \
+        while read line; do set $line; echo $1 $($DATE -d "$2" +%s); done | \
+        $SORT -n -k2 | \
+        $HEAD -n $numres;
+    return 0;
+}
+
+function getPgCount() {
+    # Args:
+    # Output: number of total PGs
+    # Desc: Output the total number of "active+clean" PGs
+    $CEPH pg stat | $SED 's/^.* \([0-9]\+\) active+clean[^+].*/\1/g';
+}
+
+
+# Get PG count
+pgcnt=$(getPgCount);
+# Get the number of PGs we'll be working on
+pgwork=$((pgcnt / workratio + 1));
+
+# Actual work starts here, quite self-explanatory.
+logger -t ceph_scrub "Ceph deep scrub - Start on $[100/workratio]% of $pgcnt PGs = $pgwork PGs";
+getOldestScrubs $pgwork | while read line; do
+    set $line;
+    waitForScrubSlot;
+    deepScrubPg $1 $2;
+done
+logger -t ceph_scrub "Ceph deep scrub - End";
