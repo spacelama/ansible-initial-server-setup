@@ -1,0 +1,7 @@
+# https://forum.proxmox.com/threads/ceph-schedule-deep-scrubs-to-prevent-service-degradation.38499/
+
+#0 1 * * 0,6 root if [ `hostname` = pve1 ] ; then /usr/local/bin/ceph-deep-scrub-pg-ratio 4 ; fi
+#0 1 * * 1-5 root if [ `hostname` = pve1 ] ; then /usr/local/bin/ceph-deep-scrub-pg-ratio 10 ; fi
+
+# all days are equal in my world, and I try not to go to bed after 2am
+0 2 * * * root if [ `hostname` = pve1 ] ; then /usr/local/bin/ceph-deep-scrub-pg-ratio 7 ; fi

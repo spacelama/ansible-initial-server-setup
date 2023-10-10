@@ -1,3 +1,0 @@
-# https://forum.proxmox.com/threads/ceph-schedule-deep-scrubs-to-prevent-service-degradation.38499/
-0 1 * * 0,6 root /root/ceph-deep-scrub-pg-ratio 4
-0 1 * * 1-5 root /root/ceph-deep-scrub-pg-ratio 10

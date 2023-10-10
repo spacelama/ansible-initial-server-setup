@@ -226,10 +226,11 @@
 
 - name: install ceph-deep-scrub-pg-ratio cronjob
   copy:
-    src: etc/cron.d/cron.d.ceph-scrub-deep
-    dest: /etc/cron.d/cron.d.ceph-scrub-deep
+    src: etc/cron.d/ceph-scrub-deep
+    dest: /etc/cron.d/ceph-scrub-deep
     mode: 0644
   become: true
+  notify: restart cron
 
 - name: set pve-ha-lrm/pve-ha-crm disabled when on HA or enabled when on HA, to alleviate constant disk writes by pmxcfs to SSD
   # https://forum.proxmox.com/threads/pmxcfs-writing-to-disk-all-the-time.35828/ https://www.reddit.com/r/Proxmox/comments/i8e5fi/excessive_nvme_wear_out/g193xr2/
