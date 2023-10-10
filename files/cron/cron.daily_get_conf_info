@@ -204,6 +204,12 @@ backup --noerr /proc/pci $data_dir/pci
 sysctl -a > $data_dir/sysctl 2> $data_dir/sysctl.err
 backup /proc/cmdline $data_dir/cmdline
 
+# copy the /etc/pve fuse filesystem that's built by proxmox based on
+# its database, so we can recover from barebones if necessary
+if [ -d /etc/pve ] ; then
+    cp -pra /etc/pve $data_dir/pve
+fi
+
 if [ -x /usr/local/bin/get_conf_info.local ] ; then
     /usr/local/bin/get_conf_info.local $data_dir
 fi
