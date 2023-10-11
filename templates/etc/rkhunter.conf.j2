@@ -846,7 +846,7 @@ ALLOWIPCPROC=/usr/bin/gthumb
 # The default value is the null string.
 #
 #INETD_CONF_PATH=/etc/inetd.conf
-{% if ( "openbsd-inetd" in ansible_facts.packages ) %}
+{% if ( ansible_facts.packages is defined and "openbsd-inetd" in ansible_facts.packages ) %}
 INETD_CONF_PATH=/etc/inetd.conf
 {% endif %}
 
