@@ -14,7 +14,7 @@ function get_logentry() {
 }
 
 msg=$(
-    df -lPk -x tmpfs -x devtmpfs -x devpts -x sysfs -x proc -x udf -x squashfs |
+    df -Pk -x tmpfs -x devtmpfs -x devpts -x sysfs -x proc -x udf -x squashfs -x nfs -x nfs3 -x nfs4 -x fuse.sshfs |
        tail -n +2 | 
        awk '{print $6}' | 
        grep -v /net/ |
