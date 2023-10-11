@@ -45,9 +45,9 @@
 
   # zfs root systems in pve8 might need systemd-boot package:
   # https://pve.proxmox.com/wiki/Roadmap#8.0-known-issues
-- name: Install pve prereq packages for pve8
+- name: Install pve prereq and handy packages for pve8
   apt:
-    name: ['systemd-boot']
+    name: ['systemd-boot', 'systemd-zram-generator' ]
     autoremove: no
     state: present
     install_recommends: no
