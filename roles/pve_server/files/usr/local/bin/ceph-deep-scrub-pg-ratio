@@ -1,6 +1,9 @@
 #!/bin/bash
 
 # https://forum.proxmox.com/threads/ceph-schedule-deep-scrubs-to-prevent-service-degradation.38499/
+# But you probably also need to set max interval and follow other threads too:
+#  https://ceph-users.ceph.narkive.com/4gA7RXS5/non-effective-new-deep-scrub-interval might need osd_scrub_max_interval and osd_scrub_interval_randomize_ratio (would need to encode injected args into /etc/pve/ceph.conf)
+
 
 # /etc/cron.d/ceph-scrub-deep
 #  0 1 * * 0,1 root /root/ceph-deep-scrub-pg-ratio 4
