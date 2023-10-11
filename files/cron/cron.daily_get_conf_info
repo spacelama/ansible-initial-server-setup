@@ -208,6 +208,15 @@ backup /proc/cmdline $data_dir/cmdline
 # its database, so we can recover from barebones if necessary
 if [ -d /etc/pve ] ; then
     cp -pra /etc/pve $data_dir/pve
+
+    ceph osd lspools | awk '{print $2}' | while read pool ; do
+        rbd du -p $pool > $data_dir/ceph.du.rbd.pool.$pool
+    done
+    rados df > $data_dir/ceph.df.rados
+    ceph osd pool ls detail > $data_dir/ceph.ls.osd.pool # grep full
+    ceph osd df detail > $data_dir/ceph.df.osd.detail
+    ceph osd df > $data_dir/ceph.df.osd
+    ceph df > $data_dir/ceph.df
 fi
 
 if [ -x /usr/local/bin/get_conf_info.local ] ; then
