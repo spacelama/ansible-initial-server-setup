@@ -1,4 +1,8 @@
 config usteer
+
+#	https://openwrt.org/docs/guide-user/network/wifi/usteer
+#	(other settings in wifi config)
+
 	# The network interface for inter-AP communication
 #	option 'network' 'lan'
 #	option 'network' 'eth0'

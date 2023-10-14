@@ -1,5 +1,7 @@
 ---
 - name: remove conflicting and/or obsolete packages
+  # if want to go back to DAWN later, it is now better documented: https://github.com/berlin-open-wireless-lab/DAWN/blob/master/CONFIGURE.md
+  # also, here: https://www.reddit.com/r/openwrt/comments/v26ybu/dawn_vs_usteer/
   opkg:
     name: luci-app-dawn,dawn
     state: absent
@@ -24,6 +26,11 @@
   when: openwrt_router_packages is defined
   ignore_errors: true
 
+  # https://openwrt.org/docs/guide-user/network/wifi/usteer talks
+  # about needing wpad full (wpad-wolfssl or wpad-openssl), but we
+  # haven't had that installed for a few versions, and doesn't seem to
+  # be causing any problems?  openwrt 23.05.0 may want something in
+  # place of wpad-wolfssl, since it's moved from wolfssl to mbedtls
 - name: install AP packages
   opkg:
     name: usteer
