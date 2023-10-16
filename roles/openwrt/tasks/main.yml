@@ -85,7 +85,6 @@
     - show_wifi_clients2.sh.helper2
     - opkg-search
     - nutups_
-    - nutups2_
 
 - name: set root account passwd
   lineinfile:
