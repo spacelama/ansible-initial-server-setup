@@ -112,6 +112,7 @@
 
 - name: include uci config
   include_tasks: uci_config.yml
+  when: run_uci_config is defined
 
 - name: commit changes
   meta: flush_handlers

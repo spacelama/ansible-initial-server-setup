@@ -1,0 +1,16 @@
+---
+# https://stackoverflow.com/questions/18195142/safely-limiting-ansible-playbooks-to-a-single-machine
+- hosts: "{{ target | default('openwrt') }}"
+#  strategy: free
+  strategy: linear
+#  gather_facts: no
+  remote_user: rootsh # so keeps working even fresh after upgrade (but not brand-new installation)
+  vars:
+      ansible_ssh_transfer_method: scp
+      run_uci_config: yes
+  vars_files:
+    - vars/openwrt.yml
+  roles:
+    - gekmihesg.openwrt
+    - install_files
+    - openwrt
