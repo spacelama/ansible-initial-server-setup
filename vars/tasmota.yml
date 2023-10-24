@@ -12,6 +12,7 @@
   timezone: 99
   timestd: "1,1,4,1,3,600"
   timedst: "1,1,10,1,2,660"
+  underscore_name: "{{ inventory_hostname | regex_replace('-', '_') }}"
 
   psk_setting:
     - command: Password1
@@ -61,10 +62,22 @@
       value: "{{ inventory_hostname }}"
 
     - command: Topic
-      value: "{{ inventory_hostname | regex_replace('-', '_') }}"
+      value: "{{ underscore_name }}"
 
     - command: MqttHost
       value: "{{ mqtthost }}"
+
+    - command: FriendlyName1
+      value: "{{ FriendlyName1 | default(underscore_name) }}"
+
+    - command: FriendlyName2
+      value: "{{ FriendlyName2 | default(omit) }}"
+
+    - command: FriendlyName3
+      value: "{{ FriendlyName3 | default(omit) }}"
+
+    - command: FriendlyName4
+      value: "{{ FriendlyName4 | default(omit) }}"
 
     - command: SetOption65
       value: "{{ disable_default_reset_on_power_reset7 | default(0) }}"
