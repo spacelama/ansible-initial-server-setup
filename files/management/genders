@@ -2,9 +2,10 @@ dirac                           linux,intel,amd              # AMD is not a stri
 dirac-laptop                    linux,intel,not247
 maxwell                         linux,intel,not247
 fs                              linux,intel
+iot                             linux,intel,not247,notyetproduction
 #pve                             linux,intel,pve
 pve1                            linux,intel,pve
-pve1a                           linux,intel,pve
+pve1a                           linux,intel,pve,not247
 pve2                            linux,intel,amd,pve
 pve3                            linux,intel,pve
 pi                              linux,arm
@@ -13,9 +14,9 @@ pauli                           linux,intel,not247
 fermi                           linux,intel,amd
 homeassistant                   linux,intel,hassio
 zm                              linux,intel,lxc,turnkey
-media                           linux,intel,lxc,turnkey
-zm12                            linux,intel,lxc
-jellyfin                        linux,intel,lxc
+media                           linux,intel,lxc,turnkey,not247,notyetproduction
+zm12                            linux,intel,lxc,not247,notyetproduction
+jellyfin                        linux,intel,lxc,not247,notyetproduction
 syslog                          linux,intel,lxc
 
 #idrac                           drac
@@ -29,14 +30,16 @@ bedroomlifx                     lifx
 netclock                        esp8266
 ac                              esp8266
 
-esp32cam                        esp82
+esp32cam                        esp82,not247,notyetproduction
 
 airmon1                         tasmota,PMS5003,SCD40
 fishtank-temperature            tasmota,DS18B20
+batterymon1                     tasmota,millivolts
 ac-power                        tasmota,medion,powermon,accurate
+angela-power                    tasmota,sonoffs26,not247
 loungeroomlights-power          tasmota,sonoffs26
 bedroomlights-power             tasmota,sonoffs26
-garagelights-power              tasmota,sonoffs26
+garagelights-power              tasmota,oldkogan,powermon,accurate,usbport,limitedusbport
 heatedseat-power                tasmota,sonoffs26,not247,solidstate
 studio-power                    tasmota,arlecswitchindiv4board
 studio-power2                   tasmota,sonoffs26
@@ -47,13 +50,13 @@ beerfridges-power               tasmota,medion,powermon,accurate
 aquapump-power                  tasmota,oldkogan,powermon,accurate,usbport
 aquaheater-power                tasmota,oldkogan,powermon,accurate,usbport
 brewfridge-power                tasmota,newkogan,powermon,esp12s,accurate
-monitor-power                   tasmota,newkogan,powermon,esp12s,accurate
+#monitor-power                   tasmota,newkogan,powermon,esp12s,accurate
+
 washingmachine-power            tasmota,medion,powermon,accurate,repairedlimitresistor
-valveamp-power                  tasmota,newkogan,powermon,accurate,usbport
-stereo-power                    tasmota,oldkogan,powermon,accurate,disabledusbport
-chromecast-lounge-power         tasmota,oldkogan,powermon,currentoffset
+measure-power                   tasmota,oldkogan,powermon,accurate,usbport
+chromecast-lounge-power         tasmota,newkogan,powermon,currentoffset
 panasonic-power                 tasmota,newkogan,powermon,accurate
-electricblanket-power           tasmota,athom,powermon
+electricblanket-power           tasmota,athom,powermon,not247
 loungefrontlight-power          tasmota,athom,powermon
 study-power                     beken,jinvooswitchindiv4boardusb,not247,1W_all_off,5W_all_on
 
