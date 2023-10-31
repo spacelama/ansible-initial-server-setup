@@ -220,9 +220,16 @@ if [ -d /etc/pve ] ; then
     done
     rados df > $data_dir/ceph.df.rados
     ceph osd pool ls detail > $data_dir/ceph.ls.osd.pool # grep full
-    ceph osd df detail > $data_dir/ceph.df.osd.detail
     ceph osd df > $data_dir/ceph.df.osd
-    ceph df > $data_dir/ceph.df
+    ceph df detail > $data_dir/ceph.df.detail
+
+    ceph osd lspools | while read num poolname ; do
+        rbd ls $pool | while read volume ; do
+            echo $pool/$volume:
+            rbd snap ls $pool/$volume
+            echo
+        done
+    done > $data_dir/ceph.pool.volume.snapshots
 fi
 
 if [ -x /usr/local/bin/get_conf_info.local ] ; then
