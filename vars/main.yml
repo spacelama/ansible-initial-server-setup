@@ -8,6 +8,12 @@
   ansible_was_run_by: "{{ lookup('env','USER') }@{{ lookup('env','HOSTNAME') }}"
   smtp_server: smtp.rather.puzzling.org
   smtp_root_alias: tconnors
+  smtp_aliases: |2
+    backuppc: root
+    adsl: root
+    nut: root
+
+    root: tconnors
   smtp_mail_name: rather.puzzling.org
   dovecot_insecure_logfile_creation: true
   smtp_crontab:

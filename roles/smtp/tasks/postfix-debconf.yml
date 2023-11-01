@@ -121,7 +121,7 @@
 - name: "Since dpkg-reconfigure doesn't seem to set aliases with above, let's set ourselves"
   copy:
     dest: "/etc/aliases"
-    content: "postmaster: root\nwebmaster: root\nroot: {{ smtp_root_alias }}\n"
+    content: "postmaster: root\nwebmaster: root\n{{ smtp_aliases }}\n"
     mode: 0644
   become: true
   notify: newaliases
