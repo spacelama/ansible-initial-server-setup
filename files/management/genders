@@ -18,6 +18,7 @@ media                           linux,intel,lxc,turnkey,not247,notyetproduction
 zm12                            linux,intel,lxc,not247,notyetproduction
 jellyfin                        linux,intel,lxc,not247,notyetproduction
 syslog                          linux,intel,lxc
+smtp                            linux,intel,lxc
 
 #idrac                           drac
 idrac-r730xd                    drac

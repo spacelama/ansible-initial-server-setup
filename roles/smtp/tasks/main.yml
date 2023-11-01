@@ -1,0 +1,186 @@
+---
+
+# This role configures the postfix mailer on a system as either a mail
+# satellite or a mail relay and mail server (MDA).  We do not yet go
+# into the much more in-depth configuration required to configure a
+# properly secured, publicly accessible incoming MTA - I just pull
+# from gmail using fetchmail on this central relay (mostly configured
+# outside this role, in my case, from .procmail.* and .fetchmail.*
+# files on a persistent filesystem that survives rebuilds of the mail
+# server).  I'm also pushing to gmail using my credentials, from the
+# relay, so some assumptions around masquerading on the relay will be
+# relying on gmail's behaviour regarding address munging.
+#
+# The relay can be configured to setup dovecot with IMAPS enabled.
+# When running in this configuration (and this is the only
+# configuration that this role has targeted and been tested in), mail
+# to your own domain (eg, from cron-jobs, and all other internal mail)
+# does not leave the network - it gets relayed to the relay, which is
+# also the MDA, so it stays on there.  All other mail gets forwarded
+# upstream to gmail.  This has also only been tested on a single user
+# network - I'm the only configured human user of the network, and
+# that's who get's all root@ emails, but I don't see anything stopping
+# this working on a multi-user network, internally at least.  If
+# you're relaying to gmail, you're relaying as a single authenticated
+# user, so there's that...
+
+# On previous versions where I didn't benefit from gmail's treatment
+# of all relayed mail, and I didn't control the upstream Exchange
+# relayhost that had strange behaviours regarding mail headers, and
+# yet I was responsible for root@the-entire-domain, I had to muck
+# around with transport rules, canonical and generic maps, and
+# procmail, and other measures I dare not try remember.  Some of that
+# legacy can be seen in the comments here.
+
+# Some of the debian configuration came from
+# https://www.linode.com/docs/guides/configure-postfix-to-send-mail-using-gmail-and-google-workspace-on-debian-or-ubuntu/
+
+- name: Install mail SMTP relay packages
+  apt:
+    name: ['postfix', 'libsasl2-modules' ] # libsasl2-modules for relaying to gmail
+    autoremove: no
+    state: present
+  become: true
+  when: host_is_smtp_relay is defined
+
+- name: Install dovecot when mda is configured (only tested when mda is also smtp)
+  apt:
+    name: ['dovecot-imapd', 'fetchmail', 'psmisc' ] # psmisc for killall for our fetchmail helper
+    autoremove: no
+    state: present
+  become: true
+  when: host_is_mda is defined
+
+  # "touch" file if not exist: https://stackoverflow.com/questions/28347717/how-to-create-an-empty-file-with-ansible
+  # https://dev.to/icy1900/ansible-create-empty-file-if-it-does-not-exist-1fof
+- name: Ensure (insecure) logfile for imap-via-ssh is writable if set
+  file:
+    path: /var/log/imap.log
+    state: touch
+    mode: 0666
+    modification_time: preserve
+    access_time: preserve
+  become: true
+  when: (host_is_mda is defined) and (dovecot_insecure_logfile_creation is defined)
+
+- name: Rotate imap-via-ssh logfile
+  copy:
+    src: etc/logrotate.d/dovecot-custom
+    dest: /etc/logrotate.d/dovecot-custom
+  become: true
+  when: (host_is_mda is defined) and (dovecot_insecure_logfile_creation is defined)
+
+- name: Install dovecot/mail.conf
+  copy:
+    src: etc/dovecot/10-mail.conf
+    dest: /etc/dovecot/conf.d/10-mail.conf
+  become: true
+  when: host_is_mda is defined
+  notify: restart dovecot
+
+- name: Install mail packages
+  apt:
+    name: ['postfix' ]
+    autoremove: no
+    state: present
+  become: true
+#  when: host_is_smtp_relay is not defined
+
+- name: debconf Configure postfix first time
+  include_tasks: postfix-debconf.yml
+
+- name: Make sure all handlers run
+  meta: flush_handlers
+
+  # Rerun entire debconf relevant tasks again because the debconf step
+  # when reconfiguring some existing machines ends up not actually
+  # invoking things like destination configs because the initial
+  # configuration seems to be done on the basis of a wrong mail
+  # satellite setting.  This also helps in the procmail case where
+  # default is true, we want to set to false, but "false" is unchanged
+  # from what the ansible debconf helper thinks is default - set the
+  # value first, generate the conf file, then let debconf figure out
+  # what the real current value is, and ansible can detect that this
+  # needs now be changed, before finally triggering another
+  # regeneration.
+- name: debconf Configure postfix second time
+  include_tasks: postfix-debconf.yml
+
+- name: Make sure all handlers run
+  meta: flush_handlers
+
+- name: remove conflicting smtpd_tls_security_level from postfix/main.cf
+  lineinfile:
+    dest: "/etc/postfix/main.cf"
+    regexp: "^smtp_tls_security_level=may"
+    line: "#smtp_tls_security_level=may # disabled by ANSIBLE"
+  become: true
+  notify: restart postfix
+  when: host_is_smtp_relay is defined
+
+# - name: populate the virtual user table
+#   copy:
+#     dest: /etc/postfix/virtual
+# #    content: "root {{ smtp_send_all_local_mail_to }}\n@{{ smtp_mail_name }} {{ smtp_send_all_local_mail_to }}\n"
+#     content: "root {{ smtp_root_mail_to }}\n"
+#   become: true
+#   notify: postmap /etc/postfix/virtual
+#   when: host_is_smtp_relay is defined
+
+- name: Ensure gmail configuration used in postfix/main.cf
+  blockinfile:
+    path: "/etc/postfix/main.cf"
+    marker: "# {mark} ANSIBLE MANAGED BLOCK"
+    backup: yes
+    block: |
+      # Enable SASL authentication
+      smtp_sasl_auth_enable = yes
+      # Disallow methods that allow anonymous authentication
+      smtp_sasl_security_options = noanonymous
+      # Location of sasl_passwd
+      smtp_sasl_password_maps = hash:/etc/postfix/sasl/sasl_passwd
+      # Enable STARTTLS encryption
+      smtp_tls_security_level = encrypt
+      # Location of CA certificates
+      smtp_tls_CAfile = /etc/ssl/certs/ca-certificates.crt
+
+      # And to enable our virtual map to send all incoming mail onwards
+      # virtual_alias_maps    = hash:/etc/postfix/virtual
+
+      #smtp_generic_maps     = hash:/etc/postfix/generic
+      masquerade_domains    = $mydomain
+      # would expose root user, but can't because we need them to remain
+      # deliverable despite Exchange.
+      # Headers still contain enough information to identify machine sender, and
+      # we do preserve header recipient (below), so cron output will still be useful:
+      # masquerade_exceptions = root
+      masquerade_exceptions =
+
+      # default rhel6:
+      # #masquerade_classes    = envelope_sender, header_sender, header_recipient
+
+      # # from prior tested rhel6/postfix/main.cf and also that which worked on suse 11/12:
+      # #----
+      # # masquerade_classes = envelope_sender, envelope_recipient, header_sender, header_recipient
+      # masquerade_classes = envelope_sender, envelope_recipient, header_sender
+      # #----
+
+      masquerade_classes = envelope_sender, header_sender, envelope_recipient, header_recipient
+
+  become: true
+  notify: restart postfix
+  when: host_is_smtp_relay is defined
+
+- name: Make sure all handlers run
+  meta: flush_handlers
+
+- name: install fetchmail crontab if available
+  copy:
+    content: "{{ smtp_crontab.content }}"
+    dest: "/var/spool/cron/crontabs/{{ smtp_crontab.user }}"
+    mode: 0600
+    owner: "{{ smtp_crontab.user }}"
+    group: crontab
+  become: true
+  when: (smtp_crontab is defined) and (host_is_mda is defined)
+

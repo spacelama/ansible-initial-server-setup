@@ -77,7 +77,7 @@
 
 - name: Install essential packages (all)
   apt:
-    name: ['rsyslog', 'needrestart', 'rsync', 'munin-node', 'sysstat', 'procmail'] # procmail for lockfile
+    name: ['rsyslog', 'needrestart', 'rsync', 'munin-node', 'sysstat', 'bsd-mailx', 'procmail'] # procmail for lockfile
     autoremove: no
     state: present
   become: true
@@ -447,9 +447,6 @@
   loop: "{{ modprobe | default([]) }}"
 
 # FIXME: consider caching name server etc per https://wiki.debian.org/NetworkConfiguration
-
-# FIXME: should set up postfix for !host_is_mailserver
-#(eg, /etc/postfix/main.cf myhostname=...,
 
 # FIXME: /etc/resolv.conf search rather.puzzling.org
 

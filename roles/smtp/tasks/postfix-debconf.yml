@@ -1,0 +1,179 @@
+---
+- name: set as internet mailer (to be overridden later)
+  debconf:
+    name: postfix
+    question: postfix/main_mailer_type
+    vtype: string
+#    value: "Internet Site"
+    value: "Internet with smarthost"
+  become: true
+  notify: reconfigure postfix
+  when: host_is_smtp_relay is defined
+
+- name: set as satellite mailer
+  debconf:
+    name: postfix
+    question: postfix/main_mailer_type
+    vtype: string
+    value: "Satellite system"
+  become: true
+  notify: reconfigure postfix
+  when: host_is_smtp_relay is not defined
+
+- name: Set mailname
+  debconf:
+    name: postfix
+    question: postfix/mailname
+    vtype: string
+    value: "{{ smtp_mail_name }}"
+  become: true
+  notify: reconfigure postfix
+  when: host_is_smtp_relay is defined
+
+- name: Set mailname
+  debconf:
+    name: postfix
+    question: postfix/mailname
+    vtype: string
+    value: "{{ fqdn | default( inventory_hostname ~ '.' ~ default_domain ) }}"
+  become: true
+  notify: reconfigure postfix
+  when: host_is_smtp_relay is not defined
+
+- name: Set force sync
+  debconf:
+    name: postfix
+    question: postfix/chattr
+    vtype: boolean
+    value: "true"
+  become: true
+  notify: reconfigure postfix
+
+- name: Set no size limit
+  debconf:
+    name: postfix
+    question: postfix/mailbox_limit
+    vtype: string
+    value: "0"
+  become: true
+  notify: reconfigure postfix
+
+- name: Set destinations on relay
+  debconf:
+    name: postfix
+    question: postfix/destinations
+    vtype: string
+    value: "{{ hostname | default(inventory_hostname) }}.localdomain, localhost.localdomain, localhost, {{ smtp_mail_name }}"
+#    value: "{{ smtp_local_destination_domains }}" for smtp relay?
+  become: true
+  notify: reconfigure postfix
+  when: host_is_smtp_relay is defined
+
+- name: Set destinations on satellites
+  debconf:
+    name: postfix
+    question: postfix/destinations
+    vtype: string
+    value: "{{ hostname | default(inventory_hostname) }}.localdomain, localhost.localdomain, localhost"
+  become: true
+  notify: reconfigure postfix
+  when: host_is_smtp_relay is not defined
+
+- name: Set relayhost
+  debconf:
+    name: postfix
+    question: postfix/relayhost
+    vtype: string
+    value: "[smtp.gmail.com]:587"
+  become: true
+  notify: reconfigure postfix
+  when: smtp_relay_to_gmail is defined and host_is_smtp_relay is defined
+
+- name: Set relayhost
+  debconf:
+    name: postfix
+    question: postfix/relayhost
+    vtype: string
+    value: "{{ smtp_server }}"
+  become: true
+  notify: reconfigure postfix
+  when: not (smtp_relay_to_gmail is defined and host_is_smtp_relay is defined)
+
+- name: Set mynetworks
+  debconf:
+    name: postfix
+    question: postfix/mynetworks
+    vtype: string
+    value: "{{ smtp_local_networks | default('127.0.0.0/8') }}"
+  become: true
+  notify: reconfigure postfix
+
+- name: Set root user
+  debconf:
+    name: postfix
+    question: postfix/root_address
+    vtype: string
+    value: "{{ smtp_root_alias }}"
+  become: true
+  notify: reconfigure postfix
+  when: host_is_smtp_relay is defined
+
+- name: "Since dpkg-reconfigure doesn't seem to set aliases with above, let's set ourselves"
+  copy:
+    dest: "/etc/aliases"
+    content: "postmaster: root\nwebmaster: root\nroot: {{ smtp_root_alias }}\n"
+    mode: 0644
+  become: true
+  notify: newaliases
+  when: host_is_smtp_relay is defined
+
+- name: Set protocols
+  debconf:
+    name: postfix
+    question: postfix/protocols
+    vtype: string
+    value: "all"
+  become: true
+  notify: reconfigure postfix
+
+- name: Set delim
+  debconf:
+    name: postfix
+    question: postfix/recipient_delim
+    vtype: string
+    value: "+"
+  become: true
+  notify: reconfigure postfix
+
+- name: Set no procmail
+  # Similar problem to https://github.com/ansible/ansible/issues/25481 exists
+  # For some reason debconf doesn't realise false is
+  # changed from the default (unlike "true" in an above question)
+  debconf:
+    name: postfix
+    question: postfix/procmail
+    vtype: string  # ansible debconf module seems to behave better on this setting if string, not boolean
+    value: "false"
+  become: true
+  notify: reconfigure postfix
+  when: host_is_smtp_relay is not defined
+
+- name: Set procmail
+  debconf:
+    name: postfix
+    question: postfix/procmail
+    vtype: boolean
+    value: "true"
+  become: true
+  notify: reconfigure postfix
+  when: host_is_smtp_relay is defined
+
+- name: Setup gmail forward
+  copy:
+    dest: "/etc/postfix/sasl/sasl_passwd"
+    content: "[smtp.gmail.com]:587 {{ gmail_user_pass }}"
+    mode: 0600
+  become: true
+  no_log: true
+  notify: postmap sasl_passwd
+  when: host_is_smtp_relay is defined

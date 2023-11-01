@@ -1,0 +1,45 @@
+---
+- name: postmap sasl_passwd
+  command: "postmap /etc/postfix/sasl/sasl_passwd"
+  become: true
+  notify: reconfigure postfix
+
+- name: reconfigure postfix
+  file:
+    path: "{{ item }}"
+    state: absent
+  loop:
+    - "/etc/mailname"
+    - "/etc/postfix/main.cf"
+  notify: dpkg-reconfigure postfix
+  changed_when: true  # force the trigger of the next depdendent
+                      # action even if we didn't end up deleting the
+                      # conf files above because they were already
+                      # non-existent
+  become: true
+
+- name: postmap /etc/postfix/virtual
+  command: postmap /etc/postfix/virtual
+  become: true
+  notify: restart postfix
+
+- name: dpkg-reconfigure postfix
+  shell: dpkg-reconfigure --frontend noninteractive postfix
+  become: true
+
+- name: newaliases
+  command: newaliases
+  become: true
+  notify: restart postfix
+
+- name: restart postfix
+  service:
+    name: postfix
+    state: restarted
+  become: true
+
+- name: restart dovecot
+  service:
+    name: dovecot
+    state: restarted
+  become: true

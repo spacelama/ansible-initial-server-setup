@@ -1,0 +1,9 @@
+/var/log/imap.log {
+	weekly
+	missingok
+	rotate 7
+	compress
+	notifempty
+        create 666 dovecot
+        copytruncate
+}

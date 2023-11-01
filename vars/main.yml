@@ -6,6 +6,22 @@
   default_domain: rather.puzzling.org
 #  ssh_port: 22
   ansible_was_run_by: "{{ lookup('env','USER') }@{{ lookup('env','HOSTNAME') }}"
+  smtp_server: smtp.rather.puzzling.org
+  smtp_root_alias: tconnors
+  smtp_mail_name: rather.puzzling.org
+  dovecot_insecure_logfile_creation: true
+  smtp_crontab:
+    user: tconnors
+    content: |2
+      PATH=/home/tconnors/bin:/usr/bin:/bin:/usr/sbin:/sbin
+
+      # m h  dom mon dow   command
+      @reboot restartfetchmail
+      12 */6 * * * restartfetchmail
+
+      0 * * * * check-oldstopped-mail
+      00 07 * * sun cd Mail && mv .log.normal .log.normal.old
+      # now automated by the read-mail: 00 06 * * * mv_deleted_inbox_trash
 
   pve_users:
     - "{{ lookup('file', 'main.pve_users.passwd') }}"

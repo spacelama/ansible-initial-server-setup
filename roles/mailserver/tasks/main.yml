@@ -8,3 +8,4 @@
     state: present
   become: true
 
+# FIXME: Still to be fleshed out...  Needs to set up a properly hardened mailserver, firewalled off, selinux, etc...
