@@ -107,29 +107,29 @@
     state: present
   become: true
 
-- name: mount media
-  mount:
-    path: /media
-    src: /mnt/pve/cephfs-hdd/media/media
-    fstype: none
-    opts: bind,_netdev,x-systemd.automount
-    state: present
-  become: true
-  ignore_errors: true  # fails when not in systemd, or still in the
-                       # installation environment, etc
-  notify: systemd daemon reload
+# - name: mount media
+#   mount:
+#     path: /media
+#     src: /mnt/pve/cephfs-hdd/media/media
+#     fstype: none
+#     opts: bind,_netdev,x-systemd.automount
+#     state: present
+#   become: true
+#   ignore_errors: true  # fails when not in systemd, or still in the
+#                        # installation environment, etc
+#   notify: systemd daemon reload
 
-- name: mount media transcodes
-  mount:
-    path: /media_transcodes
-    src: /mnt/pve/cephfs-hdd/media/transcodes
-    fstype: none
-    opts: bind,_netdev,x-systemd.automount
-    state: present
-  become: true
-  ignore_errors: true  # fails when not in systemd, or still in the
-                       # installation environment, etc
-  notify: systemd daemon reload
+# - name: mount media transcodes
+#   mount:
+#     path: /media_transcodes
+#     src: /mnt/pve/cephfs-hdd/media/transcodes
+#     fstype: none
+#     opts: bind,_netdev,x-systemd.automount
+#     state: present
+#   become: true
+#   ignore_errors: true  # fails when not in systemd, or still in the
+#                        # installation environment, etc
+#   notify: systemd daemon reload
 
 - name: Ensures {{ item }} exists
   file:
