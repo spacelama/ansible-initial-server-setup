@@ -6,7 +6,7 @@
 
 log=/.backuppc_status
 date=`date +%s`
-excludes=( /backuppc /home/tconnors/.mp3.low_qual /var/spool/squid "/tank[^/]*" "/mnt/.*" "/media/.*" /var/spool/dovecot /mnt/olddirac "/var/cache/.*" ".*not_backed_up.*" ".*scratch" /external_backups /tmp /home/angela /piroot-new ".*subvol.*" ".*basevol.*" "/rpool.*" "/hdd" "/ssd_hdd" "/wavlink" ) # it's not ideal that /hdd matches on both pve and dirac and we care about dirac, but we know its already backed up, and next replacement host for dirac won't have that mount name ; FIXME: we do want /hdd/template/iso though.  Only thing we don't want is  /hdd/subvol-* - perhaps we should be excluding those instead
+excludes=( /backuppc /home/tconnors/.mp3.low_qual /var/spool/squid "/tank[^/]*" "/mnt/.*" "/media/.*" /mnt/olddirac "/var/cache/.*" ".*not_backed_up.*" ".*scratch" /external_backups /tmp /home/angela /piroot-new ".*subvol.*" ".*basevol.*" "/rpool.*" "/hdd" "/ssd_hdd" "/wavlink" ) # it's not ideal that /hdd matches on both pve and dirac and we care about dirac, but we know its already backed up, and next replacement host for dirac won't have that mount name ; FIXME: we do want /hdd/template/iso though.  Only thing we don't want is  /hdd/subvol-* - perhaps we should be excluding those instead
 HOST=`hostname`
 
 function get_logentry() {
@@ -14,7 +14,7 @@ function get_logentry() {
 }
 
 msg=$(
-    df -a -Pk -x tmpfs -x devtmpfs -x devpts -x sysfs -x proc -x udf -x squashfs -x nfs -x nfs3 -x nfs4 -x fuse.sshfs -x fuse.lxcfs -x ramfs -x mqueue -x fusectl -x cgroup2 |
+    df -a -Pk -x tmpfs -x devtmpfs -x devpts -x sysfs -x proc -x udf -x squashfs -x nfs -x nfs3 -x nfs4 -x fuse.sshfs -x fuse.lxcfs -x ramfs -x mqueue -x fusectl -x cgroup2 -x securityfs -x pstore -x bpf -x hugetlbfs -x debugfs -x tracefs -x configfs -x rpc_pipefs -x nfsd -x autofs -x binfmt_misc -x fuse.afuse -x fuse |
        tail -n +2 | 
        awk '{print $6}' | 
        grep -v /net/ |
