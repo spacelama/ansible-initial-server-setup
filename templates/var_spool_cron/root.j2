@@ -5,13 +5,15 @@ MAILTO=tconnors
 
 @reboot mail -s "$(/bin/hostname) reboot at $(/bin/date)" root < /dev/null > /dev/null
 
-{% if inventory_hostname is regex('^pve')%}
+{% if inventory_hostname is regex('^pve') %}
 @reboot if hostname | grep -q ^pve ; then echo schedutil | tee /sys/devices/system/cpu/cpu*/cpufreq/scaling_governor ; fi
 {% endif %}
-{% if inventory_hostname is regex('^pi')%}
+{% if monitor_nut is defined %}
 * * * * * /root/bin/restart-nut-driver
 {% endif %}
+{% if host_is_container is not defined %}
 00 4    * * *   /usr/local/bin/checkntp
+{% endif %}
 
 {# commented out:
   #00 04 * * * ( df -lP 2>&1 | grep -v "/.cache/doc: Operation not permitted" ) | tail -n +2 | awk '{print $6}' | while read a ; do ls -lA $a > /dev/null 2>/dev/null ; [ $? -le 1 ] || echo "$a mount has failed" ; done
