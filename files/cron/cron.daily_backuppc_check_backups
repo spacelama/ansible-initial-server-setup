@@ -6,41 +6,82 @@
 
 log=/.backuppc_status
 date=`date +%s`
-excludes=( "/proc/.*" "/sys/.*" "/dev/.*" "/run/.*" "/backuppc" "/snapshots" "/home/tconnors/.mp3.low_qual" "/var/spool/squid" "/tank[^/]*" "/mnt/.*" "/media/.*" "/mnt/olddirac" "/var/cache/.*" ".*not_backed_up.*" ".*scratch" "/external_backups" "/tmp" "/home/angela" "/piroot-new" ".*subvol.*" ".*basevol.*" "/rpool.*" "/wavlink" ) # it's not ideal that /hdd matches on both pve and dirac and we care about dirac, but we know its already backed up, and next replacement host for dirac won't have that mount name ; FIXME: we do want /hdd/template/iso though.  Only thing we don't want is  /hdd/subvol-* - perhaps we should be excluding those instead
+excludes=( "/proc/.*" "/sys/.*" "/dev/.*" "/run/.*" "/backuppc" "/snapshots" "/home/tconnors/.mp3.low_qual" "/var/spool/squid" "/tank[^/]*" "/mnt/.*" "/media/.*" "/mnt/olddirac" "/var/cache/.*" ".*not_backed_up.*" ".*scratch" "/external_backups" "/tmp" "/home/angela" "/piroot-new" ".*subvol.*" ".*basevol.*" "/rpool.*" "/wavlink" "/net/.*" "/var/snap/.*" ) # FIXME: we do want /hdd/template/iso though.  Only thing we don't want is  /hdd/subvol-* - perhaps we should be excluding those instead
 HOST=`hostname`
 
 function get_logentry() {
     sed -n "s@^$HOST:$1 @@p" $log 2>/dev/null | head -n 1 | awk '{print $1}'  # head just in case the sed substituion went bad and we have repeat lines.  want to pick the earlier occurence so we flag the error
 }
 
-msg=$(
-    df -a -T -Pk -x tmpfs -x devtmpfs -x devpts -x sysfs -x proc -x udf -x squashfs -x nfs -x nfs3 -x nfs4 -x fuse.sshfs -x fuse.lxcfs -x autofs -x fuse.afuse |
-       tail -n +2 |
-       awk '{print $7}' |
-       sort | uniq |
-       while read fs ; do
-        for exclude in "${excludes[@]}" ; do
-            if echo "$fs" | grep -q "^$exclude\$" ; then
-#               echo "fs $fs deliberately excluded"
-                continue 2
-            fi
-        done
-        logentry=`get_logentry $fs`
-        if [ -n "$logentry" ] ; then
-            if [ $logentry -gt $((date-86400*10)) -a $fs != /home/tconnors/thesis ] ||
-               [ $logentry -gt $((date-86400*30)) -a $fs == /home/tconnors/thesis ] ||
-               [ $logentry -gt $((date-86400*30)) -a $HOST == maxwell ]
-            then
-                :
+# we need to do the filtering that df does by default to remove
+# duplicate (eg bind mounted) filesystems that are just subsets of
+# what are already ensured to be backed up, eg, if / and
+# /var/snap/firefox both map back to the /dev/mapper/dirac-root
+# device, then don't list /var/snap/firefox separately
+function filter_bindmount_children() {
+    lastdev=
+    lasttestfs=
+    while read -r dev type fs ; do
+        # ensure we're always testing directories with "/" at the end of them
+        if [[ "$testfs" == */ ]] ; then
+            testfs="$fs"
+        else
+            testfs="$fs/"
+        fi
+        echo "$dev =? $lastdev"
+        if [ "$dev" = "$lastdev" ] ; then
+            if [[ "testfs" == "$lasttestfs"* ]] ; then
+                # echo "****supressing: $fs"
+                : # we are a child of a directory already checked, so supress output
             else
-                backed_up=`date -d "1970-01-01 UTC $logentry seconds"`
-                echo "$HOST:$fs not attempted to be backed up since: $backed_up"
+                echo "$dev $type $fs"
             fi
         else
-            echo "$HOST:$fs not recorded in $log status file "
+            #we're definitely on a new device, so always output the first match
+            echo "$dev $type $fs"
         fi
+
+        lastdev="$dev"
+        lasttestfs="$testfs"
     done
-)
+}
+
+msg=$(
+    # df -a because bind mounts /aaaaa/a, /aaaaa/b and /aaaaa/c
+    # mounted underneath a container's namespace share the same fsid,
+    # but we need to back them all up
+    #
+    # we don't say df -l anymore, because we care about backing up
+    # ceph filesystems, which are network filesystems, not local
+
+    df -a -k --output='source,fstype,target' -x tmpfs -x devtmpfs -x devpts -x sysfs -x proc -x udf -x squashfs -x nfs -x nfs3 -x nfs4 -x fuse.sshfs -x fuse.lxcfs -x autofs -x fuse.afuse |
+        tail -n +2 |
+        sort |
+        filter_bindmount_children |
+        sort | uniq |
+        while read -r dev type fs ; do
+            for exclude in "${excludes[@]}" ; do
+                if echo "$fs" | grep -q "^$exclude\$" ; then
+                    # echo "fs $fs deliberately excluded"
+                    continue 2
+                fi
+            done
+            logentry=`get_logentry $fs`
+            if [ -n "$logentry" ] ; then
+                if [ $logentry -gt $((date-86400*10)) -a $fs != /home/tconnors/thesis ] ||
+                       [ $logentry -gt $((date-86400*30)) -a $fs == /home/tconnors/thesis ] ||
+                       [ $logentry -gt $((date-86400*30)) -a $HOST == maxwell ]
+                then
+                    :
+                else
+                    backed_up=`date -d "1970-01-01 UTC $logentry seconds"`
+                    echo "$HOST:$fs not attempted to be backed up since: $backed_up"
+                fi
+            else
+                echo "$HOST:$fs not recorded in $log status file "
+            fi
+        done
+   )
 
 if [ -n "$msg" ] ; then
     (
