@@ -6,13 +6,42 @@
 
 log=/.backuppc_status
 date=`date +%s`
+# excludes should be escaped in the same way paths in /etc/mtab is escaped
 excludes=( "/proc/.*" "/sys/.*" "/dev/.*" "/run/.*" "/backuppc" "/snapshots" "/home/tconnors/.mp3.low_qual" "/var/spool/squid" "/tank[^/]*" "/mnt/.*" "/media/.*" "/mnt/olddirac" "/var/cache/.*" ".*not_backed_up.*" ".*scratch" "/external_backups" "/tmp" "/home/angela" "/piroot-new" ".*subvol.*" ".*basevol.*" "/rpool.*" "/wavlink" "/net/.*" "/var/snap/.*" ) # FIXME: we do want /hdd/template/iso though.  Only thing we don't want is  /hdd/subvol-* - perhaps we should be excluding those instead
+exclude_types=( "tmpfs" "devtmpfs" "devpts" "sysfs" "proc" "udf" "squashfs" "nfs" "nfs3" "nfs4" "fuse.sshfs" "fuse.lxcfs" "autofs" "fuse.afuse" )
+exclude_dev_type_matches=( "/dev/mapper/hdd.*/home/tconnors/.*" )
 HOST=`hostname`
 
 function get_logentry() {
     sed -n "s@^$HOST:$1 @@p" $log 2>/dev/null | head -n 1 | awk '{print $1}'  # head just in case the sed substituion went bad and we have repeat lines.  want to pick the earlier occurence so we flag the error
 }
 
+function exclude() {
+    while read -r dev type fs ; do
+        for exclude_type in "${exclude_types[@]}" ; do
+            if echo "$type" | grep -q "^$exclude_type\$" ; then
+                # echo "fs $fs ($type) deliberately excluded"
+                continue 2
+            fi
+        done
+
+        for exclude in "${excludes[@]}" ; do
+            if echo "$fs" | grep -q "^$exclude\$" ; then
+                # echo "fs $fs deliberately excluded"
+                continue 2
+            fi
+        done
+
+        for exclude_dev_type_match in "${exclude_dev_type_matches[@]}" ; do
+            if echo "$dev $type $fs" | grep -q "^$exclude_dev_type_match\$" ; then
+                # echo "fs $fs deliberately excluded"
+                continue 2
+            fi
+        done
+
+        echo "$dev $type $fs"
+    done
+}
 # we need to do the filtering that df does by default to remove
 # duplicate (eg bind mounted) filesystems that are just subsets of
 # what are already ensured to be backed up, eg, if / and
@@ -28,7 +57,7 @@ function filter_bindmount_children() {
         else
             testfs="$fs/"
         fi
-        echo "$dev =? $lastdev"
+        # echo "$dev =? $lastdev" 1>&2
         if [ "$dev" = "$lastdev" ] ; then
             if [[ "testfs" == "$lasttestfs"* ]] ; then
                 # echo "****supressing: $fs"
@@ -47,27 +76,20 @@ function filter_bindmount_children() {
 }
 
 msg=$(
-    # df -a because bind mounts /aaaaa/a, /aaaaa/b and /aaaaa/c
-    # mounted underneath a container's namespace share the same fsid,
-    # but we need to back them all up
-    #
-    # we don't say df -l anymore, because we care about backing up
-    # ceph filesystems, which are network filesystems, not local
-
-    df -a -k --output='source,fstype,target' -x tmpfs -x devtmpfs -x devpts -x sysfs -x proc -x udf -x squashfs -x nfs -x nfs3 -x nfs4 -x fuse.sshfs -x fuse.lxcfs -x autofs -x fuse.afuse |
-        tail -n +2 |
+    # get dev, fstype and destination from /etc/mtab, filter out those
+    # types we don't care about, then unescape destination
+    cat /etc/mtab | awk '{print $1, $3, $2}' |
+        exclude |
         sort |
         filter_bindmount_children |
         sort | uniq |
         while read -r dev type fs ; do
-            for exclude in "${excludes[@]}" ; do
-                if echo "$fs" | grep -q "^$exclude\$" ; then
-                    # echo "fs $fs deliberately excluded"
-                    continue 2
-                fi
-            done
+            # unescape fs
+            fs=$( printf "%b" "$fs" )
+
             logentry=`get_logentry $fs`
             if [ -n "$logentry" ] ; then
+                # FIXME: need a better way to special case the special cases
                 if [ $logentry -gt $((date-86400*10)) -a $fs != /home/tconnors/thesis ] ||
                        [ $logentry -gt $((date-86400*30)) -a $fs == /home/tconnors/thesis ] ||
                        [ $logentry -gt $((date-86400*30)) -a $HOST == maxwell ]
