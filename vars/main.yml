@@ -139,6 +139,8 @@
     - { source: etc/reportbug.conf,       dest: /etc/reportbug.conf, when_pkg_installed: "reportbug" }
 
     - { source: etc/cron.d/munin-node,    dest: /etc/cron.d/munin-node }
+    - { source: etc/munin/munin-node,     dest: /etc/munin/munin-node,   notify: "restart munin-node" }
+
 #    - { source: etc/fuse.conf,            dest: /etc/fuse.conf,                          mode: "0640", group: "{{ 'fuse' if inventory_hostname == 'fs' else 'root' }}", when_pkg_installed: "fuse3"  }
 #    - { source: etc/fuse.conf,            dest: /etc/fuse.conf,                          mode: "0640", group: "fuse", when: "{{ inventory_hostname == 'fs' }}" }
 #    - { source: etc/fuse.conf,            dest: /etc/fuse.conf,                          mode: "0640", group: "root", when: "{{ inventory_hostname != 'fs' }}" }
