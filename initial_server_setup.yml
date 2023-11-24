@@ -30,6 +30,10 @@
     - role: bootstrap
     - role: ssh_bootstrap
       become: true
+    - role: nutserver
+      when: (host_is_nut_server is defined) or (host_is_nut_master is defined)
+    - role: nutmaster
+      when: host_is_nut_master is defined
     - role: management
       when: host_is_mgmt is defined
     - user

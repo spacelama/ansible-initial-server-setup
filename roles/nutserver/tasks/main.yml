@@ -1,0 +1,139 @@
+---
+- name: install nut
+  apt:
+    name: [ "nut-server" ]
+    autoremove: no
+    state: present
+    install_recommends: no
+  become: true
+
+- name: set up nut ups.conf
+  blockinfile:
+    path: /etc/nut/ups.conf
+    marker: "# {mark} ANSIBLE MANAGED BLOCK"
+    backup: yes
+    block: |2
+      pollinterval 1
+
+      {{ nut_ups_conf[inventory_hostname].content | string }}
+  become: true
+#  notify: restart nut # not needed on pve8 - it seems to just autoreload on any changes?
+  when: host_is_nut_server is defined
+
+- name: set up nut nut.conf
+  block:
+    - lineinfile:
+        dest: /etc/nut/nut.conf
+        regexp: '^MODE=none'
+        line: '# MODE=none'
+      notify: restart nut server
+
+    - lineinfile:
+        dest: /etc/nut/nut.conf
+        regexp: '^MODE='
+        line: 'MODE=standalone'
+      notify: restart nut server
+  become: true
+
+- name: set up nut upsd.conf
+  block:
+    - lineinfile:
+        dest: /etc/nut/upsd.conf
+        regexp: '^LISTEN.*'
+        line: 'LISTEN *'
+      notify: restart nut server
+  become: true
+
+- name: set up nut upsd.users
+  block:
+    - blockinfile:
+        path: /etc/nut/upsd.users
+        marker: "# {mark} ANSIBLE MANAGED BLOCK"
+        backup: yes
+        block: |2
+          [nut]
+          password = {{ nut_password }}
+          #allowfrom = localhost
+          upsmon primary
+          #actions = set
+          actions  = set,fsd
+          instcmds = all
+      notify: restart nut server
+  become: true
+
+- name: set up nut upsmon.conf
+  block:
+    # first comment out entries we don't want
+    - lineinfile:
+        dest: /etc/nut/upsmon.conf
+        regexp: "^{{ item }}"
+        line: "# {{ item }}"
+      notify: restart nut monitor
+      with_items:
+        - "POLLFREQ 5"
+        - "POLLFREQALERT 5"
+
+    # then add in our entire configuration block
+    - blockinfile:
+        path: /etc/nut/upsmon.conf
+        marker: "# {mark} ANSIBLE MANAGED BLOCK"
+        backup: yes
+        block: |2
+          RUN_AS_USER nut
+
+          MONITOR {{ nut_upsmon_conf[inventory_hostname].name }}@{{ nut_upsmon_conf[inventory_hostname].host | default('localhost') }} 1 nut {{ nut_password }} master
+
+          POLLFREQ 1
+          POLLFREQALERT 1
+
+          NOTIFYFLAG ONLINE   SYSLOG+EXEC
+          NOTIFYFLAG ONBATT   SYSLOG+EXEC
+          NOTIFYFLAG LOWBATT  SYSLOG+EXEC
+          NOTIFYFLAG FSD      SYSLOG+EXEC
+          NOTIFYFLAG COMMOK   SYSLOG+EXEC
+          NOTIFYFLAG COMMBAD  SYSLOG+EXEC
+          NOTIFYFLAG SHUTDOWN SYSLOG+EXEC
+          NOTIFYFLAG REPLBATT SYSLOG+EXEC
+          NOTIFYFLAG NOCOMM   SYSLOG+EXEC
+          NOTIFYFLAG NOPARENT SYSLOG+EXEC
+      notify: restart nut monitor
+  become: true
+
+- name: set up nut upssched.conf
+  block:
+    # first comment out entries we don't want
+    - lineinfile:
+        dest: /etc/nut/upssched.conf
+        regexp: "^{{ item }}"
+        line: "# {{ item }}"
+      notify: restart nut monitor
+      with_items:
+        - "CMDSCRIPT /bin/upssched-cmd"
+
+    # then add in our entire configuration block
+    - blockinfile:
+        path: /etc/nut/upssched.conf
+        marker: "# {mark} ANSIBLE MANAGED BLOCK"
+        backup: yes
+        block: |2
+          CMDSCRIPT /home/tconnors/bin/upssched-cmd
+
+          AT ONBATT * START-TIMER onbatt 30
+          AT ONLINE * CANCEL-TIMER onbatt online
+          AT ONBATT * START-TIMER earlyshutdown 30
+          AT LOWBATT * EXECUTE onbatt
+          AT COMMBAD * START-TIMER commbad 30
+          AT COMMOK * CANCEL-TIMER commbad commok
+          AT NOCOMM * EXECUTE commbad
+          AT SHUTDOWN * EXECUTE powerdown
+      notify: restart nut monitor
+  become: true
+
+- name: install upssched-cmd
+  copy:
+    dest: "{{ nut_upssched_install.location }}"
+    owner: "{{ nut_upssched_install.owner }}"
+    group: "{{ nut_upssched_install.group }}"
+    src: upssched-cmd
+    mode: 0755
+  become: true

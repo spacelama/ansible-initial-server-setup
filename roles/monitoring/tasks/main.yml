@@ -71,6 +71,20 @@
     - nvme_
   notify: restart munin-node
 
+- name: install custom nutups2_ etc munin monitoring plugins from munin-contrib, that take arguments, to UPS nut monitoring nodes
+  copy:
+    src: "monitoring/munin/{{ item }}"
+    dest: "/usr/share/munin/plugins/"
+    owner: root
+    group: root
+    mode: 0755
+    local_follow: true
+  become: true
+  with_items:
+    - nutups2_
+  notify: restart munin-node
+  when: host_is_nut_master is defined
+
 - name: install custom chrony etc munin monitoring plugins from munin-contrib, that don't take arguments, for non-containers
   copy:
     src: "monitoring/munin/{{ item }}"
@@ -181,6 +195,7 @@
   notify: restart munin-node
   ignore_errors: true # munin packages are on fs, which might not be alive
 
+  #FIXME: should work out a way of removing all stale items discovered by previous suggests that are no longer relevant (so wildcard minus current suggests result)
 - name: gather and implement munin suggests
   include_tasks: munin_suggest_plugin.yml
   loop_control:
@@ -194,7 +209,6 @@
     - if_
     - if_err_
     - nutups_
-    - nutups2_
 #    - ipmi_  # wants to set all 4 on all hosts, so define them in dell instead
 
 - name: existing munin plugins with params

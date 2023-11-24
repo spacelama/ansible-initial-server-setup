@@ -1,0 +1,39 @@
+---
+- name: install nut
+  apt:
+    name: [ "nut-client", "nut-cgi" ]
+    autoremove: no
+    state: present
+    install_recommends: no
+  become: true
+
+- name: setup nut hosts.conf
+  blockinfile:
+    path: /etc/nut/hosts.conf
+    marker: "# {mark} ANSIBLE MANAGED BLOCK"
+    backup: yes
+    block: |2
+      {% for host in nut_upsmon_conf %}
+      {# we don't include those entries in nut_upsmon_conf where .host is defined,
+         because that monitoring node is talking to another machine with a UPS attached #}
+      {% if (nut_upsmon_conf[host].host | default('localhost') == 'localhost' ) %}
+      MONITOR {{ nut_upsmon_conf[host].name }}@{{ host }} "{{ nut_upsmon_conf[host].desc }}"
+      {% endif %}
+      {% endfor %}
+  notify: restart nut monitor
+  become: true
+
+- name: create nutups2_ symlinks for munin
+  file:
+    src: /usr/share/munin/plugins/nutups2_
+    dest: "/etc/munin/plugins/nutups2_{{ nut_upsmon_conf[item[0]].name }}.{{ item[0] }}_{{ item[1] }}"
+    state: link
+    force: yes
+  become: true
+  notify: restart munin-node
+  with_nested:
+    - "{{ nut_upsmon_conf.keys() | list }}"
+    - "{{ [ 'frequency', 'charge', 'temperature', 'power_emulated', 'voltage', 'runtime', 'current' ] }}"
+  # we don't include those entries in nut_upsmon_conf where .host is defined,
+  # because that monitoring node is talking to another machine with a UPS attached
+  when: nut_upsmon_conf[item[0]].host | default('localhost') == 'localhost'

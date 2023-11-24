@@ -31,6 +31,111 @@
 
   pve_users:
     - "{{ lookup('file', 'main.pve_users.passwd') }}"
+
+  nut_password: "{{ lookup('file', 'main.nut.passwd') }}"
+  nut_ups_conf:
+    pve1:
+      content: |2
+        [powershield-centurion]
+        #https://blog.warbel.net/index.php/2017/09/15/configuring-powershield-ups-on-linux-and-integrating-into-zabbix/
+        # https://alioth-lists.debian.net/pipermail/nut-upsuser/2011-March/006699.html
+        driver=nutdrv_qx
+        port = auto
+        # find with -DD:
+        #ProductID: 5161
+        #VendorID: 0665
+        vendorid = 0665
+        desc = "Powershield Centurion 1000@pve1"
+
+        #        default.battery.voltage.high = 27.2
+        default.battery.voltage.high = 39
+        default.battery.voltage.low = 31.2
+        # Just an example from https://networkupstools.org/docs/man/blazer_usb.html, modified according to manual
+        runtimecal = 3120,100,6240,50
+        # from manual:
+        chargetime = 18000
+    pve3:
+      content: |2
+        [powershield]
+        #driver = blazer_usb
+        driver=nutdrv_qx
+        port = auto
+        vendorid = 0665
+        desc = "Powershield Mini@pve3"
+        default.battery.voltage.high = 13
+        default.battery.voltage.low = 10.4
+        runtimecal = 312,100,624,50
+        chargetime = 10800
+    pve-backup:
+      content: |2
+        [powershield-commander]
+        driver=nutdrv_qx
+        #        driver=blazer_usb
+        port=auto
+        # find with -DD:
+        #VendorID: 0001
+        #ProductID: 0000
+        vendorid = 0001
+        desc = "Powershield Commander 1000@pve-backup"
+
+        #        default.battery.voltage.high = 27.2
+        default.battery.voltage.high = 26
+        default.battery.voltage.low = 20.8
+        # Just an example from https://networkupstools.org/docs/man/blazer_usb.html, modified according to manual
+        runtimecal = 270,100,840,50
+        # from manual:
+        chargetime = 10800
+  nut_upsmon_conf:
+    pve1:
+      name: powershield-centurion
+      desc: "Powershield Centurion 1000@pve1"
+    pve3:
+      name: powershield
+      desc: "Powershield Mini@pve3"
+    pve-backup:
+      name: powershield-commander
+      desc: "Powershield Commander 1000@pve-backup"
+    iot:
+      # if iot is going to coordinate shutdown, it ought monitor pve1
+      # because that's probably where it's running
+      name: powershield-centurion
+      desc: "Powershield Centurion 1000@pve1"
+      host: pve1
+  nut_upssched_install:
+    location: /home/tconnors/bin/
+    owner: tconnors
+    group: tconnors
+  munin_nut_config: |2
+    #[nutups2_*]
+    #env.upsc upsc
+
+    [nutups2_powershield-commander*]
+    user nut
+    group nut
+    # powershield commander 1000: 400 watts at 63% load on powershield commander 1000: 400/63
+    env.power_emulated_multiplier 6.349
+    # warning and critical from the values shown by nutups2_powershield-commander_voltage config, but upper limits scaled up a bit above the charging voltage, which is higher than full (uncharging) level
+    # env.battery.warning
+    env.battery_critical 20.8:27.5
+
+    [nutups2_powershield-centurion*]
+    user nut
+    group nut
+    # powershield centurion 1000: 445 watts at 48% load on powershield centurion 1000: 445/49
+    env.power_emulated_multiplier 9.294
+    # warning and critical from the values shown by nutups2_powershield-centurion_voltage config, but upper limits scaled up a bit above the charging voltage, which is higher than full (uncharging) level
+    # env.battery.warning
+    env.battery_critical 31.2:41.25
+
+    [nutups2_powershield.asusrtax53u*]
+    user nut
+    group nut
+    # powershield mini 1000: 317 watts at 67% load on powershield mini 1000: 317/67
+    env.power_emulated_multiplier 4.73
+    # warning and critical from the values shown by nutups2_powershield.asusrtax53u_voltage config, but upper limits scaled up a bit above the charging voltage, which is higher than full (uncharging) level
+    # env.battery.warning
+    env.battery_critical 10.40:13.75
+
   my_groups:
     tconnors:
       gid: 273

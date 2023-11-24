@@ -1,0 +1,49 @@
+#! /bin/sh
+#
+# This script should be called by upssched via the CMDSCRIPT directive.
+#
+# Here is a quick example to show how to handle a bunch of possible
+# timer names with the help of the case structure.
+#
+# This script may be replaced with another program without harm.
+#
+# The first argument passed to your CMDSCRIPT is the name of the timer
+# from your AT lines.
+
+case $1 in
+    upsgone)
+        echo "The UPS has been gone for awhile: $@, $NOTIFYTYPE, $UPSNAME" | mail -s "UPS warning gone, $UPSNAME" tconnors
+        ;;
+    onbattwarn)
+        echo "The UPS is currently running on battery power! $@, $NOTIFYTYPE, $UPSNAME" | mail -s "UPS warning on batt, $UPSNAME" tconnors
+        #echo "We will shut down" | mail -s "upscched-cmd: UPS temporary workaround to shutdown machine on mains power" tconnors
+        # need to run as root, but we're trying to shut down the UPS as well - the web says nut does this automatically
+        #/usr/sbin/upsmon -c fsd
+        ;;
+    online)
+        echo "The UPS is OK now! $@, $NOTIFYTYPE, $UPSNAME" | mail -s "UPS OK, $UPSNAME" tconnors
+        ;;
+    fsd)
+        echo "FSD: $@, $NOTIFYTYPE, $UPSNAME" | mail -s "UPS warning FSD, $UPSNAME" tconnors
+        #       echo "We will shut down" | mail -s "upscched-cmd: UPS temporary workaround to shutdown machine on mains power" tconnors
+        #       /sbin/shutdown -h +0
+        ;;
+    lowbatt)
+        echo "Low battery: $@, $NOTIFYTYPE, $UPSNAME" | mail -s "UPS warning low batt, $UPSNAME" tconnors
+        #        echo "We will shut down" | mail -s "upscched-cmd: UPS temporary workaround to shutdown machine on mains power" tconnors
+        #        /sbin/shutdown -h +0
+        #        /usr/sbin/upsmon -c fsd
+        ;;
+    shutdown)
+        echo "Shutdown: $@, $NOTIFYTYPE, $UPSNAME" | mail -s "UPS warning shutting down, $UPSNAME" tconnors
+        #        echo "We will shut down" | mail -s "upscched-cmd: UPS temporary workaround to shutdown machine on mains power" tconnors
+        #        /sbin/shutdown -h +0
+        #        /usr/sbin/upsmon -c fsd
+        ;;
+    replacebatt)
+        echo "Replace battery: $@, $NOTIFYTYPE, $UPSNAME" | mail -s "UPS warning replace battery, $UPSNAME" tconnors
+        ;;
+    *)
+        echo "Unrecognized command: $@, $NOTIFYTYPE, $UPSNAME" | mail -s "UPS warning, $UPSNAME" tconnors
+        ;;
+esac

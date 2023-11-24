@@ -18,6 +18,16 @@
     name: munin-node
     state: restarted
 
+- name: restart nut server
+  service:
+    name: nut-server
+    state: restarted
+
+- name: restart nut monitor
+  service:
+    name: nut-monitor
+    state: restarted
+
 - name: "systemd daemon reload"
   systemd:
     daemon_reload: true
