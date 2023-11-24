@@ -118,6 +118,23 @@
   notify: restart postfix
   when: host_is_smtp_relay is defined
 
+- name: add submission ports to postfix master
+  lineinfile:
+    dest: "/etc/postfix/master.cf"
+    regexp: "^#?({{ item }}.*)"
+    backrefs: true
+    line: '\1'
+  become: true
+  notify: restart postfix
+  when: host_is_smtp_relay is defined
+  with_items:
+    # uncomment lines that start with these:
+    - "127.0.0.1:submission"
+    - "127.0.0.1:submissions"
+  become: true
+  notify: restart postfix
+  when: host_is_smtp_relay is defined
+
 # - name: populate the virtual user table
 #   copy:
 #     dest: /etc/postfix/virtual
