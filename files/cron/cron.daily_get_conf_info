@@ -164,8 +164,6 @@ if [ -e /sys/class/net/bonding_masters ] ; then
     done
 fi
 
-# FIXME: raid controller status?
-
 # dpkg packages
 dpkg --get-selections | sort > $data_dir/dpkg-packages 2>&1
 if [ -x /usr/bin/apt-show-versions ] ; then
@@ -173,9 +171,14 @@ if [ -x /usr/bin/apt-show-versions ] ; then
 fi
 
 # Dell
-if [ -e /opt/dell/srvadmin/bin/omreport ] ; then
+if [ -x /opt/dell/srvadmin/bin/omreport ] ; then
     get_dell_info
 fi
+if [ -x /usr/local/bin/megaclisas-status ] ; then
+    /usr/local/bin/megaclisas-status > $data_dir/megaclisas-status
+fi
+# FIXME: other raid controller status?
+# MegaCli64 AdpGetProp ... https://www.alteeve.com/w/MegaCli64_Cheat_Sheet
 
 # Other
 #backup /root/anaconda-ks.cfg $data_dir/anaconda-ks.cfg
