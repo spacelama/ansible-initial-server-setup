@@ -2,6 +2,8 @@
 
 # for invocation from /etc/cron.daily
 
+exec < /dev/null
+
 function backup() {
 # on hosts where files are synced back to a master server and version
 # controlled every half hour, we can just symlink 'rsync -L'd files
