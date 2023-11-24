@@ -1,0 +1,96 @@
+#!/bin/bash
+
+# Turns on a dell poweredge machine through the idrac interface, via a
+# UPS and tasmota internet power switch.  Turns on the power switch,
+# which hopefully automatically fires up the UPS output, and then we
+# wait for the idrac to respond, then we ssh into it and turn it on.
+# We finally wait for the host to respond to ssh.
+
+# Author: Tim Connors 2023
+
+set -eu
+set -o pipefail
+
+remote_host="$1"
+remote_idrac="$2"
+power_switch="$3"
+
+turn_on_ups() {
+    echo "$(date) Turning on UPS"
+    curl -fsS --data-urlencode "cmnd=Power On" http://$power_switch/cm | jq
+}
+
+wait_for_idrac() {
+    echo "$(date) Waiting for idrac on network"
+    for i in `seq 1 15` ; do
+        if fping -q -c 1 $remote_idrac ; then
+            break
+        fi
+        sleep 10
+    done
+
+    echo "$(date) Waiting for idrac ssh response"
+    for i in `seq 1 15` ; do
+        if timeout -k 1 30 ssh root@$remote_idrac racadm serveraction powerstatus ; then
+            return
+        fi
+        sleep 10
+    done
+
+    false
+}
+
+turn_on_machine() {
+    # make sure we're already in the expected state.  If the machine
+    # is already up, the admin might be doing something with it, or
+    # yesterday's run still going.  Better let it stay powered up and
+    # do nothing with it today.
+    echo "$(date) Turning on $remote_host"
+    powerstatus=$( ssh root@$remote_idrac racadm serveraction powerstatus )
+    if [[ "$powerstatus" == *ON* ]] ; then
+        return 1  # allow the caller to deal with us
+    elif ! [[ "$powerstatus" == *OFF* ]] ; then
+        echo "Power status was not determined when we went to power it on"    # a definite error condition
+        exit 1
+    fi
+    ssh root@$remote_idrac racadm serveraction powerup
+    sleep 2
+    if ! ssh root@$remote_idrac racadm serveraction powerstatus | grep ON ; then
+        echo "Power was not on after we tried turning it on"
+        exit 1
+    fi
+}
+
+wait_for_machine_up() {
+    echo "$(date) Waiting for $remote_host on network"
+    for i in `seq 1 15` ; do
+        if fping -q -c 1 $remote_host ; then
+            break
+        fi
+        sleep 10
+    done
+
+    echo "$(date) Waiting for $remote_host ssh response"
+    for i in `seq 1 15` ; do
+        if timeout -k 1 10 ssh root@$remote_host true ; then
+            # finally sleep another 20 seconds to make sure zpool disks are
+            # spun up, services are running etc
+            if ! [ -t 0 ] ; then
+                sleep 20
+            fi
+            return
+        fi
+
+        sleep 10
+    done
+
+    false
+}
+
+turn_on_ups
+wait_for_idrac
+turn_on_machine || [ -t 0 ] # failure if machine was already on,
+                            # unless we're running interactively, in
+                            # which case we're clearly debugging this
+                            # script
+wait_for_machine_up

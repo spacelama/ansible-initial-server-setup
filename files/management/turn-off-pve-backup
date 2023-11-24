@@ -1,0 +1,78 @@
+#!/bin/bash
+
+# Turns off a dell poweredge machine through a direct ssh connection,
+# where we assume the dell machine and its idrac interface are powered
+# via a UPS and tasmota internet power switch.  Turns the machine off,
+# waits for that to shutdown, then turns the internet power switch
+# off, which hopefully automatically turns off the UPS output if its
+# configured to auto-turn-off the battery backup when the output load
+# is sufficiently small (just the idrac alone and perhaps a small
+# ethernet switch).  When the idrac no longer responds, we know the
+# UPS has shut off, and we signal back to our caller that the process
+# is done.
+
+# Author: Tim Connors 2023
+
+set -eu
+set -o pipefail
+
+remote_host="$1"
+remote_idrac="$2"
+power_switch="$3"
+
+turn_off_machine() {
+    echo "$(date) Turning off $remote_host"
+    ssh root@$remote_host poweroff
+
+    #FIXME: probably should have backup option to `ssh
+    #root@$remote_idrac racadm serveraction graceshutdown` after some
+    #time just in case ssh failed, but last time ssh failed,
+    #graceshutdown failed too, and certainly don't want to do anything
+    #harder than that automatically
+}
+
+wait_for_machine_down() {
+    echo "$(date) Waiting for $remote_host to go down"
+    for i in `seq 1 15` ; do
+        if ! fping -q -c 1 $remote_host ; then
+            return
+        fi
+        sleep 10
+    done
+
+    false
+}
+
+turn_off_ups() {
+    echo "$(date) Turning off UPS"
+    # assumes machine is already off, and the UPS will turn off the
+    # load after 30 seconds when it detects the load is mostly idle
+    # (just the idrac residual) after it loses input
+    curl -fsS --data-urlencode "cmnd=Power Off" http://$power_switch/cm | jq
+}
+
+ensure_ups_off() {
+    echo "$(date) Ensuring UPS is off"
+    for i in `seq 1 15` ; do
+        if ! fping -q -c 1 $remote_idrac ; then
+            return
+        fi
+        sleep 10
+    done
+
+    echo
+    echo "************************************"
+    echo "Looks like UPS hasn't shut off, and $remote_idrac is still answering!"
+    echo "Power will eventually go out on UPS because UPS power inlet"
+    echo "has been turned off, but it might flatten the battery!"
+    echo "************************************"
+    echo
+    echo "UPS still appears to be turned on even after we turned load off.  Too much residual load?"
+    exit 1
+}
+
+
+turn_off_machine
+wait_for_machine_down
+turn_off_ups
+ensure_ups_off

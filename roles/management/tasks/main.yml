@@ -8,6 +8,18 @@
     mode: 0644
   become: true
 
+- name: Install turn-on-pve-backup, turn-off-pve-backup
+  copy:
+    src: "management/{{ item }}"
+    dest: "/usr/local/bin/{{ item }}"
+    owner: root
+    group: root
+    mode: 0755
+  become: true
+  with_items:
+    - turn-on-pve-backup
+    - turn-off-pve-backup
+
 - name: Install management packages
   apt:
     name: ['pdsh', 'clusterssh']
