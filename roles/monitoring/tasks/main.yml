@@ -254,7 +254,6 @@
   with_items:
     - { src: 'ping_dirac', dest: 'ping_' }
     - { src: 'ping_fs', dest: 'ping_' }
-    - { src: 'ping_gamow', dest: 'ping_' }
     - { src: 'ping_gw', dest: 'ping_' }
     - { src: 'ping_www.google.com.au', dest: 'ping_' }
     - { src: 'chrony_ntp.internode.com.au', dest: 'chrony_' }
