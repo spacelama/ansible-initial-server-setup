@@ -142,6 +142,11 @@
     force: yes
   when: '"lm-sensors" in packages_to_install'
 
+- name: "ensure dnsmasq service {{ 'started' if inventory_hostname != 'gateway-tmp' else 'stopped' }} for {{ inventory_hostname }}"
+  service:
+    name: dnsmasq
+    state: "{{ 'started' if inventory_hostname != 'gateway-tmp' else 'stopped' }}"
+
 - name: setup dhcp reservations
   copy:
     dest: /etc/config/dhcp
