@@ -151,3 +151,10 @@
     - { src: 'MegaRaid_0_temp',       dest: 'MegaRaid_' }
     - { src: 'MegaRaid_0_predictive', dest: 'MegaRaid_' }
   notify: restart munin-node
+
+- name: install megaclisas-status
+  copy:
+    src: megaclisas-status
+    dest: /usr/local/bin/megaclisas-status
+    mode: 0755
+  become: true
