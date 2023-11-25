@@ -5,8 +5,8 @@
   install_files:
     - { source: "roles/openwrt/files/etc_config_usteer", dest: /etc/config/usteer, mode: "0644", when: "{{ type == 'ap'}}", become: false }
     - { source: "roles/openwrt/files/etc_dropbear_authorized_keys", dest: /etc/dropbear/authorized_keys, mode: "0644", become: false }
-    - { source: "roles/openwrt/files/etc_crontabs_root", dest: /etc/crontabs/root, mode: "0644", become: false }
     - { source: "roles/openwrt/files/etc_rc.local", dest: /etc/rc.local, mode: "0644", become: false }
+    - { template: "roles/openwrt/templates/etc_crontabs_root.j2", dest: /etc/crontabs/root, mode: "0644", become: false }
 
   syslog: 192.168.1.204
 

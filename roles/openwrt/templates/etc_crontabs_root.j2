@@ -4,3 +4,7 @@
 # 0 * * * * echo 3 > /proc/sys/vm/drop_caches
 
 #@reboot /root/bin/log-daily-config
+
+{% if type == 'router' %}
+15 06 * * * /etc/init.d/banip reload
+{% endif %}
