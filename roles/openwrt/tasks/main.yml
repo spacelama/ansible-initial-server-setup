@@ -108,7 +108,7 @@
 
 - name: install full packages
   opkg:
-    name: tcpdump,strace,lsof,usbutils,ethtool,psmisc,procps-ng-ps,procps-ng-watch,procps-ng-vmstat,iftop,htop,perl,perlbase-tie # perlbase-tie for munin sensors_
+    name: tcpdump,strace,lsof,usbutils,ethtool,psmisc,procps-ng-ps,procps-ng-watch,procps-ng-vmstat,iftop,htop,less,diffutils,perl,perlbase-tie # perlbase-tie for munin sensors_
     state: present
   when: openwrt_heavy_installation is defined
 
