@@ -428,6 +428,7 @@
 
 - name: install host specific packages
   apt:
+    # list of packages
     name: "{{ packages_to_install }}"
     # atop
     autoremove: no
