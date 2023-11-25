@@ -13,7 +13,7 @@
 
 - name: install router packages
   opkg:
-    name: luci-app-sqm,avahi-dbus-daemon,adblock,luci-app-adblock,msmtp,crelay,ethtool,arp-scan,ifstat # instead of port mirroring, perhaps we can configure ecowitt mirroring of port 8000->homeassistant:4199 via port forwards ,port-mirroring
+    name: luci-app-sqm,avahi-dbus-daemon,adblock,luci-app-adblock,msmtp,ethtool,arp-scan,ifstat # instead of port mirroring, perhaps we can configure ecowitt mirroring of port 8000->homeassistant:4199 via port forwards ,port-mirroring
     state: present
   when: openwrt_router_packages is defined
 
@@ -42,6 +42,13 @@
     name: tcpdump,strace,lsof,usbutils,ethtool,psmisc,procps-ng-ps,procps-ng-watch,procps-ng-vmstat,iftop,htop
     state: present
   when: openwrt_heavy_installation is defined
+
+- name: install host specific packages
+  opkg:
+    # comma separated, single variable
+    name: "{{ packages_to_install }}"
+    state: present
+  when: packages_to_install is defined
 
 - name: install nut packages
   opkg:
