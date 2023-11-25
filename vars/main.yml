@@ -109,7 +109,7 @@
     #[nutups2_*]
     #env.upsc upsc
 
-    [nutups2_powershield-commander*]
+    [nutups2_powershield-commander.pve-backup*]
     user nut
     group nut
     # powershield commander 1000: 400 watts at 63% load on powershield commander 1000: 400/63
@@ -118,7 +118,7 @@
     # env.battery.warning
     env.battery_critical 20.8:27.5
 
-    [nutups2_powershield-centurion*]
+    [nutups2_powershield-centurion.pve1*]
     user nut
     group nut
     # powershield centurion 1000: 445 watts at 48% load on powershield centurion 1000: 445/49
@@ -127,7 +127,7 @@
     # env.battery.warning
     env.battery_critical 31.2:41.25
 
-    [nutups2_powershield.asusrtax53u*]
+    [nutups2_powershield.pve3*]
     user nut
     group nut
     # powershield mini 1000: 317 watts at 67% load on powershield mini 1000: 317/67
