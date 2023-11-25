@@ -1,4 +1,5 @@
 ---
+  domain: rather.puzzling.org
   install_dirs:
     - { dir: "/root/bin", mode: "0755", become: false }
 

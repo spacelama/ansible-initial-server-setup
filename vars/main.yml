@@ -3,7 +3,7 @@
   new_public_key: ~/.ssh/id_rsa_github.pub
   fs_public_key: ~/.ssh/fs_id_rsa.pub
   deprecated_public_key: ~/.ssh/remove_id_rsa.pub
-  default_domain: rather.puzzling.org
+  domain: rather.puzzling.org
 #  ssh_port: 22
   ansible_was_run_by: "{{ lookup('env','USER') }@{{ lookup('env','HOSTNAME') }}"
   smtp_server: smtp.rather.puzzling.org

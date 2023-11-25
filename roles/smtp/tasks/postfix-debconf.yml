@@ -35,7 +35,7 @@
     name: postfix
     question: postfix/mailname
     vtype: string
-    value: "{{ fqdn | default( inventory_hostname ~ '.' ~ default_domain ) }}"
+    value: "{{ fqdn | default( inventory_hostname ~ '.' ~ domain ) }}"
   become: true
   notify: reconfigure postfix
   when: host_is_smtp_relay is not defined

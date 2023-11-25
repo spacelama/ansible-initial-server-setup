@@ -20,7 +20,7 @@
   lineinfile:
     dest: /etc/hosts
     line: hosts already has correct hostname
-    regexp: "^{{ ansible_default_ipv4.address }} {{ fqdn | default( inventory_hostname ~ '.' ~ default_domain) }} {{ hostname | default(inventory_hostname) }}$"
+    regexp: "^{{ ansible_default_ipv4.address }} {{ fqdn | default( inventory_hostname ~ '.' ~ domain) }} {{ hostname | default(inventory_hostname) }}$"
     state: present
   changed_when: false
 
@@ -37,7 +37,7 @@
   lineinfile:
     dest: /etc/hosts
     insertafter: '^127\.0\.0\.1\slocalhost'
-    line: "{{ ansible_default_ipv4.address }} {{ fqdn | default( inventory_hostname ~ '.' ~ default_domain) }} {{ hostname | default(inventory_hostname) }}"
+    line: "{{ ansible_default_ipv4.address }} {{ fqdn | default( inventory_hostname ~ '.' ~ domain) }} {{ hostname | default(inventory_hostname) }}"
     state: present
   notify: restart hostname
   become: true

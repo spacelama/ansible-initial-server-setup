@@ -41,7 +41,7 @@ Modify the variables in **_vars/main.yml_** according to your needs:
 
 **my_public_key:** the local path to your public SSH key that will be authorized on all remote hosts
 
-**default_domain:** your chosen domain
+**domain:** your chosen domain
 
 **hostname:** your chosen hostname
 
