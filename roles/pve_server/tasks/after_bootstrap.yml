@@ -107,10 +107,10 @@
     state: present
   become: true
 
-# - name: mount media
+# - name: mount jellyfin
 #   mount:
-#     path: /media
-#     src: /mnt/pve/cephfs-hdd/media/media
+#     path: /jellyfin
+#     src: /mnt/pve/cephfs-hdd/media/jellyfin
 #     fstype: none
 #     opts: bind,_netdev,x-systemd.automount
 #     state: present
@@ -137,12 +137,12 @@
     state: directory
   become: true
   with_items:
-    - /etc/systemd/system/media.automount.d
+    - /etc/systemd/system/jellyfin.automount.d
     - /etc/systemd/system/media_transcodes.automount.d
 
-- name: make sure media isn't mounted til ceph is mounted
+- name: make sure jellyfin isn't mounted til ceph is mounted
   copy:
-    dest: /etc/systemd/system/media.automount.d/override.conf
+    dest: /etc/systemd/system/jellyfin.automount.d/override.conf
     content: "[Unit]\nAfter=mnt-pve-cephfs\x2dhdd.mount\n"
   become: true
   notify: systemd daemon reload
