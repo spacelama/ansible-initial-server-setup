@@ -50,8 +50,14 @@
         #        default.battery.voltage.high = 27.2
         default.battery.voltage.high = 39
         default.battery.voltage.low = 31.2
-        # Just an example from https://networkupstools.org/docs/man/blazer_usb.html, modified according to manual
-        runtimecal = 3120,100,6240,50
+        # Just an example from
+        # https://networkupstools.org/docs/man/blazer_usb.html,
+        # modified according to manual and
+        # https://powershield.com.au/wp-content/uploads/Tools/PowerShield_Comparison_RunChart_Web.pdf
+        # (latter says 1000VA = 40minutes, 500VA = 88minutes,
+        # pscebb6_u.pdf says 45 minutes, 105 minutes)
+        # PowerShield_Centurion_Tower_Brochure.pdf says 52min, 104min
+        runtimecal = 2700,100,6300,50
         # from manual:
         chargetime = 18000
     pve3:
