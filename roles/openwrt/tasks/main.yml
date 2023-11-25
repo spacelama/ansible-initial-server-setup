@@ -108,7 +108,7 @@
 
 - name: install full packages
   opkg:
-    name: tcpdump,strace,lsof,usbutils,ethtool,psmisc,procps-ng-ps,procps-ng-watch,procps-ng-vmstat,iftop,htop
+    name: tcpdump,strace,lsof,usbutils,ethtool,psmisc,procps-ng-ps,procps-ng-watch,procps-ng-vmstat,iftop,htop,perl,perlbase-tie # perlbase-tie for munin sensors_
     state: present
   when: openwrt_heavy_installation is defined
 
@@ -133,6 +133,14 @@
     force: yes
   with_items: [ charge,voltages,freq,current ]
   when: nut_install is defined
+
+- name: install temperature sensors munin plugin
+  file:
+    src: /root/bin/sensors_
+    dest: "/etc/munin/plugins/sensors_temp"
+    state: link
+    force: yes
+  when: '"lm-sensors" in packages_to_install'
 
 - name: setup dhcp reservations
   copy:
@@ -174,6 +182,7 @@
     - show_wifi_clients2.sh.helper2
     - opkg-search
     - nutups_
+    - sensors_
 
 - name: set root account passwd
   lineinfile:
