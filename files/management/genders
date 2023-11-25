@@ -5,9 +5,9 @@ fs                              linux,intel
 iot                             linux,intel,not247,notyetproduction
 #pve                             linux,intel,pve
 pve1                            linux,intel,pve
-pve1a                           linux,intel,pve,not247
 pve2                            linux,intel,amd,pve
 pve3                            linux,intel,pve
+pve-backup                      linux,intel,pve,not247
 pi                              linux,arm
 gamow                           linux,intel,not247
 pauli                           linux,intel,not247

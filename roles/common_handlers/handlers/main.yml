@@ -17,6 +17,7 @@
   service:
     name: munin-node
     state: restarted
+  ignore_errors: true # might not be installed yet
 
 - name: restart nut server
   service:
@@ -48,3 +49,7 @@
     name: chrony
     state: restarted
   become: true
+  ignore_errors: true # very first step in playbook is to install
+                      # files and run those handlers - chrony might
+                      # not be installed yet though
+  when: host_is_container is not defined

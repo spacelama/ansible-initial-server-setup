@@ -14,4 +14,5 @@
     - libcmpicppimpl0_2.0.3-0ubuntu2_amd64.deb
     - openwsman_2.4.7-0ubuntu2_amd64.deb
   srvadmin_depends_bookworm:
+    - libssl1.1_1.1.1w-0+deb11u1_amd64.deb
     - ipmitool_1.8.19-6_amd64.deb

@@ -1,13 +1,4 @@
 ---
-- name: determine if vendor-reset dkms module already exists
-  command: /usr/sbin/dkms status -m vendor-reset -k {{ ansible_kernel }}
-  register: vendor_reset_dkms
-  changed_when: false
-
-- debug:
-    msg: "dkms status vendor-reset: {{ vendor_reset_dkms.stdout }}"
-  when: vendor_reset_dkms.stdout is defined
-
 - name: Purge some incompatible packages
   apt:
     name: ['ifupdown']   # some stale config files left from automatic
@@ -33,6 +24,15 @@
     state: present
     install_recommends: no
   become: true
+
+- name: determine if vendor-reset dkms module already exists
+  command: /usr/sbin/dkms status -m vendor-reset -k {{ ansible_kernel }}
+  register: vendor_reset_dkms
+  changed_when: false
+
+- debug:
+    msg: "dkms status vendor-reset: {{ vendor_reset_dkms.stdout }}"
+  when: vendor_reset_dkms.stdout is defined
 
   # disabled because we actually need the old kernels on pve1 for when we want to be able to lvcreate: https://forum.proxmox.com/threads/lvm-lvcreate-getting-stuck-in-pve8-kernel-on-some-jbod-controller-ssd-intel-dc-s3500-combinations.134649/
 # - name: Purge old kernels in bookworm
@@ -407,6 +407,14 @@
   become: true
   notify: "Update initramfs config"
   when: vfio_ids is defined
+
+- name: "vfio module parameters"
+  file:
+    dest: /etc/modprobe.d/vfio-custom.conf
+    state: absent
+  become: true
+  notify: "Update initramfs config"
+  when: vfio_ids is not defined
 
 - name: "Ensure vfio, vendor-reset in /etc/modules"
   lineinfile:

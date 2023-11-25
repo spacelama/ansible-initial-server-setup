@@ -20,9 +20,22 @@ iface lo inet loopback
   eth0 can safely become eno1 or en1 again in pve 8, but we still have pve 7
   instances, and systemd would probably screw up auto-naming on the old r520 too
 #}
+{% if (inventory_hostname == 'pve-backup') %}
+{#
+  pve-backup doesn't have VLANs configured on its network
+#}
+auto eth0
+iface eth0 inet static
+	address 192.168.1.9/24
+	gateway 192.168.1.254
+
+{% else %}
 iface eth0 inet manual
 
-{% if (inventory_hostname == 'pve1') or (inventory_hostname == 'pve1a') %}
+{#
+  dell poweredge machines with many network interfaces
+#}
+{% if (host_is_dell_server is defined) %}
 iface eno2 inet manual
 
 iface eno3 inet manual
@@ -75,6 +88,7 @@ auto vmbr0.70
 iface vmbr0.70 inet manual
 #VLAN 70 WINDOWS
 
+{% endif %}
 {#
 # iface wlp5s0 inet manual
 # iface eno2 inet manual

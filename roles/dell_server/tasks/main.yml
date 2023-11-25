@@ -74,12 +74,6 @@
   #  when: archived_package_check_deb.rc == 0
   loop: "{{ srvadmin_depends + srvadmin_depends_bookworm }}"
 
-- name: Install archived_package
-  apt: deb="/home/{{ ansible_env.USER }}/Downloads/{{ item }}"
-  become: true
-  #  when: archived_package_check_deb.rc == 0
-  loop: "{{ srvadmin_depends }}"
-
   #install ipmitool>= 1.8.19-6 on debian 12:
   #https://forum.proxmox.com/threads/ipmi-tool-error-after-v8-upgrade.129334/
 - name: Install archived_package on bookworm
@@ -88,6 +82,12 @@
   #  when: archived_package_check_deb.rc == 0
   loop: "{{ srvadmin_depends_bookworm }}"
   when: deb_release | default('bullseye') == 'bookworm'
+
+- name: Install archived_package
+  apt: deb="/home/{{ ansible_env.USER }}/Downloads/{{ item }}"
+  become: true
+  #  when: archived_package_check_deb.rc == 0
+  loop: "{{ srvadmin_depends }}"
 
 - name: Download megacli .deb files
   copy:
