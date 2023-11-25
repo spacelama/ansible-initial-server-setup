@@ -1,4 +1,100 @@
 ---
+- name: intercept spundown disks in hddtemp_smartctl
+  ini_file:
+    path: /etc/munin/plugin-conf.d/munin-node
+    section: "hddtemp_smartctl"
+    # no equals separating the key and value, so lets hack that up:
+    allow_no_value: true
+    option: "env.smartctl /usr/local/bin/smart-intercept-spindown"
+    state: present
+  become: true
+  notify: restart munin-node
+
+- name: intercept spundown disks in smart_*
+  ini_file:
+    path: /etc/munin/plugin-conf.d/munin-node
+    section: "smart_*"
+    # no equals separating the key and value, so lets hack that up:
+    allow_no_value: true
+    option: "env.smartpath /usr/local/bin/smart-intercept-spindown"
+    state: present
+  become: true
+  notify: restart munin-node
+
+  # FIXME: these should all be ini_file, I suspect, but do need to
+  # consider what happens when we change value, given we can't specify
+  # option and value
+- name: Ensure munin df excludes
+  lineinfile:
+    path: "/etc/munin/plugin-conf.d/munin-node"
+    backup: yes
+    regexp: '^env.exclude none '
+    insertafter: '^\[df\*\]'
+    line: 'env.exclude none unknown iso9660 squashfs udf romfs ramfs debugfs'
+  become: true
+  notify: restart munin-node
+
+- name: munin node conf - diskstats and chrony config
+  blockinfile:
+    path: "/etc/munin/plugin-conf.d/munin-node"
+    marker: "# {mark} ANSIBLE MANAGED BLOCK"
+    backup: yes
+    block: |
+
+      [nvme_*]
+      user root
+
+      # to transform smartctl nvme output to more resemble traditional
+      # output so existing munin plugins can monitor it
+      [smart_nvme*]
+      user root
+      env.smartpath /usr/local/bin/smartctlnvme
+
+      # for nice devicemapper names
+      [diskstats]
+      user root
+
+      # settings docuemnted in chrony_* executables
+      [chrony_*]
+      user _chrony
+      env.timesources 2.debian.pool.ntp.org 2.debian.pool.ntp.org 2.debian.pool.ntp.org 2.debian.pool.ntp.org 192.168.1.254 ntp.superloop.com ntp.internode.com.au
+      env.chrony /usr/bin/chronyc
+      env.chronycpath /usr/bin/chronyc
+      env.driftfile /var/lib/chrony/chrony.drift
+      env.freqlimit 0.7
+      env.freqskewlimit 0.3
+      env.offsetlimit 0.005
+      env.stddevlimit 0.001
+
+      # If we've got ceph modules to run, run them as ceph
+      [ceph*]
+      user root # ceph isn't sufficient for one of the plugins - it appears to need to read the ceph conf file, which is owned root.www-data
+
+      # Need to talk to the fail2ban socket
+      [fail2ban*]
+      user root
+
+      [megacli*]
+      user root
+
+      [MegaRaid*]
+      user root
+      env.PATH /bin:/sbin:/opt/MegaRAID/MegaCli
+
+      # [proxmox_count]
+      [proxmox_vm_count]
+      user root
+      group root
+
+      [nutups_*]
+      user nut
+      group nut
+
+      {{ munin_nut_config if host_is_nut_master is defined }}
+
+  become: true
+  notify: restart munin-node
+
 - name: determine if any hardware monitors exist
   stat: path=/sys/class/hwmon/hwmon0
   register: hwmon0
@@ -239,115 +335,6 @@
   include_tasks: munin_dev.yml
 #  with_items: { sda, sdb, sdc, sdd, sde, sdf, sdg, sdh, sdi, sdj, sdk, sdl, sdm, sdn, nvme0n1 }
   with_items: { nvme0n1, nvme0n2 }
-
-- name: allow munin-node from fs
-  lineinfile:
-    path: "/etc/munin/munin-node.conf"
-    line: "{{ item }}"
-    state: present
-  become: true
-  with_items: [ 'cidr_allow 127.0.0.1/32', 'cidr_allow 192.168.1.2/24', 'cidr_deny  192.168.1.254/32' ]
-  notify: restart munin-node
-
-- name: workaround munin-node failing to start on debian bookworm on slow machines
-  # host * -> host 0.0.0.0
-  lineinfile:
-    path: "/etc/munin/munin-node.conf"
-    regexp: "^host"
-    line: "host 0.0.0.0"
-    state: present
-  become: true
-  notify: restart munin-node
-
-- name: intercept spundown disks in hddtemp_smartctl
-  ini_file:
-    path: /etc/munin/plugin-conf.d/munin-node
-    section: "hddtemp_smartctl"
-    # no equals separating the key and value, so lets hack that up:
-    allow_no_value: true
-    option: "env.smartctl /usr/local/bin/smart-intercept-spindown"
-    state: present
-  become: true
-  notify: restart munin-node
-
-- name: intercept spundown disks in smart_*
-  ini_file:
-    path: /etc/munin/plugin-conf.d/munin-node
-    section: "smart_*"
-    # no equals separating the key and value, so lets hack that up:
-    allow_no_value: true
-    option: "env.smartpath /usr/local/bin/smart-intercept-spindown"
-    state: present
-  become: true
-  notify: restart munin-node
-
-  # FIXME: these should all be ini_file, I suspect, but do need to
-  # consider what happens when we change value, given we can't specify
-  # option and value
-- name: Ensure munin df excludes
-  lineinfile:
-    path: "/etc/munin/plugin-conf.d/munin-node"
-    backup: yes
-    regexp: '^env.exclude none '
-    insertafter: '^\[df\*\]'
-    line: 'env.exclude none unknown iso9660 squashfs udf romfs ramfs debugfs'
-  become: true
-  notify: restart munin-node
-
-- name: munin node conf - diskstats and chrony config
-  blockinfile:
-    path: "/etc/munin/plugin-conf.d/munin-node"
-    marker: "# {mark} ANSIBLE MANAGED BLOCK"
-    backup: yes
-    block: |
-
-      [nvme_*]
-      user root
-
-      # to transform smartctl nvme output to more resemble traditional
-      # output so existing munin plugins can monitor it
-      [smart_nvme*]
-      user root
-      env.smartpath /usr/local/bin/smartctlnvme
-
-      # for nice devicemapper names
-      [diskstats]
-      user root
-
-      # settings docuemnted in chrony_* executables
-      [chrony_*]
-      user _chrony
-      env.timesources 2.debian.pool.ntp.org 2.debian.pool.ntp.org 2.debian.pool.ntp.org 2.debian.pool.ntp.org 192.168.1.254 ntp.superloop.com ntp.internode.com.au
-      env.chrony /usr/bin/chronyc
-      env.chronycpath /usr/bin/chronyc
-      env.driftfile /var/lib/chrony/chrony.drift
-      env.freqlimit 0.7
-      env.freqskewlimit 0.3
-      env.offsetlimit 0.005
-      env.stddevlimit 0.001
-
-      # If we've got ceph modules to run, run them as ceph
-      [ceph*]
-      user root # ceph isn't sufficient for one of the plugins - it appears to need to read the ceph conf file, which is owned root.www-data
-
-      # Need to talk to the fail2ban socket
-      [fail2ban*]
-      user root
-
-      [megacli*]
-      user root
-
-      [MegaRaid*]
-      user root
-      env.PATH /bin:/sbin:/opt/MegaRAID/MegaCli
-
-      # [proxmox_count]
-      [proxmox_vm_count]
-      user root
-      group root
-
-  become: true
-  notify: restart munin-node
 
 - name: Ensure apt_all doesn't trigger every 5 minutes
   lineinfile:

@@ -1,11 +1,11 @@
 ---
 # https://stackoverflow.com/questions/18195142/safely-limiting-ansible-playbooks-to-a-single-machine
-- hosts: "fs"
+- hosts: "iot"
   gather_facts: no
   remote_user: ansible_adm
   roles:
     - role: munin-server
-      when: inventory_hostname == 'fs'
+      when: inventory_hostname == 'iot'
 
 # to do a quick sync of commonly changed files, let's just push them
 # first without running a slow gather_facts first:
