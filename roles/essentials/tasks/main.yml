@@ -277,15 +277,6 @@
     force: yes
   become: true
 
-- name: copy /usr/local/bin/backuppc_check_backups
-  copy:
-    src: cron/cron.daily_backuppc_check_backups
-    dest: /usr/local/bin/backuppc_check_backups
-    owner: root
-    group: root
-    mode: 0755
-  become: true
-
 - name: install cron.daily.backuppc_check_backups
   file:
     src: /usr/local/bin/backuppc_check_backups

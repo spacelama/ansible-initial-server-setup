@@ -214,6 +214,8 @@
                 # implies the creation of that directory first
     - { dir: "/etc/chrony/sources.d", mode: "0755" }
 
+    # "simple-sync" - let's just transfer a whole bunch of files,
+    # according to simple criteria, with possible event triggering:
   install_files:
     - { source: sbin/init.sysvinit,                     dest: /sbin/init.sysvinit,                     mode: "0755" } # https://wiki.debian.org/systemd recovery from a borked systemd: grub "init=/sbin/init.sysvinit"
     - { source: usr_local_bin/hddtemp,                  dest: /usr/local/bin/hddtemp,                  mode: "0755" }
@@ -221,6 +223,7 @@
     - { source: usr_local_bin/smartctlnvme,             dest: /usr/local/bin/smartctlnvme,             mode: "0755", local_follow: true }
     - { source: usr_local_bin/checkntp,                 dest: /usr/local/bin/checkntp,                 mode: "0755" }
     - { source: cron/cron.daily_get_conf_info,          dest: /usr/local/bin/get_conf_info,            mode: "0755" }
+    - { source: cron/cron.daily_backuppc_check_backups, dest: /usr/local/bin/backuppc_check_backups,   mode: "0755" }
     - { template: var_spool_cron/root.j2,               dest: /var/spool/cron/crontabs/root,           mode: "0600", group: "crontab" }
 
     - { template: etc/modprobe.d/ansible-custom.conf.j2, dest: /etc/modprobe.d/ansible-custom.conf }
