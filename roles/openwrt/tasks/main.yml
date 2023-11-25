@@ -109,6 +109,7 @@
     regexp: "^rootsh:"
     line: "rootsh:{{ rootshadow }}:18868:0:99999:7:::"
     insertafter: "^root:"
+  no_log: true
 
 - name: include uci config
   include_tasks: uci_config.yml

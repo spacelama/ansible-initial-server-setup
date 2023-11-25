@@ -11,7 +11,7 @@
 - name: restart dnsmasq service
   service:
     name: dnsmasq
-    state: restarted
+    state: "{{ 'restarted' if inventory_hostname != 'gateway-tmp' else 'stopped' }}"
   throttle: 1
 
 - name: restart firewall

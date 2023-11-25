@@ -4,7 +4,7 @@
 #  strategy: free
   strategy: linear
 #  gather_facts: no
-  remote_user: rootsh # so keeps working even fresh after upgrade (but not brand-new installation)
+  remote_user: "{{ remote_user | default('rootsh') }}" # so keeps working even fresh after upgrade, but not on a brand-new installation - supply '-e remote_user=root' for a new installation
   vars:
       ansible_ssh_transfer_method: scp
   vars_files:

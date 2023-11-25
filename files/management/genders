@@ -73,8 +73,11 @@ cam-rear                        iot
 fan-1                           iot,tuya
 
 switch                          network
-b1300                           network,openwrt
+gateway                         network,openwrt
 archerd7                        network,openwrt,wifi
 archerc7                        network,openwrt,wifi
-#wavlink                         network,openwrt,wifi
 asusrtax53u                     network,openwrt,wifi
+
+#b1300                           network,openwrt
+#gateway-tmp                     network,openwrt,not247,notyetproduction
+#wavlink                         network,openwrt,wifi
