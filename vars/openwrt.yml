@@ -10,6 +10,9 @@
 
   syslog: 192.168.1.204
 
+  allow_avahi_zeroconf_interfaces: "br-LAN1, br-LANWINDOWS7, br-LANIOT4"
+  avahi_zeroconf_public_dns_servers: "192.168.7.254,192.168.4.254,192.168.1.254"
+
   mobility_domain: "{{ lookup('file', 'ap.mobility_domain') }}"
 
   default_wifi_device_settings:
