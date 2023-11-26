@@ -29,6 +29,16 @@
     name: nut-monitor
     state: restarted
 
+- name: reload autofs
+  service:
+    name: autofs
+    state: reloaded
+
+- name: restart autofs
+  service:
+    name: autofs
+    state: restarted
+
 - name: "systemd daemon reload"
   systemd:
     daemon_reload: true

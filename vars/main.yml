@@ -243,10 +243,10 @@
     - { source: etc/bashcolors,           dest: /etc/bashcolors  }
     - { source: etc/inputrc,              dest: /etc/inputrc     }
 
-    - { source: etc/auto.master,          dest: /etc/auto.master }
-    - { template: etc/auto.nas.j2,        dest: /etc/auto.nas    }
-    - { source: etc/autofs.conf,          dest: /etc/autofs.conf }
-#    - { source: etc/default/autofs,       dest: /etc/default/autofs }   MOUNT_NFS_DEFAULT_PROTOCOL seems to be ignored, and not causing me problems anyway, these days
+    - { source: etc/auto.master,          dest: /etc/auto.master, notify: "reload autofs", when_pkg_installed: "autofs" }
+    - { template: etc/auto.nas.j2,        dest: /etc/auto.nas,    notify: "reload autofs", when_pkg_installed: "autofs" }
+    - { source: etc/autofs.conf,          dest: /etc/autofs.conf, notify: "reload autofs", when_pkg_installed: "autofs" }
+#    - { source: etc/default/autofs,       dest: /etc/default/autofs, notify: "restart autofs" }   MOUNT_NFS_DEFAULT_PROTOCOL seems to be ignored, and not causing me problems anyway, these days
     - { template: etc/idmapd.conf.j2,     dest: /etc/idmapd.conf }
 
     - { template: etc/rkhunter.conf.j2,   dest: /etc/rkhunter.conf }
