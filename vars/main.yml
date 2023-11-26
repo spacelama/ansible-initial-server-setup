@@ -267,9 +267,9 @@
     - { source: etc/logrotate.d/btmp,          dest: /etc/logrotate.d/ }
     - { source: etc/logrotate.d/wtmp,          dest: /etc/logrotate.d/ }
     - { source: etc/logrotate.d/custom,        dest: /etc/logrotate.d/ }
-    - { source: etc/logrotate.d/sleep-browser, dest: /etc/logrotate.d/ }
-    - { source: etc/logrotate.d/apache2,       dest: /etc/logrotate.d/, when_pkg_installed: "apache2"           }
-    - { source: etc/logrotate.d/iot,           dest: /etc/logrotate.d/, when: "{{ host_is_syslog is defined }}" }
+    - { source: etc/logrotate.d/sleep-browser, dest: /etc/logrotate.d/, when: "{{ host_is_desktop is defined }}" }
+    - { source: etc/logrotate.d/apache2,       dest: /etc/logrotate.d/, when_pkg_installed: "apache2"            }
+    - { source: etc/logrotate.d/iot,           dest: /etc/logrotate.d/, when: "{{ host_is_syslog is defined }}"  }
 
     - { source: "etc/rsyslog.conf",                                 dest: /etc/rsyslog.conf }
     - { source: "etc/rsyslog.d/remote.conf",                        dest: /etc/rsyslog.d/, when: "{{ host_is_syslog is not defined }}" }
