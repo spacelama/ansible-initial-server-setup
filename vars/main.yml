@@ -39,7 +39,9 @@
         [powershield-centurion]
         #https://blog.warbel.net/index.php/2017/09/15/configuring-powershield-ups-on-linux-and-integrating-into-zabbix/
         # https://alioth-lists.debian.net/pipermail/nut-upsuser/2011-March/006699.html
-        driver=nutdrv_qx
+        #driver=nutdrv_qx
+        # 20231125: nutdrv_qx is newer and slightly nicer than blazer_usb, and does things like bypass.start/stop, but it seems to get runtime calculation wrong, alternating between 0 and 60
+        driver=blazer_usb
         port = auto
         # find with -DD:
         #ProductID: 5161
