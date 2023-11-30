@@ -5,17 +5,21 @@
 # this file has to be sourced in /etc/profile.
 
 #echo 9 1>&2
-if [ -d /etc/bash.bashrc.d ]; then
-#echo 10 1>&2
-  for i in /etc/bash.bashrc.d/*.sh; do
-#      echo 11 $i 1>&2
-    if [ -r $i ]; then
-#      echo 12 $i 1>&2
-      . $i
+for i in /etc/bash.bashrc.d/ ~/.bashrc.d/ ; do
+#    echo "1 - $i"
+    if [ -d "$i" ]; then
+#	echo 10 "$i" 1>&2
+	for i in "$i"*.sh; do
+	    #      echo 11 $i 1>&2
+	    if [ -r $i ]; then
+		#      echo 12 $i 1>&2
+		. $i
+	    fi
+	done
+	break
     fi
-  done
-  unset i
-fi
+done
+unset i
 
 # If not running interactively, don't do anything
 [ -z "$PS1" ] && return
