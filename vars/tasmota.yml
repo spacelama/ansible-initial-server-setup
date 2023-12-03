@@ -3,9 +3,9 @@
   psk: "{{ lookup('file', 'main.tasmota-psk.passwd') }}"
   syslog: 192.168.1.204
   ntp1: 192.168.1.17
-  ntp2: 192.168.1.2
+  ntp2: 192.168.1.3
   ntp3: "0.au.pool.ntp.org"
-  mqtthost: 192.168.1.2
+  mqtthost: 192.168.1.3
   latitude: -37.72
   longitude: 144.965
   #https://tasmota.github.io/docs/Commands/timezone_table/#management
