@@ -221,7 +221,11 @@ else
     function finalise_prompt() {
         if [ -z "$GIT_PROMPT_HAS_RUN" ] ; then
             ESC=`echo -ne '\033'`
-            . /etc/bash-git-prompt/gitprompt.sh
+	    if [ -e /etc/bash-git-prompt/gitprompt.sh ] ; then
+		. /etc/bash-git-prompt/gitprompt.sh
+	    else
+		. ~/bash-git-prompt/gitprompt.sh
+	    fi
             GIT_PROMPT_HAS_RUN=true
         fi
         if [ -z "$NONINTERACT" ] ; then
