@@ -8,6 +8,7 @@ failed_tests=
 
 function fail() {
     cmd_failed=$( eval echo "$BASH_COMMAND" )
+    echo " * -> Failed: $cmd_failed"
 
     failed_tests="$failed_tests$cmd_failed ; "
     fail=true
