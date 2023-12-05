@@ -10,7 +10,6 @@ pve3                            linux,intel,pve
 pve-backup                      linux,intel,pve,not247
 pi                              linux,arm
 gamow                           linux,intel,not247
-pauli                           linux,intel,not247
 fermi                           linux,intel,amd,not247
 homeassistant                   linux,intel,hassio
 zm                              linux,intel,lxc,turnkey
@@ -19,6 +18,7 @@ zm12                            linux,intel,lxc,not247,notyetproduction
 jellyfin                        linux,intel,lxc,not247,notyetproduction
 syslog                          linux,intel,lxc
 smtp                            linux,intel,lxc
+webserver                       linux,intel,lxc
 #mda                             linux,intel,lxc,not247,notyetproduction
 
 #idrac                           drac
@@ -56,8 +56,8 @@ brewfridge-power                tasmota,athom,accurate,powermon
 pvebackup-power                 tasmota,newkogan,powermon,esp12s,accurate
 
 washingmachine-power            tasmota,medion,accurate,powermon,repairedlimitresistor
-measure-power                   tasmota,oldkogan,accurate,powermon,usbport
-chromecast-lounge-power         tasmota,newkogan,powermon,currentoffset
+measure-power                   tasmota,oldkogan,accurate,powermon,usbport,not247
+#chromecast-lounge-power         tasmota,newkogan,powermon,currentoffset,frequent-dies-need-power-supply-work
 panasonic-power                 tasmota,newkogan,accurate,powermon
 electricblanket-power           tasmota,athom,accurate,powermon,not247
 loungefrontlight-power          tasmota,athom,accurate,powermon

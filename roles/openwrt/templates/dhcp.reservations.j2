@@ -90,6 +90,12 @@ config host
 	option dns '1'
 
 config host
+	option ip '192.168.1.18'
+	option mac 'bc:24:11:38:2b:ab'
+	option name 'webserver'
+	option dns '1'
+
+config host
 	option ip '192.168.1.16'
 	option mac '8a:66:e0:f1:05:65'
 	option name 'mda'
@@ -166,12 +172,13 @@ config host
 	option mac '44:A8:42:15:1F:4B'
 	option name 'idrac-r730xd2'
 	option dns '1'
-
-config host
-	option ip '192.168.1.18'
-	option mac '70:54:d2:90:a2:52'
-	option name 'pauli'
-	option dns '1'
+{#
+#config host
+#	option ip '192.168.1.18'
+#	option mac '70:54:d2:90:a2:52'
+#	option name 'pauli'
+#	option dns '1'
+#}
 
 config host
 	option ip '192.168.1.61'
@@ -548,4 +555,10 @@ config host
 	option name 'cam-rear'
 	option dns '1'
 	option ip '192.168.4.11'
+
+config host
+	option mac '90:09:DF:30:0B:CE'
+	option name 'ltu'
+	option dns '1'
+	option ip '192.168.4.39'
 
