@@ -5,3 +5,4 @@ files/main.*.passwd
 files/ap.*
 host_vars
 tmp/
+*~
