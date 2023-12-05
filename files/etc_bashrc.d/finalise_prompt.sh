@@ -20,6 +20,7 @@ function bashrc_last() {
     #        trap 'generatetitle "`eval "echo "$BASH_COMMAND" | sanitise"`"' DEBUG
 
     setup_environment
+    addkeychain
     setup_precmd_hook
     finalise_login
 }
