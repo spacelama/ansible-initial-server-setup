@@ -1,5 +1,9 @@
 " ~/.vimrc (configuration file for vim only)
 
+" https://www.shallowsky.com/linux/noaltscreen.html
+" Exorcising the Evil Alternate Screen
+set t_ti= t_te=
+
 " twc's original contents:"
 set nofsync
 set swapsync=
