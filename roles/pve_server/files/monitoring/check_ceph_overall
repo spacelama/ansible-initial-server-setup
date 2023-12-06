@@ -24,11 +24,21 @@ for pool in $pools ; do
     ./check_ceph_df -W 90 -C 95 -p $pool
 done
 ./check_ceph_health
-# a and b, but they're all on a standby arrangement and some aren't up
-for fs in $fss ; do
-    for mds in `hostname`-a `hostname`-b ; do
-        ./check_ceph_mds -n $mds -f $fs
+# a and b, but they're all on a standby arrangement and some aren't
+# up.  I'm not actually quite sure of what defines healthy, so let's
+# keep trying!
+for mds in `hostname`-a `hostname`-b ; do # each worker needs to be
+                                          # responsible for something?
+    success=false
+    for fs in $fss ; do
+        if ./check_ceph_mds -n $mds -f $fs ; then
+            success=true
+        fi
     done
+    if ! $success ; then
+        echo $mds failed on one of: ./check_ceph_mds -n $mds -f: $fss
+        fail=true
+    fi
 done
 ./check_ceph_mgr
 ./check_ceph_mon -I $hostname
