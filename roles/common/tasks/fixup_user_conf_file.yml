@@ -31,24 +31,26 @@
   when: file_or_template.lines is defined
 
 - name: "fixup conf file: ~{{ user }}/{{ file_or_template.name }}"
+  # default to homes/<name> if source: isn't provided
   copy:
     dest: "~{{ user }}/{{ file_or_template.name }}"
     owner: "{{ user }}"
     group: "{{ user }}"
-    src: "{{ file_or_template.source }}"
+    src: "{{ file_or_template.source | default( 'homes/' ~ file_or_template.name ) }}"
     mode: "{{ file_or_template.mode | default(omit) }}"
   become: true
-  when: file_or_template.source is defined and file_or_template.source is not regex(".*.j2$")
+  when: file_or_template.name is defined and ( file_or_template.source | default ( file_or_template.name ) ) is not regex(".*.j2$")
 
 - name: "fixup conf file per template: ~{{ user }}/{{ file_or_template.name }} "
+  # default to homes/<name> if source: isn't provided
   template:
     dest: "~{{ user }}/{{ file_or_template.name }}"
     owner: "{{ user }}"
     group: "{{ user }}"
-    src: "{{ file_or_template.source }}"
+    src: "{{ file_or_template.source | default( 'homes/' ~ file_or_template.name ) }}"
     mode: "{{ file_or_template.mode | default(omit) }}"
   become: true
-  when: file_or_template.source is defined and file_or_template.source is regex(".*.j2$")
+  when: file_or_template.name is defined and ( file_or_template.source | default ( file_or_template.name ) ) is regex(".*.j2$")
 
 #- name: "ensure permissions are correct on {{ file_or_template.name }} for user {{ user }}"
 #  when: file_or_template.mode is defined  # stop spurious messages about "changed" when the file is a symlink to common-files/
