@@ -203,6 +203,10 @@
       - name: .bashrc.d/override-turnkey-prompt.sh
         source: homes/.bashrc.d/override-turnkey-prompt.sh
         mode: "0755"
+      - name: .gitconfig
+        source: homes/.gitconfig
+      - name: .gitattributes
+        source: homes/.gitattributes
     # templates done by matching on .j2
       - name: .nanorc
         source: homes/.nanorc.j2

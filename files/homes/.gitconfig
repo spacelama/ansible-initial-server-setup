@@ -1,0 +1,90 @@
+[user]
+	name = Tim Connors
+#	email = git@rather.puzzling.org
+
+[color]
+	status = auto
+	branch = auto
+	interactive = auto
+	diff = auto
+	ui = true
+
+[diff]
+	# https://www.reddit.com/r/git/comments/1oi0tw/is_there_any_way_have_git_diff_show_that_a_file/
+        renames = copies
+        renamelimit = 1
+
+[diff "gzip"]
+        binary = true
+        textconv = /bin/zcat
+
+# from puppet/dotfiles/dot.gitconfig (jamie moore)
+#[merge]
+#        tool = vimdiff
+
+[core]
+	editor = e
+	pager = less -F -X
+
+[push]
+	default = simple
+
+[alias]
+# http://idnotfound.wordpress.com/2009/05/09/word-by-word-diffs-in-git/
+	wdiff = diff --color-words
+#     colordiff = diff --color
+	graph = log --graph --abbrev-commit --decorate --date=relative --pretty=format:'%C(bold yellow)%h%Creset -%C(yellow)%d%Creset %s %C(bold green)(%cr) %C(bold blue)<%an>%Creset'
+	graphall = log --graph --abbrev-commit --decorate --date=relative --all --pretty=format:'%C(bold yellow)%h%Creset -%C(yellow)%d%Creset %s %C(bold green)(%cr) %C(bold blue)<%an>%Creset'
+        ci = commit
+        co = checkout
+        br = branch
+        st = status
+        who = shortlog -s --
+        email = config user.email
+# following from https://github.com/k88hudson/git-flight-rules#i-want-to-add-aliases-for-some-git-commands
+        a = add
+        amend = commit --amend
+        c = commit
+        ca = commit --amend
+        # ci = commit -a
+        # co = checkout
+        d = diff
+        dc = diff --changed
+        ds = diff --staged
+        f = fetch
+        loll = log --graph --decorate --pretty=oneline --abbrev-commit
+        m = merge
+        one = log --pretty=oneline
+        outstanding = rebase -i @{u}
+        s = status
+        unpushed = log @{u}
+        wc = whatchanged
+        wip = rebase -i @{u}
+	zap = fetch -p
+
+	# for `git blame --follow` whjich isn't implemented, so git blame just returns the commit that renamed a file.  This doesn't really work that well though:
+	# https://stackoverflow.com/questions/29468273/why-git-blame-does-not-follow-renames
+	follow = "!bash -c '                                                 \
+    if [[ $1 == \"/\"* ]]; then                                      \
+        FILE=$1;                                                     \
+    else                                                             \
+        FILE=${GIT_PREFIX}$1;                                        \
+    fi;                                                              \
+    echo \"git log --topo-order -u -L $2,${3:-$2}:\\\"$FILE\\\" $4 \";   \
+    git log -w -b -p --ignore-blank-lines --topo-order -u -L $2,${3:-$2}:\"$FILE\" $4;\
+' --"
+
+[url "git@github.com:"]
+        pushInsteadOf = git://github.com/
+        pushInsteadOf = https://github.com/
+
+[branch]
+# https://www.atlassian.com/git/tutorials/syncing/git-pull
+	autosetuprebase = always
+
+# newer git may require:
+[pull]
+	rebase = true
+
+[init]
+	defaultBranch = main
