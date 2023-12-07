@@ -1,0 +1,392 @@
+! Parts (C) 1996 By Greg J. Badros <gjb@cs.duke.edu>
+! You may use this file as specified under the GNU General Public License
+
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+! emacs, xemacs
+
+!see /usr/lib/xemacs-21.4.6/etc/sample.Xdefaults
+
+!!emacs*Background:		DarkSlateGray
+!!emacs*Foreground:		Wheat
+!!emacs*pointerColor:		Orchid
+!!emacs*cursorColor:		Orchid
+!!emacs*bitmapIcon: 		on
+!!emacs*font: 			fixed
+!!emacs.geometry: 		80x25
+!Emacs.default.attributeFont:	-*-courier-medium-r-*-*-*-120-*-*-*-*-iso8859-*
+!!Emacs.default.attributeFont:	-*-ttf-monaco-r-*-*-*-120-*-*-*-*-iso8859-*
+!!Emacs.default.Font:    Bitstream Vera Sans Mono-18:dpi=100
+!Emacs*menubar*Font:		-*-helvetica-bold-r-*-*-*-120-*-*-*-*-iso8859-*
+!Emacs*popup*Font:		-*-helvetica-bold-r-*-*-*-120-*-*-*-*-iso8859-*
+!Emacs*Dialog*Font:		-*-helvetica-bold-r-*-*-*-140-*-*-*-*-iso8859-*
+
+!Perhaps one day, this will work: http://calypso.tux.org/pipermail/xemacs-beta/2005-January/004210.html
+!Emacs*Font:    Bitstream Vera Sans Mono-18:dpi=100
+Emacs.fontBackend: xft
+Xft.antialias: 1
+
+
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+! xterm (and friends)
+
+XTerm*veryBoldColors:           15
+XTerm*on2Clicks:           word
+XTerm*on3Clicks:           line
+XTerm*on4Clicks:           group
+XTerm*on5Clicks:           all
+
+! XTerm*VT100.fontdefault:	-*-fixed-medium-*-*-*-6-*-*-*-*-*-*-*
+! XTerm*VT100.font1:		-*-fixed-medium-*-*-*-6-*-*-*-*-*-*-*
+! XTerm*VT100.font2:		-*-fixed-medium-*-*-*-10-*-*-*-*-*-*-*
+! XTerm*VT100.font3:		-*-fixed-medium-*-*-*-15-*-*-*-*-*-*-*
+! XTerm*VT100.font4:		-*-fixed-medium-*-*-*-24-*-*-*-*-*-*-*
+! XTerm*VT100.font5:		-*-fixed-medium-*-*-*-48-*-*-*-*-*-*-*
+! XTerm*VT100.font6:		-*-fixed-medium-*-*-*-96-*-*-*-*-*-*-*
+
+!xfontsel: 
+!XTerm*VT100.font:		-*-lucidatypewriter-*-*-*-24-*-*-*-*-*-*-*
+!XTerm*VT100.font:		-*-lucidatypewriter-*-*-*-18-*-*-*-*-*-*-*
+
+!XTerm*VT100.font1:		-*-nil-*-*-*-2-*-*-*-*-*-*-*
+!!XTerm*VT100.font1:		-*-fixed-*-*-*-6-*-*-*-*-*-*-*
+!XTerm*VT100.font2:		-*-lucidatypewriter-*-*-*-8-*-*-*-*-*-*-*
+!XTerm*VT100.font3:		fixed
+!!XTerm*VT100.font3:		-*-lucidatypewriter-*-*-*-10-*-*-*-*-*-*-*
+!XTerm*VT100.font4:		-*-lucidatypewriter-*-*-*-18-*-*-*-*-*-*-*
+!XTerm*VT100.font5:		-*-lucidatypewriter-*-*-*-24-*-*-*-*-*-*-*
+!XTerm*VT100.font6:		-*-lucidatypewriter-*-*-*-34-*-*-*-*-*-*-*
+
+!When using xft fonts (facename below), these below just set the relative scalings and where the default font size fits in relative to the other font sizes
+
+!!XTerm*VT100.Font2: -efont-fixed-medium-r-normal-*-12-*-*-*-*-*-iso10646-1
+!!XTerm*VT100.Font2: -misc-fixed-medium-r-*--12-*-*-*-*-*-iso10646-1
+!XTerm*VT100.Font2: -misc-fixed-medium-r-normal-*-8-80-75-75-c-50-iso10646-1
+!XTerm*VT100.Font3: -misc-fixed-medium-r-normal-*-13-*-*-*-*-*-iso10646-1
+!XTerm*VT100.Font4: -efont-fixed-medium-r-normal-*-14-*-*-*-*-*-iso10646-1
+!!XTerm*VT100.Font5: -efont-fixed-medium-r-normal-*-16-*-*-*-*-*-iso10646-1
+!XTerm*VT100.Font: -misc-fixed-medium-r-normal--18-*-*-*-*-*-iso10646-1
+!XTerm*VT100.Font5: -misc-fixed-medium-r-normal--20-*-*-*-*-*-iso10646-1
+!!XTerm*VT100.Font6: -efont-fixed-medium-r-normal-*-24-*-*-*-*-*-iso10646-1
+!XTerm*VT100.Font6: -misc-fixed-medium-r-normal-*-24-*-*-*-*-*-iso10646-1
+
+!WARNING: See .Xdefault.debian for font settings on sane systems (ie, debian)
+
+!FIXME: on aatpc2, seem to need to decrease dpi for some gtk1 apps like gbuffy and xterm on a remote display started through gbuffy (possibly to do with our xft fonts hack) but not xterm locally:
+! following sets dpi for gtk2; gtk1 requires X -dpi or 75dpi fonts specified before 100dpi
+!Xft.dpi: 80
+
+!to get meta characters to be able to be input in bash and emacs in an xterm:
+!http://www.leonerd.org.uk/hacks/hints/xterm-8bit.html
+XTerm*VT100.utf8:            1
+XTerm*VT100.eightBitInput:   false
+XTerm*VT100.eightBitControl: false
+XTerm*VT100.eightBitOutput:  true
+
+!http://www.leonerd.org.uk/hacks/hints/xterm-sensible.html
+XTerm*VT100.faceName:        DejaVu Sans Mono
+XTerm*VT100.boldFont:        DejaVu Sans Mono:style=Bold
+XTerm*VT100.faceSize:        9
+
+!doesn't seem to set the relative sizes as monotonically increasing - can't slot default size=11 in between facesize4 and facesize5
+!FIXME: Need to fix this to enable on non debian hosts
+!FIXME: enabled on debian testing aatpc2.  works there...
+XTerm*VT100.faceSize1:       1
+XTerm*VT100.faceSize2:       5
+XTerm*VT100.faceSize3:       7
+XTerm*VT100.faceSize4:       11
+XTerm*VT100.faceSize5:       14
+XTerm*VT100.faceSize6:       17
+
+XTerm*VT100.underLine:       true
+
+XTerm*highlightSelection:	true
+XTerm*keepSelection:	        true
+
+! Uncomment this to use color for the bold attribute
+XTerm*VT100.colorBDMode:	on
+XTerm*VT100.colorBD:		blue
+! Uncomment this to use color for underline attribute
+XTerm.VT100.colorULMode:	on
+XTerm.VT100.underLine:		off
+XTerm*VT100.colorUL:		magenta
+! Uncomment this to display the scrollbar 
+XTerm*scrollBar:		true
+XTerm*VT100.charClass:		33:33,37:33,45-47:33,64:33
+XTerm.VT100.background: 	rgb:00/00/00
+XTerm.VT100.foreground: 	rgb:60/ff/60
+XTerm*Scrollbar.background:	black
+XTerm*Scrollbar.foreground:	white
+XTerm*borderColor:		white
+XTerm*multiScroll: 		true
+XTerm*reverseWrap: 		true
+
+! This resource specifies whether or not to ignore the 'alternate screen'
+! of applications such as vi.  When it is on, these applications will restore
+! the contents of the screen when they are exited to what they were before
+! they were started.  When it is off, the contents of vi will remain on the
+! screen after the program is quit (seriously, who do I shoot to make sure 
+! that this ridiculous concept never appears again?)
+XTerm.VT100.titeInhibit:  true
+!and then allow an extra screenfull of scroll when screen "alternated"
+XTerm.VT100.tiXtraScroll: true
+
+!http://www.tldp.org/HOWTO/Keyboard-and-Console-HOWTO-5.html
+XTerm*ttymodes: erase ^? kill ^U intr ^C quit ^\ eof ^D \
+                            susp ^Z start ^Q stop ^S eol ^@
+
+
+
+! Uncomment this to turn off color mode in your xterms
+!XTerm.VT100.colorMode:  	off
+XTerm.VT100.dynamicColors:  	on
+
+! Number of lines of scrollback to save
+XTerm*saveLines:		16384
+
+XTerm*visualBell:		False
+XTerm*scrollTtyOutput:		True
+XTerm*scrollKey:		True
+!#ifdef CLNT_indium_bsee_swin_edu_au
+#ifdef SRVR_indium_bsee_swin_edu_au
+XTerm*backarrowKey:		true
+#else
+XTerm*backarrowKey:		false
+#endif
+
+!Scrollbar.JumpCursor:		True
+!XTerm*deleteIsDEL:		false
+!XTerm*background:		black
+!XTerm*foreground:		white
+
+XTerm*VT100.translations: #override \n\
+                None<Key>Home: string(0x1b) string("[1~") \n\
+		None<Key>End: string(0x1b) string("[4~") \n\
+		None<Key>Prior: string(0x1b) string("[5~") \n\
+		None<Key>Next: string(0x1b) string("[6~") \n\
+                ~Ctrl ~Meta <Btn2Up>:   insert-selection(PRIMARY, CLIPBOARD, CUT_BUFFER0) \n\
+
+
+!CLIPBOARD above from http://mlblog.osdir.com/emacs.xemacs.general/2004-07/index.shtml
+
+kbiff.NoTitle:			Yes
+
+! number of minutes to logout button, -1 disables
+XLock*logoutButton:		-1
+XLock*remote:                   true
+XLock.erasedelay:               0
+XLock.nice:                     20
+XLock.dpmsoff:                  15
+XLock.allowaccess:              on
+
+
+!!!!!!!!!!!!!!!!!!!!xmixer stuff follow:
+! These are the usual X defaults which are commonly used across X
+! applications. Note that color settings are ignored on monochrome
+! servers. Try reverseVideo instead.
+!
+!*Title:			XMixer
+!*iconic:			off
+!*background:			gray80
+!*foreground:			black
+XMixer*font:			-b&h-lucida-medium-r-normal-sans-*-90-*-*-p-*-*-*
+!*reverseVideo:			off
+!*synchronize:			off
+!*iconStartup:			off
+
+! Special settings for 3D look and feel.
+!
+!*brightBorder:			gray94
+!*darkBorder:			gray40
+!*hilightColor:			gray72
+
+!
+! Babble funny things...
+!*verbose:			on
+
+!
+! The mixer device.
+!*mixerDevice:			/dev/mixer
+
+!
+! If you set this to on, XMixer will periodically poll the mixer device and
+! update the display, so you can see changes even if they are made by other
+! programs.
+! Polling will not cause a big system load, however, it keeps the program
+! always in memory, so this is probably not a good idea if you are low.
+! The pollRate is specified in microseconds, thus this example means three
+! times per sec.
+XMixer*pollMixer:		on
+XMixer*pollRate:		1000000
+
+!
+! You may enable/disable each slider separately.
+! If none of the following resources are set, the default is to
+! enable everything.
+! XMixer will, however, check for each slider whether it is supported by
+! the sound driver. Each unsupported slider will silently be disabled if not.
+! Use '*debug: on' if you are unsure.
+!
+!*vol:				on
+!*bass:				on
+!*treble:			on
+!*synth:			on
+!*pcm:				on
+!*speaker:			on
+!*line:				on
+!*mic:				on
+!*cd:				on
+!*mix:				on
+!*pcm2:				on
+!*rec:				on
+!*igain:		 	off
+!*ogain: 			off
+!*line1: 			off
+!*line2: 			off
+!*line3: 			off
+
+
+
+Dtsession*wmStartupCommand:	/opt/csw/bin/fvwm
+!Would you believe CDE is so $#$!@!@ing stupid it does not start the wm after 60 seconds by default?
+Dtsession*waitWmTimeout:	1
+
+
+mozilla*noTitle: 		no
+
+! Ghostview
+!Ghostview*Font:		*-helvetica-bold-r-normal--12-*-*-*-*-*-*
+!Ghostview*BorderColor:		white
+!Ghostview*Text*Font:		rk14
+!*Ghostview.Background:		#d9d9d9
+!*Ghostview.Foreground:		white
+!ghostview.form.pageview.page.background:	black
+!ghostview.form.pageview.page.foreground:	white
+!.ghostview.zoom.form.page.background:	white
+!.ghostview.zoom.form.page.foreground:	black
+GV.antialias:			true
+!GV.uncompressCommand:           mycat %s --tofile /tmp/asd
+GV.scratchDir:                  /tmp/
+GV.reverseScrolling:    True
+
+
+!GV*Ghostview.background:	black
+!GV*Ghostview.foreground:	white
+
+
+ghostview.form.pageview.page.background:	white
+ghostview.form.pageview.page.foreground:	black
+.ghostview.zoom.form.page.background:	white
+.ghostview.zoom.form.page.foreground:	black
+
+
+!Wmcliphist.window.x:		56
+!Wmcliphist.window.y:		56
+
+#define TextFG rgb:10/10/10
+#define TextBG rgb:d0/d0/d0
+#define PanelBG rgb:c0/c0/c0
+#define ButtonBG rgb:b0/b0/b0
+#define DarkBG rgb:80/80/80
+
+#define DefFont -*-helvetica-medium-r-*-*-*-120-*
+#define BoldFont -*-helvetica-bold-r-*-*-*-120-*
+#define ItalFont -*-helvetica-medium-i-*-*-*-120-*
+#define MonoFont codec-text
+#define MonoBdFont codec-text
+
+#define TermGeom 90x50
+
+!xclock*font:			 -b&h-lucida-medium-r-normal-sans-*-90-*-*-p-*-*-*
+
+!xclock*font:			 -*-helvetica-medium-r-*-*-8-*-*-*-*-*-*-*
+
+XClock.geometry: -5-5
+XClock.transient: True
+!XClock.clock.font: DefFont
+!XClock.clock.background: PanelBG
+XClock.clock.analog: False
+XClock.clock.update: 1
+
+Gnuplot*noraise: on
+Gnuplot*raise: off
+
+!http://lists.debian.org/debian-tetex-maint/2004/03/msg00018.html
+!XDvi.wheelTranslations: \
+!	<Btn4Down>: up(0.015)\n\
+!	<Btn5Down>: down(0.015)\n\
+!	<Btn6Down>: left(0.015)\n\
+!	<Btn7Down>: right(0.015)\n
+
+
+Syssuspend*xlock:   False
+
+*vncviewer*wmDecorationHeight: 30
+*vncviewer*wmDecorationWidth: 12
+
+! bug 344154
+Ddd*source_text_w.baseTranslations: #override \
+<Btn4Down>:                             scroll-one-line-up()\
+                                        scroll-one-line-up()\
+                                        scroll-one-line-up()\n\
+~Shift Ctrl<Btn4Down>,<Btn4Up>:         previous-page()\n\
+~Ctrl Shift<Btn4Down>,<Btn4Up>:         previous-line()\n\
+~Shift ~Ctrl<Btn4Down>,<Btn4Up>:        previous-line()\
+                                        previous-line()\
+                                        previous-line()\
+                                        previous-line()\
+                                        previous-line()\n\
+<Btn5Down>:                             scroll-one-line-down()\
+                                        scroll-one-line-down()\
+                                        scroll-one-line-down()\n\
+~Shift Ctrl<Btn5Down>,<Btn5Up>:         next-page()\n\
+~Ctrl Shift<Btn5Down>,<Btn5Up>:         next-line()\n\
+~Shift ~Ctrl<Btn5Down>,<Btn5Up>:        next-line()\
+                                        next-line()\
+                                        next-line()\
+                                        next-line()\
+                                        next-line()\n
+
+Ddd*code_text_w.baseTranslations: #override \
+<Btn4Down>:                             scroll-one-line-up()\
+                                        scroll-one-line-up()\
+                                        scroll-one-line-up()\n\
+~Shift Ctrl<Btn4Down>,<Btn4Up>:         previous-page()\n\
+~Ctrl Shift<Btn4Down>,<Btn4Up>:         previous-line()\n\
+~Shift ~Ctrl<Btn4Down>,<Btn4Up>:        previous-line()\
+                                        previous-line()\
+                                        previous-line()\
+                                        previous-line()\
+                                        previous-line()\n\
+<Btn5Down>:                             scroll-one-line-down()\
+                                        scroll-one-line-down()\
+                                        scroll-one-line-down()\n\
+~Shift Ctrl<Btn5Down>,<Btn5Up>:         next-page()\n\
+~Ctrl Shift<Btn5Down>,<Btn5Up>:         next-line()\n\
+~Shift ~Ctrl<Btn5Down>,<Btn5Up>:        next-line()\
+                                        next-line()\
+                                        next-line()\
+                                        next-line()\
+                                        next-line()\n
+
+Ddd*gdb_w.baseTranslations: #override \
+<Btn4Down>:                             scroll-one-line-up()\
+                                        scroll-one-line-up()\
+                                        scroll-one-line-up()\n\
+~Shift Ctrl<Btn4Down>,<Btn4Up>:         previous-page()\n\
+~Ctrl Shift<Btn4Down>,<Btn4Up>:         previous-line()\n\
+~Shift ~Ctrl<Btn4Down>,<Btn4Up>:        previous-line()\
+                                        previous-line()\
+                                        previous-line()\
+                                        previous-line()\
+                                        previous-line()\n\
+<Btn5Down>:                             scroll-one-line-down()\
+                                        scroll-one-line-down()\
+                                        scroll-one-line-down()\n\
+~Shift Ctrl<Btn5Down>,<Btn5Up>:         next-page()\n\
+~Ctrl Shift<Btn5Down>,<Btn5Up>:         next-line()\n\
+~Shift ~Ctrl<Btn5Down>,<Btn5Up>:        next-line()\
+                                        next-line()\
+                                        next-line()\
+                                        next-line()\
+                                        next-line()\n
+

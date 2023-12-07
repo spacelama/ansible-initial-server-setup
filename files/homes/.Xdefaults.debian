@@ -1,0 +1,10 @@
+!FIXME: Need to fix this to disable on non debian hosts
+XTerm*VT100.Font2: -*-dejavu sans mono-medium-r-*-*-8-*-*-*-*-*-iso10646-1
+XTerm*VT100.Font3: -*-dejavu sans mono-medium-r-*-*-10-*-*-*-*-*-iso10646-1
+XTerm*VT100.Font:  -*-dejavu sans mono-medium-r-*-*-14-*-*-*-*-*-iso10646-1
+XTerm*VT100.Font4: -*-dejavu sans mono-medium-r-*-*-18-*-*-*-*-*-iso10646-1
+XTerm*VT100.Font5: -*-dejavu sans mono-medium-r-*-*-20-*-*-*-*-*-iso10646-1
+XTerm*VT100.Font6: -*-dejavu sans mono-medium-r-*-*-24-*-*-*-*-*-iso10646-1
+
+!XTerm*VT100.geometry:       101x32
+

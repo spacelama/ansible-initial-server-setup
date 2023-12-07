@@ -203,6 +203,8 @@
         mode: "0755"
       - name: .gitconfig
       - name: .gitattributes
+      - name: .Xdefaults
+      - name: .Xdefaults.debian
     # templates done by matching on .j2
       - name: .nanorc
         source: homes/.nanorc.j2
