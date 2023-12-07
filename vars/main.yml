@@ -205,6 +205,10 @@
       - name: .gitattributes
       - name: .Xdefaults
       - name: .Xdefaults.debian
+      - name: .emacs
+      - name: .gnu-emacs
+      - name: .gnu-emacs-custom
+      - name: .xemacs/
     # templates done by matching on .j2
       - name: .nanorc
         source: homes/.nanorc.j2

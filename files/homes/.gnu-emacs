@@ -1,0 +1,949 @@
+;; -*- Mode: Emacs-Lisp -*-
+
+(or (boundp 'running-emacs)
+    (defvar running-emacs (string-match "GNU Emacs [0-9]" (version))))
+(or (boundp 'running-xemacs)
+    (defvar running-xemacs (string-match "XEmacs\\|Lucid" (version))))
+
+(defmacro GNUEmacs (&rest x)
+  (list 'if 'running-emacs
+	(cons 'progn x)))
+(defmacro XEmacs (&rest x)
+  (list 'if 'running-xemacs
+	(cons 'progn x)))
+
+(defmacro GNULinux (&rest x)
+  (list 'if (string-match "linux" (prin1-to-string system-type))
+	(cons 'progn x)))
+(defmacro Windows (&rest x)
+  (list 'if (string-match "windows" (prin1-to-string system-type))
+	(cons 'progn x)))
+
+;(GNUEmacs
+; ;; Stop at the end of the file, not just add lines
+; (setq gnuserv-program "~/bin/gnuserv.restart")
+; (load "gnuserv-compat")
+; (load-library "gnuserv")
+; (gnuserv-start))
+;;(server-start)
+(XEmacs
+ (defvar running-xemacs 't)
+ (defvar running-xemacs nil))
+(GNUEmacs
+ (defvar running-emacs 't)
+ (defvar running-emacs nil))
+
+(setq inhibit-splash-screen 't)
+(setq inhibit-startup-screen 't)
+
+(setq-default default-directory "~/")
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;; Emacs Elements
+;; URL: https://youtu.be/eRHLGWajcTk
+;; Last updated 19 February 2023
+;; Thanks to Tim Cross for some suggestions
+
+;; settings from https://www.youtube.com/watch?v=eRHLGWajcTk
+;; https://drive.google.com/drive/folders/1K8pc2uY7bDqmnboqAqfHbe_lvrb0GBY2
+;;
+;; Zoom
+(set-face-attribute 'default nil :height 120)
+
+;; Save History
+(savehist-mode +1)
+(setq savehist-additional-variables '(kill-ring search-ring regexp-search-ring))
+
+;; Startup
+(setq inhibit-startup-screen t)
+(setq initial-scratch-message
+      ";; Hello world.\n")
+
+;; Size of the starting Window
+(setq initial-frame-alist '((top . 1)
+			    (left . 450)
+			    (width . 101)
+			    (height . 70)))
+
+;; Use `use-package'
+;; This code is not required in Emacs 29 which bundles `use-package'
+(eval-when-compile (add-to-list 'load-path "/home/tconnors/.emacs.d/use-package")
+		   (require 'use-package))
+
+;; Set the default directory
+(setq default-directory "/home/tconnors/")
+
+;; Package directory
+(add-to-list 'load-path "/home/tconnors/.emacs.d/packages")
+
+;; Recent files
+(recentf-mode 1)
+(global-set-key "\C-x\ \C-r" 'recentf-open-files)
+
+;; Melpa
+(require 'package)
+(add-to-list 'package-archives '("melpa" . "https://melpa.org/packages/") t)
+(package-initialize)
+;(setq package-check-signature nil)
+
+; these functions are disabled by default.  Have people not heard of
+; undo instead?
+(put 'set-goal-column 'disabled nil)
+(put 'upcase-region 'disabled nil)
+(put 'downcase-region 'disabled nil)
+(put 'dired-find-alternate-file 'disabled nil)
+
+ ;;
+ ;;  Start GNUServe process when starting up.  This lets us send new files
+ ;; to previously spawned emacs process.
+ ;;
+
+; Is this emacs or xemacs?
+;(or (boundp 'running-xemacs)
+;    (defvar running-xemacs (string-match "XEmacs\\|Lucid" emacs-version)))
+
+; use e.g. as follows:
+;(if (not running-xemacs)
+;    t
+;  nil)
+
+; alternatively, use (XEmacs, (GNUEmacs, etc macros from ~/.emacs
+
+(add-to-list 'load-path "~/elisp")
+;(add-to-list 'load-path "~/elisp/gnuplot-mode")  ; not yet in debian
+(add-to-list 'load-path "~/elisp/arduino-mode")  ; not yet in debian
+(add-to-list 'load-path "~/elisp/grip-mode")  ; not yet in debian
+;(add-to-list 'load-path "~/elisp/emacs-libvterm") ; not yet in debian
+
+
+;(add-to-list 'load-path "~/elisp/tramp/lisp")
+;(add-to-list 'load-path "~/elisp/tramp/contrib")
+;(add-to-list 'load-path "~/elisp/preview-latex/....")
+;(add-to-list 'load-path "~/elisp/mmm-mode-0.4.7")
+;(add-to-list 'load-path "~/elisp/latex-symbols-0.04")
+;(add-to-list 'Info-default-directory-list "~/elisp/tramp/info")
+
+;(defun trycatch (fn)
+;;;A try/catch mechanism:
+;  (condition-case err
+;      (fn)
+;    (error
+;     (setq message-log-max t)  ; if an error occurs, I'd like to see all messages
+;     (message "Ooops, something didn't load: %s" err))))
+
+(require 'try-require)
+
+(XEmacs
+ (try-require 'redo))
+(GNUEmacs
+; (defun redo(arg)
+;   "Undo or redo changes.  If ARG is present or negative, redo ARG
+;    changes.  If ARG is positive, repeatedly undo ARG changes."
+;   (interactive "P")
+;   (if (null arg)
+;       (undo)
+;     (let ((n (prefix-numeric-value arg)))
+;       (cond ((= n 0) (redo))
+;	     ((< n 0) (redo (- n)))
+;	     ((> n 0) (undo n)))))))
+ (when (try-require "undo-tree")
+   (global-undo-tree-mode)
+   (setq undo-tree-history-directory-alist '(("." . "~/.emacs.d/undo")))
+;   (global-set-key [(meta backspace)] 'undo)
+;   (global-set-key [(meta shift backspace)] 'redo))
+   )
+ )
+
+;http://www.emacswiki.org/emacs/RevertBuffer
+;(defun revert-buffer-keep-undo (&rest -)
+;  "Revert buffer but keep undo history."
+;  (interactive)
+;  (let ((inhibit-read-only t))
+;    (set-buffer-modified-p nil)
+;    (erase-buffer)
+;    (insert-file-contents (buffer-file-name))
+;    (set-visited-file-modtime (visited-file-modtime))
+;    (set-buffer-modified-p nil)))
+;(setq revert-buffer-function 'revert-buffer-keep-undo)
+
+; http://stackoverflow.com/questions/4924389/is-there-a-way-to-retain-the-undo-list-in-emacs-after-reverting-a-buffer-from-fi :
+;; emacs doesn't actually save undo history with revert-buffer
+;; see http://lists.gnu.org/archive/html/bug-gnu-emacs/2011-04/msg00151.html
+;; fix that.
+(defun revert-buffer-keep-history (&optional IGNORE-AUTO NOCONFIRM PRESERVE-MODES)
+  (interactive)
+  
+  ;; tell Emacs the modtime is fine, so we can edit the buffer
+  (clear-visited-file-modtime)
+  
+  ;; insert the current contents of the file on disk
+  (widen)
+  (delete-region (point-min) (point-max))
+  (insert-file-contents (buffer-file-name))
+  
+  ;; mark the buffer as not modified
+  (not-modified)
+  (set-visited-file-modtime))
+(setq revert-buffer-function 'revert-buffer-keep-history)
+
+(setq european-calendar-style t)
+(setq diary-mail-days 7)
+(setq appt-check-time-syntax t)
+(setq appt-announce-method 'appt-persistent-message-announce)
+
+(try-require 'tex-site)   ;; see info auctex/quick start
+(setq TeX-auto-save t)
+(setq TeX-parse-self t)
+(setq-default TeX-master nil)
+
+;(try-require 'tex)
+;(try-require 'latex)
+
+;(try-require 'revive)
+(try-require 'scroll-in-place)
+(try-require 'calendar)
+(try-require 'sendmail)
+(try-require 'message)
+(try-require 'cc-mode)
+(try-require 'csh-mode)
+(try-require 'winmgr-mode)
+(try-require 'folding)
+(try-require 'puppet)
+;(try-require 'vline)
+;(try-require 'col-highlight)   ; too many bugs - to do with searching when there's a selection or indeed searching at any other time
+(when (try-require 'mwheel)
+  (mwheel-install))
+(when (try-require 'power-macros)
+  (setq power-macros-file "~/.xemacs/macros.el")
+  (or (boundp 'loaded-macros)
+      (progn 
+        (defvar loaded-macros t)
+        (load power-macros-file)                ; loads the saved macros
+        ))
+  )
+
+;; to handle a little timer bug in the current clearcase.el (Jan 21, 2005)
+(try-require 'timer)
+
+(try-require 'wdired)
+(try-require 'font-lock)
+;(try-require 'color-theme)
+;(color-theme-initialize)
+(load-theme 'wheatgrass)
+; 20210915 disabled to enable diary-mail-entries to start:
+; (load-theme 'migration-to-theme-v26)
+(require 'paren)
+(XEmacs
+ (paren-set-mode 'blink-paren))
+(GNUEmacs
+; (paren-set-mode 'blink)))
+ (blink-cursor-mode 't))
+
+;;(try-require 'recent-files)
+;;(vc-load-vc-hooks)
+(when (try-require 'vc)
+  (load "~/.xemacs/myvc.el"))
+
+;(try-require 'type-break)
+
+;(load-library "tramp")
+;(setq tramp-unified-filenames t)
+;(when (try-require 'tramp)
+;  (load "~/.xemacs/tramp-methods.el"))
+
+;; ANSI color mode for shells, etc
+(autoload 'ansi-color-for-comint-mode-on "ansi-color" nil t)
+(autoload 'font-lock-add-buffer-keywords "add-buffer-keywords" nil t)
+(autoload 'mount "mouumo" nil t)
+(autoload 'umount "mouumo" nil t)
+(autoload 'vvb-mode "vvb-mode" nil t)
+(autoload 'eperiodic "eperiodic" nil t)
+(autoload 'htmlize-buffer "htmlize" nil t)
+(autoload 'gnuplot-mode "gnuplot" nil t)
+(autoload 'arduino-mode "arduino-mode" nil t)
+(autoload 'grip-mode "grip-mode" nil t)
+(autoload 'muttrc-mode "muttrc-mode" nil t)
+(autoload 'toggle-option "toggle-option" nil t)
+
+;(try-require 'vterm)
+(try-require 'gnuplot-mode)
+(try-require 'mmm-auto)
+(try-require 'preview)
+(try-require 'fscroll)  ;; make sure that when you pgup to top of document, it gets to very top
+(try-require 'uniquify) ;; rename ambiguous buffers
+
+(load-library "reposition")
+;(require 'iswitchb)
+;;reposition the window better than C-l with C-M-l
+      
+;;iswitch is does a better job with C-x b
+;(autoload 'iswitchb "iswitchb" "Run iswitchb" t)
+;(setq read-buffer-function 'iswitchb-read-buffer)
+;(setq iswitchb-default-method 'samewindow)
+;(iswitchb-default-keybindings) ; removed from emacs24
+(iswitchb-mode 1)
+;(icomplete-mode 1)
+;(ido-mode 1)   ;; screws up window focus when switching to a tab that already exists
+
+; http://emacswiki.org/emacs/IswitchBuffers
+; Additionally one can configure uniquify to rework the buffer names whenever a buffer is killed. This feature does not play well with IswitchBuffers function ‘iswitchb-kill-buffer’, bound to C-k. The following code instructs ‘iswitchb-kill-buffer’ to update the buffer list after killing a buffer, so that a possible buffer renaming
+(defadvice iswitchb-kill-buffer (after rescan-after-kill activate)
+      "*Regenerate the list of matching buffer names after a kill.
+    Necessary if using `uniquify' with `uniquify-after-kill-buffer-p'
+    set to non-nil."
+      (setq iswitchb-buflist iswitchb-matches)
+      (iswitchb-rescan))
+(defun iswitchb-rescan ()
+  "*Regenerate the list of matching buffer names."
+  (interactive)
+  (iswitchb-make-buflist iswitchb-default)
+  (setq iswitchb-rescan t))
+
+;; FIXME: 2023: iswitchb became obsolete in emacs 24!  http://xahlee.info/emacs/emacs/emacs_iswitch_vs_ido.html
+;; Apparently we're looking for icomplete-mode
+;; There's also ido according to that page
+;; There's also https://www.emacswiki.org/emacs/IswitchBuffers
+;; https://www.emacswiki.org/emacs/IswitchBuffers
+
+(display-time)
+(defun periodic ()
+  (interactive)
+  (eperiodic))
+
+;(when (try-require 'revive)
+;  (define-key ctl-x-map "S" 'save-current-configuration)
+;  (define-key ctl-x-map "F" 'resume)
+;  (define-key ctl-x-map "K" 'wipe))
+
+(defun yes-or-no-p (prompt)
+  "replace tedious yes/no+enter with y/n keypress"
+  (ding t)
+  (y-or-n-p prompt))
+
+(setq inhibit-startup-message t)        ; I'm sick of the welcome message
+;(set 'small-temporary-file-directory "/tmp")   ; makes /tmp/crontab.* get same inode as before, and hence crontab doesnt bail out on us -- necessary on new SuSE for some reason?  So what entries did I add that got deleted?
+(setq backup-by-copying t)
+(setq backup-by-copying-when-mismatch t)
+(setq backup-by-copying-when-linked t)
+(setq backup-directory-alist '(("." . "~/xemacs-backups/")))
+
+(when (try-require 'os-utils-autoloads)
+  (auto-compression-mode))
+
+;(try-require 'recentf)
+;(recentf-mode 1)
+
+;;end of loading libraries, setting paths, etc
+
+(setq report-xemacs-bug-no-explanations t)
+
+(setq vm-default-folder-type 'From_)
+
+(setq-default font-lock-auto-fontify nil) ; taken care of in highlighting in file-load hook
+(setq-default font-lock-use-fonts nil)
+(setq-default font-menu-ignore-scaled-fonts t)
+(setq-default font-menu-this-frame-only-p nil)
+(setq-default font-lock-use-colors '(color))
+(setq-default font-lock-maximum-decoration t)
+;(setq-default font-lock-maximum-size 256000)  ; no longer in emacs 24
+(setq-default font-lock-mode-enable-list nil)
+(setq-default font-lock-mode-disable-list nil)
+
+(XEmacs
+ (add-spec-list-to-specifier modeline-shadow-thickness '((global (nil . 2))))
+ (try-require 'lazy-shot)
+;(try-require 'lazy-lock)
+ (remove-hook 'font-lock-mode-hook 'turn-on-fast-lock)
+ (remove-hook 'font-lock-mode-hook 'turn-on-lazy-shot)
+ (remove-hook 'font-lock-mode-hook 'turn-on-lazy-lock)
+ (add-hook 'font-lock-mode-hook 'turn-on-lazy-shot)
+;(add-hook 'font-lock-mode-hook 'turn-on-lazy-lock)
+
+ (if (featurep 'scrollbar) (progn (add-spec-list-to-specifier scrollbar-width 'nil) (add-spec-list-to-specifier scrollbar-height 'nil)))
+ (if (featurep 'toolbar) (progn (set-default-toolbar-position 'top) (add-spec-list-to-specifier default-toolbar-visible-p 'nil) (add-spec-list-to-specifier toolbar-buttons-captioned-p 'nil)))
+ )
+;(GNUEmacs
+; (tabbar-mode)
+; )
+
+;(setq-default mouse-avoidance-mode nil)
+(setq rfcr-proxy-host "localhost")
+(setq rfcr-proxy-port 8000)
+
+(set-face-attribute 'default nil :family "DejaVu Sans Mono")
+(set-face-attribute 'variable-pitch nil :family "DejaVu Sans")
+
+
+;(load "languages.el")
+;(if (boundp 'set-default-coding-systems)
+;    (load "~/.xemacs/init-i18n.el"))
+;(set-fontset-font "fontset-default" 'gb18030 '("dejavu sans mono". ~unicode-bmp~))
+;(set-terminal-coding-system 'utf-8)
+;
+;;;;;;;;;;;;;;;;;;;;;
+;;; set up unicode
+;(prefer-coding-system       'utf-8)
+;(set-default-coding-systems 'utf-8)
+;(set-terminal-coding-system 'utf-8)
+;(set-keyboard-coding-system 'utf-8)
+;;; This from a japanese individual.  I hope it works.
+;(setq default-buffer-file-coding-system 'utf-8)
+;;; From Emacs wiki
+;(setq x-select-request-type '(UTF8_STRING COMPOUND_TEXT TEXT STRING))
+;
+
+(setq c-recognize-knr-p nil);;speeds up indenting a lot, by not
+;;looking for old style k&r
+
+;; adds an imenu
+(defun add-imenu ()
+  (interactive)
+  (f90-add-imenu-menu))
+
+;(vvb-mode)  ;toggle on
+(setq-default vvb-permanent-p t)
+(setq-default vvb-right-on-eol-p t)
+;(set-face-background 'vvb-face "red4")
+;(vvb-mode)  ;toggle off
+
+(defun flyspell-buffer-if-not-too-large ()
+  (interactive)
+  (if (< (buffer-size) (* 1024 64))
+      (flyspell-buffer)
+    't))
+
+(autoload 'flyspell-mode "flyspell" "On-the-fly ispell." t)
+(autoload 'flyspell-buffer "flyspell" "On-the-fly ispell." t)
+;(load-library "glish-mode")
+;(add-hook 'c-mode-hook 'turn-off-auto-fill)
+(add-hook 'c-mode-hook 'turn-on-folding-mode)
+(add-hook 'emacs-lisp-mode-hook 'turn-on-folding-mode)
+(add-hook 'f90-mode-hook     'turn-on-folding-mode 'add-imenu)
+(add-hook 'cperl-mode-hook    'turn-on-folding-mode)
+(add-hook 'fortran-mode-hook 'turn-on-folding-mode 'turn-on-auto-fill 'vvb-mode)
+(add-hook 'TeX-mode-hook     'turn-on-folding-mode 'turn-on-auto-fill); encompases LaTeX-mode as well
+;(add-hook 'text-mode-hook    'turn-on-auto-fill)
+;(add-hook 'text-mode-hook    (lambda () (flyspell-mode 1)))
+;Bug#459044 - flyspell-mode is a toggle, whereas tex-mode calls text-mode eventually, toggling it back off
+(add-hook 'TeX-mode-hook     (lambda () (flyspell-mode 1))) ; encompases LaTeX-mode as well
+(add-hook 'text-mode-hook    (lambda () (flyspell-mode 1)))
+;(add-hook 'html-mode-hook    (lambda () (flyspell-mode 1)))
+;(add-hook 'mail-mode-hook    (lambda () (flyspell-mode 1)))
+(add-hook 'message-mode-hook    (lambda () (flyspell-mode 1)))
+(add-hook 'LaTeX-mode-hook   'turn-on-reftex)   ; with AUCTeX LaTeX mode
+(add-hook 'latex-mode-hook   'turn-on-reftex)   ; with Emacs latex mode
+; treat underscores as part of word.  This is the case in all languages I can think of
+(add-hook 'find-file-hooks   (lambda () (modify-syntax-entry ?_ "w" (syntax-table))) 't)
+
+;debian bug#459044
+; if flyspell-mode is on for this buffer (from above) when we invoke
+; this hook, then flyspell the buffer then
+;  this once stopped buffers from being checked if too big, but now it just results in a buffer being spell checked twice.  ; twc 20111217
+;(add-hook 'find-file-hooks
+;          (lambda ()
+;            (if (and (boundp 'flyspell-mode)
+;                       flyspell-mode)
+;                (flyspell-buffer-if-not-too-large)
+;              't)))
+
+;(when (try-require 'folding)
+;  (add-hook 'find-file-hooks 'turn-on-folding-mode))
+; that line is good, or the following will only turn it on when an
+; appropriate buffer local variable has been set in the bottom of the
+; file:
+;  (folding-mode-add-find-file-hook))
+
+(add-hook 'htmlize-after-hook 'font-lock-fontify-buffer)
+; from custom.el -> '(f90-mode-hook (quote (f90-add-imenu-menu f90-key-settings add-imenu)) t)
+;(if (eq (console-type) 'x) (x-symbol-initialize))
+;(add-hook 'LaTeX-mode-hook 'x-symbol-mode)   
+;(add-hook 'TeX-mode-hook   'x-symbol-mode)
+
+;;(try-require 'backup)
+;;(backup-set-directory "~/xemacs-backups/")
+
+
+;;Get tramp to beep whenever it finishes doing something.
+
+;(defadvice tramp-handle-write-region
+;  (after tramp-write-beep-advice activate)
+;  " make tramp beep after writing a file."
+;  (interactive)
+;  (beep))
+;(defadvice tramp-handle-do-copy-or-rename-file
+;  (after tramp-copy-beep-advice activate)
+;  " make tramp beep after copying a file."
+;  (interactive)
+;  (beep))
+;(defadvice tramp-handle-insert-file-contents
+;  (after tramp-copy-beep-advice activate)
+;  " make tramp beep after copying a file."
+;  (interactive)
+;  (beep))
+
+(try-require 'tramp)
+
+(setq tramp-default-method "ssh")
+; 20130617 upgrading to debian wheezy, and downgrading from emacs24 to emacs23, and we get in *tramp/ssh ssh* buffer: "ssh: Could not resolve hostname ssh: Name or service not known \n Process *tramp/ssh ssh* exited abnormally with code 255"
+;(add-to-list 'tramp-default-proxies-alist
+;                  '("\\." "root" "/ssh:root@ant:"))
+;(add-to-list 'tramp-default-proxies-alist
+;	     '("ant" nil nil))
+
+(load "~/.xemacs/filebindings.el")
+(load "~/.xemacs/lismp.el") ;; list manipulation
+(load "~/.xemacs/funckeybindings.el")
+(load "~/.xemacs/highlighting.el")
+(load "~/.xemacs/keysettings.el")
+(load "~/.xemacs/savefiles.el")
+(load "~/.xemacs/diary-helper.el")
+(load "~/.xemacs/fun.el")
+
+(defun prepareprettyprint ()
+  "Colors the screen in an appropriate way for pretty preinting. When I work out something better, I will use it!."
+  (interactive)
+;  (set-face-background 'default "white")
+;  (set-face-foreground 'default "black")
+;  (color-theme-standard)
+;  (color-theme-standard) ; twice seems to be necessary! (or maybe just the customs from custom.el are being loaded after the theme the first but not subsequent times
+  (message "disabled until we can find an emacs26 way of doing things")
+  )
+
+
+(defun deprepareprettyprint ()
+  "Un-Colors the screen in an appropriate way for viewing. When I work out something better, I will use it!."
+  (interactive)
+  (setdefaultcolors))
+
+(defun setdefaultcolors ()
+  "Set the default colors of the screen."
+  (interactive)
+;  (set-face-background 'default "black") ;screen background
+;  (set-face-foreground 'default "lightblue") ;normal text (not really - just do it before setting it properly later, in case of failures during init
+
+  ;(load "~/.xemacs/sweyla902670.el")
+  ;(sweyla902670)
+; http://emacswiki.org/?ColorTheme
+;  (color-theme-whateveryouwant)
+;  (color-theme-hober)
+;  (color-theme-renegade)
+  )
+
+(defun set-newframe-color (frame)
+  "Fix the default colors of new frames"
+  (interactive)
+  (message "disabled until we can find an emacs26 way of doing things")
+                                        ;  (set-variable 'color-theme-is-global nil)
+                                        ;  (select-frame frame)
+                                        ;            (if window-system
+                                        ;                (color-theme-renegade)
+                                        ;              (color-theme-tty-dark))
+  )
+
+(add-hook 'after-make-frame-functions 'set-newframe-color)
+
+(setq-default frame-title-format "emacs: %b")
+
+;-------------------------------------------------------------------------
+; Find matching parenthesis for "()", "[]" and "{}".
+; Bind <Ctrl-C g> to - go to the matching parenthesis.
+; Bind <Ctrl-C s> to - a brief show of the matching parenthesis.
+; Original code: http://list-archive.xemacs.org/xemacs-nt/199912/msg00050.html
+
+(defun go-matching-paren ()
+  "Move cursor to the matching parenthesis."
+  (interactive)
+  (cond ((looking-at "[[({]") (forward-sexp 1))
+	((save-excursion
+           (backward-char 1)
+           (looking-at "[])}]")) (backward-sexp 1))
+        (t (ding) (message "Unbalanced parenthesis"))))
+
+(defun show-matching-paren ()
+  "Move cursor momentarily to the matching parenthesis."
+  (interactive)
+  (save-excursion
+    (cond ((looking-at "[[({]") (forward-sexp 1) (sit-for 1))
+          ((save-excursion
+             (backward-char 1)
+             (looking-at "[])}]")) (backward-sexp 1) (sit-for 1))
+	  (t (ding) (message "Unbalanced parenthesis")))))
+
+(defun shell-command-on-buffer ()
+  "eg, invoke C-| md5sum to obtain md5sum of the entire buffer"
+  (interactive)
+  (shell-command-on-region (point-min) (point-max) (read-shell-command "Shell command on buffer: ")))
+
+; mic-paren: (should really check what this does)
+;(add-hook 'LaTeX-mode-hook
+;          (function (lambda ()
+;                      (paren-toggle-matching-quoted-paren 1)
+;                      (paren-toggle-matching-paired-delimiter 1))))
+
+;; set the tag files used by the following directories:
+;; /home/office/tconnors/TAGS/TAGS is createed with tags-create.sh
+(setq tag-table-alist
+      '(("/ficticious/directory/name" . "/ficticious/directory/name/and/crap")
+        ("\\.el" . "~/TAGS/xel-TAGS")
+        ("\\.c"  . "~/TAGS/c-TAGS"  );;anything ending with .c
+        (""      . "~/TAGS/"        );;default
+        ))
+
+;(let
+;    ((c-keyword-names
+;      (concat "\\b\\(0[xX][0-9a-fA-F]+[lL]?\\|[0-9]+\\.?[0-9]*"
+;              "\\([eE][-+]?[0-9]+\\)?\\([lL]\\|[fF]\\|[dD]\\)?\\)\\b")))
+;  (setq c-font-lock-keywords-4
+;        (list
+;         (list (concat "\\<\\(" c-keyword-names "\\)\\>") 1 'c-number-face)
+;         )))
+
+
+
+
+(defun timc-c-settings-hook ()
+;  (c-set-style "k&r")
+  (c-set-style "stroustrup")   ; include c-basic-offset 4
+  (c-set-offset 'case-label 2)
+;  (c-basic-offset 4)
+;  (setq c-font-lock-keywords  (append c-font-lock-keywords-4
+;                                      c-font-lock-keywords-3))
+  )
+
+(add-hook 'c-mode-common-hook 'timc-c-settings-hook)
+
+;(mouse-avoidance-mode 'animate)
+
+; allow the user to redefine "~" to be some other directory, for the
+; purposes of opening a file
+
+; probably a really bad idea! -- stephen turnbull (eg, custom.el changes, etc)
+
+;(defvar temp-home nil "temporary home directory - must include final /")
+;(fset 'real-expand-file-name (symbol-function 'expand-file-name))
+;(defun expand-file-name (name &optional defdir)
+;  (real-expand-file-name
+;    (if (and temp-home (string-match "^~/" name))
+;      (replace-match temp-home t t name)
+;     name) defdir))
+
+
+(defun string-match-nonil (match str)
+  (if (eq str nil)
+      nil
+    (string-match match str)))
+
+(defun count-words-buffer ()
+  "Count the number of words in the current buffer;
+print a message in the minibuffer with the result."
+  (interactive)
+  (save-excursion
+    (let ((count 0))
+      (goto-char (point-min))
+      (while (< (point) (point-max))
+	(forward-word 1)
+	(setq count (1+ count)))
+      (message "Buffer contains %d words." count))))
+
+;; call fortune!
+(defun fortune ()
+  "What is life without a fortune cookie?"
+  (interactive)
+  (pop-to-buffer "*Fortune*")
+  (insert (shell-command-to-string "/usr/games/fortune")))
+
+;;; dos2unix and unix2dos from Benjamin Rutt's .emacs ;; Convert a buffer from dos ^M end of lines to unix end of lines
+(defun dos2unix ()
+  "Simply convert \\cr\\lf in a buffer into \\n.  Must first get the buffer into a noconv state by using turn-off-eol-detection, then later, switch it back to normal with turn-on-eol-detection."
+  (interactive)
+  (save-excursion 
+    (goto-char (point-min))
+    (while (search-forward "\r" nil t)
+      (replace-match ""))))
+
+;;vice versa
+(defun unix2dos ()
+  "Simply convert \\n in a buffer into \\cr\\lf." 
+  (interactive)
+  (save-excursion
+    (goto-char (point-min))
+    (while (search-forward "\n" nil t)
+      (replace-match "\r\n"))))
+
+(defun turn-on-eol-detection ()
+  (interactive)
+  (set-eol-detection t)
+  (setq buffer-file-coding-system-for-read 'undecided)
+  (message "eol detection back to normal: on")
+  )
+
+(defun turn-off-eol-detection ()
+  (interactive)
+  (set-eol-detection nil)
+  (message "eol detection off")
+  )
+
+(defun toggle-eol-detection ()
+  (interactive)
+  (if (eq buffer-file-coding-system-for-read 'undecided)
+      (turn-off-eol-detection)
+    (turn-on-eol-detection)))
+
+(defalias 'diff-buffers 'ediff-buffers)
+
+
+; http://stackoverflow.com/questions/384284/how-do-i-rename-an-open-file-in-emacs
+;; source: http://steve.yegge.googlepages.com/my-dot-emacs-file
+;; Originally from stevey, adapted to support moving to a new directory.
+(defun rename-file-and-buffer (new-name)
+  "Renames both current buffer and file it's visiting to NEW-NAME."
+  (interactive
+   (progn
+     (if (not (buffer-file-name))
+         (error "Buffer '%s' is not visiting a file!" (buffer-name)))
+     (list (read-file-name (format "Rename %s to: " (file-name-nondirectory
+                                                     (buffer-file-name)))))))
+  (if (equal new-name "")
+      (error "Aborted rename"))
+  (setq new-name (if (file-directory-p new-name)
+                     (expand-file-name (file-name-nondirectory
+                                        (buffer-file-name))
+                                       new-name)
+                   (expand-file-name new-name)))
+  ;; If the file isn't saved yet, skip the file rename, but still update the
+  ;; buffer name and visited file.
+  (if (file-exists-p (buffer-file-name))
+      (rename-file (buffer-file-name) new-name 1))
+  (let ((was-modified (buffer-modified-p)))
+    ;; This also renames the buffer, and works with uniquify
+    (set-visited-file-name new-name)
+    (if was-modified
+        (save-buffer)
+      ;; Clear buffer-modified flag caused by set-visited-file-name
+      (set-buffer-modified-p nil))
+    (message "Renamed to %s." new-name)))
+
+; also from steve:
+;; someday might want to rotate windows if more than 2 of them
+(defun swap-windows ()
+  "If you have 2 windows, it swaps them."
+  (interactive)
+  (cond ((not (= (count-windows) 2))
+         (message "You need exactly 2 windows to do this."))
+        (t
+         (let* ((w1 (first (window-list)))
+                (w2 (second (window-list)))
+                (b1 (window-buffer w1))
+                (b2 (window-buffer w2))
+                (s1 (window-start w1))
+                (s2 (window-start w2)))
+           (set-window-buffer w1 b2)
+           (set-window-buffer w2 b1)
+           (set-window-start w1 s2)
+           (set-window-start w2 s1)))))
+
+(setq vc-diff-switches "-u")
+
+;(setq visible-bell t)    ;;for my local terminal - it has no beeper
+(setq remote-shell-program 'ssh)
+
+;; https://www.emacswiki.org/emacs/DiredReuseDirectoryBuffer
+;; we want dired not not make always a new buffer if visiting a directory
+;; but using only one dired buffer for all directories.
+(defadvice dired-advertised-find-file (around dired-subst-directory activate)
+  "Replace current buffer if file is a directory."
+  (interactive)
+  (let ((orig (current-buffer))
+        (filename (dired-get-filename)))
+    ad-do-it
+    (when (and (file-directory-p filename)
+               (not (eq (current-buffer) orig)))
+      (kill-buffer orig))))
+
+(eval-after-load "dired"
+  ;; don't remove `other-window', the caller expects it to be there
+  '(defun dired-up-directory (&optional other-window)
+     "Run Dired on parent directory of current directory."
+     (interactive "P")
+     (let* ((dir (dired-current-directory))
+     	    (orig (current-buffer))
+     	    (up (file-name-directory (directory-file-name dir))))
+       (or (dired-goto-file (directory-file-name dir))
+     	   ;; Only try dired-goto-subdir if buffer has more than one dir.
+     	   (and (cdr dired-subdir-alist)
+     		(dired-goto-subdir up))
+     	   (progn
+     	     (kill-buffer orig)
+     	     (dired up)
+     	     (dired-goto-file dir))))))
+
+; https://emacs.stackexchange.com/questions/17566/open-file-from-dired-in-the-same-window-using-the-mouse
+(defun dired-mouse-find-file (event)
+  "In Dired, visit the file or directory name you click on."
+  (interactive "e")
+  (let (window pos file)
+    (save-excursion
+      (setq window (posn-window (event-end event))
+            pos (posn-point (event-end event)))
+      (if (not (windowp window))
+          (error "No file chosen"))
+      (set-buffer (window-buffer window))
+      (goto-char pos)
+      (setq file (dired-get-file-for-visit)))
+    (if (file-directory-p file)
+        (or (and (cdr dired-subdir-alist)
+                 (dired-goto-subdir file))
+            (progn
+              (select-window window)
+              (dired file)))
+      (select-window window)
+      (find-file (file-name-sans-versions file t)))))
+;      (find-file-other-window (file-name-sans-versions file t)))))
+
+(define-key dired-mode-map [mouse-2] 'dired-mouse-find-file)
+
+;; Compilation regexps
+;; make emacs grok g95 error messages: (can now jump to the right line)
+(eval-after-load "compile"
+  '(setq compilation-error-regexp-alist 
+	 (cons '("^In file \\(.+\\):\\([0-9]+\\)" 1 2)
+	       compilation-error-regexp-alist)))
+;; For ifort
+(eval-after-load "compile"
+  '(setq compilation-error-regexp-alist
+	 (append compilation-error-regexp-alist
+		 '(("^[A-Za-z ]+[:][A-Za-z ]+[:] \\([^.]+[.][a-zA-Z0-9]+\\), line \\([0-9]+\\)[:]"
+		    1 2)))))
+
+
+
+(defun toggle-case-sensitivity ()
+  "Switch from case-sentitive to case-insensitive searches, and back again."
+  (interactive)
+;  (if case-fold-search
+;      (progn
+;	(setq case-fold-search nil)
+;	(message "Searches will be case sensitive." ())
+;	)
+;      (progn
+;	(setq case-fold-search t)
+;	(message "Searches will ignore case." ())
+;	)
+;      )
+  (if font-lock-keywords-case-fold-search
+      (progn
+	(setq font-lock-keywords-case-fold-search nil)
+	(message "Font lock searches will be case sensitive." ())
+	)
+    (progn
+      (setq font-lock-keywords-case-fold-search t)
+      (message "Font lock searches will ignore case." ())
+      )
+    ))
+
+
+;(try-require 'func-menu)
+;(add-hook 'find-file-hooks 'fume-add-menubar-entry)
+
+(XEmacs
+  (progn
+    ;; Rearrange the modeline so that everything is to the left of the
+    ;; long list of minor modes, which is relatively unimportant but takes
+    ;; up so much room that anything to the right is obliterated.
+    
+    (setq-default
+     modeline-format
+     (list
+      ""
+      (if (boundp 'modeline-multibyte-status) 'modeline-multibyte-status "")
+      (cons modeline-modified-extent 'modeline-modified)
+      (cons modeline-buffer-id-extent
+	    (list (cons modeline-buffer-id-left-extent
+			(cons 15 (list
+				  (list 'line-number-mode "L%l ")
+				  (list 'column-number-mode "C%c ")
+				  (cons -3 "%p"))))
+		  (cons modeline-buffer-id-right-extent "%17b")))
+      "   "
+      'global-mode-string
+      "   %[("
+      (cons modeline-minor-mode-extent
+	    (list "" 'mode-name 'minor-mode-alist))
+      (cons modeline-narrowed-extent "%n")
+      'modeline-process
+      ")%]----"
+      "%-"))
+  
+  ;; Get rid of modeline information taking up too much space -- in
+  ;; particular, minor modes that are always enabled.
+  (setq pending-delete-modeline-string "")
+  (setq filladapt-mode-line-string "")
+  ;; lazy-lock doesn't have a variable for its modeline name, so we have
+  ;; to do a bit of surgery.
+  (and (assoc 'lazy-lock-mode minor-mode-alist)
+       (setcdr (cdr (cadr (assoc 'lazy-lock-mode minor-mode-alist))) ""))))
+
+(load "~/.xemacs/check-unsaved-buffers.el")
+
+(defun ascii-table ()
+  "Print the ascii table. Based on a defun by Alex Schroeder <asc@bsiag.com>"
+  (interactive)
+  (switch-to-buffer "*ASCII*")
+  (erase-buffer)
+  (insert (format "ASCII characters up to number %d.\n" 254))
+  (let ((i 0))
+    (while (< i 254)
+      (setq i (+ i 1))
+      (insert (format "%4d %c\n" i i))))
+  (beginning-of-buffer))
+
+(setq menu-accelerator-modifiers '(super))
+(setq menu-accelerator-enabled 'menu-force)
+
+
+(defun degree-insert ()
+  (interactive)
+  (insert "⁰"))
+
+
+;;; http://www.emacswiki.org/emacs/CopyAndPaste  (emacs 23 defaults to overwriting the X cut buffers (primary?) when you try to kill text in emacs.  that sucks.  Try to set up typical behaviour of other x apps: kill ring seperate from X cut buffers, etc
+;;;;;;;;;; http://www.jwz.org/doc/x-cut-and-paste.html
+;;;         Clipboard: 	   for when the user has explicitly copied
+;;;                        something (e.g., the ``Edit/Copy'' menu item.)
+;;;         Primary: 	   more ephemeral and implicit: it is for when
+;;;                        the user has highlighted or selected something
+;;;                        (e.g., dragging the mouse over some text.)
+;;;         Cut Buffers:   Obsolete. Never, ever, ever use them. Ever.
+
+                                        ; (transient-mark-mode 1)  ; Now on by default: makes the region act quite like the text "highlight" in many apps.
+                                        ; (setq shift-select-mode t) ; Now on by default: allows shifted cursor-keys to control the region.
+
+(if (<= emacs-major-version 23)
+;;;; all part of emacs24 by default?
+;;;;    http://www.masteringemacs.org/articles/2011/12/12/what-is-new-in-emacs-24-part-2/
+    (progn
+      (setq mouse-drag-copy-region nil)  ; stops selection with a mouse being immediately injected to the kill ring
+      (setq x-select-enable-primary nil)  ; stops killing/yanking interacting with primary X11 selection
+  ;(setq x-select-enable-clipboard t)  ; makes killing/yanking interact with clipboard X11 selection
+      (setq x-select-enable-clipboard nil)  ; makes killing/yanking interact with clipboard X11 selection
+;      (setq select-active-regions t)   ; and same for just keyboard select without kill, sigh (hopefully mouse select will still work?).
+  ;; these will probably be already set to these values, leave them that way if so!
+                                          ; (setf interprogram-cut-function 'x-select-text)
+                                          ; (setf interprogram-paste-function 'x-cut-buffer-or-selection-value)
+                                          ; You need an emacs with bug #902 fixed for this to work properly. It has now been fixed in CVS HEAD.
+                                          ; it makes "highlight/middlebutton" style (X11 primary selection based) copy-paste work as expected
+                                          ; If you're used to other modern apps (that is to say, the mere act of highlighting doesn't
+                                          ; overwrite the clipboard or alter the kill ring, but you can paste in merely highlighted
+                                          ; text with the mouse if you want to)
+      (setq select-active-regions t) ;  active region sets primary X11 selection
+      (global-set-key [mouse-2] 'mouse-yank-primary)  ; make mouse middle-click only paste from primary X11 selection, not clipboard and kill ring.
+  ;; with this, doing an M-y will also affect the X11 clipboard, making emacs act as a sort of clipboard history, at
+  ;; least of text you've pasted into it in the first place.
+                                          ; (setq yank-pop-change-selection t)  ; makes rotating the kill ring change the X11 clipboard.
+      ))
+
+
+;;;;;;;;;;;;;;;;;;;;
+
+(setdefaultcolors);;do this last, so we know instantly if we have b0rked something in the init.el scripts.
+
