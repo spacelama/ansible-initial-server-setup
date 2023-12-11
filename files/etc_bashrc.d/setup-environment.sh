@@ -213,7 +213,11 @@ function setup_environment() {
     #export LC_MESSAGES=en_AU
     #export EMACSPACKAGEPATH=$HOME/.xemacs/packages
     if [ -z "$EMAIL" ] ; then
-        export EMAIL=tconnors@rather.puzzling.org
+        if [[ $LONGHOST == *ltu.edu.au ]] ; then
+            export EMAIL=t.connors@latrobe.edu.au
+        else
+            export EMAIL=tconnors@rather.puzzling.org
+        fi
     fi
     # for reportbug so we can keep an otherwise vanilla file
     export REPORTBUGEMAIL=reportbug@rather.puzzling.org
