@@ -1,0 +1,86 @@
+#!/usr/bin/perl
+# -*- Mode: perl -*-
+#template by ~tconnors/bin/newplscript
+#Tue Feb  1 15:37:52 EST 2005
+
+# $Revision: 1.5 $ $Date: 2022/09/03 12:32:57 $
+# $Id: remove_dup_in_small_window,v 1.5 2022/09/03 12:32:57 tconnors Exp $
+# $Header: /home/tconnors/cvsroot/bin/remove_dup_in_small_window,v 1.5 2022/09/03 12:32:57 tconnors Exp $
+# $RCSfile: remove_dup_in_small_window,v $
+
+# This program is a modification of removedup that removes duplicate
+# words from stdin, without needing to pipe to sort and uniq
+
+# Only looks for duplicates in a small window in order not to blow out
+# memory usage (and also ignores first timestamp part of line, for
+# keepfvwmalive's use)
+
+# Keeps first entry; if you want to keep last entry, then you need to
+# pipe to tac before and after this
+
+use strict;
+use warnings;
+#use mycommon;
+
+my (@SAVEARGV)=@ARGV;
+
+sub usageerror(;$) {
+  my ($error)=(@_);
+  if (defined($error)) {
+    print STDERR "Usage error: $error\n";
+    print STDERR "Usage was: $0 @SAVEARGV\n";
+  }
+  usage(1);
+}
+
+sub usage(;$) {
+  my ($exit)=(@_);
+  print STDERR "Usage: $0 [--printdups] < in > out\n";
+  $exit=defined($exit) ? $exit : 0;
+  exit $exit;
+}
+
+my $printdups;
+
+sub parseinput() {
+  $printdups=0;
+  while (defined($_= shift (@ARGV))) {
+    /^--printdups$/ && do { $printdups=1 ; 1; } ||
+    /^--help$/ && usage() ||
+    /^-/ && usageerror("Unrecognised switch: $_") ||
+    usageerror("Unrecognised option: $_") ||
+    last;
+  }
+  defined($_) && unshift @ARGV, $_;
+}
+
+#########################
+
+parseinput();
+select STDOUT ; $| = 1;
+
+my %lines;
+my @lines;
+my $window_size=10;
+
+while (<>) {
+  # first filter out beginnings of lines that are just timestamps, eg
+  # bug #901831
+  my $line=$_;
+  my $match=$line;
+  $match =~ s/^[][0-9:\/.]*//;
+#  print "** match=$match **\n";
+  if (!defined $lines{$match}) {
+    if (!$printdups) {
+      print $line;
+    }
+  } elsif ($printdups) {
+    print $line;
+  }
+  if (@lines > $window_size) {
+    my $remove = shift @lines;
+    undef $lines{$remove};
+  }
+  $lines{$match}=1;
+  push @lines, $match;
+}
