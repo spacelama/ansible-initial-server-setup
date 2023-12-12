@@ -1,0 +1,1095 @@
+# -*- Mode: winmgr -*-
+
+# This file changed by the .fvwm2rc to .fvwm/.fvwm2rc converter
+# Trying to compile an old .fvwrc to the new fvwm-2.xx Format
+##
+## .fvwm  - fvwm resource file
+##				    modified for Basser 1997, shopwood/mik
+
+###########################################################################
+# set up the colors
+#
+# OK some people like bright clear colors on their window decorations.
+# These people, I guess would mostly be from nice sunny/good weather places
+# line California.
+#
+# StdForeColor 		Black
+# StdBackColor		LightSkyBlue
+# HiForeColor 		yellow
+# HiBackColor		PeachPuff1
+# PagerBackColor	BlanchedAlmond
+
+# 2018/12/06: Numlock spontaneously turns on every few months on
+# weinberg (no keyboard/mouse bindings work, and xev shows
+# "state: 0x10") even though I've got it disabled in xmodmap.  Who
+# cares about the extra network traffic in 2018, as per `man fvwm`?
+
+IgnoreModifiers L25
+
+# Me, I'm from Upstate New York, and live in New Hampshire, so I prefer
+# these dark muddy colors...
+
+# this is used for the selected window
+#!HiForeColor 		Black (new command=HilightColor)
+#!HiBackColor 		rgb:00/00/ff (new command=HilightColor)
+
+#Set the foreground and background color for selected windows
+Style "*" HilightFore Black, HilightBack rgb:00/00/ff
+Style "*" ForeColor   Black, BackColor   rgb:aa/aa/aa
+#LoForeColor             Black
+#LoBackColor             rgb:77/77/77
+
+#! PagerBackColor		rgb:5c/54/c0 [deleted]
+#! An FvwmPager config to emulate builtin pager would be as follows:
+# *FvwmPagerBack SlateGrey
+# *FvwmPagerFore Black
+# *FvwmPagerFont none
+# *FvwmPagerHilight SlateBlue4
+# *FvwmPagerGeometry <xsize> <ysize>
+# *FvwmPagerSmallFont -*-times-medium-r-*-*-*-80-*-*-*-*-*-*
+# *FvwmPagerDeskTopScale 32
+# #! Now start pager
+# Module FvwmPager 0 0
+#! PagerForeColor		orchid [deleted]
+#! An FvwmPager config to emulate builtin pager would be as follows:
+# *FvwmPagerBack SlateGrey
+# *FvwmPagerFore Black
+# *FvwmPagerFont none
+# *FvwmPagerHilight SlateBlue4
+# *FvwmPagerGeometry <xsize> <ysize>
+# *FvwmPagerSmallFont -*-times-medium-r-*-*-*-80-*-*-*-*-*-*
+# *FvwmPagerDeskTopScale 32
+# #! Now start pager
+# Module FvwmPager 0 0
+
+#! StickyForeColor		Black (not supported in FVWM2)
+#! StickyBackColor		rgb:60/c0/a0 (not supported in FVWM2)
+
+MenuStyle "*" Animation
+# Menu colors
+#!MenuForeColor           Black
+MenuStyle * Foreground Black
+#!MenuBackColor           grey
+MenuStyle * Background grey
+#!MenuStippleColor        SlateGrey
+MenuStyle * Greyed SlateGrey
+
+############################################################################
+# Now the fonts - one for menus, another for window titles, another for icons
+#Font			-*-times-medium-r-*-*-*-120-*-*-*-*-*-*
+#!Font			-adobe-helvetica-bold-r-*-*-14-*-*-*-*-*-*-*
+
+DefaultFont "xft:Helvetica:size=8"
+MenuStyle * Font "xft:Helvetica:size=8"
+Style "*" Font "xft:Helvetica:size=10"
+Style "*" IconFont "xft:fixed:size=8"
+*FvwmButtonsFont "xft:Helvetica:style=Bold:size=6"
+*FvwmWinList: Font "xft:Helvetica:style=Bold:size=7"
+*FvwmIdent: Font "xft:Helvetica:size=7"
+
+
+###########################################################################
+# Set up the major operating modes
+#
+########################      FOCUS STUFF     ##############################
+# Set windows to auto-raise after 750 milliseconds if you like it.
+# Autoraise can sometimes obscure pop-up windows. Performance is now
+# similar to olvwm's auto-raise feature.
+#AutoRaise 750
+
+# Normally, we'll be in focus-follows mouse mode, but uncomment this 
+# for mwm-style click-to-focus
+#ClickToFocus
+
+Style "*" SloppyFocus, FPClickToFocus, FPSortWindowlistByFocus
+
+# see if we can get opera and openoffice to not be so obnoxious with
+# focus stealing.  If we quickly pass over an opera window, perhaps it
+# won't even have time to steal the focus, and then the next window
+# will steal it back 100ms later anyway.  And maybe openoffice/xine
+# won't get into its focus stealing loop
+
+#Attempt 1:
+#Style "*" ClickToFocus, !FPGrabFocus, !FPGrabFocusTransient, !FPClickRaisesFocused, !FPSortWindowlistByFocus
+#Style "*" !FPEnterToFocus, !FPLeaveToUnfocus, !FPSortWindowlistByFocus
+
+#Attempt 2:
+#Module FvwmAuto 200 -passid -menter delayfocus
+
+#DestroyFunc delayfocus
+#AddToFunc delayfocus
+# + "I" WindowId $0 (AcceptsFocus, !Focused) Focus
+
+#Attempt 3:
+# opera windows steal the focus, so upon every focus change, just make sure the window under the mouse has focus (might want to narrow this down to only changes involving opera)
+#*FvwmEvent: destroy_window "NoWindow Prev (AcceptsFocus) Silent Focus"
+*FvwmEvent: focus_change "NoWindow PointerWindow (AcceptsFocus) Silent Focus"
+
+
+# # I WindowId $0 (AcceptsFocus, !Raised) Raise
+
+#following only focusses the window under the mouse when that window loses the focus
+#Module FvwmAuto 1200 -passid -menter Nop delayfocus
+
+#DestroyFunc delayfocus
+#AddToFunc delayfocus
+#+ "I" PointerWindow (AcceptsFocus,!Focused) Focus
+# # I WindowId $0 (AcceptsFocus, !Raised) Raise
+
+#stop gnuplot stealing focus: "Re: FVWM: focus question" 10Jun2009
+DestroyFunc EWMHActivateWindowFunc
+AddToFunc EWMHActivateWindowFunc
+#nothing
+
+
+#Style "*" FocusFollowsMouse
+
+# http://fvwmforums.org/wiki/Tips/FocusStealing/
+
+#  Destroy the urgency function that causes things to steal the focus.
+#  Would rather this to only apply to opera (opera 9.50 now steals the
+#  focus if it has just been focussed but hasn't drawn the window yet
+#  before it loses focus again) and openoffice, but can't see how to
+#  apply it only to them (this could turn out to be a real pain for
+#  search dialogs etc in things like xpdf)
+#from http://www.starshine.org/xteddy/thomas/fvwm/fvwmchanfaq.html#cf9:
+#original was:
+
+DestroyFunc MyUrgencyFunc
+AddToFunc MyUrgencyFunc
+    + I Iconify off
+    + I FlipFocus
+    + I Raise
+    + I WarpToWindow 5 5
+
+# opera was from 2009.  Microsoft teams actually steals the focus by
+# warping the pointer to its window.  Didn't need to engage the below
+# styles as well
+DestroyFunc UrgencyFunc
+AddToFunc UrgencyFunc
++ I ThisWindow (!"opera|*Microsoft Teams*") MyUrgencyFunc
+
+
+
+########################      ICON STUFF     ##############################
+# Auto Place Icons is a nice feature....
+# This creates two icon boxes, one on the left side, then one on the
+# bottom. Leaves room in the upper left for my clock and xbiff,
+# room on the bottom for the Pager.
+#IconBox -150 90 -5 -140
+#IconBox 230 -75 -75 -5
+Style "*" IconBox -60 110 -5 -5
+# If you uncomment this, and make sure that the WindowList is bound to
+# something, it works pretty much like an icon manager.
+#SuppressIcons
+
+# StubbornIcons makes icons de-iconify into their original position on the
+# desktop, instead of on the current page.
+#OBSOLETE FVWM 1.24 StubbornIcons
+
+# With AutoPlacement, icons will normally place themselves underneath active
+# windows. This option changes that.
+#StubbornIconPlacement
+
+# If you want ALL you icons to follow you around the desktop (Sticky), try
+# this
+#StickyIcons
+
+########################      MWM EMULATION     #######################
+#
+# My feeling is that everyone should use MWMDecorHints and MWMFunctionHints,
+# since some applications depend on having the window manager respect them
+
+# MWMFunction hints parses the function information in the MOTIF_WM_HINTS
+# property, and prohibits use of these functions on the window. Appropriate
+# portions of the window decorations are removed.
+Style "*" MWMFunctions
+
+# MWM is kinda picky about what can be done to transients, and it was keeping
+# me from iconifying some windows that I like to iconify, so here's an
+# over-ride that will allow me to do the operation, even tough the menu
+# item is shaded out.
+#MWMHintOverride
+
+# MWMDecor hints parses the decoration information in the MOTIF_WM_HINTS
+# property, and removes these decoratons from the window. This does not affect
+# the functions that can be performed via the menus.
+Style "*" MWMDecor
+
+# These are affect minor aspects for the look-and-feel.
+# Sub-menus placement mwm-style?
+#!MWMMenus
+MenuStyle * mwm
+# mwm-style border reliefs (less deep than default fvwm) ?
+Style "*" MWMBorder
+# Maximize button does mwm-inversion thingy
+Style "*" MWMButtons
+
+MenuStyle mwm
+MenuStyle PopupDelayed, PopupDelay 180
+
+########################      MISCELLANEOUS STUFF     #######################
+# If you don't like the default 150 msec click delay for the complex functions
+# change this and uncomment it.
+#ClickTime 150
+
+# OpaqueMove has a number (N) attached to it (default 5).
+# if the window occupies less than N% of the screen, 
+# then opaque move is used. 0 <= N <= 100
+OpaqueMoveSize unlimited
+Style "*" ResizeOpaque
+#OpaqueResize 100
+
+#HideGeometryWindow Move
+#HideGeometryWindow Never
+
+#no automatic page movement when mouse hits edge
+EdgeScroll 0 0
+
+#2/3 arg form of EdgeResistance with move and xinerama deprecated, in preference to this form:
+#Style * EdgeMoveResistance 100 100
+Style * EdgeMoveResistance 0 0
+
+
+#Style * WindowShadeShrinks, WindowShadeSteps 75   #, WindowShadeLazy
+Style * WindowShadeScrolls, WindowShadeSteps 75   #, WindowShadeLazy
+
+#Style "*" SaveUnder
+#Style "*" BackingStore
+########################      WINDOW PLACEMENT     #######################
+
+# SmartPlacement makes new windows pop-up in blank regions of screen 
+# if possible, or falls back to random or interactive placement.
+Style "*" MinOverlapPlacement
+#RandomPlacement, SmartPlacement, CleverPlacement
+
+# With SmartPlacement, windows will normally place themselves over icons. 
+# Uncomment this to change that.
+#StubbornPlacement
+
+# NoPPosition instructs fvwm to ignore the PPosition field in window
+# geometry hints. Emacs annoyingly sets PPosition to (0,0), xpdf
+# buggers around with things, and opera is stupid!
+# Can disable this on a style by style basis if wanted to, but I don't
+# know of anything that acutally uses it for good and not evil
+Style "*" NoPPosition
+#BUT we modify this later on for specific pains in the arse
+
+########################      DECORATIONS     #######################
+# If you want decorated transient windows, uncomment this:
+Style "*" DecorateTransient
+
+#want to have windows de-iconified at current screen, not where they
+#were iconified! Used to be "StubbornIcons", now SlipperyIcons Most
+#useful for Microsoft Teams where closing it just iconifies it.  Want
+#to open it back up whenever you switch to it.  Haven't evaluated
+#usefulness or not of other iconified applications yet - don't use
+#that many
+#Style "*" StickyIcon
+
+###########################################################################
+# Set up the virtual desktop and pager
+
+#set the desk top size in units of physical screen size
+DeskTopSize 6x4
+
+# and the reduction scale used for the panner/pager
+#!DeskTopScale 64 (new command=*FvwmPagerDeskTopScale <scale>)
+*FvwmPagerDeskTopScale 64
+
+##########################################################################
+# Module path and paths to the icons
+#
+# ModulePath is a colon-separated list, just like regular unix PATH
+#! (ModulePath command commented out)
+##ModulePath /usr/X11R6/lib/X11/fvwm:/home/office/tconnors/install/fvwm1.linux/fvwm-1.24r/modules/modules/
+##ModulePath ${HOME}/lib/usr/libexec/fvwm/2.4.6/:${HOME}/lib/usr/X11R6/lib/X11/fvwm:+:/usr/X11R6/lib/X11/fvwm2:/usr/X11R6/lib/X11/fvwm
+#ImagePath ${HOME}/xpm/col:${HOME}/xpm/menu:${HOME}/icons:${HOME}/icons/xpms:${HOME}/icons/local/share/icons:/sw/lib/xemacs-21.4.9/etc:/usr/share/emacs/21.2/etc:/usr/X11R6/lib/X11/fvwm2/pixmaps:/usr/X11R6/include/X11/pixmaps:+:/usr/share/emacs/21.2/etc:/usr/X11R6/include/X11/pixmaps:/usr/share/doc/libgtk1.2-dev/examples:/usr/share/doc/python-gtk/examples/testgtk:/usr/share/emacs/21.2/etc:/usr/share/gtk-gnutella/pixmaps:/usr/share/icons:/usr/share/icons/hicolor/32x32/apps:/usr/share/icons/hicolor/48x48/apps:/usr/share/icons/locolor/16x16/apps:/usr/share/icons/locolor/32x32/apps:/usr/share/nano:/usr/share/penguineyes:/usr/share/pixmaps:/usr/share/pixmaps/fwbuilder:/usr/share/videolan:/usr/share/xine/desktop:/usr/share/xmcd/pixmaps      #oxygenINCLUDE indiumINCLUDE poloniumINCLUDE
+#ImagePath ${HOME}/xpm/bw:${HOME}/xpm/menu:${HOME}/icons:${HOME}/icons/xpms:${HOME}/icons/local/share/icons:/sw/lib/xemacs-21.4.9/etc:/usr/share/emacs/21.2/etc:/usr/X11R6/lib/X11/fvwm2/pixmaps:/usr/X11R6/include/X11/pixmaps:+:/usr/share/emacs/21.2/etc:/usr/X11R6/include/X11/pixmaps:/usr/share/doc/libgtk1.2-dev/examples:/usr/share/doc/python-gtk/examples/testgtk:/usr/share/emacs/21.2/etc:/usr/share/gtk-gnutella/pixmaps:/usr/share/icons:/usr/share/icons/hicolor/32x32/apps:/usr/share/icons/hicolor/48x48/apps:/usr/share/icons/locolor/16x16/apps:/usr/share/icons/locolor/32x32/apps:/usr/share/nano:/usr/share/penguineyes:/usr/share/pixmaps:/usr/share/pixmaps/fwbuilder:/usr/share/videolan:/usr/share/xine/desktop:/usr/share/xmcd/pixmaps       #bohr-galileoINCLUDE
+ImagePath ${HOME}/xpm/col:${HOME}/xpm/menu:${HOME}/icons:${HOME}/icons/xpms:${HOME}/icons/local/share/icons:/sw/lib/xemacs-21.4.9/etc:/usr/share/emacs/21.2/etc:/usr/X11R6/lib/X11/fvwm2/pixmaps:/usr/X11R6/include/X11/pixmaps:+:/usr/share/emacs/21.2/etc:/usr/X11R6/include/X11/pixmaps:/usr/share/doc/libgtk1.2-dev/examples:/usr/share/doc/python-gtk/examples/testgtk:/usr/share/emacs/21.2/etc:/usr/share/gtk-gnutella/pixmaps:/usr/share/icons:/usr/share/icons/hicolor/32x32/apps:/usr/share/icons/hicolor/48x48/apps:/usr/share/icons/locolor/16x16/apps:/usr/share/icons/locolor/32x32/apps:/usr/share/nano:/usr/share/penguineyes:/usr/share/pixmaps:/usr/share/pixmaps/fwbuilder:/usr/share/videolan:/usr/share/xine/desktop:/usr/share/xmcd/pixmaps       #bohr-galileoEXCLUDE oxygenEXCLUDE indiumEXCLUDE poloniumEXCLUDE
+
+
+############################################################################
+# Set the decoration styles and window options
+# Order is important!!!!
+# If compatible styles are set for a single window in multiple Style
+# commands, then the styles are ORed together. If conflicting styles
+# are set, the last one specified is used.
+
+# These commands should command before any menus or functions are defined,
+# and before the internal pager is started.
+
+# change the default width.
+Style "*"                BorderWidth 3, HandleWidth 5, Color Black/rgb:60/a0/c0,Icon unknown1.xpm
+
+Style "Fvwm*"            NoTitle, NoHandles, Sticky, WindowListSkip, BorderWidth 0
+Style "x2x*"             NoTitle, NoHandles, Sticky, BorderWidth 0, MouseFocus
+#Style "Fvwm Pager"      StaysOnTop
+#Style "FvwmPager"       StaysOnTop
+#Style "FvwmBanner"      StaysOnTop
+Style "FvwmConsole"      Title, Handles, Slippery, BorderWidth 3, HandleWidth 5
+Style "FvwmButtons"      Icon toolbox.xpm, NoTitle, NoHandles, Sticky, WindowListSkip, BorderWidth 0
+Style "FvwmIconMan"      NeverFocus
+#Style "FvwmIconMan"      StaysOnTop   #piINCLUDE
+
+Style "Penguineyes"      NoTitle, NoHandles, Sticky, WindowListSkip, BorderWidth 0
+Style "Tuxeyes"          NoTitle, NoHandles, Sticky, WindowListSkip, BorderWidth 0
+Style "xbiff"            Icon mail.xpm, NoTitle, NoHandles, Sticky, WindowListSkip, BorderWidth 0, NeverFocus
+Style "gbuffy"           Icon mail.xpm, NoTitle, NoHandles, Sticky, WindowListSkip, BorderWidth 0
+Style "gbuffy2"          Icon mail.xpm, NoTitle, NoHandles, Sticky, WindowListSkip, BorderWidth 0
+Style "gbuffyh"          Icon mail.xpm, NoTitle, NoHandles, Sticky, WindowListSkip, BorderWidth 0
+Style "procmeter3"       NoTitle, NoHandles, Sticky, WindowListSkip, BorderWidth 0, NeverFocus
+Style "gkrellm"          NoTitle, NoHandles, Sticky, WindowListSkip, BorderWidth 0, NeverFocus
+Style "Perfmeter"        NoTitle, NoHandles, Sticky, WindowListSkip, HandleWidth 5, NeverFocus
+Style "wmmon"            NoTitle, NoHandles, Sticky, WindowListSkip, BorderWidth 0
+Style "swalxload"        NoTitle, NoHandles, Sticky, WindowListSkip, BorderWidth 0, NeverFocus
+Style "smallxterm"       NoTitle, NoHandles, Sticky, WindowListSkip, BorderWidth 0
+Style "vumeter"          NoTitle, NoHandles, Sticky, WindowListSkip, BorderWidth 0, NeverFocus
+Style "ascd"             NoTitle, NoHandles, Sticky, WindowListSkip, BorderWidth 0, NeverFocus
+Style "wmix"             NoTitle, NoHandles, Sticky, WindowListSkip, BorderWidth 0, NeverFocus
+Style "wmmixer"          NoTitle, NoHandles, Sticky, WindowListSkip, BorderWidth 0, NeverFocus
+Style "wmrack"           NoTitle, NoHandles, Sticky, WindowListSkip, BorderWidth 0, NeverFocus
+Style "xload"            NoTitle, NoHandles, Sticky, WindowListSkip, BorderWidth 0, NeverFocus
+Style "xclockstandard"   NoTitle, NoHandles, Sticky, WindowListSkip, BorderWidth 0, NeverFocus
+Style "pidisplay*"       NoTitle, NoHandles, Sticky, WindowListSkip, BorderWidth 0, StaysOnTop
+#Style "mpv"              NoTitle, NoHandles, Sticky, WindowListSkip, BorderWidth 0 #piINCLUDE
+Style "QupZilla"         NoTitle, NoHandles, Sticky, BorderWidth 0
+Style "maxwelldisplay"   NoTitle, NoHandles, Sticky, WindowListSkip, BorderWidth 0
+Style "xbattlocal"       NoTitle, NoHandles, Sticky, WindowListSkip, BorderWidth 0, NeverFocus
+Style "swalxbatt"        NoTitle, NoHandles, Sticky, WindowListSkip, BorderWidth 0, NeverFocus
+Style "xbatt"            NoTitle, NoHandles, Sticky, WindowListSkip, BorderWidth 0, NeverFocus
+Style "i8kmon"           NoTitle, NoHandles, Sticky, WindowListSkip, BorderWidth 0, NeverFocus
+Style "wmcliphist"       NoTitle, NoHandles, Sticky, WindowListSkip, BorderWidth 0, NeverFocus
+Style "xwud"             NoTitle, NoHandles, Sticky, WindowListSkip, BorderWidth 0
+#Style "xwud"            NoTitle, NoHandles, Sticky, WindowListSkip, BorderWidth 0
+Style "gnuplot.weather"  NoTitle, NoHandles, Sticky, WindowListSkip, BorderWidth 0, NeverFocus
+Style "Vncviewer"        NoTitle, NoHandles, BorderWidth 0
+Style "xmessage.nofocus" NoTitle, NoHandles, Sticky, WindowListSkip, BorderWidth 0, NeverFocus
+Style "xmessage"         UsePPosition
+Style "Pidgin"           Sticky
+Style "grip"             Sticky
+Style "alsamixerxterm"   Sticky
+Style "alsamixergui"     Sticky
+Style "xmixer"           Sticky
+Style "progressbar"      Sticky
+Style "gaim"             Sticky
+Style "licq"             Sticky
+Style "licq.real"        Sticky
+Style "xkbvleds"         NoTitle, NoHandles, Sticky, WindowListSkip, BorderWidth 0, NeverFocus
+Style "*lock"            NoTitle, NoHandles, Sticky, WindowListSkip
+#Style "faces"           NoTitle, NoHandles, Sticky, WindowListSkip, HandleWidth 5
+Style "xterm"            Icon xterm.xpm, Color black/grey
+Style "Emacs*"           Icon xemacs.xpm, Color black/grey
+Style "INBOX*"           Icon mail.xpm, Color black/grey
+Style "xcalc"            Icon xcalc.xpm, NoButton 2
+Style "xman"	         Icon xman.xpm
+Style "xmag"	         Icon mag_glass.xpm
+Style "Xawtv"            ResizeOutline, Sticky
+Style "gnuplot"          ResizeOutline
+
+#Arduino - java gui doesn't get sorted to top of window list when any of its windows are focussed.  sets the "Globally Active" focus policy but doesn't appear to ever take focus maybe?
+Style "processing-app-Base" Lenience # http://fvwm.fvwm.narkive.com/N7Z0sXe1/fvwm-wine-fvwm-focus-bunfight
+#Style "*Microsoft Teams*" Lenience # http://fvwm.fvwm.narkive.com/N7Z0sXe1/fvwm-wine-fvwm-focus-bunfight
+
+Style "OpenOffice*"      !FPFocusByProgram # possibly disable focus stealing behaviour: Re: FVWM: Disabling automatic focus
+Style "Acroread*"        !FPFocusByProgram # possibly disable focus stealing behaviour: Re: FVWM: Disabling automatic focus
+Style "Thunderbird*"     !FPFocusByProgram # attempt 2017/10/16 for thunderbird calerndar events stealing focus.  Don't yet know which parts of http://fvwmforums.org/wiki/Tips/FocusStealing/ to follow
+#Style "opera" NoUSPosition
+#Style "opera" VariablePPosition
+Style "opera"            NoUSPosition, !Maximizable   #,FixedPSize
+#nope, doesn't work with acroread version 7 - still wants to open on the current screen, steal the focus, then redisplay with its own geometry on the other xinerama screen.  idiots.  And any dialogs pop up in the middle
+Style "Acroread*"        NoUSPosition   #,FixedPSize
+#Style "*" NoUSPosition   #an experiment to see whether adobe reader 7 can be made not to suck with window placement
+Style "SkyCat" !Icon
+# nothing works to get borders and decorations back: Style "Microsoft Teams*" GNOMEIgnoreHints # https://fvwm.fvwm.narkive.com/z7ifVxX2/fvwm-forcing-window-decorations
+# at least we get titlebar back:
+# see also "missing titlebar, decorations for one program (Microsoft Teams electron app)"
+Style "*Microsoft Teams*" NoDecorHint, RecaptureHonorsStartsOnPage, CaptureHonorsStartsOnPage, StartsOnPageIncludesTransients, FixedPPosition, StickyIcon
+Style "Xitk Combo" !Borders   # xine UI loops fvwm: http://marc.info/?l=xine-user&m=113974627127600
+
+#Style "xdvi"            BackingStore #xdvi doesn't save its image when you come back to it - drawing millions of dots takes a real long time
+#Style "SSH Auth*"        ClickToFocus (grabfocustransient is default on - click to focus only applies for entering the window, not leaving it)
+
+# Change the Maximize and iconify buttons to up and down triangles.
+
+ButtonStyle 2 4 50x35@1 65x65@0 35x65@0 50x35@1
+ButtonStyle 4 4 50x65@1 35x35@1 65x35@1 50x65@0
+
+#############################################################################
+
+# Stuff to do at start-up
+
+#AddToFunc "InitFunction" "I" GotoPage 0 0
+#+                        "I" Exec startmaindisplay.sh
+
+#	Desk	"I"	0 1
+#	Exec	"I"	exec xterm -geometry +0+0 -e "/usr/cs3/tconnors/bin/bkrun"
+#	Wait	"I"	xterm
+#	Desk 	"I"	0 0
+
+
+#AddToFunc "RestartFunction" "I" GotoPage 0 0
+
+AddToFunc "StartFunction" "I" GotoPage 0 0
+#+                         "I" Function StartDropTerm
++                         "I" Exec fvwm_alert_sizechange
+#+                         "I" Module FvwmWinList
++                         "I" Module FvwmAnimate
+##+                         "I" Module FvwmIconMan      #piINCLUDE
++                         "I" Module FvwmCommandS
+# /var/tmp/FvwmCommand-`hostname`$[DISPLAY]
++                         "I" Module FvwmButtons       #piEXCLUDE
+#+                         "I" Wait FvwmButtons        #diracINCLUDE gamowINCLUDE maxwellINCLUDE fermiINCLUDE weinbergINCLUDE
+#the delay is so that things get captured into a definite window instead of the race condition that seems to exist
+#+                         "I" Schedule 5000 Module FvwmButtons -g +$[HORSIZE]+1795    #maxwellINCLUDE fermiINCLUDE weinbergINCLUDE (VERT2SIZE is 1920, but we can't do arithmetic here)
+#+                         "I" Wait FvwmButtons        #weinbergINCLUDE
+#+                         "I" Schedule 5000 Module FvwmButtons -g +$[HORSIZE]-0    #diracINCLUDE
+#+                         "I" Schedule 5000 Module FvwmButtons -g +-$[HOR0SIZE]+955    #weinbergINCLUDE (VERT0SIZE is 1080, but we can't do arithmetic here)
+#+                         "I" All (Xconsole) Destroy
+
+
+#DestroyFunc ExitFunction
+#AddToFunc ExitFunction    "I" Function EndDropTerm
+#FIXME: Causes blocking when both starting and finishing (like a wait has gone funny in the Next command - have to terminate with ctrl-alt-esc)
+
+
+############################################################################
+# Now define some handy complex functions
+
+# This one moves and then raises the window if you drag the mouse,
+# only raises the window if you click,  or does a RaiseLower if you double 
+# click
+AddToFunc "Move-or-Raise-or-Shade" "I" Raise
++ "M" Move     #M is for mouse
++ "H" Move     #H is for keyboard
++ "D" WindowShade North #D is for double click
+
+AddToFunc "Move" "M" Move     #M is for mouse
+
+AddToFunc "ModuleMove" "I" Current Move
+AddToFunc "ModuleDie" "I" Current Close
+
+#AddToFunc "PlaceAgainAnimAndWarp" "I" PlaceAgain Anim
+#+ "I" WarpToWindow 20 20
+
+DestroyFunc PlaceAgainAnimAndWarp
+AddToFunc PlaceAgainAnimAndWarp
++ I SetEnv tmpx $[pointer.wx]
++ I SetEnv tmpy $[pointer.wy]
++ I PlaceAgain Anim
++ I WarpToWindow $[tmpx]p $[tmpy]p
++ I UnSetEnv tmpx
++ I UnSetEnv tmpy
+
+#AddToFunc MoveRaise I Raise
+#+ I Move
+
+#AddToFunc "Move-or-Raise" "M" Move
+#+              "M" Raise
+#+              "C" Raise
+#+              "D" RaiseLower
+
+AddToFunc "Raise" "C" Raise
+
+# This one maximizes vertically if you click (leaving room for the
+# GoodStuff bar at the bottom, or does a full maximization if you double
+# click, or a true full vertical maximization if you just hold the mouse
+# button down.
+
+#opera wants to maximize its new windows all of the time if we have set 
+AddToFunc "MaximizeAll" "I" ThisWindow (Maximizable) Maximize $0 $1
++              "I" TestRc (NoMatch) PipeRead fvwm_maximize_to_current_xinerama_screen.sh
+
+AddToFunc "animated-max" "I" AnimatedMove 20 20 + "I" Function
+MaximizeAll $0 $1
+
+AddToFunc "maximize-func" "C" Function MaximizeAll 100 -125p
++              "H" Function MaximizeAll 100 100
++              "D" Function MaximizeAll 0 100
+
+#AddToFunc "maximize-func" "C" Function "animated-max" 100 85
+#+              "H" Function "animated-max" 100 100
+#+              "D" Function MaximizeAll 0 100
+#AddToFunc "maximize-func2" "C" Function "animated-max" 100 100
+
+# This one moves and then lowers the window if you drag the mouse,
+# only lowers the window if you click,  or does a RaiseLower if you double 
+# click
+AddToFunc "Move-or-Lower" "M" Move
++              "M" Lower
++              "C" Lower
++              "D" RaiseLower
+
+# This one moves or (de)iconifies:
+AddToFunc "Move-or-Iconify" "M" Move
++              "D" Iconify
+
+# This one resizes and then raises the window if you drag the mouse,
+# only raises the window if you click,  or does a RaiseLower if you double 
+# click
+AddToFunc "Resize-or-Raise" "M" Resize
++              "M" Raise
++              "C" Raise
++              "D" RaiseLower
+
+# This is provided as a hint only.
+# Move to a known page on the desktop, then start an application in a 
+# known location. Could also switch to a known desktop, I guess
+#Function "abs_coord"
+#	GoToPage "Immediate"	1,1
+#	Exec	"Immediate"	exec xcalc -geometry +100+100&
+#EndFunction
+
+SetAnimation 10 -.01 0 .01 .03 .08 .18 .3 .45 .6 .75 .85 .90 .94 .97 .99 1.0
+
+##############################################################################
+#now define the menus - defer bindings until later
+
+# Read the auto-generated menus
+Read menudefs.hook Quiet                   
+
+# This menu is invoked as a sub-menu - it allows you to quit,
+# restart, or switch to another WM.
+#	Title	"Really Quit Fvwm?"
+
+DestroyFunc PopImDir
+AddToFunc PopImDir      I       Piperead 'fvwm-menu -1 ImDirMenu "$0" fvwm-menu-imlist -d $0 $0 $1'
+
+DestroyFunc AutoMenu
+AddToFunc AutoMenu      I Piperead 'fvwm-menu -n $0 "$1" $2 $3 $4 $5 $6 $7 $8 $9'
++                       I AddToMenu MenuMenu "$1" Popup $0
+
+AutoMenu RecentSearches "Recent Searches" fvwm-menu-recent-searches
+AutoMenu RecentWebPages "Recent Web Pages" fvwm-menu-recent-web-pages
+
+AddToMenu "ImDirMenuO" "qiv background" PopImDir background 'qiv -m -n -f'
++                      "xv background" PopImDir background 'xv'
++                      "set background" PopImDir background 'qiv -x -m -n -f'
+
+AddToFunc "MyRestart" "I" Exec setupfvwmrc
++                     "I" Restart $*
+
+AddToFunc "MyQuit" "I" Exec fvwm_quittest
+
+
+AddToMenu "Quit-Verify" "Yes, Really Quit" Function MyQuit
++ "Yes, Really and Trealy Quit" Quit
++ "&Fvwm" Function MyRestart --pass-args source-startup-exec-fvwm
++ "Fvwm-&Shell" Function MyRestart /usr/bin/X11/fvwm-shell
++ "M&wm" Function MyRestart /usr/bin/mwm
++ "&Twm" Function MyRestart twm
+#	Exec    "Yes, Really Quit" exec /usr/dt/bin/dtaction ExitSession
+#	Exec	"Yes, Kill All" exec kill -1 -1
+#	Restart "Restart Fvwm"	fvwm
+#	Restart "Start twm" 	twm
+#	Restart "Start tvtwm" 	tvtwm
+#	Restart "Start mwm" 	mwm
+#	Restart "Start olwm" 	/usr/openwin/bin/olwm
+#	Nop	""
+#	Nop	"No, Don't Quit"
+
+# Provides a list of modules to fire off
+AddToMenu "Module-Popup" "Modules" Title
++              "FvwmButtons" Module FvwmButtons
++              "FvwmConsole" Module FvwmConsole -e FvwmConsoleC.pl
++              "Clean-Up" Module FvwmClean
++              "Identify" Module FvwmIdent
++              "SaveDesktop" Module FvwmSave
++              "Debug" Module FvwmDebug
++              "Pager" Module FvwmPager 0 3
++              "FvwmWinList" Module FvwmWinList
+
+# This menu will fire up some very common utilities
+AddToMenu "Apps" "&M Browser" Exec choosebrowser
+#+		"cd play"       exec xmcd
++              "cd play" Exec grip
++              "xmms" Exec xmms
+#+		"Volume Control"	exec xmix &
+#+		"Volume Control" Exec gmix
+#+		"Volume Control" Exec xmixer &
++              "Volume Control" Exec alsamixergui &
++              "Alsa Volume Control" Exec xalsamixer &
++              "" Nop
++              "slrn" Exec xterm -e slrn
++              "Pine" Exec read-mail
++              "Pine (hexane)" Exec remotemail
++              "" Nop
+#+		"XEmacs" Exec xemacsclient.sh
++              "XEmacs" Exec xemacs
++              "Emacs" Exec emacs
++              "" Nop
++              "X File Manager" Exec xfm
++              "xpaint" Exec xpaint
++              "xfig" Exec xfig
++              "xv" Exec xv
++              "" Nop
++              "wish" Exec xterm -e wish
++              "Python" Exec xterm -e python
++              "" Nop
++              "Top" Exec xterm -T Top@`hostname` -n Top@`hostname` -e bash -l -c top
++              "Calculator" Exec xcalc
++              "Xman" Exec xman
++              "Xmag" Exec xmag
++              "xkeycaps" Exec xkeycaps
++              "xosview" Exec xosview
+
+AddToMenu "Hosts" "Here" Exec xterm
++              "Here (not login shell)" Exec xterm
++              "Bohr" Exec bohr-xterm
++              "Feynman" Exec feynman-xterm
++              "Scuzzie" Exec scuzzie-xterm
++              "" Nop
++              "AATpc2" Exec aatpc2-xterm
++              "AAT-extern" Exec aaogw-xterm
++              "" Nop
+#+              "RandomClusterNode" Exec xterm -e randomclusternode
++              "Hexane" Exec hexane-xterm
++              "Tellurium" Exec tellurium-xterm
++              "Radium" Exec radium-xterm
++              "Tera1" Exec tera1-xterm
++              "Mono1" Exec mono1-xterm
++              "Ssi1" Exec ssi1-xterm
++              "WWW" Exec astronomy-xterm
++              "Tin (tape)" Exec tin-xterm
++              "" Nop
++              "Brecca.VPAC" Exec brecca-xterm
++              "" Nop
++              "Suphys" Exec suphys-xterm
++              "Hera" Exec hera-xterm
++              "Simonj" Exec simonj-xterm
++              "" Nop
++              "Venice" Exec venice-xterm
++              "" Nop
+#	Exec    "Vislab"	exec xterm -e ssh -l tconnors vislab.usyd.edu.au 
++              "Wilson" Exec wilson-xterm
++              "Bruce" Exec bruce-xterm
++              "Napier" Exec napier-xterm
++              "" Nop
+#+              "Home (root)" Exec xterm -e ssh -C -l root p10148.net10.usyd.edu.au
++              "Feynman (root)" Exec xterm -e ssh -l root feynman
++              "Bohr (root)" Exec xterm -e ssh -l root bohr
++              "Scuzzie (root)" Exec xterm -e ssh -l root scuzzie
++              "Here (root)" Exec xterm -e ssh -l root 127.0.0.1
+
+AddToMenu "Network" "ppp-load" Exec kpppload
++              "ICQ" Exec icu
++              "" Nop
++              "Dial Usyd Extro" Exec dialextro
++              "Dial Free Coonabarabran" Exec dialcoonabarabranfree
++              "Dial Coonabarabran" Exec dialcoonabarabran
++              "Dial Last" Exec dial.last
++              "Hangup" Exec  hangup
+    
+
+# This menu will fire up some very common utilities
+AddToMenu "Utilities" "Program Menu" Title
++              "&Xterm" Exec xterm
+#+              "RandomCluster&Node" Exec xterm -e randomclusternode
+#+              "X&Emacs" Exec xemacs
+#+              "&Gnuclient" Exec runcommand gnuclient
++              "&Gnuclient" Exec emacsclientserver
++              "Mail (&Pine)" Exec read-mail
+#+              "X&Emacs" Exec xemacsclient.sh
++              "&m Browser" Exec choosebrowser
++              "&e clipboard" Exec mozclip
++              "&Setuptv" Exec setuptv
++              "&TV" Exec xawtv
++              "Re&cordTV" Exec xtermprofile recordtv current 1:00:00
++              "RecordRadi&o" Exec xtermprofile recordradio current 1:00:00
++              "" Nop
++              "Recent Searc&hes" Popup RecentSearches
++              "Recent &URLs" Popup RecentWebPages
+#+              "Control Panel" Exec control-panel
+#+              "" Nop
++              "&Images" Popup ImDirMenuO
++              "" Nop
++              "&Hosts" Popup Hosts
++              "Applications" Popup Apps
+#+              "Utilities" Popup Utils
++              "Debian Menu" Popup /Debian
+#+              "Network" Popup Network
++              "Debian Modules" Popup "/Debian/FVWM_Modules"
++              "Modules" Popup Module-Popup
++              "" Nop
++              "&Restart fvwm2" Function MyRestart --pass-args source-startup-exec-fvwm
++              "Exit Fvwm" Popup Quit-Verify
+
+#	Exec    "Xterm"		exec xterm -e bash &
+#	Exec    "Rxvt"		exec rxvt -bg Black -fg Wheat &
+#	Exec	"Color Xterm"	exec xterm-color &
+#	Nop	""
+#	Exec    "Control Panel" exec control-panel &
+#	Exec    "Glint"         exec glint &
+#	Nop	""
+#       Popup   "Hosts"         Hosts
+#	Popup   "Applications"  Apps
+#	Popup   "Games"         Games
+#	Popup   "Utilities"     Utils
+#	Popup	"Modules"	Module-Popup
+#	Nop	""
+#       Restart "Restart Fvwm"  fvwm
+#	Popup	"Exit Fvwm"	Quit-Verify
+
+# This defines the most common window operations
+AddToMenu "Window-Ops" "Window Ops" Title
++              "&Move" Function "Move-or-Raise-or-Shade"
++              "&Resize" Function "Resize-or-Raise"
++              "R&aise" Raise
++              "&Lower" Lower
++              "I&dentify" Module FvwmIdent
++              "(De)&Iconify" Iconify
++              "(Un)&Stick" Stick
++              "(Un)Ma&ximize" Function MaximizeAll 100 -125p
++              "(Un)Fully Maximi&ze" Function MaximizeAll 100 100
++              "(Un)Maximize &Vertical" Function MaximizeAll 0 -125p
++              "(Un)&Fully Maximize Vertical" Function MaximizeAll 0 100
++              "(Un)Maximize &Horizontal" Function MaximizeAll 100 0
++              "" Nop
++              "Destroy" Destroy
+#	Exec		"Destroy" exec xkill
++              "&Close" Close
++              "" Nop
++              "R&efresh Screen" Refresh
++              "Restart &Window Manager" Function MyRestart --pass-args source-startup-exec-fvwm
++              "" Nop
++              "Exit" Popup Quit-Verify
+
+# A trimmed down version of "Window Ops", good for binding to decorations
+AddToMenu "Window-Ops2" "Move" Function "Move-or-Raise-or-Shade"
++              "Resize" Function "Resize-or-Raise"
++              "Raise" Raise
++              "Lower" Lower
++              "Iconify" Iconify
++              "(Un)Stick" Stick
++              "" Nop
++              "Destroy" Destroy
++              "Close" Close
+#	Nop 		""
+#	Module		"ScrollBar" 	FvwmScroll 2 2
+
+#############################################################################
+# One more complex function - couldn't be defined earlier because it used 
+# pop-up menus
+#
+# This creates a motif-ish sticky menu for the title-bar window-ops
+# pop-up
+# Menu acts like normal twm menu if you just hold the button down,
+# but if you click instead, the menu stays up, motif style
+AddToFunc "window-ops-func" C PopUp "Window-Ops2"
++              H PopUp "Window-Ops2"
+# Motif would add:
+# I'll add it too, it can be mighty handy.
++              D Close
+
+AddToFunc "flipFlopFocus"   "I" FlipFocus 
++   "I" WarpToWindow 5p 5p
+
+AddToFunc FocusAndRaise
++ I Iconify off
++ I Raise
++ I Focus
+
+#this seems to be overwritten on some systems - set it back to the default
+DestroyFunc WindowListFunc
+AddToFunc WindowListFunc
++ I WindowId $0 Iconify off
++ I WindowId $0 FlipFocus
++ I WindowId $0 Raise
++ I WindowId $0 WarpToWindow 5p 5p
+
+DestroyFunc my_dbltab2
+AddToFunc   my_dbltab2 "I" WindowListFunc
+
+DestroyFunc my_dbltab
+AddToFunc   my_dbltab "I" Prev (CurrentDesk) my_dbltab2
+
+DestroyFunc DestroyOrClose
+AddToFunc   DestroyOrClose
++ I ThisWindow ("*tim.w.connors\ -\ Skype*") Destroy
++ I TestRc (NoMatch) ThisWindow (Skype) Close
+
+################################
+#
+# DropTerm is a sticky instance of aterm that models after
+# the console of FPS games like Quake. It is shaded normally:
+# it drops down from the top edge of the screen when the cursor
+# touches the top edge or when the user hits the hotkey (F12 is
+# what I defined it to be).
+#
+# Author: Willie W. Wong, "Recipes: Fvwm configuration"
+################################
+
+################################################################
+# DropTerm style
+################################################################
+                                                               #
+Style "DropTerm*" !Title
+Style "DropTerm*" !Borders
+
+Style "DropTerm*" StaysOnTop
+Style "DropTerm*" Sticky
+
+Style "DropTerm*" WindowListSkip
+                                                               #
+################################################################
+# End of: DropTerm style
+################################################################
+
+AddToFunc UnrollDropTerm
++ I Next ("DropTerm*") WindowShade False
++ I Next ("DropTerm*") Focus NoWarp
+
+#EdgeCommand Top Function UnrollDropTerm
+#EdgeLeaveCommand Top Next ("DropTerm*") WindowShade True
+
+################################ Start of: StartDropTerm
+DestroyFunc StartDropTerm
+AddToFunc StartDropTerm
++ I Exec exec xterm -class "DropTerm" +sb -geometry +27+0
++ I Wait "DropTerm*"
++ I Next ("DropTerm*") WindowShade West
+################################ End of: StartDropTerm
+
+################################ Start of: EndDropTerm
+DestroyFunc EndDropTerm
+AddToFunc EndDropTerm
++ I Next ("DropTerm*") Close
+################################ End of: EndDropTerm
+
+################################ Start of: RollUnrollDropTerm
+DestroyFunc RollUnrollDropTerm
+AddToFunc RollUnrollDropTerm
++ I Next ("DropTerm*") WindowShade West
++ I Next ("DropTerm*") Focus NoWarp
+################################ End of: RollUnrollDropTerm
+
+#MenuStyle WindowList SelectOnRelease Meta_L
+
+##############################################################################
+# This defines the mouse bindings
+
+# First, for the mouse in the root window
+# Button 1 gives the Utilities menu
+# Button 2 gives the Window Ops menu
+# Button 3 gives the WindowList (like TwmWindows)
+# I use the AnyModifier (A) option for the modifier field, so you can hold down
+# any shift-control-whatever combination you want!
+
+#     Button	Context Modifi 	Function
+Mouse 1		R   	A       PopUp "Utilities"
+Mouse 2		R    	A      	PopUp "Window-Ops"
+Mouse 3         R       A       Module FvwmWinList transient
+
+# Note the use of "Mouse 0" for AnyButton.
+
+# The title bar buttons
+#     Button	Context Modifi 	Function
+Mouse 1		1    	A      	Function "window-ops-func"
+Mouse 1		2    	A     	Function "maximize-func"
+Mouse 2		2    	A     	Function MaximizeAll 100 100
+Mouse 3		2    	A     	Function MaximizeAll 0 100
+Mouse 1		4    	A     	Iconify
+
+# Now the title bar
+Mouse 1		T	A	Function "Move-or-Raise-or-Shade"
+Mouse 2		T	A	Function "Move"
+Mouse 3		T	A	Function "Move-or-Lower"
+
+# Now the rest of the frame
+Mouse 1		FS	A	Function "Resize-or-Raise"
+Mouse 2		FS	A	Function "Move"
+Mouse 3		FS	A	Function "window-ops-func"
+
+# Now click in the icon
+Mouse 1		I	A	Iconify
+Mouse 2		I	A	Function "Move-or-Iconify"
+Mouse 3		I	A	Function "window-ops-func"
+
+#key and mouse bindings:
+PipeRead 'bind_fvwm' Quiet    #piEXCLUDE
+
+
+# Keyboard accelerators not to be overriden when in vnc
+Key SunFront    A       A       RaiseLower
+Key D           A       CM      Exec monitorOff
+Key L           A       CM      Exec dpmslock
+#Key S           A       CMS     Exec write_bash_hists
+Key XF86KbdBrightnessUp A A     Exec lcdbright up
+Key XF86KbdBrightnessDown A A     Exec lcdbright down
+
+
+############################################################################
+#Definitions used by the modules
+
+#************* panels:
+
+########## PANEL WinOps
+# Make the menu/panel look like CDE
+Style "WinOps" Title, NoHandles, BorderWidth 0, NeverFocus
+Style "WinOps" NoButton 2, NoButton 4, Sticky, WindowListSkip
+Style "Tools" Title, NoHandles, BorderWidth 0, NeverFocus
+Style "Tools" NoButton 2, NoButton 4, Sticky, WindowListSkip
+
+*WinOpsBack bisque2
+*WinOpsGeometry -3-3
+*WinOpsColumns 1
+
+*WinOps(Title Kill,  Icon rbomb2.xpm,  Action Destroy)
+*WinOps(Title Close, Icon bomb.xpm,    Action Close)
+*WinOps(Title Resize,Icon resize.xpm ,Action Resize)
+*WinOps(Title Move  ,Icon arrows2.xpm,Action Move  )
+*WinOps(Title Lower ,Icon Down       ,Action Lower )
+*WinOps(Title Raise ,Icon Up         ,Action Raise )
+
+#BusyCursor Read True
+#PipeRead 'fvwm_menu2panel /etc/X11/fvwm/menudefs.hook ~/.fvwm/menudefs.hook'
+
+########## PANEL Tools
+#*ToolsBack bisque2
+#*ToolsGeometry -1-1
+#*ToolsColumns 1
+
+#*Tools(Title Kill,  Icon rbomb2.xpm,  Action Destroy)
+#*Tools(Title Close, Icon bomb.xpm,    Action Close)
+
+###########
+#*DebianXShellsPanelBack bisque2
+#*DebianXShellsPanelGeometry -3-3
+#*DebianXShellsPanelColumns 1
+
+#*DebianXShellsPanel(Title "&XTerm", Icon "xterm.xpm", Action Exec xterm)
+###########
+#*ApplicationsPanelBack bisque2
+#*ApplicationsPanelGeometry -3-3
+#*ApplicationsPanelColumns 1
+
+#*ApplicationsPanel(Title "Shells", Icon "shells.xpm", Panel DebianXShellsPanel "Module FvwmButtons -transientpanel DebianXShellsPanel")
+
+
+
+
+#***************** FvwmButtons:
+# Colors
+*FvwmButtonsFore Black
+#*FvwmButtonsBack rgb:90/80/90
+*FvwmButtonsBack gray44
+#*FvwmButtons: Pixmap none    #woot - transparent
+
+# Geometry - really likes to pick its own size, but giving a position is OK
+*FvwmButtonsGeometry 1024x125+0-0
+
+# Layout: specify rows or columns, not both
+*FvwmButtonsRows 24
+*FvwmButtonsColumns 28
+
+# Define the buttons to use.....
+
+# INCLUDE, EXCLUDE specifications:
+# $hostnameINCLUDE $hostnameEXCLUDE or
+# $hostname-$displaynameINCLUDE $hostname-$displaynameEXCLUDE
+
+#no "Respawn" following, since we may actually want them stopped dead
+
+#*FvwmButtons(2x11, Swallow (UseOld Close SwallowNew) "wmbattery" "Exec wmbattery")  #dirac-laptopINCLUDE gamowINCLUDE maxwellINCLUDE fermiINCLUDE weinbergINCLUDE
+
+#*FvwmButtons(2x11, Swallow (UseOld Close SwallowNew) "wmxmms2" "Exec wmxmms2") #diracINCLUDE
+
+#*FvwmButtons(2x11, Swallow (UseOld Close) "wmxmms" "Exec mywmxmms -i ~/xpm/bw/wmxmms.xpm")   #bohr-galileoINCLUDE
+
+*FvwmButtons(2x11, Icon keyboard.xpm, Action "Exec xterm")
+*FvwmButtons(2x8, NoSize, Icon mozilla.xpm, Action "Exec choosebrowser")
+*FvwmButtons(2x8, NoSize, Icon gnu.xpm, Action "Exec emacsclientserver")
+*FvwmButtons(8x8, Swallow (UseOld NoClose SwallowNew) "ProgressBar" "Exec true")
+*FvwmButtons(12x24, Swallow (UseOld Close Respawn) "consolexterm" "Exec env SMALLPROMPT=yes SMALLPROMPTCOLOUR=\\#332200:\\#332200 xterm -name consolexterm -bg \\#332200 -fg \\#FFC200 -wf -fn 'fixed' -xrm 'XTerm*renderFont:false'")
+
+#no respawn, because of the interactions with gnuplot.  Having it this
+#way means we can restart fvwm and this will use the previous one or
+#two weathers running, but it will start them if necessary
+*FvwmButtons(2x16, Swallow (UseOld NoClose SwallowNew) "gnuplot.weather" "Exec true") #radiumEXCLUDE
+#*FvwmButtons(2x16, Swallow (UseOld NoClose SwallowNew) "gnuplot.weather" "Exec weather --location melb -bg gray44 -geometry 80x80") #radiumINCLUDE
+
+*FvwmButtons(2x16, Swallow (UseOld NoClose SwallowNew Respawn) "xbiff" "Exec xbiff -xrm 'XBiff*checkCommand:exec checkmaildir INBOX smtp' -bg gray44", Action(Mouse 1) "Exec read-mail") #aatpc2EXCLUDE #weinbergEXCLUDE 
+#*FvwmButtons(2x16, Swallow (UseOld NoClose SwallowNew Respawn) "xbiff" "Exec xbiff -xrm 'XBiff*checkCommand:exec checkmaildir INBOX ant' -bg gray44", Action(Mouse 1) "Exec read-mail") #weinbergINCLUDE
+#*FvwmButtons(2x16, Swallow (UseOld NoClose SwallowNew Respawn) "xbiff" "Exec xbiff -xrm 'XBiff*checkCommand:exec checkmaildir INBOX aatlxz' -bg gray44", Action(Mouse 1) "Exec read-mail")                #aatpc2INCLUDE
+
+*FvwmButtons(2x8, NoSize, Icon keylock.xpm, Action "Exec xscreensaver-command -lock")
+*FvwmButtons(6x16, Swallow (UseOld Respawn Close) "FvwmPager" "FvwmPager 0 1")
+*FvwmButtons(2x13, NoSize, Title  "System Info", \
+    Swallow (UseOld Close Respawn) "xload" "Exec xload -bg gray44 -label ''", \
+    Action(Mouse 3) "Exec xosview -geometry 325x325 || xterm -T 'Top cpu@'$SHORTHOST -n 'Top cpu@'$SHORTHOST -e bash -l -c top", \
+    Action(Mouse 2) "Exec xcpustate -interval 1 -bg rgb:a4/97/8e -fg black || xterm -T 'Top memory@'$SHORTHOST -n 'Top memory@'$SHORTHOST -e bash -l -c top", \
+    Action(Mouse 1) "Exec xterm -T Top@$SHORTHOST -n Top@$SHORTHOST -e bash -l -c top" )
+*FvwmButtons(2x13, Swallow (UseOld Close SwallowNew) "wmmoonclock" "Exec wmmoonclock -lat -31.14 -lon -149.18")
+*FvwmButtons: (2x8, NoSize, Title "Main menu", \
+    Action(Mouse 1) "PopUp Utilities", \
+    Action(Mouse 2) "PopUp Window-Ops", \
+    Action(Mouse 3) "Module FvwmWinList transient")
+
+######################### No Clutter ########################################
+# I only wrote NoClutter as a simple test case, but maybe some big sites like
+# universities really have usage problems (too many open windows)....
+# Time delays are in seconds.
+#*FvwmNoClutter 3600 Iconify 1
+#*FvwmNoClutter 86400 Delete
+#*FvwmNoCLutter 172800 Destroy
+
+########################## Window-Identifier ###############################
+# Just choose colors and a fonts
+*FvwmIdent: Back MidnightBlue
+*FvwmIdent: Fore Yellow
+
+########################### Pager #########################################
+*FvwmPager: Back gray44
+*FvwmPager: Hilight white
+#*FvwmPager: WindowColors yellow red blue green
+#*FvwmPager: Fore white
+#*FvwmPager: SolidSeparators
+#*FvwmPager: DeskHilight
+#*FvwmPager: DeskColor 1 black
+#*FvwmPager: WindowBorderWidth 1
+#*FvwmPagerFore rgb:48/40/48
+#*FvwmPagerFont -adobe-helvetica-bold-r-*-*-10-*-*-*-*-*-*-*
+#*FvwmPagerHilight rgb:ca/b3/ca
+#*FvwmPagerGeometry -1-1
+*FvwmPager: Label 0 Theory
+*FvwmPager: Label 1 Play
+*FvwmPager: Label 2 Fun
+*FvwmPager: Label 3 Other
+#*FvwmPagerSmallFont 5x8
+
+
+##########################FvwmWinList##################################
+*FvwmWinList: Back rgb:90/80/90
+*FvwmWinList: Fore Black
+*FvwmWinList: FocusBack White
+*FvwmWinList: Action Click1 Iconify -1,Focus
+#*FvwmWinList: Action Click2 Iconify
+*FvwmWinList: Action Click2 AnimatedMove 0 0
+*FvwmWinList: Action Click3 Module "FvwmIdent" FvwmIdent
+#*FvwmWinList: UseSkipList
+*FvwmWinList: Geometry +0-1
+*FvwmWinList: Geometry    1x0-0+115
+*FvwmWinList: ShowCurrentDesk
+#*FvwmWinList: FollowWindowList
+
+#FIXME: None of the below actually seems to work
+#*FvwmIconMan: managergeometry    1x0-1+1
+#*FvwmIconMan: buttongeometry      100x10
+#*FvwmIconMan: followfocus         True
+#*FvwmIconMan: shape               True
+
+#*FvwmIconMan: Action     Mouse     1 N sendcommand RaiseLower #piINCLUDE
+#*FvwmIconMan: Font       12x24                                #piINCLUDE
+#*FvwmIconMan: ManagerGeometry -1+0                            #piINCLUDE
+
+*FvwmWharf Animate
+*FvwmWharf BgColor white
+*FvwmWharf files folders.xpm Folder
+*FvwmWharf Resize resize.xpm Exec "blah1"
+*FvwmWharf Move arrows2.xpm  Exec "blah2"
+*FvwmWharf ~Folders
+
+
+MenuStyle * MenuFace HGradient 128 lightgrey rgb:44/44/ff, PopupOffset 1 100               #bohr-galileoEXCLUDE
+TitleStyle ActiveUp SGradient 50 2 rgb:00/00/ff 10 rgb:44/44/ee 40 rgb:ff/ff/ff            #bohr-galileoEXCLUDE
+TitleStyle Inactive SGradient 50 rgb:aa/aa/aa rgb:44/44/ff                                 #bohr-galileoEXCLUDE

@@ -1,0 +1,5 @@
+#!/bin/bash
+
+apt install ssh man vim git xterm procmail curl keychain mgitstatus rsync telnet vim-pathogen plocate bash-completion net-tools lsof ncal x11-apps x11-xserver-utils
+
+apt install -t bookworm-backports emacs emacs-gtk

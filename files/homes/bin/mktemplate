@@ -1,0 +1,27 @@
+#!/bin/bash
+# -*- Mode: shell-script -*-
+#template by ~tconnors/bin/newshscript
+#Sun May 18 02:43:47 EST 2003
+
+outfile="$1"
+shift
+infile="$1"
+shift
+
+tmp1=`mktemp /tmp/mktemplate.XXXXXX` || exit 1
+tmp2=`mktemp /tmp/mktemplate.XXXXXX` || exit 1
+
+#first, include a commented line, then remove any lines that match exclude, then remove any comments that are after the first non-white-space char (so still leave entirely commented lines intact)
+cp "$infile" $tmp1
+for match in "$@" ; do
+    sed "s/^#\(.*\)[ #]${match}INCLUDE.*/\1/" $tmp1 > $tmp2 ; mv $tmp2 $tmp1
+done
+for match in "$@" ; do
+    sed "s/^\(.*[ #]${match}EXCLUDE.*\)/#\1/" $tmp1 > $tmp2 ; mv $tmp2 $tmp1
+done
+sed "s/^\( *[^#][^\\#]*\)#.*/\1/" $tmp1 > "$outfile"
+rm -f $tmp1 $tmp2
+
+#make sure time is correct.
+touch -r "$infile" "$outfile"
+

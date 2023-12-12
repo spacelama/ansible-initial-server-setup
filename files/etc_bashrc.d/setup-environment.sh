@@ -215,6 +215,7 @@ function setup_environment() {
     if [ -z "$EMAIL" ] ; then
         if [[ $LONGHOST == *ltu.edu.au ]] ; then
             export EMAIL=t.connors@latrobe.edu.au
+            setpath PATH PATH:$HOME/bin/ltu
         else
             export EMAIL=tconnors@rather.puzzling.org
         fi

@@ -1,0 +1,63 @@
+#!/bin/bash
+
+# if fvwm dies of either any signal other than SIGTERM or SIGINT ie
+# with SEGV, SIGKILL, etc, then restart it.
+# 
+# 2 reasons you'd want to deliberately restart: 
+#
+# 1. want to restart with new config, and hence have to re-source
+# these scripts.  Need a specialised restart handler, that still
+# allows fvwm to create ~/.fs-restart state file, but does the
+# necessary conversions first
+
+# 2. fvwm has stuck in 100%CPU loop after running xine.  SIGUSR1
+# restarts fvwm internally, which wont source the scripts we want it
+# to source.  Don't care about that because haven't changed the
+# config.  And the signal handler bug has been fixed now so works
+# multiple times.
+
+#set -xv
+
+export wm=fvwm
+while : ; do
+    exec < /dev/null
+    bash -xv source-startup-exec-fvwm
+    err=$?   #if just sigtermed, fvwm seems to give an exit code of 0.
+#	export RESTARTINGFVWM=yes
+#    set -xv
+    ( echo $PATH ; date ; echo "$wm: $err" ) > $HOME/.fvwm-exit-code
+#	if [ "$err" != 139 -a "$err" != 138 ] ; then
+    if [ "$err" = 0 -o "$err" = 129 ] ; then   #If X killed, it gives 1 back, but then X kills us anyway
+
+        # need to tell child loop to exit, otherwise there is no exit
+        # condition, and it will keep looping despite everything else
+        # dying
+
+        echo -e "\nKILL CHILD $$\n$err"
+
+#        exit $err
+
+        # also need to kill the parent, because oterhwise everyone's
+        # STDOUT/ERR is still going to remove_dup_in_small_window, so it never dies.
+        # Still, removeup should have died when the child reader
+        # exited prior to us killing parent, but that didn't seem to
+        # work, so I suspect remove_dup_in_small_window is going to stick around
+        # regardless...
+        kill $PPID
+    fi
+    if [ "$wm" = fvwm ] ; then
+        export wm=twm
+    else
+        export wm=fvwm
+    fi
+    cd / ; cd $HOME  # just in case NFS mount had gone stale
+    sleep 1
+done 2>&1 | grep -v '^$' | remove_dup_in_small_window | while read a ; do
+    echo `date +"%Y-%m-%d %H:%M:%S:"` "$a" >> $HOME/.xsession-errors.$HOSTNAME$DISPLAY-fvwm.`date +%Y%m%d`
+    find $HOME/.xsession-errors.$HOSTNAME$DISPLAY-fvwm.* -mtime +5 -exec rm '{}' ';'
+    if [ "$a" = "KILL CHILD $$" ] ; then
+        read a
+        echo "Got sent command to die from parent: $a"
+        exit $a
+    fi
+done
