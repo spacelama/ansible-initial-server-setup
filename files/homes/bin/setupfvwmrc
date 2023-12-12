@@ -1,0 +1,27 @@
+#!/bin/bash
+# -*- Mode: shell-script -*-
+#template by ~tconnors/bin/newshscript
+#Sun May 18 02:43:47 EST 2003
+
+lockfile -1 -r 10 -l 60 $HOME/.fvwm.lock || exit 1
+
+SHORTHOST=${SHORTHOST/aatpc2a/aatpc2}
+SHORTDISPHOST=${SHORTDISPHOST/aatpc2a/aatpc2}
+
+if ! mktemplate $HOME/.fvwm/.fvwm2rc $HOME/.fvwm/.fvwm2rc.in $SHORTHOST $SHORTHOST-$SHORTDISPHOST ; then
+    msg="cowardly refusing to overwrite the newer $HOME/.fvwm/.fvwm2rc, before starting fvwm"
+    echo "$msg"
+    xmessage "$msg"
+
+    rm -f $HOME/.fvwm.lock
+    exit 1    #the caller ought not to exit - because they still might have a usable config
+fi
+
+if [ -f /etc/X11/fvwm/menudefs.hook ] ; then
+      ln -sf /etc/X11/fvwm/menudefs.hook $HOME/.fvwm/menudefs.hook
+else
+      #get rid of any pathnames, and just hope the binary exists in our PATH
+      sed 's!%[^%]*/\(.*\)%!%\1%! ; s!\(Exec exec \)[^'\'']*/!\1!' $HOME/.fvwm/menudefs.hook.in > $HOME/.fvwm/menudefs.hook
+fi
+
+rm -f $HOME/.fvwm.lock
