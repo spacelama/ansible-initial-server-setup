@@ -6,7 +6,13 @@ SHELL=bash ; export SHELL
 wm=fvwm
 
 unset BASH_PROFILE_EXECUTED
-. $HOME/.bash_profile           #if we decide to remove raid from LD_LIBRARY_PATH, lets honour it upon startup
+for i in  ~/.bash_profile ~/.profile ; do
+    #if we decide to remove raid from LD_LIBRARY_PATH, lets honour it upon startup
+    if [ -e "$i" ] ; then
+        . $i
+        break
+    fi
+done
 set -vx    #keep this second one around, just incase .bash_profile decided to turn it off
 bash -x setupfvwmrc
 # SEGV and KILL still works 2009/12/24 if you really do want to force a restart

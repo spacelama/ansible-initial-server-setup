@@ -60,7 +60,7 @@ fi
 sleep 3 # resolve any race conditions from running xrandr and waiting for things to resize
 for i in  ~/.bash_profile ~/.profile ; do
     if [ -e "$i" ] ; then
-        . ~/.bash_profile
+        . $i
         break
     fi
 done
