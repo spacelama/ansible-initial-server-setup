@@ -1,0 +1,7 @@
+#!/bin/sh
+
+cd $HOME
+
+xpra start-desktop --attach=True --exit-with-children=True --start-child=.xsession
+
+
