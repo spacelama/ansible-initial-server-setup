@@ -400,6 +400,16 @@ function setup_environment() {
 
     #export FSHCLUSTERDEFAULT=ignis1
 
+    # FIXME: probably have ordering of this incorrect now that I fully
+    # expect SSH_AUTH_SOCK to be set for most shells - I still need to
+    # populate the agent at some point!  2023-12-xx solution was to
+    # just unconditionally run addkeychain in finalise_prompt, but
+    # that's not correct either!  So we do want to addkeychain on
+    # dirac, not on any ssh sessions from dirac, on ltu, and not on
+    # any ssh sessions from ltu (ie, coyote8), except maybe dirac if
+    # it's the first time logging into dirac.  So yes everywhere
+    # except ssh session, except when agent is running but unpopulated
+    # Solved this temporarily in EDC just by checking `ssh-add -l`'s exit code
     if ! [ -n "$SSH_AUTH_SOCK" ] && [ -z "$NONINTERACT" -a -z "$PBS_ENVIRONMENT" -a -n "$DISPLAY" -a -t 0 -a $SHORTHOST != fs -a $SHORTHOST != pi ] && programexists keychain ; then
         addkeychain
     fi
