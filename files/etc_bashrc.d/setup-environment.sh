@@ -243,13 +243,13 @@ function setup_environment() {
             fi
             if [[ "$DISPLAY" != :* ]] ; then
                 if [[ $EDITOR == *emacs* ]]; then
-		    if which emacs-term 2> /dev/null ; then
+		    if which emacs-term >& /dev/null ; then
 			EDITOR=emacs-term
 		    fi
                 fi
             fi
             if [ "$EDITOR" = emacs -a "$UID" != 0 ] ; then
-		if which emacsclientserver 2> /dev/null ; then
+		if which emacsclientserver >& /dev/null ; then
                     EDITOR=emacsclientserver
 		fi
             fi
