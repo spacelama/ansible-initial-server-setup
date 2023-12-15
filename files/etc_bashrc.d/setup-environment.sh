@@ -213,7 +213,8 @@ function setup_environment() {
     #export LC_MESSAGES=en_AU
     #export EMACSPACKAGEPATH=$HOME/.xemacs/packages
     if [ -z "$EMAIL" ] ; then
-        if [[ $LONGHOST == *ltu.edu.au ]] ; then
+        if [[ $LONGHOST == *ltu.edu.au ]] ||
+           [[ $LONGHOST == *latrobe.edu.au ]] ; then
             export EMAIL=t.connors@latrobe.edu.au
             setpath PATH PATH:$HOME/bin/ltu
         else
@@ -242,13 +243,13 @@ function setup_environment() {
             fi
             if [[ "$DISPLAY" != :* ]] ; then
                 if [[ $EDITOR == *emacs* ]]; then
-		    if which emacs-term > /dev/null ; then
+		    if which emacs-term 2> /dev/null ; then
 			EDITOR=emacs-term
 		    fi
                 fi
             fi
             if [ "$EDITOR" = emacs -a "$UID" != 0 ] ; then
-		if which emacsclientserver > /dev/null ; then
+		if which emacsclientserver 2> /dev/null ; then
                     EDITOR=emacsclientserver
 		fi
             fi
