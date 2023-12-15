@@ -1,0 +1,19 @@
+#!/bin/bash
+# -*- Mode: shell-script -*-
+#template by ~tconnors/bin/newshscript
+#Sun May 25 21:59:47 EST 2003
+
+if [ $# -ne 0 ] ; then
+   echo "Usage: $0" 1>&2
+   exit 1
+fi
+
+PATH=$PATH:/sbin
+
+# ifconfig -a < /dev/null 2>/dev/null - for apple and solaris boxen.
+# But we probably don't have route -n there anyway...
+
+# filter in routes with default destination, then filter out those with gateway that isn't just "0(.0.0.0)"
+iface=`route -n | grep '^0.0.0.0  *[1-9]' | sed 's/.* //'`
+ifconfig "$iface" < /dev/null 2>/dev/null | sed -n 's/^[ 	]*inet \([^ ]*\) .*cast.*/\1/p' | head -n 1 | sed 's/^addr://'
+
