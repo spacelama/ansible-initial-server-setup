@@ -45,5 +45,4 @@ function precmd_hook() {
 
 function finalise_login() {
     [ ! -e /sys/class/power_supply/BAT0 ] || on_ac_power 2>/dev/null || ( apm_available 2>/dev/null && ( apm ; ibam ) || ( ibam --percentbattery ) 2>/dev/null )
-    addkeychain
 }
