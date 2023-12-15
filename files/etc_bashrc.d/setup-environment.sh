@@ -410,18 +410,21 @@ function setup_environment() {
     # it's the first time logging into dirac.  So yes everywhere
     # except ssh session, except when agent is running but unpopulated
     # Solved this temporarily in EDC just by checking `ssh-add -l`'s exit code
-    if ! [ -n "$SSH_AUTH_SOCK" ] ; then
-        if programexists keychain ; then
-            if [ -z "$NONINTERACT" -a -z "$PBS_ENVIRONMENT" -a -n "$DISPLAY" -a -t 0 ] ; then
-                if nodeattr -l $SHORTHOST | grep -q desktop ; then
+    if [ -e $HOME/.keychain/$HOSTNAME-sh ] ; then
+        . $HOME/.keychain/$HOSTNAME-sh
+    fi
+    if programexists keychain ; then
+        if ! [ -n "$SSH_AUTH_SOCK" ] ; then
+            if [ -z "$NONINTERACT" -a -z "$PBS_ENVIRONMENT" -a -n "$DISPLAY" -a -t 0 ] ; then # not some sort of automated process
+                if ! programexists nodeattr ; then  # a node we don't control ourselves
+                    addkeychain
+                elif nodeattr -l $SHORTHOST 2>/dev/null | grep -q desktop ; then   # not a remote machine where we don't have keys installed
                     addkeychain
                 fi
             fi
         else
-            :
+            addkeychain
         fi
-    elif ssh-add -l >& /dev/null ; [ $? = 2 ] ; then
-        addkeychain
     fi
 
     #export HOSTALIASES=$HOME/.scuzzieaddress

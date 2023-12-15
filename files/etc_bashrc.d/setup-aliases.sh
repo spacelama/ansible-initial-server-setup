@@ -118,6 +118,10 @@ function programexists () {
 }
 
 function addkeychain() {
+    if [ -e $HOME/.keychain/$HOSTNAME-sh ] ; then
+        . $HOME/.keychain/$HOSTNAME-sh
+    fi
+
     keys=
     for i in {id_dsa,id_rsa,identity} ; do
         if [ -e $HOME/.ssh/$i ] ; then
@@ -141,5 +145,8 @@ function addkeychain() {
     else
         keychain --quiet $keys
     fi
-    . $HOME/.keychain/$HOSTNAME-sh
+
+    if [ -e $HOME/.keychain/$HOSTNAME-sh ] ; then
+        . $HOME/.keychain/$HOSTNAME-sh
+    fi
 }
