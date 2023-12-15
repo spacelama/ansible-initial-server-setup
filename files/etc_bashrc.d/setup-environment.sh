@@ -102,12 +102,12 @@ function setup_environment() {
 
     export LONGHOST=$(
         set -o pipefail
-        ( programexists byname && timeout 0.4 byname `hostname` 2>/dev/null | sed -n 's/canonical name: //p' ) ||
+        ( programexists byname && timeout 0.4 byname `hostname` 2>/dev/null | sed -n 's/canonical name: //p' | grep . ) ||
             hostname -f 2>/dev/null || hostname   #might fail if hostname is really stuffed, timeout, and we havent yet compiled byname...
            )
     export REALHOST=$(
         set -o pipefail
-        ( programexists byname && timeout 0.4 byname `timeout 0.4 ipaddr` 2>/dev/null | sed -n 's/canonical name: //p' ) ||
+        ( programexists byname && timeout 0.4 byname `timeout 0.4 ipaddr` 2>/dev/null | sed -n 's/canonical name: //p' | grep . ) ||
             hostname -f 2>/dev/null || hostname   #might fail if hostname is really stuffed, timeout, and we havent yet compiled byname...
            )
     export SHORTHOST=$(echo $LONGHOST | sed 's/\..*//')
