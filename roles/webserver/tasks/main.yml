@@ -1,0 +1,86 @@
+---
+- name: install nut
+  apt:
+    name: [ 'apache2', 'javascript-common', 'python3-certbot-apache' ]
+
+- name: localalize error pages
+  lineinfile:
+    dest: /etc/apache2/conf-enabled/localized-error-pages.conf
+    insertafter: '^#ErrorDocument 404'
+    line: 'ErrorDocument 404 /404.html'
+  become: true
+  notify: restart apache2
+
+- name: install apache proxy and rewrite confs
+  copy:
+    src: etc/apache2/{{ item }}
+    dest: /etc/apache2/
+  become: true
+  notify: restart apache2
+  with_items:
+    - rewrite.conf
+    - proxy.conf
+
+- name: enable apache modules
+  apache2_module:
+    name: "{{ item.name | default( item ) }}"
+    state: "{{ item.state | default('present') }}"
+  loop:
+    - expires
+    - headers
+    - include
+    - proxy
+    - proxy_http
+    - proxy_wstunnel
+    - rewrite
+    - ssl
+    - userdir
+  become: true
+  notify: restart apache2
+#FIXME: mods-enabled:
+#cgi - later, if necessary
+#fcgid - later, if necessary
+#mpm_prefork instead of mpm_event, later, if necessary
+#perl, php, python if necessary, or will everything that needs that be redirected?
+# php*.ini if necessary (upload_tmp_dir = /tmp; sqlite3.defensive = 1 was turned off at one stage
+# php*.conf may need public_html section commented out
+# /etc/cron.d/php?
+#mods-available/userdir.conf might need AllowOverride and Options modified, RewriteEngine On
+
+- name: remove default apache 000-default.conf
+  file:
+    dest: /etc/apache2/sites-enabled/000-default.conf
+    state: absent
+  become: true
+  notify: restart apache2
+
+- name: install our apache sites
+  copy:
+    src: etc/apache2/sites-enabled/
+    dest: /etc/apache2/sites-enabled/
+  become: true
+  notify: restart apache2
+
+- name: install our apache sites
+  copy:
+    src: etc/apache2/secrets/
+    dest: /etc/apache2/secrets/
+    owner: www-data
+    group: www-data
+    mode: 0640
+  become: true
+#  notify: restart apache2
+
+#FIXME: letsencrypt ; /etc/cron.daily/check_letsencrypt_certbot
+# FIXME: original letsencrypt contents saves in webserver:/etc/letsencrypt.orig/
+
+#FIXME: logrotate 644 root adm apache/*log
+
+#FIXME: /home conf-enabled/cache.conf if necessary
+#FIXME: /weewx (probably already taken care of)
+
+#FIXME: secrets
+
+#FIXME: proxy.conf and rewrite.conf
+
+#FIXME: webserver:public_html - search for symlinks pointing nowhere, like astronomy.swin.edu.au/publications/publicThesis.pdf, code, bin, etc
