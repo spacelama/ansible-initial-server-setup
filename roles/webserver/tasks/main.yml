@@ -1,5 +1,5 @@
 ---
-- name: install nut
+- name: install apache and letsencrypt certbot
   apt:
     name: [ 'apache2', 'javascript-common', 'python3-certbot-apache' ]
 
@@ -18,8 +18,32 @@
   become: true
   notify: restart apache2
   with_items:
-    - rewrite.conf
-    - proxy.conf
+    - rather.puzzling.org-rewrite.conf
+    - rather.puzzling.org-proxy.conf
+
+- name: remove default apache 000-default.conf
+  file:
+    dest: /etc/apache2/sites-enabled/000-default.conf
+    state: absent
+  become: true
+  notify: restart apache2
+
+- name: install our apache sites
+  copy:
+    src: etc/apache2/sites-enabled/
+    dest: /etc/apache2/sites-enabled/
+  become: true
+  notify: restart apache2
+
+- name: install our apache sites
+  copy:
+    src: etc/apache2/secrets/
+    dest: /etc/apache2/secrets/
+    owner: www-data
+    group: www-data
+    mode: 0640
+  become: true
+#  notify: restart apache2
 
 - name: enable apache modules
   apache2_module:
@@ -46,30 +70,6 @@
 # php*.conf may need public_html section commented out
 # /etc/cron.d/php?
 #mods-available/userdir.conf might need AllowOverride and Options modified, RewriteEngine On
-
-- name: remove default apache 000-default.conf
-  file:
-    dest: /etc/apache2/sites-enabled/000-default.conf
-    state: absent
-  become: true
-  notify: restart apache2
-
-- name: install our apache sites
-  copy:
-    src: etc/apache2/sites-enabled/
-    dest: /etc/apache2/sites-enabled/
-  become: true
-  notify: restart apache2
-
-- name: install our apache sites
-  copy:
-    src: etc/apache2/secrets/
-    dest: /etc/apache2/secrets/
-    owner: www-data
-    group: www-data
-    mode: 0640
-  become: true
-#  notify: restart apache2
 
 #FIXME: letsencrypt ; /etc/cron.daily/check_letsencrypt_certbot
 # FIXME: original letsencrypt contents saves in webserver:/etc/letsencrypt.orig/
