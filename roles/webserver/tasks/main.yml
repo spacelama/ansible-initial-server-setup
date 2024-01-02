@@ -77,8 +77,19 @@
     mode: 0755
   become: true
 
+- name: Setup monitoring against known letsencrypt failures and non-renewal of cert
+  copy:
+    src: etc/cron.daily/check_letsencrypt_certbot
+    dest: /etc/cron.daily/check_letsencrypt_certbot
+    mode: 0755
+  become: true
 
-#FIXME: letsencrypt ; /etc/cron.daily/check_letsencrypt_certbot
-# FIXME: original letsencrypt contents saves in webserver:/etc/letsencrypt.orig/
+#FIXME: we would rather let ansible do the letsencrypt bootstrapping
+#(since we're starting off setting apache to redirect all http->https
+#via a snakeoil cert, this makes it hard for us to bootstrap using
+#letsencypt using the official methods), but for now let's just seed
+#it with a copy from the original webserver, and store the letsencrypt
+#configuration directory in our proxmox host's non-volatile storage
+#FIXME: original letsencrypt contents saves in webserver:/etc/letsencrypt.orig/
 
-#FIXME: webserver:public_html - search for symlinks pointing nowhere, like astronomy.swin.edu.au/publications/publicThesis.pdf, code, bin, etc
+#FIXME: webserver:public_html - search for symlinks pointing nowhere, like astronomy.swin.edu.au/publications/publicThesis.pdf, code, bin, photos, etc

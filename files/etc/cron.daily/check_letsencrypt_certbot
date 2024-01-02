@@ -1,0 +1,12 @@
+#!/bin/bash
+
+tail -n 500 /var/log/letsencrypt/letsencrypt.log | grep -v 'no renewal failures' | grep 'renew.*failure'
+certbot certificates 2> >( grep -v "Saving debug log to") | grep INVALID
+
+# FIXME: would also want to check expiries something along the lines of:
+
+#for domain in {www.,}{angelahughes,rather.puzzling}.org ; do
+#    echo | openssl s_client -servername $domain -connect $domain:443 | openssl x509 -noout -dates
+#done
+
+exit 0
