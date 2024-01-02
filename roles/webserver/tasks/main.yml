@@ -71,16 +71,14 @@
 # /etc/cron.d/php?
 #mods-available/userdir.conf might need AllowOverride and Options modified, RewriteEngine On
 
+- name: Fix permissions on /var/log/apache2
+  file:
+    dest: /var/log/apache2
+    mode: 0755
+  become: true
+
+
 #FIXME: letsencrypt ; /etc/cron.daily/check_letsencrypt_certbot
 # FIXME: original letsencrypt contents saves in webserver:/etc/letsencrypt.orig/
-
-#FIXME: logrotate 644 root adm apache/*log
-
-#FIXME: /home conf-enabled/cache.conf if necessary
-#FIXME: /weewx (probably already taken care of)
-
-#FIXME: secrets
-
-#FIXME: proxy.conf and rewrite.conf
 
 #FIXME: webserver:public_html - search for symlinks pointing nowhere, like astronomy.swin.edu.au/publications/publicThesis.pdf, code, bin, etc
