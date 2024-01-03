@@ -84,7 +84,8 @@ for i in $HOME/.ssh2/id_dsa_1024_a $HOME/.ssh/id_dsa $HOME/.ssh/id_rsa ; do #$HO
     fi
 done
 if [ $SHORTHOST != fs -a $SHORTHOST != pi ] ; then
-    xterm -geometry 150x50+200+200 -e keychain --quiet $keys
+    echo "Running keychain..."
+    xterm -geometry 150x50+200+200 -e "echo Running keychain... ; keychain --quiet $keys"
     . $HOME/.keychain/$HOSTNAME-sh
 fi
 

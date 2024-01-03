@@ -137,13 +137,26 @@ function addkeychain() {
 
             #    if ! timeout .3 keychain --quiet --agents gpg,ssh $keys ; then
             #        echo "Enter gpg details:" 1>&2
-            keychain --quiet --agents gpg,ssh $keys
+
+            # try to be silent at first, but give up quickly and
+            # mention what we're waiting on just in case the ssh
+            # askpass prompt is coming up on a screen you can't see
+            if ! ssh-add -l $keys | grep -v 'no identities' | grep -q . ; then
+                echo "Starting keychain (perhaps in another screen)..." 1>&2
+                keychain --quiet --agents gpg,ssh $keys
+            fi
             #    fi
             #    set +xv
         )
         . $HOME/.keychain/$HOSTNAME-sh-gpg
     else
-        keychain --quiet $keys
+        # try to be silent at first, but give up quickly and
+        # mention what we're waiting on just in case the ssh
+        # askpass prompt is coming up on a screen you can't see
+        if ! ssh-add -l $keys | grep -v 'no identities' | grep -q . ; then
+            echo "Starting keychain (perhaps in another screen)..." 1>&2
+            keychain --quiet $keys
+        fi
     fi
 
     if [ -e $HOME/.keychain/$HOSTNAME-sh ] ; then
