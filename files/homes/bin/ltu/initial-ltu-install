@@ -1,5 +1,12 @@
 #!/bin/bash
 
-apt install ssh man vim git xterm procmail curl keychain mgitstatus rsync telnet vim-pathogen plocate bash-completion net-tools lsof ncal x11-apps x11-xserver-utils lynx bind9-dnsutils systemd-resolved
+apt install x11-utils xdm ssh man vim git xterm procmail curl keychain mgitstatus rsync telnet vim-pathogen plocate bash-completion net-tools lsof ncal x11-apps x11-xserver-utils lynx bind9-dnsutils systemd-resolved tcpdump snapd mesa-utils
 
 apt install -t bookworm-backports emacs emacs-gtk
+
+if ! [ -e /etc/ssh/sshd_config.d/local.conf ] || ! md5sum /etc/ssh/sshd_config.d/local.conf | grep 1ef3493504a55c88f59511289c418628 ; then
+    echo -e 'Port 6022\nListenAddress 0.0.0.0' | tee /etc/ssh/sshd_config.d/local.conf
+    systemctl restart ssh
+fi
+#update-rc.d ssh enable   # FIXME: ???? in WSL2?
+#/etc/init.d/ssh restart  # FIXME: ???? in WSL2?
