@@ -21,18 +21,18 @@ root maxwell dark red bright green
 tconnors fs bright yellow bright blue
 root fs dark red bright blue
 
-tconnors ant bright yellow bright blue
-tconnors weinberg bright yellow dark magenta
-tconnors haze bright yellow dark green
-tconnors devmoodle bright yellow dark green
-tconnors livemoodle bright yellow dark red
-tconnors moodle bright yellow dark green red
+tconnors coyote8 bright yellow bright blue
+tconnors DBJXCY3 bright yellow dark magenta
+#tconnors haze bright yellow dark green
+#tconnors devmoodle bright yellow dark green
+#tconnors livemoodle bright yellow dark red
+#tconnors moodle bright yellow dark green red
 
-tconnors tera* bright yellow bright cyan
-tconnors green bright yellow dark yellow
-tconnors radium bright yellow dark purple
-tconnors jocelyn bright yellow bright yellow
-tconnors brecca* bright yellow dark cyan
+#tconnors tera* bright yellow bright cyan
+#tconnors green bright yellow dark yellow
+#tconnors radium bright yellow dark purple
+#tconnors jocelyn bright yellow bright yellow
+#tconnors brecca* bright yellow dark cyan
 
 tconnors * bright yellow dark red
 root * dark red dark red
