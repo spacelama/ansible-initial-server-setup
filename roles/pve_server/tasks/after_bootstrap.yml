@@ -98,7 +98,7 @@
 - name: Install virtual host tools
   apt:
     # https://pve.proxmox.com/wiki/Install_Proxmox_VE_on_Debian_Jessie
-    name: ['proxmox-ve', 'ssh', 'postfix', 'ksm-control-daemon', 'open-iscsi', 'systemd-sysv', 'munin-libvirt-plugins', 'targetcli-fb', 'powertop', 'libguestfs-tools', 'hwloc', 'numad', 'emacs'] # 'virt-goodies', (emacs because big enough servers, and use it often enough...)
+    name: ['proxmox-ve', 'ssh', 'postfix', 'ksm-control-daemon', 'open-iscsi', 'systemd-sysv', 'munin-libvirt-plugins', 'targetcli-fb', 'powertop', 'libguestfs-tools', 'hwloc', 'numad', 'emacs', 'autofs'] # 'virt-goodies', (emacs because big enough servers, and use it often enough...)
 #, 'swapspace']
 #    FIXME: run tuned-adm profile powersave or perhaps virtual-host # https://www.reddit.com/r/Proxmox/comments/uc53m7/4port_j4125_pc_how_to_run_proxmox_with_lowpower/
     update_cache: yes
@@ -131,28 +131,34 @@
 #                        # installation environment, etc
 #   notify: systemd daemon reload
 
-- name: Ensures {{ item }} exists
-  file:
-    path: "{{ item }}"
-    state: directory
-  become: true
-  with_items:
-    - /etc/systemd/system/jellyfin.automount.d
-    - /etc/systemd/system/media_transcodes.automount.d
+# - name: Ensures {{ item }} exists
+#   file:
+#     path: "{{ item }}"
+#     state: directory
+#   become: true
+#   with_items:
+#     - /etc/systemd/system/jellyfin.automount.d
+#     - /etc/systemd/system/media_transcodes.automount.d
 
-- name: make sure jellyfin isn't mounted til ceph is mounted
-  copy:
-    dest: /etc/systemd/system/jellyfin.automount.d/override.conf
-    content: "[Unit]\nAfter=mnt-pve-cephfs\x2dhdd.mount\n"
-  become: true
-  notify: systemd daemon reload
+# - name: make sure jellyfin isn't mounted til ceph is mounted
+#   copy:
+#     dest: /etc/systemd/system/jellyfin.automount.d/override.conf
+#     content: "[Unit]\nAfter=mnt-pve-cephfs\x2dhdd.mount\n"
+#   become: true
+#   notify: systemd daemon reload
 
-- name: make sure media_transcodes isn't mounted til ceph is mounted
-  copy:
-    dest: /etc/systemd/system/media_transcodes.automount.d/override.conf
-    content: "[Unit]\nAfter=mnt-pve-cephfs\x2dhdd.mount\n"
-  become: true
-  notify: systemd daemon reload
+# - name: make sure media_transcodes isn't mounted til ceph is mounted
+#   copy:
+#     dest: /etc/systemd/system/media_transcodes.automount.d/override.conf
+#     content: "[Unit]\nAfter=mnt-pve-cephfs\x2dhdd.mount\n"
+#   become: true
+#   notify: systemd daemon reload
+
+# Much better way of automounting a remote NFS directory before
+# turning on the LXC seems to be to getting automounter to mount it
+# somewhere appropriate, then present that through the LXC using
+# resource mounts, with shared=1; eg, see lxc 129 webserver or 105
+# media
 
 - name: ensure SMR drives have a longer timeout
   copy:
@@ -173,7 +179,8 @@
 
 # FIXME: limit zfs RAM usage to 8GB on pve itself if the only timely stuff its going to host is on SSD anyway: https://pve.proxmox.com/wiki/ZFS_on_Linux#sysadmin_zfs_limit_memory_usage
 
-  # FIXME: there are no non-zfs partitions on pve where there's enough space for swapspace to operate
+# FIXME: We don't have any local storage on filesystems that aren't
+# ZFS, so there's almost no point to setting up file based swap:
 #- name: Ensures /var/lib/swapspace 0700
 #  file:
 #    path="/var/lib/swapspace"
@@ -371,10 +378,10 @@
   # boot flag possibilities are: "systemd.unit=rescue.target", "1",
   # "systemd.unit=emergency.target", or rescue via some other means
   # and add a debug shell to tty9 via `systemctl enable
-  # debug-shell.service`: https://wiki.debian.org/systemd (other debug
-  # tips can be found here:
-  # https://freedesktop.org/wiki/Software/systemd/Debugging/ Help on
-  # systemd targets found here:
+  # debug-shell.service` or systemd.debug-shell=1 on the cmdline:
+  # https://wiki.debian.org/systemd (other debug tips can be found
+  # here: https://freedesktop.org/wiki/Software/systemd/Debugging/
+  # Help on systemd targets found here:
   # https://opensource.com/article/20/5/systemd-startup )
 - name: "Add modprobe blacklist to failsafe boot config"
   include_tasks: "{{ playbook_dir }}/roles/common/tasks/add_boot_flag.yml"
