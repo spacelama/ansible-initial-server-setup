@@ -215,6 +215,17 @@ backup --noerr /proc/pci $data_dir/pci
 sysctl -a > $data_dir/sysctl 2> $data_dir/sysctl.err
 backup /proc/cmdline $data_dir/cmdline
 
+if [ -x /usr/bin/docker ] ; then
+    docker image ls > $data_dir/docker.image.ls
+    docker image ls -a > $data_dir/docker.image.ls-a
+    docker container ls > $data_dir/docker.container.ls
+    docker container ls -a > $data_dir/docker.container.ls-a
+    docker ps > $data_dir/docker.ps
+    docker ps -a > $data_dir/docker.ps-a
+    # docker image prune
+    # docker container prune
+fi
+
 # copy the /etc/pve fuse filesystem that's built by proxmox based on
 # its database, so we can recover from barebones if necessary
 if [ -d /etc/pve ] ; then
@@ -240,7 +251,7 @@ if [ -d /etc/pve ] ; then
 fi
 
 if [ -x /usr/local/bin/get_conf_info.local ] ; then
-    /usr/local/bin/get_conf_info.local $data_dir
+    /usr/local/bin/get_conf_info.local $data_dir $data_dir_dest
 fi
 
 # Now, move all of the log files almost atomically to their final destination

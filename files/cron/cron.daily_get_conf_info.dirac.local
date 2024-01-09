@@ -3,14 +3,21 @@
 . $HOME/.keychain/$HOSTNAME-sh
 
 data_dir="$1"
+data_dir_dest="$2"
 
 cd "$data_dir" || exit 1
 mkdir -p tasmota
 cd tasmota || exit 1
 nodeattr -n tasmota | while read h ; do
-    error=$( ( decode-config.py --source "$h" | jq > $h.json || echo jq failed: $h ) 2>&1 )
-    if [ -n "$error" ] && ! nodeattr -l $h | grep -q not247 ; then
-        echo "$error"
+    error=$( ( decode-config.py --source "$h" | jq > "$h.json" || echo jq failed: "$h" ) 2>&1 )
+#    if [ -n "$error" ] && ! nodeattr -l $h | grep -q not247 ; then
+#        echo "$error"
+#    fi
+    if [ -n "$error" ] ; then
+        # attempt to copy yesterday's dump, but we need to work out
+        # how to flag in a non-obtrusive manner that we should
+        # occasionally deliberately get a known good dump
+        cp -a "$data_dir_dest/tasmota/$h.json" "$h.json"
     fi
 done
 
