@@ -251,6 +251,9 @@
     - { source: etc/bashcolors,           dest: /etc/bashcolors  }
     - { source: etc/inputrc,              dest: /etc/inputrc     }
 
+    - { source: etc/ceph/ceph.client.fs.keyring, dest: /etc/ceph/, mode: "0600", when: '{{ mount_ceph_clients is defined }}' }  # also want ceph-common package
+    - { source: etc/ceph/ceph.conf, dest: /etc/ceph/,                            when: '{{ mount_ceph_clients is defined }}' }
+
     - { source: etc/auto.master,          dest: /etc/auto.master, notify: "reload autofs", when_pkg_installed: "autofs" }
     - { template: etc/auto.nas.j2,        dest: /etc/auto.nas,    notify: "reload autofs", when_pkg_installed: "autofs" }
     - { source: etc/autofs.conf,          dest: /etc/autofs.conf, notify: "reload autofs", when_pkg_installed: "autofs" }

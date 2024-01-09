@@ -1,43 +1,35 @@
-{% if host_is_pve_server is defined %}
-{%     set rw = 'ro' %}
-{%     set tconnors_mount = '/net/fs/home/tconnors' %}
-{% else %}
-{%     set rw = 'rw' %}
-{%     set tconnors_mount = '/home/tconnors' %}
-{% endif %}
-{% if inventory_hostname != 'fs' %}
-{{ tconnors_mount }}/thesis -hard,noacl,nodev,nosuid,{{ rw }},strictatime,async fs:/home/tconnors/thesis
-{{ tconnors_mount }}/photos -hard,noacl,nodev,nosuid,{{ rw }},strictatime,async fs:/home/tconnors/photos
-{%     if host_is_pve_server is not defined %}
-{{ tconnors_mount }}/p -hard,noacl,nodev,nosuid,{{ rw }},strictatime,actimeo=600,async fs:/home/tconnors/p
-{{ tconnors_mount }}/movies -hard,noacl,nodev,nosuid,{{ rw }},strictatime,async fs:/home/tconnors/movies
-{{ tconnors_mount }}/mp3 -hard,noacl,nodev,nosuid,{{ rw }},strictatime,async fs:/home/tconnors/mp3
-{{ tconnors_mount }}/.mp3.low_qual -hard,noacl,nodev,nosuid,{{ rw }},strictatime,async fs:/home/tconnors/.mp3.low_qual
-{{ tconnors_mount }}/background -hard,noacl,nodev,nosuid,{{ rw }},strictatime,async fs:/home/tconnors/background
-{{ tconnors_mount }}/qBT_dir -hard,noacl,nodev,nosuid,{{ rw }},strictatime,async fs:/home/tconnors/qBT_dir
-{{ tconnors_mount }}/not_backed_up -hard,noacl,nodev,nosuid,{{ rw }},strictatime,async fs:/home/tconnors/not_backed_up
-{{ tconnors_mount }}/not_backed_up.tank -hard,noacl,nodev,nosuid,{{ rw }},strictatime,async fs:/home/tconnors/not_backed_up.tank
-{{ tconnors_mount }}/oppo -hard,noacl,nodev,nosuid,{{ rw }},strictatime,async fs:/home/tconnors/oppo
-{{ tconnors_mount }}/pixel -hard,noacl,nodev,nosuid,{{ rw }},strictatime,async fs:/home/tconnors/pixel
+/home/tconnors/p -hard,noacl,nodev,nosuid,rw,strictatime,actimeo=600,async fs:/home/tconnors/p
+/home/tconnors/movies -hard,noacl,nodev,nosuid,rw,strictatime,async fs:/home/tconnors/movies
+/home/tconnors/mp3 -hard,noacl,nodev,nosuid,rw,strictatime,async fs:/home/tconnors/mp3
+/home/tconnors/.mp3.low_qual -hard,noacl,nodev,nosuid,rw,strictatime,async fs:/home/tconnors/.mp3.low_qual
+/home/tconnors/background -hard,noacl,nodev,nosuid,rw,strictatime,async fs:/home/tconnors/background
+/home/tconnors/qBT_dir -hard,noacl,nodev,nosuid,rw,strictatime,async fs:/home/tconnors/qBT_dir
+/home/tconnors/not_backed_up -hard,noacl,nodev,nosuid,rw,strictatime,async fs:/home/tconnors/not_backed_up
+/home/tconnors/not_backed_up.tank -hard,noacl,nodev,nosuid,rw,strictatime,async fs:/home/tconnors/not_backed_up.tank
+/home/tconnors/oppo -hard,noacl,nodev,nosuid,rw,strictatime,async fs:/home/tconnors/oppo
+/home/tconnors/pixel -hard,noacl,nodev,nosuid,rw,strictatime,async fs:/home/tconnors/pixel
 {# FIXME: make /var/cache/apt/archives symlink for those that can contact fs #}
-/var/cache/apt/archives.nfs -hard,noacl,nodev,nosuid,{{ rw }},strictatime,async fs:/var/cache/apt/archives
-{%     endif %}
-{% endif %}
+/var/cache/apt/archives.nfs -hard,noacl,nodev,nosuid,rw,strictatime,async fs:/var/cache/apt/archives
 
-{% if (inventory_hostname != 'pi') and (host_is_pve_server is not defined) %}
-/pi/boot -hard,noacl,nodev,nosuid,{{ rw }},strictatime,async pi:/pi/boot
+{% if inventory_hostname != 'pi' %}
+/pi/boot -hard,noacl,nodev,nosuid,rw,strictatime,async pi:/pi/boot
 {% endif %}
-{% if (inventory_hostname != 'pi') and (inventory_hostname != 'iot') and (host_is_not_ext_web_server is not defined) and (host_is_pve_server is not defined) %}
-{{ tconnors_mount }}/public_html -hard,noacl,nodev,nosuid,{{ rw }},strictatime,async iot:/home/tconnors/global_public_html
+{% if (inventory_hostname != 'pi') and (inventory_hostname != 'iot') %}
+/home/tconnors/public_html -hard,noacl,nodev,nosuid,rw,strictatime,async iot:/home/tconnors/global_public_html
 {% endif %}
 
 {# commented out:
   # -o fsc comes from /usr/share/doc/cachefilesd/howto.txt.gz
 
-  #/backuppc -hard,noacl,nodev,nosuid,{{ rw }},async fs:/backuppc
-  #{{ tconnors_mount }}/sysadmin -hard,noacl,nodev,nosuid,{{ rw }},strictatime,async fs:/home/tconnors/sysadmin
-  #/var/spool/news -hard,noacl,nodev,nosuid,{{ rw }},strictatime,async fs:/var/spool/news
+  #/backuppc -hard,noacl,nodev,nosuid,rw,async fs:/backuppc
+  #/home/tconnors/sysadmin -hard,noacl,nodev,nosuid,rw,strictatime,async fs:/home/tconnors/sysadmin
+  #/var/spool/news -hard,noacl,nodev,nosuid,rw,strictatime,async fs:/var/spool/news
 
-  ##{{ tconnors_mount }}/movies/kaffeine -fstype=nfs4,hard,noacl,nodev,nosuid,{{ rw }},strictatime,async fs:/home/tconnors/movies/kaffeine
-  #/var/sid-386-chroot -hard,noacl,nodev,nosuid,{{ rw }},strictatime,async fs:/raid0/data/_NAS_NFS_Exports_/sid-386-chroot
+  ##/home/tconnors/movies/kaffeine -fstype=nfs4,hard,noacl,nodev,nosuid,rw,strictatime,async fs:/home/tconnors/movies/kaffeine
+  #/var/sid-386-chroot -hard,noacl,nodev,nosuid,rw,strictatime,async fs:/raid0/data/_NAS_NFS_Exports_/sid-386-chroot
 #}
+
+{% if mount_ceph_clients is defined %}
+/home/tconnors/photos -fstype=ceph,name=fs,mds_namespace=cephfs-hdd,nodev,nosuid,rw,strictatime,async 192.168.1.6,192.168.1.7,192.168.1.8:/mounts/fs/home.tconnors.photos
+/home/tconnors/thesis -fstype=ceph,name=fs,mds_namespace=cephfs-hdd,nodev,nosuid,rw,strictatime,async 192.168.1.6,192.168.1.7,192.168.1.8:/mounts/fs/home.tconnors.thesis
+{% endif %}

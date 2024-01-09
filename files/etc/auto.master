@@ -27,8 +27,6 @@
 #+auto.master
 
 # all directories to be empty placeholders until the mount is mounted:
-{% if host_is_pve_server is not defined %}
 /net    /etc/auto.net
-{% endif %}
 #--ghost
 /-      /etc/auto.nas --ghost
