@@ -1,3 +1,4 @@
+{% if inventory_hostname != 'fs' %}
 /home/tconnors/p -hard,noacl,nodev,nosuid,rw,strictatime,actimeo=600,async fs:/home/tconnors/p
 /home/tconnors/movies -hard,noacl,nodev,nosuid,rw,strictatime,async fs:/home/tconnors/movies
 /home/tconnors/mp3 -hard,noacl,nodev,nosuid,rw,strictatime,async fs:/home/tconnors/mp3
@@ -10,12 +11,10 @@
 /home/tconnors/pixel -hard,noacl,nodev,nosuid,rw,strictatime,async fs:/home/tconnors/pixel
 {# FIXME: make /var/cache/apt/archives symlink for those that can contact fs #}
 /var/cache/apt/archives.nfs -hard,noacl,nodev,nosuid,rw,strictatime,async fs:/var/cache/apt/archives
+{% endif %}
 
 {% if inventory_hostname != 'pi' %}
 /pi/boot -hard,noacl,nodev,nosuid,rw,strictatime,async pi:/pi/boot
-{% endif %}
-{% if (inventory_hostname != 'pi') and (inventory_hostname != 'iot') %}
-/home/tconnors/public_html -hard,noacl,nodev,nosuid,rw,strictatime,async iot:/home/tconnors/global_public_html
 {% endif %}
 
 {# commented out:
