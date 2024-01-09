@@ -29,6 +29,10 @@
       00 07 * * sun cd Mail && mv .log.normal .log.normal.old
       # now automated by the read-mail: 00 06 * * * mv_deleted_inbox_trash
 
+  ceph_client_mounts:
+    - { mount: "/home/tconnors/photos",      name: "fs", mds_namespace: "cephfs-hdd",  options: "nodev,nosuid,rw,strictatime,async", mons: "192.168.1.6,192.168.1.7,192.168.1.8", remote_path: "/mounts/fs/home.tconnors.photos" }
+    - { mount: "/home/tconnors/thesis",      name: "fs", mds_namespace: "cephfs-hdd",  options: "nodev,nosuid,rw,strictatime,async", mons: "192.168.1.6,192.168.1.7,192.168.1.8", remote_path: "/mounts/fs/home.tconnors.thesis" }
+
   pve_users:
     - "{{ lookup('file', 'main.pve_users.passwd') }}"
 

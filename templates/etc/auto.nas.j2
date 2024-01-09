@@ -29,7 +29,9 @@
   #/var/sid-386-chroot -hard,noacl,nodev,nosuid,rw,strictatime,async fs:/raid0/data/_NAS_NFS_Exports_/sid-386-chroot
 #}
 
+{# FIXME: might need wsize and rsize to not run out memory with mount/umount cycles: https://www.spinics.net/lists/ceph-users/msg60621.html #}
 {% if mount_ceph_clients is defined %}
-/home/tconnors/photos -fstype=ceph,name=fs,mds_namespace=cephfs-hdd,nodev,nosuid,rw,strictatime,async 192.168.1.6,192.168.1.7,192.168.1.8:/mounts/fs/home.tconnors.photos
-/home/tconnors/thesis -fstype=ceph,name=fs,mds_namespace=cephfs-hdd,nodev,nosuid,rw,strictatime,async 192.168.1.6,192.168.1.7,192.168.1.8:/mounts/fs/home.tconnors.thesis
+{%   for mount in ceph_client_mounts %}
+{{ mount.mount }} -fstype=ceph,name={{ mount.name }},mds_namespace={{ mount.mds_namespace }},{{ mount.options }} {{ mount.mons }}:{{ mount.remote_path }}
+{%   endfor %}
 {% endif %}
