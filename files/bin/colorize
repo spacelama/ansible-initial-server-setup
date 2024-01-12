@@ -2,9 +2,9 @@
 # -*- Mode: shell-script -*-
 #template by ~tconnors/bin/newshscript
 #Thu May  1 17:20:13 EST 2008
-# $Revision: 1.8 $ $Date: 2011-07-20 06:37:00 $
-# $Id: colorize,v 1.8 2011-07-20 06:37:00 tconnors Exp $
-# $Header: /home/tconnors/cvsroot/bin/colorize,v 1.8 2011-07-20 06:37:00 tconnors Exp $
+# $Revision: 1.10 $ $Date: 2023/06/24 14:00:03 $
+# $Id: colorize,v 1.10 2023/06/24 14:00:03 tconnors Exp $
+# $Header: /home/tconnors/cvsroot/bin/colorize,v 1.10 2023/06/24 14:00:03 tconnors Exp $
 # $RCSfile: colorize,v $
 
 # This program colorizes the text in the commandline args

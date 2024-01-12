@@ -1,0 +1,51 @@
+#!/bin/bash
+
+# x takes a shell snippet, with shell characters allowed, and runs it.
+# It can either be in a single arg or in a bunch of args. But if you
+# want to provide a file with a space in it, or a literal special
+# character, you have to escape it (eg with printf "%q") yourself.
+
+eval=eval
+while [[ "$1" == --* ]] ; do
+    case "$1" in
+        --wait)
+            shift
+            eval="wait-and-query-rerun"
+            ;;
+        --no-eval)
+            shift
+            eval=
+            ;;
+        *)
+            break
+            ;;
+    esac
+done
+
+args=
+while [[ "$1" == -* ]] ; do
+    args="$args $1"
+    shift
+done
+
+cmd=
+while (( $# > 0 )); do
+    arg=$(printf "%q" "$1")
+    if [ -n "$eval" ] ; then
+        cmd="${cmd:+$cmd\\ }${arg}"
+    else
+        cmd="${cmd:+$cmd }${arg}"
+    fi
+    shift
+done
+if [ "$eval" != eval ] ; then
+    cmd=$( printf "%q" "$cmd" )
+else
+    eval='eval'
+fi
+
+if [ "$cmd" != "" ] ; then
+    xterm $args -e "bash -c $eval\ $cmd"
+else
+    xterm $args
+fi &
