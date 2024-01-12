@@ -2,7 +2,7 @@ setup_bash_settings() {
 #    echo setup_bash_settings 1>&2
     setup_bash_history_settings
 
-    ulimit -c unlimited
+    ulimit -c unlimited 2>/dev/null
     ulimit -S -c 0   #soft core limit. Can be increased by user
 
     #    echo I hate `date +"%A"`s.

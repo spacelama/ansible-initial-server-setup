@@ -30,7 +30,7 @@ function setup_environment() {
         setup_bash_settings
         setup_aliases
         setup_remote_aliases
-#        setup_cmd
+        #        setup_cmd
     fi
 
     if [ -z "$NONINTERACT" -a -f /etc/bash_completion -a -z "$BASH_COMPLETION" ]; then
@@ -288,6 +288,9 @@ function setup_environment() {
             ;;
     esac
     export LESS
+    if [ -n "$WSL_DISTRO_NAME" ] ; then
+        setpath PATH PATH:/mnt/c/WINDOWS:/mnt/c/WINDOWS/System32:/mnt/c/WINDOWS/System32/WindowsPowerShell/v1.0/
+    fi
 
     #debian bug 505963 (may really be associated with UTF8 problem that show_types highlights:
     #export LIBXCB_ALLOW_SLOPPY_LOCK=yes
