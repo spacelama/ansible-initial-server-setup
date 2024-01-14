@@ -1,0 +1,71 @@
+#!/bin/bash
+
+# usage: $0 <all paths to backup>
+
+# backuppc passes all the shares to this program to work out if
+# they're all mounted (and files exist because backuppc would
+# complain about that too) before it starts - otherwise if one is
+# found to be not mounted later on, it will abort the entire backup.
+# Better to abort it before it starts to even do all that wasted work.
+
+# Also record when we last attempted to backup a filesystem, and try
+# to work out whether we've forgotten to backup something recently.
+
+#set -xv
+shopt -s nullglob
+
+log=/.backuppc_status
+HOST=`hostname`
+date=`date +%s` ; dateS=`date`
+
+while [[ "$1" == -* ]] ; do
+    case "$1" in
+         --debug)
+             shift
+             set -xv
+             ;;
+         --success)
+             shift
+             success=$1
+             shift
+             ;;
+         -*)
+             echo "Usage: $0 [--debug] [--success \$ok] $shares..." 1>&2
+             exit 1
+             ;;
+    esac
+done
+
+for i in "$@" ; do
+    (
+        found=
+        for j in "$i"/* ; do
+            found="$j"
+            break
+        done
+        if [ -z "$found" ] ; then
+            exit 1
+        fi
+        # if we're backing up /net/pi/boot, assume what pi boots off
+        # is mounted at /piroot, and update its state file instead
+        if [[ "$i" = /net/* ]] ; then
+            HOST=$( echo "$i" | sed 's!/net/\([^/]*\)/\(.*\)!\1!' )
+            i=$( echo "$i" | sed 's!/net/\([^/]*\)/\(.*\)!\/\2!' )
+            log="/${HOST}root$log"
+        fi
+        touch $log
+        if [ -n "$success" ] ; then
+            sed -i "\\@^$HOST:$i @d" $log
+            if [ "$success" = 1 ] ; then
+                # doesn't write a new entry if $failed, so healthy
+                # entry disappears - this is good - we want to know
+                # very soon afterwards a failure has occurred if it
+                # hasn't self corrected
+                printf "%-50s # %s\\n" "$HOST:$i $date" "$dateS"  >> $log
+            fi
+        fi
+    ) || exit 1
+done
+
+
+exit 0

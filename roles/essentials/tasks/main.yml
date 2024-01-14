@@ -177,7 +177,7 @@
 
 - name: allow backuppc to check all mountpoints
   copy:
-    src: /home/tconnors/bin/is_all_mounted
+    src: files/usr_local_bin/is_all_mounted
     dest: /usr/local/bin/is_all_mounted
     owner: root
     group: root
