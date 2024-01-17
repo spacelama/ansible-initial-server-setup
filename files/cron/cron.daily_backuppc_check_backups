@@ -4,12 +4,13 @@
 # checks /.backuppc_status to make sure that all local paths are
 # included except for documented exeptions
 
-log=/.backuppc_status
+log=/.backuppc_status   #FIXME: foreach ceph filesystem $mnt, we should check $mnt/.bashuppc_status
 date=`date +%s`
 # excludes should be escaped in the same way paths in /etc/mtab is escaped
 excludes=( "/proc/.*" "/sys/.*" "/dev/.*" "/run/.*" "/backuppc" "/snapshots" "/home/tconnors/.mp3.low_qual" "/var/spool/squid" "/tank[^/]*" "/mnt/.*" "/media/.*" "/mnt/olddirac" "/var/cache/.*" ".*not_backed_up.*" ".*scratch" "/external_backups" "/tmp" "/home/angela" "/piroot-new" ".*subvol.*" ".*basevol.*" "/rpool.*" "/wavlink" "/net/.*" "/var/snap/.*" ) # FIXME: we do want /hdd/template/iso though.  Only thing we don't want is  /hdd/subvol-* - perhaps we should be excluding those instead
 exclude_types=( "tmpfs" "devtmpfs" "devpts" "sysfs" "proc" "udf" "squashfs" "nfs" "nfs3" "nfs4" "fuse.sshfs" "fuse.lxcfs" "autofs" "fuse.afuse" )
-exclude_dev_type_matches=( "/dev/mapper/hdd.*/home/tconnors/.*" )
+# exclude tuples of: "$dev $type $fs", in array of regexp form
+exclude_dev_type_matches=( "/dev/mapper/hdd.*/home/tconnors/.*" ) # these are bind mounted in
 HOST=`hostname`
 
 function get_logentry() {
@@ -75,6 +76,26 @@ function filter_bindmount_children() {
     done
 }
 
+# read the list of "$dev $type $fs" and output "$dev $type $fs $limit"
+# with out business rules of which limits apply to which filesystems,
+# defaulting to 10 days
+define_limits() {
+    while read dev type fs ; do
+        case "$fs@$HOST" in
+            *@maxwell|*@fermi)
+                epoch_warning=$((date-86400*30))
+                ;;
+            /home/tconnors/thesis@*)
+                epoch_warning=$((date-86400*30))
+                ;;
+            *)
+                epoch_warning=$((date-86400*10))
+                ;;
+        esac
+        echo "$dev $type $fs $epoch_warning"
+    done
+}
+
 msg=$(
     # get dev, fstype and destination from /etc/mtab, filter out those
     # types we don't care about, then unescape destination
@@ -83,17 +104,14 @@ msg=$(
         sort |
         filter_bindmount_children |
         sort | uniq |
-        while read -r dev type fs ; do
+        define_limits |
+        while read -r dev type fs epoch_warning ; do
             # unescape fs
             fs=$( printf "%b" "$fs" )
 
             logentry=`get_logentry $fs`
             if [ -n "$logentry" ] ; then
-                # FIXME: need a better way to special case the special cases
-                if [ $logentry -gt $((date-86400*10)) -a $fs != /home/tconnors/thesis ] ||
-                       [ $logentry -gt $((date-86400*30)) -a $fs == /home/tconnors/thesis ] ||
-                       [ $logentry -gt $((date-86400*30)) -a $HOST == maxwell ]
-                then
+                if [ $logentry -gt $epoch_warning ] ; then
                     :
                 else
                     backed_up=`date -d "1970-01-01 UTC $logentry seconds"`
