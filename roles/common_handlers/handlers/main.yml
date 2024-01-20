@@ -13,11 +13,22 @@
     name: cron
     state: restarted
 
+  # with munin-async, first you need to restart munin-node, then
+  # munin-async.  If there's only one munin-async that is running on
+  # iot itself caching on behalf of everyone, we'll have to delegate
+  # to it
 - name: restart munin-node
   service:
     name: munin-node
     state: restarted
-  ignore_errors: true # might not be installed yet
+  when: "'munin-node' in ansible_facts.packages | default([])"
+  notify: restart munin-async
+
+- name: restart munin-async
+  service:
+    name: munin-async
+    state: restarted
+  when: "'munin-async' in ansible_facts.packages | default([])"
 
 - name: restart nut server
   service:

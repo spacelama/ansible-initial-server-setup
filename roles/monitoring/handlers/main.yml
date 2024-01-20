@@ -1,0 +1,7 @@
+---
+- name: restart munin-async
+  systemd:
+    name: "munin-async"
+    state: restarted
+    daemon_reload: yes
+  become: true

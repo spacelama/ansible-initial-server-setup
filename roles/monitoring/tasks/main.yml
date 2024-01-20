@@ -381,6 +381,16 @@
   become: true
   notify: restart cron
 
+  # we need munin-async because some plugins just take a very long
+  # time to answer when something is down, so collecting them
+  # asynchronously helps.  But that currently has its own problems
+- name: Install monitoring packages
+  apt:
+    name: ['munin-node', 'munin-async']
+    autoremove: no
+    state: present
+  become: true
+
 - name: Install monitoring packages for webservers
   apt:
     name: ['libwww-perl']
@@ -389,3 +399,45 @@
   become: true
   when: (host_is_user_web_server is defined) or (host_is_ext_web_server is defined)
 
+- name: Install monitoring packages (except for containers)
+  apt:
+    name: ['libdata-validate-ip-perl'] # libdata-validate-ip-perl needed for chronyc munin plugin
+    autoremove: no
+    state: present
+  become: true
+  when: host_is_container is not defined
+
+- name: create ssh directory for munin-async
+  file:
+    path: "/var/lib/munin-async/.ssh/"
+    state: directory
+    owner: munin-async
+    group: munin-async
+  become: true
+
+- name: create ssh authorized_keys for munin-async
+  copy:
+    dest: "/var/lib/munin-async/.ssh/authorized_keys"
+    content: "no-port-forwarding,no-agent-forwarding,no-X11-forwarding,no-pty,no-user-rc,command=\"/usr/share/munin/munin-async --spooldir /var/lib/munin-async --spoolfetch\" {{ munin_async_ssh_key }}\n"
+    owner: munin-async
+    group: munin-async
+  become: true
+
+- name: ensures /etc/systemd/system/munin-async.service.d/ dir exists
+  file:
+    path: /etc/systemd/system/munin-async.service.d/
+    state: directory
+  become: true
+
+- name: try to get munin-async not to discard data - https://github.com/munin-monitoring/munin/issues/1429
+  # also: https://github.com/munin-monitoring/munin/issues/617
+  # https://github.com/munin-monitoring/munin/issues/619
+  # https://github.com/munin-monitoring/munin/issues/634
+  # https://github.com/munin-monitoring/munin/issues/720
+  # WARNING: be careful with --fork (doesn't seem to be a problem on dirac, iot and pve1,2,3 at 20231224.  pi could be a problem.  OOMs could be a problem at times on pve1,2,3).  This is relevant: https://github.com/munin-monitoring/munin/issues/1207
+  copy:
+    dest: /etc/systemd/system/munin-async.service.d/override.conf
+    content: "[Service]\n# https://serverfault.com/questions/1006514/systemd-timer-for-unattended-upgrades ExecStart for some stupid reason are cumulative, so should be reset:\nExecStart=\nExecStart=/usr/share/munin/munin-asyncd --fork\n"
+  become: true
+  notify: restart munin-async
+  when: munin_no_fork is not defined

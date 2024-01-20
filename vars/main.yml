@@ -6,6 +6,7 @@
   domain: rather.puzzling.org
 #  ssh_port: 22
   ansible_was_run_by: "{{ lookup('env','USER') }@{{ lookup('env','HOSTNAME') }}"
+  munin_async_ssh_key: "ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABgQC2gmBTbXpS3mgxzkOM5rpVWRxokfuCYdfF4oU41tyQFeP/lpf10KeUAj/7OT3FD3c0FQp0dKdfKS9sKZZMCAmLR4PHpNgJyF0zAaSUFXNgv3APvnfUaf4RX7hj8qh+KYv4wimmE9ayYMsIxA1ltlMkOa2IGOj4D5DiGAusg9MwtIzHJlJACCVwR7AFAr3ZWeYbP+Fdst5csYrA5Sv/QqFpIo56vBhiDqlpbMu7R+5NEVNxb0aOs5bQSe+AwrPBWWbd91Pt/JaYD23DUjyMPLR7IPdtlnjrYrRU6X9f7uJbCjZjtfYo2XDbZIHSJuUYxVFNTFe1392IfKu/Zq4Y+uuqm+mtzfTLSfURF1QXIfmddcgv91dOmSE4oPrCDeM6gRx+33+9Sg07JOXFtHR2Onsyl4Ml/BrVm9bWlSiNNriEBt+dAHBzBfdAJQipGuU2EuMCyxagLxHSSuPCf7f8BEgyEYbX4KBomg5L6klXS5/bN4/Y53DdadaH5uDSvMFDwaU= munin@iot"
   smtp_server: smtp.rather.puzzling.org
   smtp_root_alias: tconnors
   smtp_aliases: |2

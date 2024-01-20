@@ -4,8 +4,10 @@
   gather_facts: no
   remote_user: ansible_adm
   roles:
+    - role: common_handlers
+      become: true # the whole role, including handlers, will become root
     - role: munin-server
-      when: inventory_hostname == 'iot'
+      when: host_is_munin_server is defined
 
 # to do a quick sync of commonly changed files, let's just push them
 # first without running a slow gather_facts first:

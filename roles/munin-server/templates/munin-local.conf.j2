@@ -1,0 +1,19 @@
+{% for host in query('inventory_hostnames', 'laptops,containers,desktops,servers') %}
+{%    if (hostvars[host].not_active is not defined) and (hostvars[host].deprecated is not defined) %}
+[{{ host }}]
+#   address {{ host }}
+    address ssh://munin-async@{{ host }}:22/usr/share/munin/munin-async --spoolfetch
+    use_node_name yes
+
+{%    endif %}
+{% endfor %}
+
+{% for host in query('inventory_hostnames', 'openwrt') %}
+{%    if (hostvars[host].not_active is not defined) and (hostvars[host].deprecated is not defined) %}
+[{{ host }}]
+    address {{ host }}
+#   address ssh://munin-async@{{ host }}:22/usr/share/munin/munin-async --spoolfetch
+    use_node_name yes
+
+{%    endif %}
+{% endfor %}
