@@ -438,6 +438,15 @@
   become: true
   when: packages_to_install is defined
 
+- name: Install zram-generator
+  apt:
+    name: ['systemd-zram-generator' ]
+    autoremove: no
+    state: present
+    install_recommends: no
+  become: true
+  when: (deb_release | default('bullseye') == 'bookworm') and ((host_is_desktop is defined) or (host_is_pi is defined))
+
 - name: "Ensure custom modules in /etc/modules"
   lineinfile:
     dest: /etc/modules

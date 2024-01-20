@@ -229,6 +229,20 @@
     - fail2ban_all_jails
   notify: restart munin-node
 
+- name: install zram munin monitoring plugins from eg munin-contrib, that don't take arguments, for hosts with zram configured
+  copy:
+    src: "monitoring/munin/{{ item }}"
+    dest: "/etc/munin/plugins/"
+    owner: root
+    group: root
+    mode: 0755
+    local_follow: true
+  become: true
+  with_items:
+    - zram
+  notify: restart munin-node
+  when: "'systemd-zram-generator' in ansible_facts.packages"
+
 - name: existing munin plugins without params
   file:
     src: "/usr/share/munin/plugins/{{ item }}"
