@@ -200,7 +200,7 @@
   with_items:
    - ceph_osd
    - ceph_capacity
-   - ceph-osd-info
+#   - ceph-osd-info
    - proxmox_vm_count
   notify: restart munin-node
 
