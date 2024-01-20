@@ -271,7 +271,18 @@
 - name: "zfs module parameters"
   copy:
     dest: /etc/modprobe.d/zfs-custom.conf
-    content: "# ANSIBLE CONTROLLED\n# to ensure SSD doesn't have too many writes, by pve_server/main.yml\noptions zfs zfs_txg_timeout=15\n"
+    content: |
+      # ANSIBLE CONTROLLED
+      # by pve_server/main.yml
+      # to ensure SSD doesn't have too many writes:
+      options zfs zfs_txg_timeout=15
+      # now that our VMs are entirely served out of ceph, zfs is only
+      # for our zfs root, and we want to limit caching much lower than
+      # zfs's default limits.  Without this we get 10MB/s constant
+      # swapping in and out on pve2:
+      # https://rather.puzzling.org/munin/pve2/pve2/diskstats_throughput/md127.html
+      options zfs zfs_arc_min=53687091  # 50MB
+      options zfs zfs_arc_max=107374182 # 100MB
   become: true
   notify: "Update initramfs config"
 
