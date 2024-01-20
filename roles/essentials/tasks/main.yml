@@ -417,9 +417,9 @@
       - "--delete-excluded"
   become: true
 
-- name: install ceph packages
+- name: install ceph and autofs packages
   apt:
-    name: 'ceph-common'
+    name: [ 'ceph-common', 'autofs' ]
     autoremove: no
     state: present
     install_recommends: no

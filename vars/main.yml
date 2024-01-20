@@ -263,9 +263,9 @@
     - { source: etc/ceph/ceph.client.media.keyring,     dest: /etc/ceph/, mode: "0600", when: '{{ mount_ceph_clients is defined }}' }
     - { source: etc/ceph/ceph.conf, dest: /etc/ceph/,                            when: '{{ mount_ceph_clients is defined }}' }
 
-    - { source: etc/auto.master,          dest: /etc/auto.master, notify: "reload autofs", when_pkg_installed: "autofs" }
-    - { template: etc/auto.nas.j2,        dest: /etc/auto.nas,    notify: "reload autofs", when_pkg_installed: "autofs" }
-    - { source: etc/autofs.conf,          dest: /etc/autofs.conf, notify: "reload autofs", when_pkg_installed: "autofs" }
+    - { source: etc/auto.master,          dest: /etc/auto.master, notify: "restart autofs", when_pkg_installed: "autofs" }
+    - { template: etc/auto.nas.j2,        dest: /etc/auto.nas,    notify: "restart autofs", when_pkg_installed: "autofs" }
+    - { source: etc/autofs.conf,          dest: /etc/autofs.conf, notify: "restart autofs", when_pkg_installed: "autofs" }
 #    - { source: etc/default/autofs,       dest: /etc/default/autofs, notify: "restart autofs" }   MOUNT_NFS_DEFAULT_PROTOCOL seems to be ignored, and not causing me problems anyway, these days
     - { template: etc/idmapd.conf.j2,     dest: /etc/idmapd.conf }
 
