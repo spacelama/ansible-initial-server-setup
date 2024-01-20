@@ -181,6 +181,20 @@
   notify: restart munin-node
   when: host_is_nut_master is defined
 
+- name: install webserver ssl munin monitoring plugins from munin-contrib, that take arguments, for hosts serving ssl https
+  copy:
+    src: "monitoring/munin/{{ item }}"
+    dest: "/usr/share/munin/plugins/"
+    owner: root
+    group: root
+    mode: 0755
+    local_follow: true
+  become: true
+  with_items:
+    - ssl_
+  notify: restart munin-node
+  when: host_is_ext_web_server is defined
+
 - name: install custom chrony etc munin monitoring plugins from munin-contrib, that don't take arguments, for non-containers
   copy:
     src: "monitoring/munin/{{ item }}"
@@ -223,6 +237,19 @@
   become: true
   with_items: [ 'df_abs', 'iostat', 'iostat_ios', 'netstat' ]
   when: host_is_container is not defined
+  notify: restart munin-node
+
+- name: existing apache munin plugins without params
+  file:
+    src: "/usr/share/munin/plugins/{{ item }}"
+    dest: "/etc/munin/plugins/{{ item }}"
+    state: link
+  become: true
+  with_items:
+    - apache_accesses
+    - apache_processes
+    - apache_volume
+  when: (host_is_user_web_server is defined) or (host_is_ext_web_server is defined)
   notify: restart munin-node
 
 - name: existing munin plugins without params (physical machines)
@@ -323,6 +350,15 @@
   when: host_is_zfs is defined
   notify: restart munin-node
 
+- name: optional extra existing munin plugins with params
+  file:
+    src: "/usr/share/munin/plugins/{{ item.dest }}"
+    dest: "/etc/munin/plugins/{{ item.src }}"
+    state: link
+  become: true
+  with_items: "{{ munin_plugin_links | default([]) }}"
+  notify: restart munin-node
+
 # these smart_ links are in addition to those handled by
 # munin_suggest_plugin.yml, which appears to ignore devices that are
 # sent through to VMs (where we still have to run the smart queries
@@ -344,4 +380,12 @@
     line: '0 */3 \1'
   become: true
   notify: restart cron
+
+- name: Install monitoring packages for webservers
+  apt:
+    name: ['libwww-perl']
+    autoremove: no
+    state: present
+  become: true
+  when: (host_is_user_web_server is defined) or (host_is_ext_web_server is defined)
 

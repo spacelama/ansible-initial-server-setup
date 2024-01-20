@@ -269,6 +269,8 @@
 #    - { source: etc/default/autofs,       dest: /etc/default/autofs, notify: "restart autofs" }   MOUNT_NFS_DEFAULT_PROTOCOL seems to be ignored, and not causing me problems anyway, these days
     - { template: etc/idmapd.conf.j2,     dest: /etc/idmapd.conf }
 
+    - { source: etc/apache2/mods-available/userdir.conf, dest: /etc/apache2/mods-available/, notify: "restart apache2", when: '{{ ( host_is_user_web_server is defined ) and ( deb_release | default("bullseye") == "bookworm" ) }}' }
+
     - { template: etc/rkhunter.conf.j2,   dest: /etc/rkhunter.conf }
     - { source: etc/reportbug.conf,       dest: /etc/reportbug.conf, when_pkg_installed: "reportbug" }
 

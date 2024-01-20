@@ -54,6 +54,13 @@
     state: restarted
   become: true
 
+- name: restart apache2
+  service:
+    name: apache2
+    state: restarted
+  become: true
+  when: "'apache2' in ansible_facts.packages | default([])"
+
 - name: restart chrony
   service:
     name: chrony

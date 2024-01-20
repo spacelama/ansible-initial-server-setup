@@ -61,7 +61,7 @@
     - userdir
   become: true
   notify: restart apache2
-#FIXME: mods-enabled:
+#FIXME: original mods-enabled:
 #cgi - later, if necessary
 #fcgid - later, if necessary
 #mpm_prefork instead of mpm_event, later, if necessary
@@ -69,7 +69,6 @@
 # php*.ini if necessary (upload_tmp_dir = /tmp; sqlite3.defensive = 1 was turned off at one stage
 # php*.conf may need public_html section commented out
 # /etc/cron.d/php?
-#mods-available/userdir.conf might need AllowOverride and Options modified, RewriteEngine On
 
 - name: Fix permissions on /var/log/apache2
   file:
@@ -84,12 +83,52 @@
     mode: 0755
   become: true
 
+- name: comment out existing userdir entries
+  lineinfile:
+    regexp: "^\t{{ item }}"
+    line: "\t#{{ item }}"
+    path: /etc/apache2/mods-available/userdir.conf
+  with_items:
+    - AllowOverride FileInfo AuthConfig Limit Indexes
+    - Options MultiViews Indexes SymLinksIfOwnerMatch IncludesNoExec
+  become: true
+  notify: restart apache2
+
+- name: ensure our userdir options
+  lineinfile:
+    insertafter: "{{ item.search }}"
+    line: "\t{{ item.replace }}"
+    #FIXME: we'd need a regexp here if we wanted to ever change the
+    #options below, but then that will clash with insertafter:
+    path: /etc/apache2/mods-enabled/userdir.conf
+  with_items:
+    - { search: AllowOverride, replace: AllowOverride All }
+    - { search: Options, replace: Options Indexes FollowSymLinks ExecCGI }
+  become: true
+  notify: restart apache2
+  # FIXME: if we want to reinstate cgi-bin, we want:
+  #        <Directory /home/*/public_html/cgi-bin>
+  #              AllowOverride FileInfo AuthConfig Limit Indexes
+  #              Options ExecCgi MultiViews Indexes SymLinksIfOwnerMatch IncludesNoExec
+  #              XBitHack on
+  #              AddHandler cgi-script .cgi
+  #        </Directory>
+
+
 #FIXME: we would rather let ansible do the letsencrypt bootstrapping
 #(since we're starting off setting apache to redirect all http->https
 #via a snakeoil cert, this makes it hard for us to bootstrap using
 #letsencypt using the official methods), but for now let's just seed
 #it with a copy from the original webserver, and store the letsencrypt
 #configuration directory in our proxmox host's non-volatile storage
-#FIXME: original letsencrypt contents saves in webserver:/etc/letsencrypt.orig/
+#FIXME: original letsencrypt contents saved in webserver:/etc/letsencrypt.orig/
 
-#FIXME: webserver:public_html - search for symlinks pointing nowhere, like astronomy.swin.edu.au/publications/publicThesis.pdf, code, bin, photos, etc
+# caution (just remove them from the filesystem, install the scripts (which obviously can't be called from this non-cgi enabled machine anyway) since scripts should already be calling the correct master):
+#   ./.whether_in_bed
+#   ./.whether_phone_screen_on
+#   ./.whether_study_uninhabited
+#   ./.offdayshift
+#   temp-ac.ajaxy.js
+#   temp-ac.feedback.js
+
+
