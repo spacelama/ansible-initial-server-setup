@@ -11,7 +11,12 @@
 [diff]
 	# https://www.reddit.com/r/git/comments/1oi0tw/is_there_any_way_have_git_diff_show_that_a_file/
         renames = copies
-        renamelimit = 1
+	# FIXME:
+	# some of the internet is saying 0...  Need to try it...
+	#    diff.renameLimit
+        # The number of files to consider when performing the copy/rename
+        # detection; equivalent to the git diff option -l.
+        renamelimit = 20
 
 [diff "gzip"]
         binary = true
@@ -25,8 +30,15 @@
 	editor = e
 	pager = less -F -X
 
+[branch]
+# https://www.atlassian.com/git/tutorials/syncing/git-pull
+	autosetuprebase = always
+
 [push]
 	default = simple
+# newer git may require:
+[pull]
+	rebase = true
 
 [alias]
 # http://idnotfound.wordpress.com/2009/05/09/word-by-word-diffs-in-git/
@@ -76,14 +88,6 @@
 [url "git@github.com:"]
         pushInsteadOf = git://github.com/
         pushInsteadOf = https://github.com/
-
-[branch]
-# https://www.atlassian.com/git/tutorials/syncing/git-pull
-	autosetuprebase = always
-
-# newer git may require:
-[pull]
-	rebase = true
 
 [init]
 	defaultBranch = main

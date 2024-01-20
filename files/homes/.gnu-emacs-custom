@@ -253,7 +253,7 @@
  '(undo-limit 800000)
  '(undo-threshold 512000)
  '(uniquify-buffer-name-style 'post-forward-angle-brackets nil (uniquify))
- '(user-mail-address "tconnors@bom.gov.au")
+ '(user-mail-address "tim.w.connors@gmail.com")
  '(vc-annotate-background nil)
  '(vc-annotate-color-map
    '((20 . "#dc322f")

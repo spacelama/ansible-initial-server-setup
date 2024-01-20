@@ -1,17 +1,3 @@
-tconnors hubble bright yellow bright yellow
-root hubble dark red bright yellow
-tconnors feynman bright yellow bright red
-root feynman dark red bright red
-tconnors penrose bright yellow bright cyan
-root penrose dark red bright cyan
-tconnors curie bright yellow bright magenta
-root curie dark red bright magenta
-tconnors bohr bright yellow bright red
-root bohr dark red bright red
-tconnors scuzzie bright yellow bright grey
-root scuzzie dark red bright grey
-tconnors galileo bright yellow dark white
-root galileo dark red dark white
 tconnors dirac bright yellow bright white
 root dirac dark red bright white
 tconnors gamow bright yellow bright red
@@ -20,20 +6,44 @@ tconnors maxwell bright yellow bright green
 root maxwell dark red bright green
 tconnors fs bright yellow bright blue
 root fs dark red bright blue
+tconnors iot bright yellow bright yellow
+root iot dark red bright yellow
+tconnors pi bright yellow bright cyan
+root pi dark red bright cyan
+tconnors syslog bright yellow bright red
+root syslog dark red bright red
+tconnors smtp bright yellow bright magenta
+root smtp dark red bright magenta
+tconnors webserver bright yellow bright grey
+root webserver dark red bright grey
 
 tconnors coyote8 bright yellow bright blue
 tconnors DBJXCY3 bright yellow dark magenta
-#tconnors haze bright yellow dark green
-#tconnors devmoodle bright yellow dark green
-#tconnors livemoodle bright yellow dark red
-#tconnors moodle bright yellow dark green red
-
-#tconnors tera* bright yellow bright cyan
-#tconnors green bright yellow dark yellow
-#tconnors radium bright yellow dark purple
-#tconnors jocelyn bright yellow bright yellow
-#tconnors brecca* bright yellow dark cyan
 
 tconnors * bright yellow dark red
 root * dark red dark red
 * * bright grey dark blue
+
+# tconnors feynman bright yellow bright red
+# root feynman dark red bright red
+# tconnors penrose bright yellow bright cyan
+# root penrose dark red bright cyan
+# tconnors curie bright yellow bright magenta
+# root curie dark red bright magenta
+# tconnors bohr bright yellow bright red
+# root bohr dark red bright red
+# tconnors scuzzie bright yellow bright grey
+# root scuzzie dark red bright grey
+# tconnors galileo bright yellow dark white
+# root galileo dark red dark white
+
+# tconnors haze bright yellow dark green
+# tconnors devmoodle bright yellow dark green
+# tconnors livemoodle bright yellow dark red
+# tconnors moodle bright yellow dark green red
+
+# tconnors tera* bright yellow bright cyan
+# tconnors green bright yellow dark yellow
+# tconnors radium bright yellow dark purple
+# tconnors jocelyn bright yellow bright yellow
+# tconnors brecca* bright yellow dark cyan

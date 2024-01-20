@@ -410,20 +410,26 @@ function setup_environment() {
     # dirac.  So yes everywhere except ssh session, except when agent
     # is running but unpopulated.  Previously solved this temporarily
     # in EDC just by checking `ssh-add -l`'s exit code for $? = 2
-    if [ -e $HOME/.keychain/$HOSTNAME-sh ] ; then
-        . $HOME/.keychain/$HOSTNAME-sh
-    fi
-    if programexists keychain ; then
-        if ! [ -n "$SSH_AUTH_SOCK" ] ; then
-            if [ -z "$NONINTERACT" -a -z "$PBS_ENVIRONMENT" -a -n "$DISPLAY" -a -t 0 ] ; then # not some sort of automated process
-                if ! programexists nodeattr ; then  # a node we don't control ourselves
-                    addkeychain
-                elif nodeattr -l $SHORTHOST 2>/dev/null | grep -q desktop ; then   # not a remote machine where we don't have keys installed
-                    addkeychain
+
+    # Maybe it suffices just to run it when the system we're logging
+    # onto actually has keys of its own?
+    if [ -n "$( find ~/.ssh/ -maxdepth 1 -name 'id*pub' -quit )" ] ; then
+        # quickest check for a wildcard is with `find ... -quit`: https://stackoverflow.com/questions/6363441/check-if-a-file-exists-with-a-wildcard-in-a-shell-script
+        if [ -e $HOME/.keychain/$HOSTNAME-sh ] ; then
+            . $HOME/.keychain/$HOSTNAME-sh
+        fi
+        if programexists keychain ; then
+            if ! [ -n "$SSH_AUTH_SOCK" ] ; then
+                if [ -z "$NONINTERACT" -a -z "$PBS_ENVIRONMENT" -a -n "$DISPLAY" -a -t 0 ] ; then # not some sort of automated process
+                    if ! programexists nodeattr ; then  # a node we don't control ourselves
+                        addkeychain
+                    elif nodeattr -l $SHORTHOST 2>/dev/null | grep -q desktop ; then   # not a remote machine where we don't have keys installed
+                        addkeychain
+                    fi
                 fi
+            else
+                addkeychain
             fi
-        else
-            addkeychain
         fi
     fi
 
