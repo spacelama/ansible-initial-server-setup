@@ -417,6 +417,15 @@
       - "--delete-excluded"
   become: true
 
+- name: install ceph packages
+  apt:
+    name: 'ceph-common'
+    autoremove: no
+    state: present
+    install_recommends: no
+  become: true
+  when: mount_ceph_clients is defined
+
 - name: install host specific packages
   apt:
     # list of packages

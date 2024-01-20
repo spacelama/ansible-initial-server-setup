@@ -30,8 +30,10 @@
       # now automated by the read-mail: 00 06 * * * mv_deleted_inbox_trash
 
   ceph_client_mounts:
-    - { mount: "/home/tconnors/photos",      name: "fs", mds_namespace: "cephfs-hdd",  options: "nodev,nosuid,rw,strictatime,async", mons: "192.168.1.6,192.168.1.7,192.168.1.8", remote_path: "/mounts/fs/home.tconnors.photos" }
-    - { mount: "/home/tconnors/thesis",      name: "fs", mds_namespace: "cephfs-hdd",  options: "nodev,nosuid,rw,strictatime,async", mons: "192.168.1.6,192.168.1.7,192.168.1.8", remote_path: "/mounts/fs/home.tconnors.thesis" }
+    - { mount: "/home/tconnors/photos",      name: "fs",        mds_namespace: "cephfs-hdd",  options: "nodev,nosuid,rw,strictatime,async", mons: "192.168.1.6,192.168.1.7,192.168.1.8", remote_path: "/mounts/fs/home.tconnors.photos" }
+    - { mount: "/home/tconnors/thesis",      name: "fs",        mds_namespace: "cephfs-hdd",  options: "nodev,nosuid,rw,strictatime,async", mons: "192.168.1.6,192.168.1.7,192.168.1.8", remote_path: "/mounts/fs/home.tconnors.thesis" }
+    - { mount: "/home/tconnors/public_html", name: "webserver", mds_namespace: "cephfs-slow", options: "nodev,nosuid,rw,strictatime,async", mons: "192.168.1.6,192.168.1.7,192.168.1.8", remote_path: "/mounts/webserver/home.tconnors/public_html" }
+    - { mount: "/home/tconnors/movies",      name: "media",     mds_namespace: "cephfs-hdd",  options: "nodev,nosuid,rw,strictatime,async", mons: "192.168.1.6,192.168.1.7,192.168.1.8", remote_path: "/mounts/media/movies" }
 
   pve_users:
     - "{{ lookup('file', 'main.pve_users.passwd') }}"
@@ -255,7 +257,10 @@
     - { source: etc/bashcolors,           dest: /etc/bashcolors  }
     - { source: etc/inputrc,              dest: /etc/inputrc     }
 
-    - { source: etc/ceph/ceph.client.fs.keyring, dest: /etc/ceph/, mode: "0600", when: '{{ mount_ceph_clients is defined }}' }  # also want ceph-common package
+    # FIXME: suspect I need to set user to something other than fs and webserver etc - there might be fs on fastssd and fs on hdd, or both fs and webserver on fastssd, and we need to be able to access them both
+    - { source: etc/ceph/ceph.client.fs.keyring,        dest: /etc/ceph/, mode: "0600", when: '{{ mount_ceph_clients is defined }}' }
+    - { source: etc/ceph/ceph.client.webserver.keyring, dest: /etc/ceph/, mode: "0600", when: '{{ mount_ceph_clients is defined }}' }
+    - { source: etc/ceph/ceph.client.media.keyring,     dest: /etc/ceph/, mode: "0600", when: '{{ mount_ceph_clients is defined }}' }
     - { source: etc/ceph/ceph.conf, dest: /etc/ceph/,                            when: '{{ mount_ceph_clients is defined }}' }
 
     - { source: etc/auto.master,          dest: /etc/auto.master, notify: "reload autofs", when_pkg_installed: "autofs" }
