@@ -18,6 +18,39 @@ log=/.backuppc_status
 HOST=`hostname`
 date=`date +%s` ; dateS=`date`
 
+# takes $i as input and sets $i, $HOST, $log as output
+apply_mount_fixup() {
+    fstype=$( df --output='fstype' "$i" | tail -n 1 )
+    case "$i,$fstype" in
+#        /mnt/pve/ceph-*/mounts/*)
+#        # foreach ceph filesystem $mnt, we should dump to $mnt/.bashuppc_status
+#            HOST=$( echo "$i" | sed 's!/mnt/pve/\(ceph[^/]*\)/mounts/\([^/]*\)/\(.*\)!\1!' )
+#        ;;
+
+#        /mnt/pve/ceph-*,*) # ceph on the servers
+#            log="$i$log"   # since cron.daily_backuppc_check_backups
+#                           # is searching for /.backuppc_status on all
+#                           # ceph nodes, including servers, we better
+#                           # update that file
+#            ;;
+        *,ceph)            # ceph on the clients
+            log="$i$log"
+            ;;
+        /net/*,*)
+            # if we're backing up /net/pi/boot, assume what pi boots off
+            # is mounted at /piroot, and update its state file instead
+            HOST=$( echo "$i" | sed 's!/net/\([^/]*\)/\(.*\)!\1!' )
+            i=$( echo "$i" | sed 's!/net/\([^/]*\)/\(.*\)!\/\2!' )
+            log="/${HOST}root$log"
+            ;;
+    esac
+}
+
+# example usage:
+# /etc/backuppc/config.pl:$Conf{DumpPreUserCmd} = '$sshPath -q -x -l backuppc $host sudo /usr/local/bin/is_all_mounted $shares';
+# /etc/backuppc/config.pl:$Conf{DumpPostUserCmd} = '$sshPath -q -x -l backuppc $host sudo /usr/local/bin/is_all_mounted --success $xferOK $shares';
+#  - $xferOK = 1 if the dump succeeded, 0 if it didn't
+
 while [[ "$1" == -* ]] ; do
     case "$1" in
          --debug)
@@ -38,21 +71,19 @@ done
 
 for i in "$@" ; do
     (
-        found=
+        found=   # an ugly way to make sure there's at least one file
+                 # or directory under $i, and making sure any
+                 # automount is mounted
         for j in "$i"/* ; do
             found="$j"
-            break
+            break  #shortcut without testing all matches
         done
         if [ -z "$found" ] ; then
             exit 1
         fi
-        # if we're backing up /net/pi/boot, assume what pi boots off
-        # is mounted at /piroot, and update its state file instead
-        if [[ "$i" = /net/* ]] ; then
-            HOST=$( echo "$i" | sed 's!/net/\([^/]*\)/\(.*\)!\1!' )
-            i=$( echo "$i" | sed 's!/net/\([^/]*\)/\(.*\)!\/\2!' )
-            log="/${HOST}root$log"
-        fi
+
+        apply_mount_fixup  # takes $i as input and sets $i, $HOST, $log as output
+
         touch $log
         if [ -n "$success" ] ; then
             sed -i "\\@^$HOST:$i @d" $log

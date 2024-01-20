@@ -4,17 +4,20 @@
 # checks /.backuppc_status to make sure that all local paths are
 # included except for documented exeptions
 
-log=/.backuppc_status   #FIXME: foreach ceph filesystem $mnt, we should check $mnt/.bashuppc_status
-date=`date +%s`
+logf=/.backuppc_status
+date=$( date +%s )
 # excludes should be escaped in the same way paths in /etc/mtab is escaped
 excludes=( "/proc/.*" "/sys/.*" "/dev/.*" "/run/.*" "/backuppc" "/snapshots" "/home/tconnors/.mp3.low_qual" "/var/spool/squid" "/tank[^/]*" "/mnt/.*" "/media/.*" "/mnt/olddirac" "/var/cache/.*" ".*not_backed_up.*" ".*scratch" "/external_backups" "/tmp" "/home/angela" "/piroot-new" ".*subvol.*" ".*basevol.*" "/rpool.*" "/wavlink" "/net/.*" "/var/snap/.*" ) # FIXME: we do want /hdd/template/iso though.  Only thing we don't want is  /hdd/subvol-* - perhaps we should be excluding those instead
 exclude_types=( "tmpfs" "devtmpfs" "devpts" "sysfs" "proc" "udf" "squashfs" "nfs" "nfs3" "nfs4" "fuse.sshfs" "fuse.lxcfs" "autofs" "fuse.afuse" )
 # exclude tuples of: "$dev $type $fs", in array of regexp form
 exclude_dev_type_matches=( "/dev/mapper/hdd.*/home/tconnors/.*" ) # these are bind mounted in
-HOST=`hostname`
+HOST=$( hostname )
 
 function get_logentry() {
-    sed -n "s@^$HOST:$1 @@p" $log 2>/dev/null | head -n 1 | awk '{print $1}'  # head just in case the sed substituion went bad and we have repeat lines.  want to pick the earlier occurence so we flag the error
+    local logentry="$1"
+    local HOST="$2"
+    local log="$3"
+    sed -n "s@^$HOST:$logentry @@p" "$log" 2>/dev/null | head -n 1 | awk '{print $1}'  # head just in case the sed substituion went bad and we have repeat lines.  want to pick the earlier occurence so we flag the error
 }
 
 function exclude() {
@@ -76,6 +79,24 @@ function filter_bindmount_children() {
     done
 }
 
+split_out_ceph_pools() {
+    # if ceph, we want to iterate through each of
+    # /mnt/pve/\(ceph[^/]*\)/mounts/\([^/]*\) and make sure they are
+    # being backed up
+    while read dev type fs ; do
+        # first get the parent filesystem (as well as non-ceph filesystems)
+        echo "$dev $type $fs"
+        # then iterate into the /mounts/ directory on the filesystem if present
+        if [ "$type" = ceph ] ; then
+            if [ -e "$fs/mounts" ] ; then
+                for client_mount in "$fs"/mounts/*/*/ ; do
+                    echo "$dev $type $client_mount"
+                done
+            fi
+        fi
+    done
+}
+
 # read the list of "$dev $type $fs" and output "$dev $type $fs $limit"
 # with out business rules of which limits apply to which filesystems,
 # defaulting to 10 days
@@ -104,17 +125,24 @@ msg=$(
         sort |
         filter_bindmount_children |
         sort | uniq |
+        split_out_ceph_pools |
         define_limits |
         while read -r dev type fs epoch_warning ; do
             # unescape fs
             fs=$( printf "%b" "$fs" )
 
-            logentry=`get_logentry $fs`
+            log="$logf"
+            check_host="$HOST"
+            if [ "$type" = ceph ] ; then
+                log="$fs$logf"
+                check_host="[^ ]*"   # we only require one host, any host, to back it up
+            fi
+            logentry=$( get_logentry "$fs" "$check_host" "$log" )
             if [ -n "$logentry" ] ; then
                 if [ $logentry -gt $epoch_warning ] ; then
                     :
                 else
-                    backed_up=`date -d "1970-01-01 UTC $logentry seconds"`
+                    backed_up=$( date -d "1970-01-01 UTC $logentry seconds" )
                     echo "$HOST:$fs not attempted to be backed up since: $backed_up"
                 fi
             else
