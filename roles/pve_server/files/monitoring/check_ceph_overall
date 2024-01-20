@@ -7,10 +7,10 @@ fail=false
 failed_tests=
 
 function fail() {
-    cmd_failed=$( eval echo "$BASH_COMMAND" )
-    echo " * -> Failed: $cmd_failed"
+    code=$? ; CMD="$BASH_COMMAND"
+    echo " * -> Failed($code): $CMD"
 
-    failed_tests="$failed_tests$cmd_failed ; "
+    failed_tests="$failed_tests$CMD ; "
     fail=true
 }
 
@@ -46,7 +46,7 @@ done
 ./check_ceph_osd_df -W 90 -C 95
 #./check_ceph_rgw  # rados gateway to S3
 
-if "$fail" ; then
+if $fail ; then
     echo Failed tests: $failed_tests
     exit 1
 fi
