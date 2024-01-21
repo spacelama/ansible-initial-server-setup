@@ -1,16 +1,17 @@
-dirac                           linux,intel,amd              # AMD is not a strictly important flag yet, but reminds us where it is currently running.  Intel is also set just because it's compatible (again, not yet used)
-dirac-laptop                    linux,intel,not247
-maxwell                         linux,intel,not247
-fs                              linux,intel
-iot                             linux,intel,not247,notyetproduction
+dirac                           linux,intel,amd,desktop,depends_on_pve2              # AMD is not a strictly important flag yet, but reminds us where it is currently running.  Intel is also set just because it's compatible (again, not yet used)
+dirac-laptop                    linux,intel,not247,desktop
+maxwell                         linux,intel,not247,desktop
+gamow                           linux,intel,not247,desktop
+fermi                           linux,intel,amd,not247,desktop
+
+fs                              linux,intel,depends_on_pve1
+iot                             linux,intel
 #pve                             linux,intel,pve
 pve1                            linux,intel,pve
 pve2                            linux,intel,amd,pve
 pve3                            linux,intel,pve
 pve-backup                      linux,intel,pve,not247
 pi                              linux,arm
-gamow                           linux,intel,not247
-fermi                           linux,intel,amd,not247
 homeassistant                   linux,intel,hassio
 zm                              linux,intel,lxc,turnkey
 media                           linux,intel,lxc,turnkey,not247,notyetproduction
@@ -25,9 +26,6 @@ webserver                       linux,intel,lxc
 idrac-r730xd                    drac
 #idrac-r520                      drac
 
-loungeroomlifx                  lifx
-bedroomlifx                     lifx
-
 #ledstrip                        esp8266
 netclock                        esp8266
 ac                              esp8266
@@ -37,31 +35,31 @@ esp32cam                        esp82,not247,notyetproduction
 airmon1                         tasmota,PMS5003,SCD40
 fishtank-temperature            tasmota,DS18B20
 batterymon1                     tasmota,millivolts
-fanstudy1                       tasmota,fan,not247
-ac-power                        tasmota,medion,accurate,powermon
-angela-power                    tasmota,sonoffs26,not247
-loungeroomlights-power          tasmota,sonoffs26
-bedroomlights-power             tasmota,sonoffs26
-garagelights-power              tasmota,oldkogan,accurate,powermon,usbport,limitedusbport
-heatedseat-power                tasmota,sonoffs26,not247,solidstate
-studio-power                    tasmota,arlecswitchindiv4board
-studio-power2                   tasmota,sonoffs26
-patiolights-power               tasmota,sonoffs26
-laundrylights-power             tasmota,sonoffs26
-christmaslights-power           tasmota,arlecmaster4board
-beerfridges-power               tasmota,medion,accurate,powermon
-aquapump-power                  tasmota,oldkogan,accurate,powermon,usbport
-aquaheater-power                tasmota,oldkogan,accurate,powermon,usbport
-brewfridge-power                tasmota,athom,accurate,powermon
-pvebackup-power                 tasmota,newkogan,powermon,esp12s,accurate
+fanstudy1                       tasmota,switch,dimmer,fan,not247
+ac-power                        tasmota,switch,medion,accurate,powermon
+angela-power                    tasmota,switch,sonoffs26,not247
+loungeroomlights-power          tasmota,switch,sonoffs26
+bedroomlights-power             tasmota,switch,sonoffs26
+garagelights-power              tasmota,switch,oldkogan,accurate,powermon,usbport,limitedusbport
+heatedseat-power                tasmota,switch,sonoffs26,not247,solidstate
+studio-power                    tasmota,switch,arlecswitchindiv4board
+studio-power2                   tasmota,switch,sonoffs26
+patiolights-power               tasmota,switch,sonoffs26
+laundrylights-power             tasmota,switch,sonoffs26
+christmaslights-power           tasmota,switch,arlecmaster4board
+beerfridges-power               tasmota,switch,medion,accurate,powermon
+aquapump-power                  tasmota,switch,oldkogan,accurate,powermon,usbport
+aquaheater-power                tasmota,switch,oldkogan,accurate,powermon,usbport
+brewfridge-power                tasmota,switch,athom,accurate,powermon
+pvebackup-power                 tasmota,switch,newkogan,powermon,esp12s,accurate
 
-washingmachine-power            tasmota,medion,accurate,powermon,repairedlimitresistor
-measure-power                   tasmota,oldkogan,accurate,powermon,usbport,not247
-#chromecast-lounge-power         tasmota,newkogan,powermon,currentoffset,frequent-dies-need-power-supply-work
-panasonic-power                 tasmota,newkogan,accurate,powermon
-electricblanket-power           tasmota,athom,accurate,powermon,not247
-loungefrontlight-power          tasmota,athom,accurate,powermon
-study-power                     beken,jinvooswitchindiv4boardusb,not247,1W_all_off,5W_all_on
+washingmachine-power            tasmota,switch,medion,accurate,powermon,repairedlimitresistor
+measure-power                   tasmota,switch,oldkogan,accurate,powermon,usbport,not247
+#chromecast-lounge-power         tasmota,switch,newkogan,powermon,currentoffset,frequent-dies-need-power-supply-work
+panasonic-power                 tasmota,switch,newkogan,accurate,powermon
+electricblanket-power           tasmota,switch,athom,accurate,powermon,not247
+loungefrontlight-power          tasmota,switch,athom,accurate,powermon
+study-power                     beken,switch,jinvooswitchindiv4boardusb,not247,1W_all_off,5W_all_on
 
 pantech                         iot
 ecowitt                         iot
@@ -73,6 +71,12 @@ cam-garage                      iot
 cam-rear                        iot
 
 fan-1                           iot,tuya
+study-fluro-1                   iot,tuya
+living-room-light-1             iot,tuya
+side-kitchen-light              iot,tuya
+
+loungeroomlifx                  iot,lifx
+bedroomlifx                     iot,lifx
 
 switch                          network
 gateway                         network,openwrt

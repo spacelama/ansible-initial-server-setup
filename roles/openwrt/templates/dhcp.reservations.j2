@@ -60,6 +60,12 @@ config host
 	option ip '192.168.1.32'
 
 config host
+	option mac '26:48:A7:DD:10:FA FE:C1:C1:C5:30:E7'
+	option name 'watch'
+	option dns '1'
+	option ip '192.168.1.31'
+
+config host
 	option ip '192.168.1.34'
 	option mac 'd0:13:fd:63:dc:3c'
 	option name 'lg'
@@ -113,6 +119,7 @@ config host
 	option name 'pi'
 	option dns '1'
 
+{# Will become the kitchen light #}
 config host
 	option ip '192.168.1.52'
 	option mac 'd0:73:d5:30:f2:94'
@@ -423,6 +430,12 @@ config host
 	option ip '192.168.1.74'
 
 config host
+	option mac '34:ab:95:a7:88:3e'
+	option name 'ad-hoc-power'
+	option dns '1'
+	option ip '192.168.1.86'
+
+config host
 	option ip '192.168.1.79'
 	option mac 'cc:50:e3:68:4d:fc'
 	option name 'angela-power'
@@ -503,6 +516,27 @@ config host
 	option ip '192.168.4.61'
 
 config host
+{#	side kitchen light #}
+	option mac 'CC:8C:BF:99:9A:21'
+	option name 'side-kitchen-light'
+	option dns '1'
+	option ip '192.168.4.62'
+
+config host
+{#	under fishtank living room light #}
+	option mac 'CC:8C:BF:99:94:1D'
+	option name 'living-room-light-1'
+	option dns '1'
+	option ip '192.168.4.63'
+
+config host
+{#	coffee grinder #}
+	option mac '1C:90:FF:1A:78:2B'
+	option name 'coffee-grinder'
+	option dns '1'
+	option ip '192.168.4.64'
+
+config host
 	option mac '56:0f:c8:9f:b2:a4'
 	option name 'AngelaHssiPhone'
 	option dns '1'
@@ -513,24 +547,6 @@ config host
 	option name 'DESKTOP-JASCATN'
 	option dns '1'
 	option ip '192.168.7.206'
-
-config host
-	option mac '34:48:ed:4f:bb:64'
-	option name 'B028609'
-	option dns '1'
-	option ip '192.168.7.205'
-
-config host
-	option mac '04:33:c2:dc:f5:64'
-	option name 'B028609-wifi'
-	option dns '1'
-	option ip '192.168.4.205'
-
-config host
-	option mac '74:d8:3e:d5:de:14'
-	option name 'B028757'
-	option dns '1'
-	option ip '192.168.4.187'
 
 config host
 	option mac '0e:0a:a4:5e:6c:7b'
