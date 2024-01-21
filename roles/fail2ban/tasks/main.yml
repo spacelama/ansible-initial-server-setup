@@ -10,7 +10,7 @@
 # FIXME: should probably look at crowdsec
 - name: Install fail2ban
   apt:
-    name: ['fail2ban']
+    name: ['fail2ban', 'iptables']
     state: present
     update_cache: yes
     cache_valid_time: 3600
