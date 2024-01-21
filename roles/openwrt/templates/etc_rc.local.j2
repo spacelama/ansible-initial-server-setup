@@ -16,6 +16,9 @@
         # only needed when lists aren't offloaded to NFS via symlinks
         /root/bin/log-daily-config
     fi
+{% if inventory_hostname == 'ap1' %}
+    wifi up
+{% endif %}
 ) > /tmp/boot.rc.local.log 2>&1 &
 
 exit 0
