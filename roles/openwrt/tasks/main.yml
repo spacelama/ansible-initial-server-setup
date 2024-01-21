@@ -157,6 +157,7 @@
   command: get_public_ip_address
   register: public_ip_address
   delegate_to: localhost
+  run_once: true
   check_mode: no
   changed_when: false
 
