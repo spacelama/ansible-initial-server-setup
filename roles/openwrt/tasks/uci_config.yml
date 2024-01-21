@@ -250,6 +250,34 @@
   when: (type == 'ap') and (htmode_5ghz is defined)
   notify: uci commit
 
+- name: set wifinet8
+  uci:
+    command: set
+    key: wireless.wifinet8
+    value: "{{ default_wifi_iface_settings | combine( {
+      'device': 'radio1',
+      'ssid': lookup('file', 'ap.wpa2.wifinet8.ssid'),
+      'key': lookup('file', 'ap.wpa2.wifinet8.psk'),
+      'network': 'LAN1',
+      'ifname': 'wlan5-3',
+    } ) }}"
+  when: (type == 'ap') and (htmode_5ghz is defined)
+  notify: uci commit
+
+- name: set wifinet9
+  uci:
+    command: set
+    key: wireless.wifinet9
+    value: "{{ default_wifi_iface_settings | combine( {
+      'device': 'radio0',
+      'ssid': lookup('file', 'ap.wpa2.wifinet9.ssid'),
+      'key': lookup('file', 'ap.wpa2.wifinet9.psk'),
+      'network': 'LAN1',
+      'ifname': 'wlan24-3',
+    } ) }}"
+  when: (type == 'ap') and (htmode_24ghz is defined)
+  notify: uci commit
+
 - name: add wifinet11
   uci:
     command: add
