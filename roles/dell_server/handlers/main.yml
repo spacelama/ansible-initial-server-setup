@@ -1,9 +1,13 @@
 ---
+# only enable when a flag is set, because when we have no add-in cards
+# on r730xd, fan speed is very good by default.  For now this is
+# handled by our sleep throttle script, so we don't want to override
+# that even temporarily after this play has run
 - name: enable and restart fan-speed-control
   # systemd rather than service because we're explicitly installing our own systemd units
   systemd:
     name: fan-speed-control
-    enabled: yes
-    state: restarted
+    enabled: "{{ fan_speed_control_is_enabled | default('yes') }}"
+    state: "{{ 'restarted' if (fan_speed_control_is_enabled | default('yes')) else omit }}"
     daemon_reload: yes  # pick up any new unit files
   become: true

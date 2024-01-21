@@ -23,8 +23,8 @@
   # systemd rather than service because we're explicitly installing our own systemd units
   systemd:
     name: fan-speed-control
-    enabled: yes
-    state: started
+    enabled: "{{ fan_speed_control_is_enabled | default('yes') }}"
+    state: "{{ 'started' if (fan_speed_control_is_enabled | default('yes')) else omit }}"
   become: true
   ignore_errors: true  # fails when not in systemd, or still in the
                        # installation environment, etc
