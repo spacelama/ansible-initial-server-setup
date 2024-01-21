@@ -127,8 +127,8 @@
     [nutups2_powershield-commander.pve-backup*]
     user nut
     group nut
-    # powershield commander 1000: 400 watts at 63% load on powershield commander 1000: 400/63
-    env.power_emulated_multiplier 6.349
+    # powershield commander 1000: 341 watts at 63% load on powershield commander 1000: 341/63
+    env.power_emulated_multiplier 5.426
     # warning and critical from the values shown by nutups2_powershield-commander_voltage config, but upper limits scaled up a bit above the charging voltage, which is higher than full (uncharging) level
     # env.battery.warning
     env.battery_critical 20.8:27.5
