@@ -77,7 +77,4 @@
     name: chrony
     state: restarted
   become: true
-  ignore_errors: true # very first step in playbook is to install
-                      # files and run those handlers - chrony might
-                      # not be installed yet though
-  when: host_is_container is not defined
+  when: "'chrony' in ansible_facts.packages | default([])"
