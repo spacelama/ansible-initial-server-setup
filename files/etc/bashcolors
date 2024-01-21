@@ -8,6 +8,8 @@ tconnors fs bright yellow bright blue
 root fs dark red bright blue
 tconnors iot bright yellow bright yellow
 root iot dark red bright yellow
+tconnors met bright yellow bright green
+root met dark red bright green
 tconnors pi bright yellow bright cyan
 root pi dark red bright cyan
 tconnors syslog bright yellow bright red

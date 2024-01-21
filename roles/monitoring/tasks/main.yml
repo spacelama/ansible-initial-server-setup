@@ -150,6 +150,13 @@
   when: host_is_container is defined or host_is_virtual is defined or host_is_pi is defined
   notify: restart munin-node
 
+- name: Install node monitoring packages
+  apt:
+    name: ['munin-node']
+    autoremove: no
+    state: present
+  become: true
+
 - name: install custom numa,zfs,chrony etc munin monitoring plugins from munin-contrib, that take arguments, all hosts
   copy:
     src: "monitoring/munin/{{ item }}"
@@ -398,9 +405,9 @@
   # we need munin-async because some plugins just take a very long
   # time to answer when something is down, so collecting them
   # asynchronously helps.  But that currently has its own problems
-- name: Install monitoring packages
+- name: Install monitoring acceleration packages
   apt:
-    name: ['munin-node', 'munin-async']
+    name: ['munin-async']
     autoremove: no
     state: present
   become: true
