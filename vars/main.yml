@@ -44,6 +44,8 @@
     pve1:
       content: |2
         [powershield-centurion]
+        # FIXME: nut 2.8.1 includes many likely fixes for nutdrv battery calculations
+
         #https://blog.warbel.net/index.php/2017/09/15/configuring-powershield-ups-on-linux-and-integrating-into-zabbix/
         # https://alioth-lists.debian.net/pipermail/nut-upsuser/2011-March/006699.html
         #driver=nutdrv_qx
@@ -175,7 +177,7 @@
     backuppc:
       name: "BackupPC"
       group: 'backuppc'
-      groups: 'backuppc' # FIXME: needs fuse on fs - does this wipe it out if applied there?
+      groups: 'backuppc' # FIXME: also needs fuse on fs
       dir: '/var/lib/backuppc'
       uid: 130
       state: 'present'
