@@ -79,6 +79,8 @@ gateway                         network,openwrt
 archerd7                        network,openwrt,wifi
 archerc7                        network,openwrt,wifi
 asusrtax53u                     network,openwrt,wifi
+ap1                             network,openwrt,wifi,depends_on_pve3
+ap2                             network,openwrt,wifi,depends_on_pve2
 
 #b1300                           network,openwrt
 #gateway-tmp                     network,openwrt,not247,notyetproduction
