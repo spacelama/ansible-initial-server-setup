@@ -31,6 +31,7 @@ iface eth0 inet static
 
 {% else %}
 iface eth0 inet manual
+{{ eth0_interface_addendum | default('') }}
 
 {#
   dell poweredge machines with many network interfaces
