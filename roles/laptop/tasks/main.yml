@@ -40,9 +40,17 @@
 
 - name: Install battery, wifi tools
   apt:
-    name: ['ibam', 'wmbattery', 'powerstat', 'battery-stats', 'network-manager', 'iwd', 'rfkill', 'wireless-tools', 'haveged', 'brightnessctl', 'brightness-udev', 'ddcci-dkms', 'light', 'systemd-resolved'] # some machines, in particular fermi, were not answering to ssh until well after bootup, if not interacted with manually.  That turned out to be crng: haveged: https://unix.stackexchange.com/questions/461879/services-wont-start-after-booting-until-after-logging-in-through-the-virtual-co, perhaps could use rng-tools5: https://unix.stackexchange.com/questions/442698/when-i-log-in-it-hangs-until-crng-init-done/442744#442744
+    name: ['ibam', 'wmbattery', 'powerstat', 'battery-stats', 'network-manager', 'iwd', 'rfkill', 'wireless-tools', 'haveged', 'brightnessctl', 'brightness-udev', 'light', 'systemd-resolved'] # some machines, in particular fermi, were not answering to ssh until well after bootup, if not interacted with manually.  That turned out to be crng: haveged: https://unix.stackexchange.com/questions/461879/services-wont-start-after-booting-until-after-logging-in-through-the-virtual-co, perhaps could use rng-tools5: https://unix.stackexchange.com/questions/442698/when-i-log-in-it-hangs-until-crng-init-done/442744#442744
     autoremove: no
     state: present
+  become: true
+
+- name: install laptop packages that were failing at one point
+  apt:
+    name: ['ddcci-dkms']
+    autoremove: no
+    state: present
+  ignore_errors: true
   become: true
 
 - name: configure battery-stats
@@ -91,6 +99,7 @@
     content: "# This file describes the network interfaces available on your system\n# and how to activate them. For more information, see interfaces(5).\n\nsource /etc/network/interfaces.d/*\n\n# The loopback network interface\nauto lo\niface lo inet loopback\n"
   become: true
 
+  #FIXME: many devices don't have eth0 anymore
 - name: set /etc/network/interfaces.d/eth0.conf if has a wired interface
   copy:
     dest: /etc/network/interfaces.d/eth0.conf
