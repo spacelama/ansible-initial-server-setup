@@ -5,4 +5,6 @@
     - vars/main.yml
 
   roles:
+    - role: common_handlers
+      become: true # the whole role, including handlers, will become root
     - role: smtp

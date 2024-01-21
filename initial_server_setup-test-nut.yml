@@ -13,6 +13,8 @@
   vars_files:
     - vars/main.yml
   roles:
+    - role: common_handlers
+      become: true # the whole role, including handlers, will become root
     - role: nutserver
       when: (host_is_nut_server is defined) or (host_is_nut_master is defined)
     - role: nutmaster
