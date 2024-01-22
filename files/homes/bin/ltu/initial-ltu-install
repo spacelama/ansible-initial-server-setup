@@ -1,6 +1,6 @@
 #!/bin/bash
 
-apt install x11-utils xdm ssh man vim git xterm procmail curl keychain mgitstatus rsync telnet vim-pathogen plocate bash-completion net-tools lsof ncal x11-apps x11-xserver-utils lynx bind9-dnsutils systemd-resolved tcpdump snapd mesa-utils dlocate apt-file iperf3 snapd dstat
+apt install x11-utils xdm ssh man vim git xterm procmail curl keychain mgitstatus rsync telnet vim-pathogen plocate bash-completion net-tools lsof ncal x11-apps x11-xserver-utils lynx bind9-dnsutils systemd-resolved tcpdump snapd mesa-utils dlocate apt-file iperf3 snapd dstat firefox-esr
 
 apt install -t bookworm-backports emacs emacs-gtk
 
