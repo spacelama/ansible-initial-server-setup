@@ -8,7 +8,6 @@ function bashrc_last() {
     #trap: need to do this before writetohistory, because it could fail
     trap 'code=$? ; exitcleanly' 0
     trap '          exitcleanly' HUP
-    writetohistory "@$HOSTNAME OPEN"
     #    trap 'writetohistory --full' USR2
 
     #    if [ "$versiona" -ge 4 ] ; then  # version 4 since version 3 in rhel5 causes race condition:
@@ -21,6 +20,7 @@ function bashrc_last() {
 
     setup_environment
     setup_precmd_hook
+    writetohistory "@$HOSTNAME OPEN"
     finalise_login
 }
 
