@@ -218,6 +218,9 @@
       - name: .gnu-emacs
       - name: .gnu-emacs-custom
       - name: .xemacs/
+      - name: .toprc
+      - name: .toprc-cpu
+      - name: .toprc-mem
     # templates done by matching on .j2
       - name: .nanorc
         source: homes/.nanorc.j2
