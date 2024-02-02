@@ -21,7 +21,10 @@
                                  # /sys/kernel/mm/ksm/general_profit
                                  # is large and negative on pve2
                                  # (where we're constantly swapping
-                                 # too) and 0 elsewhere:
+                                 # too, and turning this off seems to
+                                 # have *drastically* dropped
+                                 # swapin/swapout rates from ~5 down
+                                 # to 1MB/s) and 0 elsewhere:
                                  # https://docs.kernel.org/next/admin-guide/mm/ksm.html
                                  # https://forum.proxmox.com/threads/ksm-control-daemon-vs-ksmtuned-installation.81262/
     state: absent
@@ -297,8 +300,10 @@
       # zfs's default limits.  Without this we get 10MB/s constant
       # swapping in and out on pve2:
       # https://rather.puzzling.org/munin/pve2/pve2/diskstats_throughput/md127.html
-      options zfs zfs_arc_min=53687091  # 50MB
-      options zfs zfs_arc_max=107374182 # 100MB
+      options zfs zfs_arc_min=53687091
+         # 50MB
+      options zfs zfs_arc_max=107374182
+         # 100MB
   become: true
   notify: "Update initramfs config"
 
