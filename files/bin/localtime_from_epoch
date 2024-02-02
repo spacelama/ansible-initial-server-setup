@@ -1,0 +1,29 @@
+#!/bin/bash
+# -*- Mode: shell-script -*-
+#template by ~tconnors/bin/newshscript
+#Thu Jun  5 20:19:15 EST 2008
+# $Revision: 1.2 $ $Date: 2012/02/10 02:24:06 $
+# $Id: secondsepoch-to-localtime,v 1.2 2012/02/10 02:24:06 tconnors Exp $
+# $Header: /home/tconnors/cvsroot/bin/secondsepoch-to-localtime,v 1.2 2012/02/10 02:24:06 tconnors Exp $
+# $RCSfile: secondsepoch-to-localtime,v $
+
+#yes, would you believe it!?
+#converts seconds epoch to localtime. What else can date -d do?
+
+
+#can take either multiple epochs, or an epoch and a date +%... format to print
+
+function d() {
+  date -d "1970-01-01 $sec sec utc" "$@"
+}
+
+if [[ "$2" == [0-9]* ]] ; then
+  for sec in "$@" ; do
+    d
+  done
+else
+  sec="$1"
+  shift
+  d "$@"
+fi
+
