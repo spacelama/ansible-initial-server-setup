@@ -32,7 +32,18 @@ function setpath() {
 #                    new_env="$new_env:$p"
 #                fi
 # alternatively, test that the provided path is both a directory and subject to timeout
-                if timeout -k 1 0.4 [ -d "$p" ] ; then
+                case "$HOSTNAME" in
+                    pi|DBJXCT3) # very slow machines
+                        pathtimeout=2
+                        ;;
+                    *)
+                        pathtimeout=1 # 0.4 - reduce temporarily
+                                      # perhaps when we have a known
+                                      # fault, but otherwise the
+                                      # false-positives are disruptive
+                        ;;
+                esac
+                if timeout -k 1 $pathtimeout [ -d "$p" ] ; then
 #                    echo Found good p="$p" 1>&2
                     new_env="$new_env:$p"
                 fi
