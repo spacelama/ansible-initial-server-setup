@@ -35,6 +35,7 @@
     - { mount: "/home/tconnors/thesis",      name: "fs",        mds_namespace: "cephfs-hdd",  options: "nodev,nosuid,rw,strictatime,async", mons: "192.168.1.6,192.168.1.7,192.168.1.8", remote_path: "/mounts/fs/home.tconnors.thesis" }
     - { mount: "/home/tconnors/public_html", name: "webserver", mds_namespace: "cephfs-slow", options: "nodev,nosuid,rw,strictatime,async", mons: "192.168.1.6,192.168.1.7,192.168.1.8", remote_path: "/mounts/webserver/home.tconnors/public_html" }
     - { mount: "/home/tconnors/movies",      name: "media",     mds_namespace: "cephfs-hdd",  options: "nodev,nosuid,rw,strictatime,async", mons: "192.168.1.6,192.168.1.7,192.168.1.8", remote_path: "/mounts/media/movies" }
+    - { mount: "/home/angela/media",         name: "media",     mds_namespace: "cephfs-hdd",  options: "nodev,nosuid,rw,strictatime,async", mons: "192.168.1.6,192.168.1.7,192.168.1.8", remote_path: "/mounts/media/angela" }
 
   pve_users:
     - "{{ lookup('file', 'main.pve_users.passwd') }}"
