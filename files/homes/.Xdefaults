@@ -119,6 +119,8 @@ XTerm*Scrollbar.foreground:	white
 XTerm*borderColor:		white
 XTerm*multiScroll: 		true
 XTerm*reverseWrap: 		true
+! Assume window titles are UTF-8 encoded
+XTerm.VT100.utf8Title: true
 
 ! This resource specifies whether or not to ignore the 'alternate screen'
 ! of applications such as vi.  When it is on, these applications will restore
