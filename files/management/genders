@@ -74,9 +74,9 @@ cam-rear                        iot
 fan-1                           iot,tuya
 study-fluro-1                   iot,tuya
 living-room-light-1             iot,tuya
-side-kitchen-light              iot,tuya
+side-kitchen-light              iot,tuya,not247
 
-loungeroomlifx                  iot,lifx
+loungeroomlifx                  iot,lifx,not247
 bedroomlifx                     iot,lifx
 
 switch                          network
