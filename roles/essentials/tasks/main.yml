@@ -84,11 +84,19 @@
 
 - name: Install essential packages (all)
   apt:
-    name: ['rsyslog', 'needrestart', 'rsync', 'sysstat', 'bsd-mailx', 'procmail', 'colordiff', 'net-tools', 'plocate', 'ccze'] # procmail for lockfile, ccze for cron.daily get_conf
+    name: ['rsyslog', 'needrestart', 'rsync', 'sysstat', 'bsd-mailx', 'procmail', 'colordiff', 'net-tools', 'ccze'] # procmail for lockfile, ccze for cron.daily get_conf
     autoremove: no
     state: present
   become: true
-  ignore_errors: true # plocate isn't available on buster, which still makes up a couple of our VMs
+
+- name: Install essential packages that might not be available (all)
+  apt:
+    name: ['plocate']
+    autoremove: no
+    state: present
+  become: true
+  ignore_errors: true # plocate isn't available on buster, which still
+                      # makes up a couple of our VMs
 
 - name: Configure locales
   block:
