@@ -1,4 +1,7 @@
 ---
+  mgmt_hosts: "{{ query('inventory_hostnames', 'all') | map('extract', hostvars) | selectattr('host_is_mgmt', 'true') | map(attribute='inventory_hostname') }}"
+  # disabled for the time being so we don't need to pull in an up-to-date version of the community.general collection via requirements.yml
+  # mgmt_host_ips: "{{ query('community.general.dig', *mgmt_hosts, fail_on_error=true) }}"
   my_public_key: ~/.ssh/id_rsa.pub
   new_public_key: ~/.ssh/id_rsa_github.pub
   fs_public_key: ~/.ssh/fs_id_rsa.pub

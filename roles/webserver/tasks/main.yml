@@ -1,13 +1,29 @@
 ---
+# an alternative to the following while the version of
+# community.general.dig in debian bookworm doesn't take a list as
+# input and output: vars/main.yml:
+#`mgmt_host_ips: "{{ query('community.general.dig', *mgmt_hosts, fail_on_error=true) }}"`
+- name: set mgmt_host_ips fact
+  set_fact:
+    mgmt_host_ips: "{{ (mgmt_host_ips | default([])) + [ lookup('community.general.dig', item, fail_on_error=true) ] }}"
+  with_items: "{{ mgmt_hosts }}"
+
 - name: install apache and letsencrypt certbot
   apt:
-    name: [ 'apache2', 'javascript-common', 'python3-certbot-apache' ]
+    name: [ 'apache2', 'javascript-common', 'python3-certbot-apache', 'apachetop', 'awstats' ]
 
 - name: localalize error pages
   lineinfile:
     dest: /etc/apache2/conf-enabled/localized-error-pages.conf
     insertafter: '^#ErrorDocument 404'
     line: 'ErrorDocument 404 /404.html'
+  become: true
+  notify: restart apache2
+
+- name: set up awstats apache conf
+  template:
+    src: awstats.conf.j2
+    dest: /etc/apache2/conf-enabled/awstats.conf
   become: true
   notify: restart apache2
 
@@ -45,6 +61,13 @@
   become: true
 #  notify: restart apache2
 
+- name: disable apache configurations
+  file:
+    path: /etc/apache2/conf-enabled/serve-cgi-bin.conf
+    state: absent
+  become: true
+  notify: restart apache2
+
 - name: enable apache modules
   apache2_module:
     name: "{{ item.name | default( item ) }}"
@@ -59,6 +82,7 @@
     - rewrite
     - ssl
     - userdir
+    - cgid
   become: true
   notify: restart apache2
 #FIXME: original mods-enabled:

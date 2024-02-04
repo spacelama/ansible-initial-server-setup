@@ -1,0 +1,64 @@
+# sourced from  /usr/share/doc/awstats/examples/apache.conf, ansible munged
+
+# This provides worldwide access to everything below the directory
+# Security concerns:
+#  * Raw log processing data is accessible too for everyone
+#  * The directory is by default writable by the httpd daemon, so if
+#    any PHP, CGI or other script can be tricked into copying or
+#    symlinking stuff here, you have a looking glass into your server,
+#    and if stuff can be uploaded to here, you have a public warez site!
+<Directory /var/lib/awstats>
+	Options None
+	AllowOverride None
+{% for item in mgmt_host_ips %}
+	Require ip {{ item }}
+{% endfor %}
+	Require ip 127.0.0.1
+	Require all denied
+</Directory>
+
+# This provides worldwide access to everything below the directory
+# Security concerns: none known
+<Directory /usr/share/awstats/icon>
+	Options None
+	AllowOverride None
+{% for item in mgmt_host_ips %}
+	Require ip {{ item }}
+{% endfor %}
+	Require ip 127.0.0.1
+	Require all denied
+</Directory>
+
+# This provides worldwide access to everything below the directory
+# Security concerns: none known
+<Directory /usr/share/java/awstats>
+	Options FollowSymLinks
+	AllowOverride None
+{% for item in mgmt_host_ips %}
+	Require ip {{ item }}
+{% endfor %}
+	Require ip 127.0.0.1
+	Require all denied
+</Directory>
+
+# This provides worldwide access to everything in the directory
+# Security concerns: none known
+Alias /awstats-icon/ /usr/share/awstats/icon/
+
+# This provides worldwide access to everything in the directory
+# Security concerns: none known
+Alias /awstatsclasses/ /usr/share/java/awstats/
+
+# This (hopefully) enables _all_ CGI scripts in the default directory
+# Security concerns: Are you sure _all_ CGI scripts are safe?
+ScriptAlias /cgi-bin/ /usr/lib/cgi-bin/
+<Directory "/usr/lib/cgi-bin">
+	AllowOverride None
+	Options +ExecCGI -MultiViews +SymLinksIfOwnerMatch
+	AllowOverride None
+{% for item in mgmt_host_ips %}
+	Require ip {{ item }}
+{% endfor %}
+	Require ip 127.0.0.1
+	Require all denied
+</Directory>

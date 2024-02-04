@@ -10,3 +10,15 @@
       become: true # the whole role, including handlers, will become root
     - role: webserver
       when: host_is_ext_web_server is defined
+  # tasks:
+  #   - debug:
+  #       msg: "item = {{ mgmt_hosts | join(',') }}"
+
+  #   - debug:
+  #       msg: "item = {{ item }}"
+  #     with_items: "{{ mgmt_hosts }}"
+
+  #   - debug:
+  #       msg: "item = {{ item }}"
+  #     loop:
+  #       "{{ mgmt_host_ips }}"

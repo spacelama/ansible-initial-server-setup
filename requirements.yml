@@ -1,0 +1,3 @@
+# we wanted a newer version of community.general.dig for mgmt_host_ips, so it would take a list, but that brings in a rather large collection that we otherwise don't need, so let's just operate on the list manually for now
+#collections:
+#- name: community.general
