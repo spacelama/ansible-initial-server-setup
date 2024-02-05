@@ -42,7 +42,7 @@
       when: host_is_mgmt is defined
     - user
     - apt_repos
-    - essentials
+    - essentials # essentials is also responsible for fixup_user_conf_files
     - monitoring
     - role: spectre_mitigations_disabled
       when: host_is_container is not defined and host_is_pi is not defined

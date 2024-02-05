@@ -221,18 +221,30 @@
       - name: .emacs
       - name: .gnu-emacs
       - name: .gnu-emacs-custom
-      - name: .xemacs/
       - name: .toprc
       - name: .toprc-cpu
       - name: .toprc-mem
+      - name: .xemacs/
+      - name: bin/
+      - name: bin/Linux-{{ arch | default ('x86_64') }}/
+        source: homes/bin.Linux-{{ arch | default ('x86_64') }}/
     # templates done by matching on .j2
       - name: .nanorc
         source: homes/.nanorc.j2
+  # files that were in homes/bin/ and homes/bin.Linux-$arch were previously
+  # dumped into /usr/local/bin.  We now dump them into the users bin
+  # dir, so we should delete the redundant copies we put in
+  # /usr/local/bin
+  usr_local_bin_files_to_remove:
+    - "{{ lookup('fileglob', \"homes/bin/*\", wantlist=True) }}"
+    - "{{ lookup('fileglob', \"homes/bin.Linux-{{ arch | default ('x86_64') }}/*\", wantlist=True) }}"
+
+  # global /etc/bashrc files
   bashrc_files:
     - "{{ lookup('fileglob', 'etc_bashrc.d/*.sh', wantlist=True) }}"
+  # /usr/local/bin files
   bin_files:
     - "{{ lookup('fileglob', 'bin/*', wantlist=True) }}"
-    - "{{ lookup('fileglob', \"bin.Linux-{{ arch | default ('x86_64') }}/*\", wantlist=True) }}"
 
   install_dirs: # these directories would normally be created by the
                 # packages we later install, but we want to be able to
@@ -323,4 +335,5 @@
 
   remove_files:
     - { files_not: "{{ bashrc_files | flatten | map('basename') }}", dir: /etc/bash.bashrc.d/ } # FIXME: should carefully consider those containers that actually provided files in that directory, but I think the main concern is actually /etc/skel/.bashrc.d/ and by extension ~/.bashrc.d/  We're not yet overriding that, so should be fine for now...
+    - { files_not: "{{ usr_local_bin_files_to_remove | flatten | map('basename') }}", dir: /usr/local/bin/ }
 #    - { files_not: "{{ bin_files | flatten | map('basename') }}", dir: /usr/local/bin/ } # Can't do this - lots of files in /usr/local/bin not controlled from here

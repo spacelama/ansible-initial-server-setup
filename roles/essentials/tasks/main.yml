@@ -460,3 +460,4 @@
 # FIXME: /etc/resolv.conf search rather.puzzling.org
 
 # FIXME: distribute ssh_known_hosts
+# https://stackoverflow.com/questions/59832034/how-to-include-all-host-keys-from-all-hosts-in-group
