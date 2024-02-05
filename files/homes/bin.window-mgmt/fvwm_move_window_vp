@@ -1,0 +1,72 @@
+#!/usr/bin/perl -w
+# -*- Mode: perl -*-
+#template by ~tconnors/bin/newplscript
+#Tue Oct  9 08:48:28 EST 2007
+
+use strict;
+use warnings;
+
+my $debug=0;
+my $steps=3;
+
+
+my ($HORSIZE, $VERTSIZE);
+
+my $SIZE=`xdpyinfo | grep dimensions:`;
+chomp $SIZE;
+$HORSIZE=$VERTSIZE=$SIZE;
+$HORSIZE=~s/.*: *([0-9]*)x([0-9]*) .*/$1/;
+$VERTSIZE=~s/.*: *([0-9]*)x([0-9]*) .*/$2/;
+
+sub AnimatedScroll {
+  print "Raise\n";
+  print "Stick\n";     #may unstick a window that was already sticky.  Not tried this, but that sounds like a feature -- we can use this keybinding when we *don't* want to move a sticky window
+  my ($totx,$toty)=(0,0);
+  foreach my $angle (0..$steps-1) {
+    $angle*=(90/$steps);
+    my $mag=sin($angle*3.14159265358979/180)**2;
+    my $magx=int($mag*$_[0]);  #don't round, otherwise we could
+                               #overshoot, which will cause problems
+                               #at the end of a page when we back back
+                               #a bit
+    my $magy=int($mag*$_[1]);
+    $magx=$magx-$totx;
+    $magy=$magy-$toty;
+    $totx+=$magx;
+    $toty+=$magy;
+    print STDERR "mag: $magx, $magy\n" if $debug;
+    print "Scroll ${magx}p ${magy}p\n" if $magx != 0 || $magy != 0;
+    #no point sleeping here, because the piperead blocks until this entire script is done
+  }
+  my $magx=$_[0]-$totx;  #one final step to get the size right
+  my $magy=$_[1]-$toty;
+  print "Scroll ${magx}p ${magy}p\n";
+  print "Stick\n";
+}
+
+sub Swap {
+  print "Raise\n";
+  print "Stick\n";
+  print "GotoDesk 1 0 1\n";
+  print "Stick\n";
+}
+
+my $usage = "supply UP|DOWN|LEFT|RIGHT|SWAP";
+
+die $usage if $#ARGV != 0;
+
+my $dir=uc($ARGV[0]);
+
+if ($dir eq "UP") {
+  AnimatedScroll(0, -$VERTSIZE);
+} elsif ($dir eq "DOWN") {
+  AnimatedScroll(0, $VERTSIZE);
+} elsif ($dir eq "LEFT") {
+  AnimatedScroll(-$HORSIZE, 0);
+} elsif ($dir eq "RIGHT") {
+  AnimatedScroll($HORSIZE, 0);
+} elsif ($dir eq "SWAP") {
+  Swap;
+} else {
+  die $usage;
+}

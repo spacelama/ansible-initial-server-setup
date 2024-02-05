@@ -28,6 +28,7 @@ xauth generate $DISPLAY . trusted
 #  . ~/.bash_profile # try calculate it again - might have a race condition on some startups
 #fi
 
+xcompmgr &   # 20240127 needed for xterm scrollback buffer not to be corrupted.  1014625: xterm: screen corruption of scrollback buffer; similar to https://bugs.freedesktop.org/show_bug.cgi?id=110214 but actually not fixed by that.
 xrandr --current
 for i in HORSIZE VERTSIZE HOR2SIZE VERT2SIZE ; do
     echo $i=`eval echo '$'$i`
@@ -83,7 +84,7 @@ function setupdesks() {
     done
     ls -lA --color /var/tmp
     sleep 1
-    FvwmCommand 'GotoDesk 0 1' 
+    FvwmCommand 'GotoDesk 0 1'
 
     ( sleep 5 ; FvwmCommand 'GotoDesk 0 0' ) &
     echo "setupdesks return: $( date )"
@@ -122,7 +123,11 @@ fi
 synclient -l > $HOME/.touchpadrc-orig
 setup-touchpad
 
-repeat=0
+repeat=0  # FIXME: turns out you've been able to address individual
+          # monitors all along.  xterm -geometry 80x24+100+100@1
+          # but nevertheless, that syntax changes in fvwm3 to:
+          # xterm -geometry 80x24+100+100@DisplayPort-1
+          # https://github.com/fvwmorg/fvwm3/discussions/878
 
 #xhost +localhost
 #xhost -
@@ -148,11 +153,11 @@ if [ $HORSIZE -ge 1024 ] ; then
     xterm -ls -geometry +0+0   &
     #    xterm -ls -geometry +500+0 &
     if [ $OS = SunOS ] ; then
-        (waitfordesk2 ; exec xterm -geometry $((87*$HORSIZE/1280))x$((62*$VERTSIZE/1024))+0+$(($VERTSIZE*2)) -fn 'fixed' -xrm 'XTerm*renderFont:false' -T "top cpu@$SHORTHOST" -e bash -l -c top ) & 
-        (waitfordesk2 ; exec xterm -geometry $((87*$HORSIZE/1280))x$((62*$VERTSIZE/1024))+$(($HORSIZE/2))+$(($VERTSIZE*2)) -fn 'fixed' -xrm 'XTerm*renderFont:false' -T "top memory@$SHORTHOST" -e bash -l -c top ) & 
+        (waitfordesk2 ; exec xterm -geometry $((87*$HORSIZE/1280))x$((62*$VERTSIZE/1024))+0+$(($VERTSIZE*2)) -fn 'fixed' -xrm 'XTerm*renderFont:false' -T "top cpu@$SHORTHOST" -e bash -l -c top ) &
+        (waitfordesk2 ; exec xterm -geometry $((87*$HORSIZE/1280))x$((62*$VERTSIZE/1024))+$(($HORSIZE/2))+$(($VERTSIZE*2)) -fn 'fixed' -xrm 'XTerm*renderFont:false' -T "top memory@$SHORTHOST" -e bash -l -c top ) &
     else
-        (waitfordesk2 ; exec xterm -geometry $((101*$HORSIZE/1280))x$((67*$VERTSIZE/1024))+0+$(($VERT2SIZE*2)) -fn 'fixed' -xrm 'XTerm*renderFont:false' -T "top (cpu)" -e top ) & 
-        (waitfordesk2 ; exec xterm -geometry $((101*$HORSIZE/1280))x$((67*$VERTSIZE/1024))+$(($HORSIZE/2))+$(($VERT2SIZE*2)) -fn 'fixed' -xrm 'XTerm*renderFont:false' -T "top (memory)" -e top ) & 
+        (waitfordesk2 ; exec xterm -geometry $((101*$HORSIZE/1280))x$((67*$VERTSIZE/1024))+0+$(($VERT2SIZE*2)) -fn 'fixed' -xrm 'XTerm*renderFont:false' -T "top (cpu)" -e top ) &
+        (waitfordesk2 ; exec xterm -geometry $((101*$HORSIZE/1280))x$((67*$VERTSIZE/1024))+$(($HORSIZE/2))+$(($VERT2SIZE*2)) -fn 'fixed' -xrm 'XTerm*renderFont:false' -T "top (memory)" -e top ) &
     fi
 fi
 
@@ -184,10 +189,10 @@ case $LONGHOST-$SHORTDISPHOST in
                     procmeter3 -geometry +$(($HORSIZE-104))+$(($VERTSIZE-529)) &
                 fi
             elif [ $SHORTHOST = dirac ] ; then
-                repeat="0 $HORSIZE"
+                repeat="0 $HOR2SIZE"
 
                 for i in $repeat ; do
-                    procmeter3 -geometry +$(($HOR0SIZE-104+$i))+$(($VERTSIZE-650)) &
+                    procmeter3 -geometry +$(($HORSIZE-104+$i))+$(($VERTSIZE-650)) &
                 done
                 #                hotkeys -Z
                 #                ( osdsh ; sleep 5 ; osdctl -S ~/.osdsh ) &
@@ -196,18 +201,23 @@ case $LONGHOST-$SHORTDISPHOST in
                 #                xrandr --fb 3360x1050 --output LVDS1 --scale 1x1 --output VGA1 --pos 0x0 --panning 3360x1050+0+0/3360x1050+0+0/0/0/0/0 # a cute little hack that after xrandr is initially set up previously to have 2 side by side monitors, and fvwm has initialised itself, we then set up a panning window for the right (primary) screen, and the left screen is just a static version of the left screen
                 #                setupx2x --usebarrier --right &
 
-                barrier & # 20230627 - find proper method to start using tray and default config 20230801 disabled since no longer have work laptop
+                #                barrier & # 20230627 - find proper method to start using tray and default config 20230801 disabled since no longer have work laptop
+                # following commandline taken from an invocation from within barrier
+                /usr/bin/barriers -f --debug INFO --name dirac -c ~/.barrier.conf --address :24800 &
                 # Barrier will be replaced by InputLeap when it hits
                 # 3.0.  In the meantime, keep using 2.4.0:
                 # https://github.com/input-leap/input-leap/issues/1414
                 # https://github.com/input-leap/input-leap
+                # https://github.com/debauchee/barrier/issues/1989
 
                 monitorCamera &
+
+                sudo env bash -l -i -c addkeychain   # needed for get_conf_info daily
 
             elif [ $SHORTHOST = gamow ] ; then
                 #                repeat="0 1920"
                 repeat="0 $HORSIZE"
-                
+
                 for i in $repeat ; do
                     procmeter3 -geometry +$(($HORSIZE-104+$i))+$(($VERTSIZE-650)) &
                 done
@@ -264,12 +274,12 @@ for i in $repeat ; do
 done
 
 #wmcliphist &
-( 
+(
     if false && type -p oneko > /dev/null ; then
         oneko -name leadcat -tofocus -time 65000 &
         sleep 5
         oneko -toname leadcat -position +20+35 -bg orange -fg brown -tora &
-    fi 
+    fi
 ) &
 
 #if [[ "$DISPLAY" == :0* ]] ; then
@@ -313,9 +323,9 @@ fi
 
 mountremote &
 
-case $system in 
+case $system in
     SWIN)    #all .swin.edu.au - unfortunately, some are named inconsistenty - some hostname give .ssi.swin, others don't
-        #        xset dpms 3600 0 0 
+        #        xset dpms 3600 0 0
         xset b 100 600 50
         #        esd -nobeeps -tcp -public &
         #        esd -nobeeps &

@@ -1,0 +1,22 @@
+#!/bin/bash
+# -*- Mode: shell-script -*-
+#template by ~tconnors/bin/newshscript
+#Wed Sep 17 11:45:52 EST 2008
+# $Revision: 1.4 $ $Date: 2020/08/30 11:37:15 $
+# $Id: fvwm_focus,v 1.4 2020/08/30 11:37:15 tconnors Exp $
+# $Header: /home/tconnors/cvsroot/bin/fvwm_focus,v 1.4 2020/08/30 11:37:15 tconnors Exp $
+# $RCSfile: fvwm_focus,v $
+
+# This program finds a specific program to focus
+
+if [ -n "$*" ] ; then
+    search=\*"$*"\*
+    echo "$search" > /tmp/fvwm.nextfocus
+else
+    search=`cat /tmp/fvwm.nextfocus`
+fi
+
+echo "`date`: $search" >> /tmp/fvwm.focus.log
+
+#FvwmCommand "Next (\"$search\") Function \"flipFlopFocus\""
+FvwmCommand  "WindowList (\"$search\") c c NoGeometry, CurrentAtEnd, IconifiedAtEnd"

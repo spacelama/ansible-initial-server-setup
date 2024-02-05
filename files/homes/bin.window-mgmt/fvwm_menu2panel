@@ -1,0 +1,176 @@
+#!/usr/bin/perl
+# -*- Mode: perl -*-
+#template by ~tconnors/bin/newplscript
+#Sun May 18 04:11:46 EST 2003
+#To add icon paths to fvwm, run this:
+#fvwm_menu2panel .fvwm/menudefs.hook.in | sed -n 's/.*Icon "\([^"]*\)".*/\1/p' | while read a ; do for i in `locate "$a" ` ; do dirname $i ; done ; done | sort | uniq
+
+use strict;
+use warnings;
+use File::Basename;
+use POSIX;
+
+my $HOME = $ENV{"HOME"};
+
+my ($file,@block);
+my ($backcolor, $forecolor) = ("bisque2", "black");
+
+sub min {
+  my ($a,$b)=(@_);
+  if ($a > $b) {
+    return $b;
+  }
+  return $a;
+}
+
+sub max {
+  my ($a,$b)=(@_);
+  if ($a < $b) {
+    return $b;
+  }
+  return $a;
+}
+
+sub cachemenuxpm {
+  my ($title, $icon) = (@_);
+  my ($outicon, $outtitle, $outfile);
+
+  if ( $icon ne "" && ! -e "$icon" ) {
+    $icon="$HOME/xpm/menu/" . basename($icon);
+  }
+  if ( $icon ne "" && ! -e "$icon" ) {
+    $icon="";
+  }
+
+  $outicon=$icon;
+  $outtitle=$title;
+  $outicon =~ s!\.xpm$!!;
+  $outicon =~ s![/() ]!_!g;
+  $outtitle =~ s![/() ]!_!g;
+  $outfile="$HOME/xpm/menu/cache/$outtitle$outicon.xpm";
+
+  if (-e $outfile) {
+    return $outfile;
+  }
+
+
+  if ( $icon ne "") {
+    system("textimage2image.sh \"$title\" $backcolor $forecolor --right \"$icon\" 20 \"$outfile\"");
+  } else {
+    system("textimage2image.sh \"$title\" $backcolor $forecolor \"$outfile\"");
+  }
+  return $outfile;
+}
+
+sub getblock {
+  @block=($_);      #no! Not the arguments! This is the last line read, and we are creating a new array with 1 elem!
+#  print "#Including line: $_\n";
+  while (<FH>) {
+    chomp;
+    last if (! /^\+/);
+    push @block, $_;
+  }
+
+#  print "@block\n";
+}
+
+sub createmenu {
+  my ($menuname,$line,$menutitle);
+
+  $line=shift @block;
+  $menuname=$menutitle=$line;
+  $menuname =~ s/AddToMenu \"([^\"]*)\"  *\"([^\"]*)\".*$/$1/;
+  $menuname =~ s!/!_!g;
+  $menuname .= "Panel";
+#  $menuname .= "_";
+  $menutitle=~ s/AddToMenu \"([^\"]*)\"  *\"([^\"]*)\".*$/$2/;
+#  print "#menuname=$menuname\n";
+#  print "#menutitle=$menutitle\n";
+  print "################\n";
+
+  print "Style \"$menuname\" NoTitle, NoHandles, BorderWidth 0\n";
+  print "Style \"$menuname\" NoButton 2, NoButton 4, Sticky, WindowListSkip\n";
+  print "*$menuname" . "Back      $backcolor\n";
+#  print "*$menuname" . "Pixmap none\n";
+  print "*$menuname" . "Geometry  -3-3\n";
+  my $howdeep = $menuname;
+  $howdeep =~ s![^_]!!g;
+  print "#ht=$howdeep\n";
+  $howdeep = length($howdeep);
+  #howdeep=1 => 20 rows.
+  #howdeep=5 => 3 rows.
+  $howdeep=max(min($howdeep,5),1);
+  #$row = sqrt(@blocks/$aspect)=$rows*$columns/($columns/$rows); and since we want aspect ^ as menu depth ^
+
+  my $rows = sqrt (8 * @block / $howdeep);
+  print "#row=$rows\n";
+  my $columns = ceil(@block / $rows);
+  print "*$menuname" . "Columns   $columns\n";
+  print "*$menuname" . "Padding   0 0\n";
+  print "*$menuname" . "($columns" . "x1, NoSize, Title \"$menutitle\",Back $forecolor, Fore $backcolor, \\\n";
+  print "    Action(Mouse 1) Function ModuleMove), \\\n";
+  print "    Action(Mouse 3) Function ModuleDie)\n";
+#  print "*$menuname" . "($columns" . "x1, NoSize, Title \"Move\",Back $forecolor, Fore $backcolor, Action Function ModuleMove)\n";
+#  print "*$menuname" . "($columns" . "x1, NoSize, Title \"Close\",Back $forecolor, Fore $backcolor, Action (Mouse 3) Function ModuleDie)\n";
+  my ($icon, $title, $todo);
+  foreach (@block) {
+    $icon="";
+    $title = $todo = $_;
+    next if ! /\"([^\"]*)\"/;    #delete invalid lines, such as the fte line on current scuzzie
+    $title =~ s/^\+ \"([^\"]*)\"  *(.*)$/$1/;
+    $title =~ s/&//;
+    if ($title =~ /%.*%/) {
+      $icon=$title;
+      $icon  =~ s/^.*%(.*)%.*/$1/;
+      $title =~ s/%.*%//;
+    }
+    $todo  =~ s/^\+ \"([^\"]*)\"  *(.*)$/$2/;
+    if ($todo =~ /Popup.*Debian/) {
+      $todo =~ s/Popup *\"([^\"]*)\".*/$1/;
+      $todo =~ s!/!_!g;
+      $todo .= "Panel";
+#      $todo .= "_";
+      $todo = "Fore red, Panel (position Button left 10 10) $todo \"Module FvwmButtons -g -30000-30000 $todo\"";
+      $icon = "rightarrow.xpm";
+    } else {
+      $todo = "Action $todo";
+      $todo =~ s!Exec exec!Exec!;    #remove both the extraneous Exec, and the path to the executable (for .ssi.swins use)
+#      $todo =~ s!Exec .*/!Exec !; #(already done by setupfvwm)
+    }
+
+#    print "#line=$_, icon=$icon, title=$title, todo=$todo\n";
+
+#    if ($icon ne "") {
+#      $icon =~ s!.*/!!;            #to strip the dirname from the icon #(already done by setupfvwm)
+#    }
+    $icon=cachemenuxpm($title,$icon);
+    print "*$menuname" . "(Right, Icon $icon, $todo)\n";
+  }
+}
+
+if ( @ARGV < 1 ) {
+  print STDERR "Usage: $0 <files> (tries each file to success, then exits)\n";
+  exit 1;
+}
+
+while (@ARGV > 0) {
+  $file=shift @ARGV;
+  if (open(FH,"$file")) {
+    last;
+  }
+  print "#Cannot open $file for read, trying next one if there is one\n";
+  die "No files could be read" if (@ARGV == 0);
+}
+
+while (<FH>) {
+  chomp;
+  if (/^AddToMenu.*Title/) {
+    getblock;
+    createmenu;
+    next;
+  }
+  print "#Discarding line: $_\n";
+}
+
+
+close FH;

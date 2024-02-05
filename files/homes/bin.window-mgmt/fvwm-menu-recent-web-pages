@@ -1,0 +1,55 @@
+#!/usr/bin/env perl
+
+use strict;
+use warnings;
+
+sub escape {
+    $_[0] =~ s/([^a-zA-Z0-9_ \/:])/\\$1/g;
+    return $_[0];
+}
+
+if (!defined $ENV{LOGDIR}) {
+  $ENV{LOGDIR}="$ENV{HOME}/var/log";
+}
+if (!defined $ENV{URLLOG}) {
+  $ENV{URLLOG}="$ENV{LOGDIR}/urllog";
+}
+
+open(FH, "cat \"$ENV{URLLOG}\" | keeplast | tac|") or die "can't open tail pipe: $!";
+
+my $count=54;
+my ($line,$counter,$engine,$search,$trimmedsearch,$url,$trimmedurl,$countertext);
+my (@arr)=(0..9,"A".."Z");
+$counter=0;
+while (defined($line=<FH>)) {
+  chomp ($line);
+  if ($line =~ /^search ([^ ]*) (.*)/) {
+    $engine=$1;
+    $search=$2;
+    if ($counter < @arr) {
+      $countertext="&$arr[$counter] ";
+    } else {
+      $countertext="";
+    }
+    $search=escape $search;
+    $trimmedsearch=$search;
+    $trimmedsearch=~s/^(.{60}).*/$1.../;
+    $line="\"$countertext$engine: $trimmedsearch\" Exec $engine $search\n";
+  } elsif ($line =~ /^page (.*)/) {
+    $url=$1;
+    if ($counter < @arr) {
+      $countertext="&$arr[$counter] ";
+    } else {
+      $countertext="";
+    }
+    $trimmedurl=$url;
+    $trimmedurl=~s/^(.{60}).*/$1.../;
+    $line="\"$countertext$trimmedurl\" Exec browser-hist \"$url\"\n";
+  } else {
+    next;
+  }
+  print $line;
+  if (++$counter > $count) {#only display as many menu items as will fit on a page
+    exit 0;
+  }
+}

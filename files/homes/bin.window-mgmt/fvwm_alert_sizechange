@@ -1,0 +1,19 @@
+#!/bin/bash -l
+# -*- Mode: shell-script -*-
+#template by ~tconnors/bin/newshscript
+#Tue Apr 22 22:39:23 EST 2008
+# $Revision: 1.1 $ $Date: 2008/04/22 13:16:44 $
+# $Id: fvwm_alert_sizechange,v 1.1 2008/04/22 13:16:44 tconnors Exp $
+# $Header: /home/ssi/tconnors/cvsroot/bin/fvwm_alert_sizechange,v 1.1 2008/04/22 13:16:44 tconnors Exp $
+# $RCSfile: fvwm_alert_sizechange,v $
+
+# This program alerts fvwm to any size changes so it can keep it for future children
+# It will be called automatically by fvwm in its startup and restart sequence
+
+#set -xv
+
+FvwmCommand "SetEnv MULTIPLE_MONITORS $MULTIPLE_MONITORS"
+FvwmCommand "SetEnv HORSIZE $HORSIZE"
+FvwmCommand "SetEnv VERTSIZE $VERTSIZE"
+
+#FIXME - export the sizes of each monitor here too so clients can use it

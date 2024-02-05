@@ -19,7 +19,7 @@ fi
 
 if [ -f /etc/X11/fvwm/menudefs.hook ] ; then
       ln -sf /etc/X11/fvwm/menudefs.hook $HOME/.fvwm/menudefs.hook
-else
+elif [ -f $HOME/.fvwm/menudefs.hook.in ] ; then
       #get rid of any pathnames, and just hope the binary exists in our PATH
       sed 's!%[^%]*/\(.*\)%!%\1%! ; s!\(Exec exec \)[^'\'']*/!\1!' $HOME/.fvwm/menudefs.hook.in > $HOME/.fvwm/menudefs.hook
 fi

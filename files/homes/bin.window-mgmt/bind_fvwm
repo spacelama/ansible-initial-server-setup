@@ -1,0 +1,42 @@
+#!/bin/bash
+# -*- Mode: shell-script -*-
+#template by ~tconnors/bin/newshscript
+#Sat Feb 24 16:21:00 EST 2007
+# $Revision: 1.4 $ $Date: 2011-08-09 02:59:07 $
+# $Id: bind_fvwm,v 1.4 2011-08-09 02:59:07 tconnors Exp $
+# $Header: /home/tconnors/cvsroot/bin/bind_fvwm,v 1.4 2011-08-09 02:59:07 tconnors Exp $
+# $RCSfile: bind_fvwm,v $
+
+# This needs to be run within fvwm to be parsed as its config file.
+# Eg: FvwmCommand "PipeRead 'bind_fvwm'" It enables all the
+# keybindings we've set up, with some postprocessing.  
+# Lets us toggle between having keys and no keys with
+# just a single Shift-F8
+
+setupfvwmrc
+
+h10=`opfloat iround "$HORSIZE/10"`
+v10=`opfloat iround "$VERTSIZE/10"`
+h1=`opfloat iround "$HORSIZE/100"`
+v1=`opfloat iround "$VERTSIZE/100"`
+
+if ! mktemplate $HOME/.fvwm/bindings.tmp $HOME/.fvwm/bindings $SHORTHOST $SHORTHOST-$SHORTDISPHOST ; then
+    msg="cowardly refusing to overwrite the newer $HOME/.fvwm/bindings.tmp, before getting bindings"
+    echo "$msg"
+    xmessage "$msg"
+    exit 1
+fi
+
+grep -v CursorMove $HOME/.fvwm/bindings.tmp  #first print the non cursor stuff
+grep CursorMove $HOME/.fvwm/bindings.tmp |   #then the cursor stuff
+  sed 's/\(CS.*[+ -]\)1 /\1'"${h1}p /" |      #with the first number being replaced by correct size in x
+  sed 's/\(CMS.*[+ -]\)10 /\1'"${h10}p /" |   #
+  sed 's/\(CS.*[+ -]\)1$/\1'"${v1}p /" |      #then the second number being replaced by correct size in y
+  sed 's/\(CMS.*[+ -]\)10$/\1'"${v10}p /"     #
+
+#| sed 's/$/ Nop/'   # | FvwmCommand 'Read /dev/stdin'
+
+#This lets us toggle between disabling all the key bindings, and enabling them
+echo "Key F8 A S PipeRead 'unbind_fvwm'"
+echo "Beep"
+echo "Schedule 1200 Beep"

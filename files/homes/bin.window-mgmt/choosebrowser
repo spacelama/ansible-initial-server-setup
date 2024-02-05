@@ -1,0 +1,56 @@
+#!/bin/bash
+# -*- Mode: shell-script -*-
+#template by ~tconnors/bin/newshscript
+#Sat Jan 17 18:44:17 EST 2004
+# $Revision: 1.21 $ $Date: 2022/12/30 13:16:48 $
+# $Id: choosebrowser,v 1.21 2022/12/30 13:16:48 tconnors Exp $
+# $Header: /home/tconnors/cvsroot/bin/choosebrowser,v 1.21 2022/12/30 13:16:48 tconnors Exp $
+# $RCSfile: choosebrowser,v $
+
+# This program finds the best browser available
+
+FLAGS=
+#if echo "$@" | grep -q ".pdf$" ; then
+#    BROWSER_OVERRIDE=firefox
+#el
+if echo "$@" | grep -q "isupport/" ; then
+    BROWSER_OVERRIDE=chromium
+fi
+if echo "$@" | grep -q "mercuryaero.sharepoint.com/" ; then
+    BROWSER_OVERRIDE=chromium
+fi
+
+
+if [ "$BROWSER" != choosebrowser ] ; then
+    BROWSER_OVERRIDE="$BROWSER $BROWSER_OVERRIDE"
+fi
+
+for BROWSER in $BROWSER_OVERRIDE firefox chromium vivaldi opera NOTkonqueror mozilla ; do
+#    case "$BROWSER" in
+#        vivaldi)
+#            FLAGS=
+#            ;;
+#        *)
+#            FLAGS=
+#            ;;
+#    esac
+    if ps --no-header -o stat -p 1 `pidof $BROWSER` `pidof $BROWSER-bin` `pidof $BROWSER-esr` | grep -q T ; then # pid 1 is there so the command doesn't fail
+        continue  # suspended, so try the next one
+    fi
+    BROWSER=`PATH=$PATH:/opt/kde3/bin type -p $BROWSER 2>/dev/null`
+    if [ -n "$BROWSER" ] ; then
+        export BROWSER    #set before local files, because local files may override
+        break
+    fi
+done
+
+$BROWSER $FLAGS "$@" &
+
+browser_pid=$!
+
+(
+    sleep 5
+    kill $$ 2>/dev/null  # kill the future wait, ensuring the whole process gets backgrounded after 5 seconds
+) &
+
+wait $browser_pid

@@ -1,0 +1,17 @@
+#!/bin/bash
+# -*- Mode: shell-script -*-
+#template by ~tconnors/bin/newshscript
+#Sun Aug 24 18:09:54 EST 2008
+# $Revision: 1.4 $ $Date: 2020/12/17 23:22:03 $
+# $Id: mozclip,v 1.4 2020/12/17 23:22:03 tconnors Exp $
+# $Header: /home/tconnors/cvsroot/bin/mozclip,v 1.4 2020/12/17 23:22:03 tconnors Exp $
+# $RCSfile: mozclip,v $
+
+# This program takes the X clipboard buffer, and runs mozilla with the URL in the clipboard.  
+# For use when the browser of choice doesn't for example support flash, and you want mozilla 
+# to display it
+
+#URL=`xcb -S 0 ; xcb -p 0`   # store into primary, then print.  Not &&, because sometimes the store fails, but the primary still contains a useful selection 
+#reset_type   # xcb stores UTF8_STRING.  This breaks emacs: bug #649837  Reset the cut buffer to STRING, which of course nulls out the contents of the buffer, but that's fine, because we have already copied it.
+URL=`xclip -o` # doesn't suffer the UTF8_STRING problem
+echo "$URL" | cat2linesurl.sh

@@ -1,0 +1,27 @@
+#!/bin/sh
+# -*- Mode: shell-script -*-
+#template by ~tconnors/bin/newshscript
+#Sun May 25 22:30:18 EST 2003
+
+# $Revision: 1.3 $ $Date: 2007/11/04 21:56:52 $
+# $Id: fvwm_quittest,v 1.3 2007/11/04 21:56:52 tconnors Exp $
+# $Header: /home/ssi/tconnors/cvsroot/bin/fvwm_quittest,v 1.3 2007/11/04 21:56:52 tconnors Exp $
+# $RCSfile: fvwm_quittest,v $
+
+if [ $# -ne 0 ] ; then
+   echo "Usage: $0" 1>&2
+   exit 1
+fi
+file="$1"
+
+if close_xemacs_server_and_session ; then
+    FvwmCommand 'Quit'
+else
+    beep
+    sleep 0.2
+    beep
+    sleep 0.7
+    beep
+    sleep 0.2
+    beep
+fi

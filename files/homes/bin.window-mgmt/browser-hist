@@ -1,0 +1,36 @@
+#!/bin/bash
+# -*- Mode: shell-script -*-
+#template by ~tconnors/bin/newshscript
+#Sun Aug  1 19:36:00 EST 2004
+# $Revision: 1.14 $ $Date: 2019/09/10 06:29:57 $
+# $Id: browser-hist,v 1.14 2019/09/10 06:29:57 tconnors Exp $
+# $Header: /home/tconnors/cvsroot/bin/browser-hist,v 1.14 2019/09/10 06:29:57 tconnors Exp $
+# $RCSfile: browser-hist,v $
+
+lock=$HOME/.browser.lock
+lockfile -l 128 $lock || exit 1
+trap "rm -f $lock ; exit 1" HUP INT QUIT TERM
+trap "rm -f $lock ; exit 0" 0
+mkdir -p $HOME/var/log
+
+if [ -z "$*" ] ; then
+    extra=about:blank
+fi
+
+for page in $extra "$@" ; do
+    if [ -e "$page" ] ; then
+        page=`realpath "$page"`  #to get the absolute version of the path
+	page=file://"$page"
+    else
+        page=`echo "$page" | cleanurllist`
+    fi
+    if [[ "$page" == uggc://* ]] ; then
+        page=`rot13 "$page"`
+    fi
+    echo page "$page" >> $HOME/var/log/urllog
+    cat $HOME/var/log/urllog | keeplast > $HOME/var/log/urllog.tmp
+    mv $HOME/var/log/urllog.tmp $HOME/var/log/urllog
+
+
+    choosebrowser "${page/about:blank/}"
+done

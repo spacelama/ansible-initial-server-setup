@@ -1,0 +1,140 @@
+#!/bin/sh
+#
+# Generate actions for an image directory menu, with thumbnails.
+#	- Cameron Simpson <cs@zip.com.au> 19oct2002
+# http://www.cskk.ezoshosting.com/cs/fvwm/
+
+: ${TMPDIR:=/tmp}
+: ${LOGDIR:=$HOME/var/log}
+: ${FVWM_MENU_IMLIST_OP:=xv}
+
+##thsize=16x16
+##thsize=32x32
+thsize=48x48
+newmenu=
+
+cmd=$0
+usage="Usage: $cmd [-N] [-d dir] [-l filelist] [XxY] menuname [filecmd [args...]]
+	-N	New menu. Destroy and recreate this menu.
+	-d dir	Context directory. Default: current directory.
+	-l filelist Read image filenames from this file.
+	XxY	Thumnbail size. Default: $thsize"
+
+##alert "#=$# $0 $*"
+##exec 2>>$LOGDIR/alert
+
+##alert "DFLT=[$FVWM_MENU_IMLIST_OP]"
+##env|grep FVWM >>$LOGDIR/alert
+
+filelist=
+inter=
+dir=.
+
+badopts=
+
+while :
+do
+  case $1 in
+    -N)	newmenu=1 ;;
+    -d)	dir=$2; shift ;;
+    -l)	filelist=$2; shift ;;
+    [1-9]|[1-9][0-9]|[1-9][0-9][0-9]) thsize=${1}x${1} ;;
+    [1-9]*x[1-9]*) thsize=$1 ;;
+    --) shift; break ;;
+    -?*)echo "$cmd: unrecognised option: $1">&2
+	badopts=1
+	;;
+    *)	break ;;
+  esac
+  shift
+done
+
+if [ $# = 0 ]
+then
+    echo "$cmd: missing menuname" >&2
+    badopts=1
+else
+    menuname=$1; shift
+fi
+
+[ $badopts ] && { echo "$usage" >&2; exit 2; }
+
+[ $# = 0 ] && set -- $FVWM_MENU_IMLIST_OP
+
+[ -n "$menutitle" ] || menutitle="$menuname: $*"
+
+cd "$dir" || exit 1
+wd=`pwd`  || exit 1
+thsubdir=.thumbnails/$thsize
+mkdir -p $thsubdir
+
+if [ $newmenu ]
+then
+    echo "DestroyMenu $menuname"
+    echo "AddTomenu   $menuname \"$menutitle\" Title"
+fi
+
+if [ -n "$filelist" ]
+then
+    cat "$filelist"
+else
+    for path in .. */. *.*
+    do
+      echo "$path"
+    done
+fi \
+| { exec 3>&1	# svae stdout for use after eaten by pipe
+
+    { exec 4>&1 1>&3 3>&-
+      # now stdout is original stdout and &4 is pipe to needthumbs
+      while read -r entry
+      do
+	if [ -d "$entry/." ]
+	then
+	  # directory pathname
+	  path=`cd "$entry" || exit 1; pwd` || continue
+
+	  # menu entry tag
+	  case "$entry" in
+	      .|*/*)tag=`basename "$path"` ;;
+	      *)	tag=$entry ;;
+	  esac
+
+	  ##alert "\"$tag\" PopImDir $path"
+	  echo "AddToMenu $menuname \"$tag\" PopImDir $path"
+	else
+	  f=$entry
+	  [ -s "$f" ] || continue;
+
+	  case "$entry" in
+	      $HOME/*)	tag='~/'`expr "x$entry" : "x$HOME/\\(.*\\)"` ;;
+	      *)		tag=$entry ;;
+	  esac
+
+	  d=`dirname "$f"`
+	  case "$d" in
+	      /*)		;;
+	      *)		d=$wd/$d ;;
+	  esac
+	  case "$f" in
+	      */*)	fbase=`basename "$f"` ;;
+	      *)		fbase=$f ;;
+	  esac
+	  case "$f" in
+	      /*)	;;
+	      *)	f=$d/$fbase ;;
+	  esac
+
+	  thumb=$thsubdir/$fbase.png
+	  fthumb=$d/$thumb
+	  if [ -s "$fthumb" ]
+	  then tag="%$fthumb%$tag"
+	  else echo "$f" >&4
+	  fi
+
+	  echo "AddToMenu $menuname \"$tag\" Exec "`shqstr "$@" "$f"`
+	fi
+      done
+    } \
+    | needthumbsfor
+  }

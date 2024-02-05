@@ -1,0 +1,223 @@
+# -*- Mode: winmgr -*-
+
+#define mouse and key bindings
+
+##############################################################################
+# This defines the mouse bindings
+
+# First, for the mouse in the root window
+# Button 1 gives the Utilities menu
+# Button 2 gives the Window Ops menu
+# Button 3 gives the WindowList (like TwmWindows)
+# I use the AnyModifier (A) option for the modifier field, so you can hold down
+# any shift-control-whatever combination you want!
+
+#     Button	Context Modifi 	Function
+
+# Now click in the window (with "Meta/Alt" modifier)
+Mouse 1         W       M       RaiseLower #Function "Move-or-Raise"
+#Mouse 2		W	M	Function "Move-or-Raise"
+Mouse 2		W	M	Function "Move"
+Mouse 3         W       M       Resize
+
+#Mouse 1         T       A       DoubleClickShadeNorth
+Mouse 1         S       S       WindowShade North
+#NOT SUPPORTED IN FVWM2.4:
+Mouse 1         -       S       WindowShade North
+Mouse 1         [       S       WindowShade West
+Mouse 1         ]       S       WindowShade E
+Mouse 1         _       S       WindowShade S
+
+############################################################################
+# Now some keyboard shortcuts.
+
+# Arrow Keys
+# press arrow + control anywhere, and scroll by 1 page
+Key Left	A	CM	Scroll -100 +0
+Key Right	A	CM	Scroll +100 +0
+Key Up		A	CM	Scroll +0   -100
+Key Down	A	CM	Scroll +0   +100
+
+Key Left	A	CMS	CursorMove -10 +0
+Key Right	A	CMS	CursorMove +10 +0
+Key Up		A	CMS	CursorMove +0 -10
+Key Down	A	CMS	CursorMove +0 +10
+Key Left	A	CS	CursorMove -1  +0
+Key Right	A	CS	CursorMove +1  +0
+Key Up		A	CS	CursorMove +0  -1
+Key Down	A	CS	CursorMove +0  +1
+
+Key KP_Left	A	CM	Scroll -100 +0
+Key KP_Right	A	CM	Scroll +100 +0
+Key KP_Up		A	CM	Scroll +0   -100
+Key KP_Down	A	CM	Scroll +0   +100
+
+Key KP_Left	A	CMS	CursorMove -10 +0
+Key KP_Right	A	CMS	CursorMove +10 +0
+Key KP_Up		A	CMS	CursorMove +0 -10
+Key KP_Down	A	CMS	CursorMove +0 +10
+Key KP_Left	A	CS	CursorMove -1  +0
+Key KP_Right	A	CS	CursorMove +1  +0
+Key KP_Up		A	CS	CursorMove +0  -1
+Key KP_Down	A	CS	CursorMove +0  +1
+
+#pipereads are blocking, so anything that gets executed gets executed
+#as a batch as soon as the piperead is finished.  Which means there is
+#no point sleeping to construct an animation
+Key Up          A       MS      PipeRead 'fvwm_move_window_vp UP'
+Key Down        A       MS      PipeRead 'fvwm_move_window_vp DOWN'
+Key Left        A       MS      PipeRead 'fvwm_move_window_vp LEFT'
+Key Right       A       MS      PipeRead 'fvwm_move_window_vp RIGHT'
+Key Tab         A       MS      PipeRead 'fvwm_move_window_vp SWAP'
+Key F3          A       MS      PipeRead 'fvwm_swap_window.sh'
+Key F3          A       CMS     PlaceAgainAnimAndWarp
+
+Key KP_Up          A       MS      PipeRead 'fvwm_move_window_vp UP'
+Key KP_Down        A       MS      PipeRead 'fvwm_move_window_vp DOWN'
+Key KP_Left        A       MS      PipeRead 'fvwm_move_window_vp LEFT'
+Key KP_Right       A       MS      PipeRead 'fvwm_move_window_vp RIGHT'
+
+#Key Tab A M WindowList (!"qiv*|*/p/*|*qBit*") Root c c CurrentDesk, NoGeometry, CurrentAtEnd, IconifiedAtEnd
+Key Tab A M WindowList Root c c CurrentDesk, NoGeometry, CurrentAtEnd # , IconifiedAtEnd  #don't want IconfiedAtEnd anymore in 2020, because Microsoft Teams iconifies when you close it, but you still want to be able to alt-tab back to it.  Would love an "IconifiedAtEndExceptForTeams"
+#Key Tab A M WindowList Root c c CurrentDesk, NoGeometry my_dbltab
+#http://www.hpc.uh.edu/fvwm/archive/0212/msg00576.html
+#Key Tab A M WindowList Root c c CurrentDesk NoGeometry SelectOnRelease Alt_L 
+#Key Tab A M WindowList Root c c NoDeskSort NoGeometry SelectOnRelease Alt_L 
+Key Tab A CM GotoDesk 1 0 1
+Key Tab A C4 GotoDesk 1 0 1       #this is needed at least on tantalum, since ctrl-alt-tab never makes it to X - according to xkeycaps. Fucked windows oriented keyboard hardware
+#try to emulate winders:
+#Key Tab A M WindowList Root c c CurrentDesk NoGeometry
+Key Escape A M Prev [CurrentDesk !Iconic] Function "flipFlopFocus"
+
+Key Tab         A       CMS      Exec exec fvwm_focus
+
+#  Key f1 a n Next (unique-name-of-the-applicatein) FocusAndRaise
+
+# press arrow + meta key, and scroll by 1/10 of a page
+#Key Left	A	M	Scroll -10 +0
+#Key Right	A	M	Scroll +10 +0
+#Key Up		A	M	Scroll +0   -10
+#Key Down	A	M	Scroll +0   +10
+
+# press shift arrow + control anywhere, and move the pointer by 1% of a page
+#Key Left	A	SC	CursorMove -1 0
+#Key Right	A	SC	CursorMove +1 +0
+#Key Up		A	SC	CursorMove +0   -1
+#Key Down	A	SC	CursorMove +0   +1
+
+# press shift arrow + meta key, and move the pointer by 1/10 of a page
+#Key Left	A	SM	CursorMove -10 +0
+#Key Right	A	SM	CursorMove +10 +0
+#Key Up		A	SM	CursorMove +0   -10
+#Key Down	A	SM	CursorMove +0   +10
+
+# Keyboard accelerators
+Key F1		A	M	Popup "Utilities"
+Key F2		A	M	Popup "Window-Ops"
+Key F2		A	MS	Popup "/Debian"
+Key F3		A	MC	Module FvwmWinList transient
+Key F3		A	M	RaiseLower
+Key F4		A	M	Close
+Key (Skype) F4		A	M	DestroyOrClose
+Key F5		A	M	Move-or-Raise-or-Shade
+Key F6		A	M	Resize
+#Key F7		A	M	CirculateUp
+#Key F8		A	M	CirculateDown
+#Mouse 0         W      A       Function "Raise"
+
+#Key KP_Add A M Next (AcceptsFocus CurrentDesk !Iconic) Focus
+#Key KP_Subtract A M Prev (AcceptsFocus CurrentDesk !Iconic) Focus
+#Key KP_Add A M Next [CurrentDesk !Iconic] FlipFocus
+#Key KP_Subtract A M Prev [CurrentDesk !Iconic] FlipFocus
+
+#Key Tab A M WindowList "Prev Raise-and-FlipFocus"
+#Key Tab		A	M	CirculateUp
+#Key Tab		A	SM	CirculateDown
+Key Prior             A       MS     Exec exec amixer set Master 1%+ unmute
+Key Next              A       MS     Exec exec amixer set Master 1%- unmute
+Key Prior             A       MCS    Exec exec amixer set Master 10%+ unmute
+Key Next              A       MCS    Exec exec amixer set Master 10%- unmute
+Key F12               A       M      Exec exec togglevolmute
+Key F12               A       MS     Exec exec sleepmute
+#Key F10               A       M      Exec exec newxclock
+#Key F10               A       M       Next (xclockstandard) Raise
+Key F10               A       M       All (xclockstandard) RaiseLower
+Key F9                A       M      Exec exec musicpause
+Key F9                A       SMC    Exec exec musicstop --endofcurrenttrack
+#Key F9                A       MS     Exec exec ssh scuzzie musicpause
+Key F9                A       MCS     Exec exec paswitch --all
+Key F9                A       MS     Exec exec paswitch
+Key F9                A       CS     Exec exec valveamptoggle
+Key F10                A       CS     Exec exec valveamptoggle --onlyvalve
+Key F8                A       M      Exec exec xcalib -i -a
+#Key F8                A       M      Exec exec policy.savepower.pl -5
+#Key F8                A       MS     Exec exec policy.unlimitedpower.pl
+Key F7                A       M      Exec exec currenttrackname
+#Key F7                A       MS     Exec exec ssh bohr currenttrackname
+#Key F7                A       CMS    Exec exec ssh scuzzie currenttrackname
+
+Key XF86Suspend	      A       A      Exec exec suspendtoram
+Key XF86Suspend	      A       C      Exec exec suspendtodisk
+Key XF86Suspend	      A       CM     Exec exec wakeup.sh --override --period 07:50
+
+Key XF86Tools         A       A      Exec exec xterm -e yacpi   #battery key
+Key XF86Eject         A       A      Exec exec umount /cdrom   #vostro laptop: hopefully the bios still ejects. could just call eject here too.
+
+#following in hotkeys.conf (which has a nice OSD)
+Key XF86AudioMute             A       A       Exec exec togglevolmute
+Key XF86AudioLowerVolume      A       A       Exec exec amixer set Master 1%- unmute
+Key XF86AudioRaiseVolume      A       A       Exec exec amixer set Master 1%+ unmute
+Key XF86AudioLowerVolume      A       S       Exec exec amixer set Master 10%- unmute
+Key XF86AudioRaiseVolume      A       S       Exec exec amixer set Master 10%+ unmute
+
+#following in /usr/openwin/lib/speckeysd.map, restarting speckeysd
+#Key SunAudioMute A       A       Exec /usr/local/bin/volumeset 0
+#Key SunAudioLowerVolume A A      Exec /usr/local/bin/volumeset -15
+#Key SunAudioRaiseVolume A A      Exec /usr/local/bin/volumeset +15
+
+Key XF86AudioPlay     A       A       Exec exec musicpause   #diracEXCLUDE    (media keys, particularly play press at random times)
+Key XF86AudioStop     A       S       Exec exec musicstop --endofcurrenttrack
+Key XF86AudioStop     A       A       Exec exec musicstop
+#Key XF86AudioStop     A       S       Exec exec musicstop --endofcurrenttrack  #doesn't work, pile of shite, despite xmodmap -pke showing it looks same as volume buttons, which *do* work shifted
+Key XF86AudioPrev     A       A       Exec exec musicrew
+Key XF86AudioNext     A       A       Exec exec musicfwd
+Key XF86AudioPrev     A       S       Exec exec musicrew --type
+Key XF86AudioNext     A       S       Exec exec musicfwd --type
+
+Key XF86AudioMedia    A       A       Exec exec choosebrowser # dell directmedia key
+
+Key XF86HomePage      A       A       Exec exec choosebrowser
+Key XF86Mail          A       A       Exec remotemail
+Key XF86Start         A       A       Exec exec xemacs -f desktop-read
+Key XF86Search        A       A       Exec exec xterm
+
+#dunno on which keyboard these were produced -- but shouldn't it have been the XF86AudioNext etc buttons?  Perhaps this was on the remote...
+#Key XF86Back          A       A       Exec  exec tv-radio-setchannel prev
+#Key XF86Forward       A       A       Exec exec tv-radio-setchannel next
+#Key XF86Back          A       S       Exec exec tv-radio-setchannel off
+#Key XF86Forward       A       S       Exec exec tv-radio-setchannel radio
+
+Key Print             A       CS       Exec exec window-dump
+
+Key Escape            A       C        Function RollUnrollDropTerm
+
+# Valid contexts are R for the root window, W for an application window, T for a win-
+# dow title bar, S for a window side, top, or bottom bar, F for a window  frame  (the
+#  corners), I for an Icon window, or 0 through 9 for title-bar buttons, or any combi-
+
+
+
+
+# and I like to use F1 in a window for iconify, close with Control
+#Key F1		W	N	Iconify
+#Key F1		W	C	Close
+
+#Page Up/Dapge Down keys are used to scroll by one desktop page
+# in any context, press page up/down + control
+# in root context, just pressing page up/down is OK
+# 
+# I prefer the non-wrapping scroll. These are for example purposes only
+#Key Next	A       C       Scroll 100000 0
+#Key Next	R       N       Scroll 100000 0  
+#Key Prior	A       C       Scroll -100000 0
+#Key Prior	R       N       Scroll -100000 0
