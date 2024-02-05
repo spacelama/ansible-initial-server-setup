@@ -228,6 +228,9 @@
       - name: bin/
       - name: bin/Linux-{{ arch | default ('x86_64') }}/
         source: homes/bin.Linux-{{ arch | default ('x86_64') }}/
+      - name: bin/   # very me-specific window management stuff, only put on my desktops
+        source: homes/bin.window-mgmt/
+        when: "{{ host_is_desktop is defined }}"
     # templates done by matching on .j2
       - name: .nanorc
         source: homes/.nanorc.j2
