@@ -183,15 +183,6 @@
 #    group: root
 #    mode: 0644
 
-- name: allow backuppc to check all mountpoints
-  copy:
-    src: files/usr_local_bin/is_all_mounted
-    dest: /usr/local/bin/is_all_mounted
-    owner: root
-    group: root
-    mode: 0755
-  become: true
-
 - name: setup apt listchanges news
   lineinfile:
     dest: /etc/apt/listchanges.conf
