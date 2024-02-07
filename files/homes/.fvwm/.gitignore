@@ -1,2 +1,4 @@
 .fvwm2rc
 menudefs.hook
+bindings.tmp
+fvwm_mfl_*pid
