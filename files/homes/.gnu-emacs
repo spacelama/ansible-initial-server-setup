@@ -36,6 +36,7 @@
 (setq inhibit-splash-screen 't)
 (setq inhibit-startup-screen 't)
 
+;; Set the default directory
 (setq-default default-directory "~/")
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
@@ -69,9 +70,6 @@
 ;; This code is not required in Emacs 29 which bundles `use-package'
 (eval-when-compile (add-to-list 'load-path "/home/tconnors/.emacs.d/use-package")
 		   (require 'use-package))
-
-;; Set the default directory
-(setq default-directory "/home/tconnors/")
 
 ;; Package directory
 (add-to-list 'load-path "/home/tconnors/.emacs.d/packages")
