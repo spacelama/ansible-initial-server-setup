@@ -15,10 +15,10 @@
 
 setupfvwmrc
 
-h10=`opfloat iround "$HORSIZE/10"`
-v10=`opfloat iround "$VERTSIZE/10"`
-h1=`opfloat iround "$HORSIZE/100"`
-v1=`opfloat iround "$VERTSIZE/100"`
+h10=`op --scale 0 "$HORSIZE/10"`
+v10=`op --scale 0 "$VERTSIZE/10"`
+h1=`op --scale 0 "$HORSIZE/100"`
+v1=`op --scale 0 "$VERTSIZE/100"`
 
 if ! mktemplate $HOME/.fvwm/bindings.tmp $HOME/.fvwm/bindings $SHORTHOST $SHORTHOST-$SHORTDISPHOST ; then
     msg="cowardly refusing to overwrite the newer $HOME/.fvwm/bindings.tmp, before getting bindings"

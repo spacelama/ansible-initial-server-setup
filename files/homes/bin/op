@@ -1,0 +1,14 @@
+#!/bin/ksh
+
+scale=1
+if [ "$1" == --scale ] ; then
+    # WARNING: WARNING: DANGER: --scale rounds down, not to closest.
+    # For a real round, you're better off using printf "%0f" etc
+    scale="$2"
+    shift ; shift
+fi
+op=$( echo -e "scale=$scale\n$@" | bc )
+echo "$op"
+[ "$op" != 0 ]
+
+
