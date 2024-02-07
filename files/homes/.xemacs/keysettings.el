@@ -61,6 +61,12 @@
   (suspend-tty)
   )
 
+;(global-set-key (kbd "<mouse-2>") 'mouse-yank-primary) ; default
+;(global-set-key (kbd "S-<mouse-2>") 'mouse-yank-primary)
+;(global-set-key (kbd "<mouse-2>") 'clipboard-yank)
+;; before Emacs 25 it was called 'x-clipboard-yank
+; FIXME: it'd be nice for selection to just copy everything to clipboard, but we often don't want to do that, and there's always meta-w to copy it to clipboard, so this will do for now
+
 ;;disable the ctrl c ctrl z combination that minimises all windows - very very annoying
 ;;(global-set-key "\C-x\C-z" nil)
 (global-unset-key "\C-x\C-z")

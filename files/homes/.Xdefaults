@@ -32,6 +32,8 @@ Xft.antialias: 1
 XTerm*veryBoldColors:           15
 XTerm*on2Clicks:           word
 XTerm*on3Clicks:           line
+! https://lukas.zapletalovi.com/posts/2013/hidden-gems-of-xterm/
+!XTerm*on3Clicks: regex ([[:alpha:]]+://)?([[:alnum:]!#+,./=?@_~-]|(%[[:xdigit:]][[:xdigit:]]))+
 XTerm*on4Clicks:           group
 XTerm*on5Clicks:           all
 
@@ -77,10 +79,13 @@ XTerm*on5Clicks:           all
 
 !to get meta characters to be able to be input in bash and emacs in an xterm:
 !http://www.leonerd.org.uk/hacks/hints/xterm-8bit.html
-XTerm*VT100.utf8:            1
 XTerm*VT100.eightBitInput:   false
 XTerm*VT100.eightBitControl: false
 XTerm*VT100.eightBitOutput:  true
+!XTerm*utf8:            1   ! default when LC_ALL unset or at least not "C"
+!XTerm*utf8Fonts:       1
+! Assume window titles are UTF-8 encoded
+XTerm*utf8Title: true
 
 !http://www.leonerd.org.uk/hacks/hints/xterm-sensible.html
 XTerm*VT100.faceName:        DejaVu Sans Mono
@@ -99,9 +104,6 @@ XTerm*VT100.faceSize6:       17
 
 XTerm*VT100.underLine:       true
 
-XTerm*highlightSelection:	true
-XTerm*keepSelection:	        true
-
 ! Uncomment this to use color for the bold attribute
 XTerm*VT100.colorBDMode:	on
 XTerm*VT100.colorBD:		blue
@@ -111,7 +113,9 @@ XTerm.VT100.underLine:		off
 XTerm*VT100.colorUL:		magenta
 ! Uncomment this to display the scrollbar 
 XTerm*scrollBar:		true
-XTerm*VT100.charClass:		33:33,37:33,45-47:33,64:33
+!https://docstore.mik.ua/orelly/unix3/upt/ch05_14.htm ; xterm -report-charclass
+XTerm*VT100.charClass:		33:33,37:33,45-46:33,64:33
+!XTerm*charClass: 33:48,36-47:48,58-59:48,61:48,63-64:48,95:48,126:48
 XTerm.VT100.background: 	rgb:00/00/00
 XTerm.VT100.foreground: 	rgb:60/ff/60
 XTerm*Scrollbar.background:	black
@@ -119,8 +123,6 @@ XTerm*Scrollbar.foreground:	white
 XTerm*borderColor:		white
 XTerm*multiScroll: 		true
 XTerm*reverseWrap: 		true
-! Assume window titles are UTF-8 encoded
-XTerm.VT100.utf8Title: true
 
 ! This resource specifies whether or not to ignore the 'alternate screen'
 ! of applications such as vi.  When it is on, these applications will restore
@@ -160,15 +162,31 @@ XTerm*backarrowKey:		false
 !XTerm*background:		black
 !XTerm*foreground:		white
 
-XTerm*VT100.translations: #override \n\
+! Lot of discussion on man terminfo and application mode and normal mode here: https://vi.stackexchange.com/questions/15324/up-arrow-key-code-why-a-becomes-oa
+XTerm*VT100*translations: #override \n\
                 None<Key>Home: string(0x1b) string("[1~") \n\
 		None<Key>End: string(0x1b) string("[4~") \n\
 		None<Key>Prior: string(0x1b) string("[5~") \n\
 		None<Key>Next: string(0x1b) string("[6~") \n\
-                ~Ctrl ~Meta <Btn2Up>:   insert-selection(PRIMARY, CLIPBOARD, CUT_BUFFER0) \n\
+                Ctrl Shift <Key>c:    copy-selection(CLIPBOARD) \n\
+                Ctrl Shift <Key>v:    insert-selection(CLIPBOARD) \n\
+                Ctrl Shift <Key> =:   larger-vt-font() \n\
+                Ctrl Shift <Key> -:   smaller-vt-font() \n\
+                ~Ctrl Shift <Btn4Down>: string(0x1b) string("OA") \n\
+                ~Ctrl Shift <Btn5Down>: string(0x1b) string("OB") \n\
+                Ctrl Shift <Btn4Down>:  string(0x1b) string("[5~") \n\
+                Ctrl Shift <Btn5Down>:  string(0x1b) string("[6~") \n\
+                ~Ctrl ~Meta <Btn1Up>: select-end(CLIPBOARD, PRIMARY) \n\
+                ~Ctrl ~Meta <Btn2Up>: insert-selection(CLIPBOARD, PRIMARY, CUT_BUFFER0) \n\
 
+!                ~Ctrl ~Meta <Btn2Up>: insert-selection(PRIMARY, CLIPBOARD, CUT_BUFFER0) \n\
+!                Ctrl Shift <Btn2Up>:  insert-selection(CLIPBOARD) \n\
 
 !CLIPBOARD above from http://mlblog.osdir.com/emacs.xemacs.general/2004-07/index.shtml
+
+XTerm*highlightSelection:	true
+XTerm*keepSelection:	        true
+!XTerm*selectToClipboard:        true
 
 kbiff.NoTitle:			Yes
 

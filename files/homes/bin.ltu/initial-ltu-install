@@ -1,12 +1,23 @@
 #!/bin/bash
 
-apt install x11-utils xdm ssh man vim git xterm procmail curl keychain mgitstatus rsync telnet vim-pathogen plocate bash-completion net-tools lsof ncal x11-apps x11-xserver-utils lynx bind9-dnsutils systemd-resolved tcpdump snapd mesa-utils dlocate apt-file iperf3 snapd dstat firefox-esr
+apt install less most x11-utils xdm ssh man vim git xterm procmail curl keychain mgitstatus rsync telnet vim-pathogen plocate bash-completion net-tools lsof ncal x11-apps x11-xserver-utils lynx bind9-dnsutils systemd-resolved tcpdump snapd mesa-utils dlocate apt-file iperf3 snapd dstat firefox-esr bc ksh fvwm fvwm2 vim-gtk3 wget gcc strace
 
 apt install -t bookworm-backports emacs emacs-gtk
+
+update-locale LANG=en_AU.UTF-8 LANGUAGE LC_ALL
 
 if ! [ -e /etc/ssh/sshd_config.d/local.conf ] || ! md5sum /etc/ssh/sshd_config.d/local.conf | grep 1ef3493504a55c88f59511289c418628 ; then
     echo -e 'Port 6022\nListenAddress 0.0.0.0' | tee /etc/ssh/sshd_config.d/local.conf
     systemctl restart ssh
 fi
+
+#apt install xdm
+#if ! tail -n 1 /etc/X11/xdm/Xaccess | grep "CHOOSER BROADCAST" ; then
+#    echo "*              CHOOSER BROADCAST       #any indirect host can get a chooser" >> /etc/X11/xdm/Xaccess
+#fi
+# don't think xdmcp chooser is a viable option since needs udp and can't forward that on to the container
+apt install xrdp xinput rxvt-unicode fonts-freefont-ttf x2goserver # tightvncserver - can't find a client that passes through as many keystrokes as rdp; x2goserver has same line-drawing and ANSI characters being injected into input buffer problem as xrdp
+
+
 #update-rc.d ssh enable   # FIXME: ???? in WSL2?
 #/etc/init.d/ssh restart  # FIXME: ???? in WSL2?
