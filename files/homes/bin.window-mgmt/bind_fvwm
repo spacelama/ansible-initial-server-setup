@@ -9,7 +9,7 @@
 
 # This needs to be run within fvwm to be parsed as its config file.
 # Eg: FvwmCommand "PipeRead 'bind_fvwm'" It enables all the
-# keybindings we've set up, with some postprocessing.  
+# keybindings we've set up, with some postprocessing.
 # Lets us toggle between having keys and no keys with
 # just a single Shift-F8
 

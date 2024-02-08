@@ -163,7 +163,7 @@ XTerm*backarrowKey:		false
 !XTerm*foreground:		white
 
 ! Lot of discussion on man terminfo and application mode and normal mode here: https://vi.stackexchange.com/questions/15324/up-arrow-key-code-why-a-becomes-oa
-XTerm*VT100*translations: #override \n\
+XTerm*VT100.translations: #override \n\
                 None<Key>Home: string(0x1b) string("[1~") \n\
 		None<Key>End: string(0x1b) string("[4~") \n\
 		None<Key>Prior: string(0x1b) string("[5~") \n\

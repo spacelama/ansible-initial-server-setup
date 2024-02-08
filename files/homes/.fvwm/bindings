@@ -81,8 +81,8 @@ Key KP_Right       A       MS      PipeRead 'fvwm_move_window_vp RIGHT'
 Key Tab A M WindowList Root c c CurrentDesk, NoGeometry, CurrentAtEnd # , IconifiedAtEnd  #don't want IconfiedAtEnd anymore in 2020, because Microsoft Teams iconifies when you close it, but you still want to be able to alt-tab back to it.  Would love an "IconifiedAtEndExceptForTeams"
 #Key Tab A M WindowList Root c c CurrentDesk, NoGeometry my_dbltab
 #http://www.hpc.uh.edu/fvwm/archive/0212/msg00576.html
-#Key Tab A M WindowList Root c c CurrentDesk NoGeometry SelectOnRelease Alt_L 
-#Key Tab A M WindowList Root c c NoDeskSort NoGeometry SelectOnRelease Alt_L 
+#Key Tab A M WindowList Root c c CurrentDesk NoGeometry SelectOnRelease Alt_L
+#Key Tab A M WindowList Root c c NoDeskSort NoGeometry SelectOnRelease Alt_L
 Key Tab A CM GotoDesk 1 0 1
 Key Tab A C4 GotoDesk 1 0 1       #this is needed at least on tantalum, since ctrl-alt-tab never makes it to X - according to xkeycaps. Fucked windows oriented keyboard hardware
 #try to emulate winders:
@@ -215,9 +215,9 @@ Key Escape            A       C        Function RollUnrollDropTerm
 #Page Up/Dapge Down keys are used to scroll by one desktop page
 # in any context, press page up/down + control
 # in root context, just pressing page up/down is OK
-# 
+#
 # I prefer the non-wrapping scroll. These are for example purposes only
 #Key Next	A       C       Scroll 100000 0
-#Key Next	R       N       Scroll 100000 0  
+#Key Next	R       N       Scroll 100000 0
 #Key Prior	A       C       Scroll -100000 0
 #Key Prior	R       N       Scroll -100000 0
