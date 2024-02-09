@@ -37,6 +37,11 @@ Key Left	A	CM	Scroll -100 +0
 Key Right	A	CM	Scroll +100 +0
 Key Up		A	CM	Scroll +0   -100
 Key Down	A	CM	Scroll +0   +100
+# duplicate these keys for Super modifier (mod4 according to xmodmap) on LTU laptop that can't use Alt/Meta inside RDP session:
+Key Left	A	C4	Scroll -100 +0
+Key Right	A	C4	Scroll +100 +0
+Key Up		A	C4	Scroll +0   -100
+Key Down	A	C4	Scroll +0   +100
 
 Key Left	A	CMS	CursorMove -10 +0
 Key Right	A	CMS	CursorMove +10 +0
