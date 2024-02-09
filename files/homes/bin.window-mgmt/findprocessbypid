@@ -1,0 +1,12 @@
+#!/bin/bash
+# -*- Mode: shell-script -*-
+#template by ~tconnors/bin/newshscript
+#Mon Feb 19 20:24:33 EST 2007
+# $Revision: 1.2 $ $Date: 2007/02/22 14:20:43 $
+# $Id: findprocessbypid,v 1.2 2007/02/22 14:20:43 tconnors Exp $
+# $Header: /home/ssi/tconnors/cvsroot/bin/findprocessbypid,v 1.2 2007/02/22 14:20:43 tconnors Exp $
+# $RCSfile: findprocessbypid,v $
+
+# portable way of finding whether process given by pid still alive 
+
+ps -p "$1" >& /dev/null
