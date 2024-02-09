@@ -6,17 +6,21 @@ SHELL=bash ; export SHELL
 wm=fvwm
 
 unset BASH_PROFILE_EXECUTED
+echo source-startup-exec-fvwm: $(date): sourcing bash startup scripts
 for i in  ~/.bash_profile ~/.profile ; do
     #if we decide to remove raid from LD_LIBRARY_PATH, lets honour it upon startup
     if [ -e "$i" ] ; then
+        echo source-startup-exec-fvwm: $(date): sourcing $i
         . $i
         break
     fi
 done
 set -vx    #keep this second one around, just incase .bash_profile decided to turn it off
+echo source-startup-exec-fvwm: $(date): running setupfvwmrc
 bash -x setupfvwmrc
 # SEGV and KILL still works 2009/12/24 if you really do want to force a restart
 
 # 2014/08/28 fvwm still occasionally fires up with /var/tmp/FvwmCommand* appearing instead in ~/.fvwm.  Haven't yet worked out where the race condition is
+echo source-startup-exec-fvwm: $(date): running $wm
 #exec strace -f -o /tmp/fvwm-trace.out $wm
 exec $wm

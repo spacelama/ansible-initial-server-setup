@@ -21,6 +21,7 @@
 export wm=fvwm
 while : ; do
     exec < /dev/null
+    echo keepfvwmalive: $(date): running source-stratup-exec-fvwm which will try to start wm $wm
     bash -xv source-startup-exec-fvwm
     err=$?   #if just sigtermed, fvwm seems to give an exit code of 0.
 #	export RESTARTINGFVWM=yes
