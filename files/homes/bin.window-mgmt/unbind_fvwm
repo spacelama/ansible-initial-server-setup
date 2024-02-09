@@ -1,0 +1,35 @@
+#!/bin/bash
+# -*- Mode: shell-script -*-
+#template by ~tconnors/bin/newshscript
+#Sat Feb 24 16:21:00 EST 2007
+# $Revision: 1.5 $ $Date: 2011-08-09 02:58:55 $
+# $Id: unbind_fvwm,v 1.5 2011-08-09 02:58:55 tconnors Exp $
+# $Header: /home/tconnors/cvsroot/bin/unbind_fvwm,v 1.5 2011-08-09 02:58:55 tconnors Exp $
+# $RCSfile: unbind_fvwm,v $
+
+# This needs to be run within fvwm to be parsed as its config file.
+# Eg: FvwmCommand "PipeRead 'unbind_fvwm'" It disables all the
+# keybindings we've set up so that a child process doesn't lose all
+# the keystrokes they want (eg, vncviewer running another fvwm
+# elsewhere).  Lets us toggle between having keys and no keys with
+# just a single Shift-F8
+
+#setupfvwmrc
+
+if ! mktemplate $HOME/.fvwm/bindings.tmp $HOME/.fvwm/bindings $SHORTHOST $SHORTHOST-$SHORTDISPHOST ; then
+    msg="cowardly refusing to overwrite the newer $HOME/.fvwm/bindings.tmp, before getting bindings"
+    echo "$msg"
+    xmessage "$msg"
+    exit 1
+fi
+
+( 
+    grep '^Mouse' $HOME/.fvwm/bindings.tmp
+    grep '^Key' $HOME/.fvwm/bindings.tmp
+) | sed 's/(.*)//' | awk '{print $1,$2,$3,$4}' | sed 's/$/ -/'
+
+#| sed 's/$/ Nop/'   # | FvwmCommand 'Read /dev/stdin'
+
+#This lets us toggle between disabling all the key bindings, and enabling them
+echo "Key F8 A S PipeRead 'bind_fvwm'"
+echo "Beep"
