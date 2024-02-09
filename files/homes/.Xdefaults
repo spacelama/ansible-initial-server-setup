@@ -10,9 +10,9 @@
 !!emacs*Foreground:		Wheat
 !!emacs*pointerColor:		Orchid
 !!emacs*cursorColor:		Orchid
-!!emacs*bitmapIcon: 		on
-!!emacs*font: 			fixed
-!!emacs.geometry: 		80x25
+!!emacs*bitmapIcon:		on
+!!emacs*font:			fixed
+!!emacs.geometry:		80x25
 !Emacs.default.attributeFont:	-*-courier-medium-r-*-*-*-120-*-*-*-*-iso8859-*
 !!Emacs.default.attributeFont:	-*-ttf-monaco-r-*-*-*-120-*-*-*-*-iso8859-*
 !!Emacs.default.Font:    Bitstream Vera Sans Mono-18:dpi=100
@@ -116,13 +116,13 @@ XTerm*scrollBar:		true
 !https://docstore.mik.ua/orelly/unix3/upt/ch05_14.htm ; xterm -report-charclass
 XTerm*VT100.charClass:		33:33,37:33,45-46:33,64:33
 !XTerm*charClass: 33:48,36-47:48,58-59:48,61:48,63-64:48,95:48,126:48
-XTerm.VT100.background: 	rgb:00/00/00
-XTerm.VT100.foreground: 	rgb:60/ff/60
+XTerm.VT100.background:		rgb:00/00/00
+XTerm.VT100.foreground:		rgb:60/ff/60
 XTerm*Scrollbar.background:	black
 XTerm*Scrollbar.foreground:	white
 XTerm*borderColor:		white
-XTerm*multiScroll: 		true
-XTerm*reverseWrap: 		true
+XTerm*multiScroll:		true
+XTerm*reverseWrap:		true
 
 ! This resource specifies whether or not to ignore the 'alternate screen'
 ! of applications such as vi.  When it is on, these applications will restore
@@ -141,8 +141,8 @@ XTerm*ttymodes: erase ^? kill ^U intr ^C quit ^\ eof ^D \
 
 
 ! Uncomment this to turn off color mode in your xterms
-!XTerm.VT100.colorMode:  	off
-XTerm.VT100.dynamicColors:  	on
+!XTerm.VT100.colorMode:		off
+XTerm.VT100.dynamicColors:	on
 
 ! Number of lines of scrollback to save
 XTerm*saveLines:		16384
@@ -258,11 +258,11 @@ XMixer*pollRate:		1000000
 !*mix:				on
 !*pcm2:				on
 !*rec:				on
-!*igain:		 	off
-!*ogain: 			off
-!*line1: 			off
-!*line2: 			off
-!*line3: 			off
+!*igain:			off
+!*ogain:			off
+!*line1:			off
+!*line2:			off
+!*line3:			off
 
 
 
@@ -271,7 +271,7 @@ Dtsession*wmStartupCommand:	/opt/csw/bin/fvwm
 Dtsession*waitWmTimeout:	1
 
 
-mozilla*noTitle: 		no
+mozilla*noTitle:		no
 
 ! Ghostview
 !Ghostview*Font:		*-helvetica-bold-r-normal--12-*-*-*-*-*-*
