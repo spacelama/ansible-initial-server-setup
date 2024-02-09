@@ -53,7 +53,7 @@ while : ; do
     fi
     cd / ; cd $HOME  # just in case NFS mount had gone stale
     sleep 1
-done 2>&1 | grep -v '^$' | remove_dup_in_small_window | while read a ; do
+done 2>&1 | grep --line-buffered -v '^$' | remove_dup_in_small_window | while read a ; do
     echo `date +"%Y-%m-%d %H:%M:%S:"` "$a" >> $HOME/.xsession-errors.$HOSTNAME$DISPLAY-fvwm.`date +%Y%m%d`
     find $HOME/.xsession-errors.$HOSTNAME$DISPLAY-fvwm.* -mtime +5 -exec rm '{}' ';'
     if [ "$a" = "KILL CHILD $$" ] ; then
