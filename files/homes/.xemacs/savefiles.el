@@ -1,5 +1,6 @@
 ; http://stackoverflow.com/questions/4477376/some-emacs-desktop-save-questions-how-to-change-it-to-save-in-emacs-d-emacs
 ;; Automatically save and restore sessions
+
 (setq desktop-dirname             "~/.emacs.d/desktop/"
       desktop-base-file-name      "emacs.desktop"
       desktop-base-lock-name      "lock"
@@ -61,7 +62,8 @@
 (defun initialise-desktop-session ()
     (message "running initialise-desktop-session")
     (message "*** Setting up session ***")
-    (when (try-require 'session)
+;    (when (try-require 'desktop)
+     (when (try-require 'session)
       (setq desktop-globals-to-save '(desktop-missing-file-warning)))
 ;;;(when (try-require 'desktop)
 ;;;  (desktop-load-default)

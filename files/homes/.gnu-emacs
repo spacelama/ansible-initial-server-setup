@@ -81,7 +81,8 @@
 ;; Melpa
 (require 'package)
 (add-to-list 'package-archives '("melpa" . "https://melpa.org/packages/") t)
-(package-initialize)
+; don't know where package-initialise came from, but it doesn't like being called twice, and it's already called first thing in ~/.emacs
+;(package-initialize)
 ;(setq package-check-signature nil)
 
 ; these functions are disabled by default.  Have people not heard of
@@ -205,7 +206,6 @@
 (try-require 'cc-mode)
 (try-require 'csh-mode)
 (try-require 'winmgr-mode)
-(try-require 'folding)
 (try-require 'puppet)
 ;(try-require 'vline)
 ;(try-require 'col-highlight)   ; too many bugs - to do with searching when there's a selection or indeed searching at any other time
@@ -414,12 +414,16 @@
 (autoload 'flyspell-buffer "flyspell" "On-the-fly ispell." t)
 ;(load-library "glish-mode")
 ;(add-hook 'c-mode-hook 'turn-off-auto-fill)
-(add-hook 'c-mode-hook 'turn-on-folding-mode)
-(add-hook 'emacs-lisp-mode-hook 'turn-on-folding-mode)
-(add-hook 'f90-mode-hook     'turn-on-folding-mode 'add-imenu)
-(add-hook 'cperl-mode-hook    'turn-on-folding-mode)
-(add-hook 'fortran-mode-hook 'turn-on-folding-mode 'turn-on-auto-fill 'vvb-mode)
-(add-hook 'TeX-mode-hook     'turn-on-folding-mode 'turn-on-auto-fill); encompases LaTeX-mode as well
+(when (try-require 'folding)
+  (add-hook 'c-mode-hook 'turn-on-folding-mode)
+  (add-hook 'emacs-lisp-mode-hook 'turn-on-folding-mode)
+  (add-hook 'f90-mode-hook     'turn-on-folding-mode 'add-imenu)
+  (add-hook 'cperl-mode-hook    'turn-on-folding-mode)
+  (add-hook 'fortran-mode-hook 'turn-on-folding-mode)
+  (add-hook 'TeX-mode-hook     'turn-on-folding-mode) ; encompases LaTeX-mode as well
+)
+(add-hook 'fortran-mode-hook 'turn-on-auto-fill 'vvb-mode)
+(add-hook 'TeX-mode-hook     'turn-on-auto-fill); encompases LaTeX-mode as well
 ;(add-hook 'text-mode-hook    'turn-on-auto-fill)
 ;(add-hook 'text-mode-hook    (lambda () (flyspell-mode 1)))
 ;Bug#459044 - flyspell-mode is a toggle, whereas tex-mode calls text-mode eventually, toggling it back off

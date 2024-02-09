@@ -2,7 +2,7 @@
 
 apt install less most x11-utils xdm ssh man vim git xterm procmail curl keychain mgitstatus rsync telnet vim-pathogen plocate bash-completion net-tools lsof ncal x11-apps x11-xserver-utils lynx bind9-dnsutils systemd-resolved tcpdump snapd mesa-utils dlocate apt-file iperf3 snapd dstat firefox-esr bc ksh fvwm fvwm2 vim-gtk3 wget gcc strace
 
-apt install -t bookworm-backports emacs emacs-gtk
+apt install -t bookworm-backports emacs emacs-gtk elpa-session
 
 update-locale LANG=en_AU.UTF-8 LANGUAGE LC_ALL
 
