@@ -1,0 +1,71 @@
+#!/bin/bash
+
+#firefox is such a stupid peice of shit, we have to protect the
+#bookmarks and prefs files before starting up.
+
+#ulimit -v $(($(free | head -n 2 | tail -n 1 | awk '{print $2}')*4/5))
+
+#export MOZ_DISABLE_GMP_SANDBOX=1 # NOPE: visual freezing, with associated log messages: https://bugs.launchpad.net/ubuntu/+source/firefox/+bug/1983010, although this sounds like a DRM issue:
+#Sandbox: attempt to open unexpected file /sys/devices/system/cpu/cpu0/cache/index2/size
+#Sandbox: attempt to open unexpected file /sys/devices/system/cpu/cpu0/cache/index3/size
+#Sandbox: attempt to open unexpected file /sys/devices/system/cpu/present
+#Sandbox: attempt to open unexpected file /sys/devices/system/cpu
+#Sandbox: unexpected multiple open of file /proc/cpuinfo
+
+# 20230220: https://wiki.debian.org/Firefox#Hardware_Video_Acceleration
+#export MOZ_X11_EGL=1
+# 20230710: maybe this is why firefox has been so unreliable since February 2023.  Doofas.
+
+
+unset LD_LIBRARY_PATH    # my own libraries seem to upset mozilla on aatpc2,centos4
+
+#export PATH=/usr/bin:/bin:/usr/local/bin  # new debian scripts end up
+                                          # calling firefox again like
+                                          # a fucking moron.  Except
+                                          # that we want all of
+                                          # firefox's children to have
+                                          # our correct PATH.
+                                          # Fuckers.
+
+function backupfile() {
+	file=$1
+	for i in 19 18 17 16 15 14 13 12 11 10 9 8 7 6 5 4 3 2 1 0 ; do 
+		j=`expr $i + 1`
+		[ -e $1.$i.gz ] && mv $1.$i.gz $1.$j.gz
+	done
+
+	[ -e $1 ] && cp -pa $1 $1.0 && gzip $1.0
+}
+
+( 
+    lock=$HOME/.firefox.lock
+    lockfile -0 -r 1 -l 128 $lock || exit 1
+    for dir in ~/.mozilla/firefox/*/ ; do 
+    (
+        cd "$dir" || exit 1
+        backupfile prefs.js
+    ) &
+    done
+    rm -f $lock
+    wait
+) 
+
+#export MOZSTART=T
+#export LD_ASSUME_KERNEL=2.2.5    #Hack to make JVM work properly
+#ulimit -s 2000                   #Or you could limit the stack size http://bugzilla.mozilla.org/show_bug.cgi?id=84093
+
+os=`uname -s`
+
+if [ -x /usr/bin/eatmydata ] ; then
+        eatmydata="eatmydata --"
+fi
+
+#PROGS="/usr/bin/firefox"
+PROGS="/usr/bin/firefox-esr"
+#PROGS="/snap/bin/firefox"
+for PROG in $PROGS ; do
+    if [ -x $PROG ] ; then
+        exec $eatmydata $PROG -new-window "$@"
+    fi
+done
+echo "sorry, no firefox found in $PROGS"

@@ -1,0 +1,50 @@
+#!/bin/bash
+# -*- Mode: shell-script -*-
+#template by ~tconnors/bin/newshscript
+#Sun Aug  1 14:52:23 EST 2004
+# $Revision: 1.22 $ $Date: 2022/01/24 00:41:10 $
+# $Id: g,v 1.22 2022/01/24 00:41:10 tconnors Exp $
+# $Header: /home/tconnors/cvsroot/bin/g,v 1.22 2022/01/24 00:41:10 tconnors Exp $
+# $RCSfile: g,v $
+
+# This program pops up a new browser to a google search - letting the
+# browser do the appropriate escaping (except for spaces, since opera
+# doesnt do that)
+
+# Also saves a history of searches, so the most recent ones can be
+# used in the fvwm menu
+
+function quoteise() {
+    res=`
+        for i in "$@" ; do
+            case "$i" in
+                *\ *)
+                    echo -n "\"$i\" "
+                ;;
+                *)
+                    echo -n "$i "
+                ;;
+            esac
+        done
+    `
+    echo "$res" | sed 's/ $//'
+}
+
+lock=$HOME/.urllog.lock
+lockfile -l 128 $lock || exit 1
+trap "rm -f $lock ; exit 1" HUP INT QUIT TERM
+trap "rm -f $lock ; exit 0" 0
+mkdir -p $HOME/var/log
+
+terms=`quoteise "$@"`
+echo search google "$terms" >> $HOME/var/log/urllog
+cat $HOME/var/log/urllog | keeplast > $HOME/var/log/urllog.tmp
+mv $HOME/var/log/urllog.tmp $HOME/var/log/urllog
+
+terms="$(echo "$terms" | sed -E 's/(lat=|lon=)//g')"
+
+if echo "$terms" | grep -iq "^-\?[0-9][0-9]*\.[0-9][0-9]*\( *[SN]\)\?[, ] *\<-\?[0-9][0-9]*\.[0-9][0-9]*\( *[EW]\)\?$" ; then
+    choosebrowser "https://$GOOGLE/maps/place/$terms"
+else
+    choosebrowser "https://$GOOGLE/$GOOGLEPRE?q=$terms&tbs=li:1"
+fi

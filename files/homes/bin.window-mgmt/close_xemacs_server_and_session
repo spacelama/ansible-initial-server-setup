@@ -1,0 +1,15 @@
+#!/bin/bash
+# -*- Mode: shell-script -*-
+#template by ~tconnors/bin/newshscript
+#Sun May 25 19:06:07 EST 2003
+
+# $Revision: 1.12 $ $Date: 2011/11/18 02:54:32 $
+# $Id: close_xemacs_server_and_session,v 1.12 2011/11/18 02:54:32 tconnors Exp $
+# $Header: /home/tconnors/cvsroot/bin/close_xemacs_server_and_session,v 1.12 2011/11/18 02:54:32 tconnors Exp $
+# $RCSfile: close_xemacs_server_and_session,v $
+
+emacsclient -a false -e '(modified-buffers-exist)' | grep -q '^t$' || exit 0
+
+#exit 0
+
+! pidof emacs > /dev/null

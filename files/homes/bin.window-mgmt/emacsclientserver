@@ -1,0 +1,22 @@
+#!/bin/bash
+
+# $Revision: 1.15 $ $Date: 2012/02/11 05:14:03 $
+# $Id: emacsclientserver,v 1.15 2012/02/11 05:14:03 tconnors Exp $
+# $Header: /home/tconnors/cvsroot/bin/emacsclientserver,v 1.15 2012/02/11 05:14:03 tconnors Exp $
+# $RCSfile: emacsclientserver,v $
+
+#   set -m   debugging -- but seems to stuff up first ! mygnuclient test
+
+if [ $UID = 0 ] ; then
+    exec emacs "$@"
+fi
+
+if emacs --version | head -n 1 | grep 21 ; then
+    exec emacs "$@"
+fi
+
+if ! emacsclient -a false -e t >/dev/null 2>&1 ; then
+    echo "Starting a vanilla emacs session on the local host. Ignore the first client if you want"
+    emacs --daemon
+fi
+exec mygnuclient "$@"

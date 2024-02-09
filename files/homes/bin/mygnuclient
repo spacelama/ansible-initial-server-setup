@@ -1,0 +1,49 @@
+#!/bin/bash
+# -*- Mode: shell-script -*-
+#template by ~tconnors/bin/newshscript
+#Sun May 25 19:06:07 EST 2003
+
+# $Revision: 1.25 $ $Date: 2012/02/11 05:14:03 $
+# $Id: mygnuclient,v 1.25 2012/02/11 05:14:03 tconnors Exp $
+# $Header: /home/tconnors/cvsroot/bin/mygnuclient,v 1.25 2012/02/11 05:14:03 tconnors Exp $
+# $RCSfile: mygnuclient,v $
+
+trap "" SIGTTOU
+
+background=
+sshbackground=
+while true ; do 
+    if [ "$1" = --testonly ] ; then
+        testonly=true
+        shift
+    elif [ "$1" = --background ] ; then
+        background=-n
+        sshbackground=-f
+        shift
+    else
+        break
+    fi
+done
+
+if [[ $(ps -p $PPID) == *bash ]] && isbackgrounded ; then
+    background=-n
+    sshbackground=-f
+fi
+
+trap - SIGTTOU
+
+function trygnuclient() {
+    if [ true != "$testonly" ] ; then
+        echo trying emacsclient 1>&2
+    fi
+    if emacsclient -a false -e t >/dev/null 2>&1 ; then
+        if [ true = "$testonly" ] ; then
+            exit 0
+        fi
+        exec emacsclient -c $background "$@"
+    fi
+}
+
+trygnuclient "$@"
+
+exit 1

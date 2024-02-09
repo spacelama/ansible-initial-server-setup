@@ -1,0 +1,12 @@
+#!/bin/sh
+# -*- Mode: shell-script -*-
+#template by ~tconnors/bin/newshscript
+#Wed Jun 21 16:36:59 EST 2006
+# $Revision: 1.3 $ $Date: 2015/07/16 00:59:54 $
+# $Id: e,v 1.3 2015/07/16 00:59:54 tconnors Exp $
+# $Header: /home/tconnors/cvsroot/bin/e,v 1.3 2015/07/16 00:59:54 tconnors Exp $
+# $RCSfile: e,v $
+
+ulimit -c unlimited   # want to find out what's causing it to crash
+
+exec ${EDITOR:-emacs} "$@"
