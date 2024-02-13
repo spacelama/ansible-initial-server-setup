@@ -46,6 +46,30 @@
   become: true
   when: "'lvm2' in ansible_facts.packages"
 
+- name: test if /var/cache/apt/archives is a link
+  stat:
+    path: /var/cache/apt/archives
+  register: stat_archives
+
+  # FIXME: verify works - might have to delete the file is already a symlink
+- name: remove /var/cache/apt/archives if symlink so won't contend on NFS
+  file:
+    dest: /var/cache/apt/archives
+    state: absent
+    follow: false
+  become: true
+  when: stat_archives.stat.islnk | default('false')
+
+  # force make /var/cache/apt/archives point to archives.native
+  # before starting so we don't have contention on the shared NFS
+  # mount.  The daily cronjobs will come back tomorrow and fix it for
+  # those hosts that belong on the shared mount
+- name: make sure /var/cache/apt/archives won't contend on NFS
+  file:
+    dest: /var/cache/apt/archives
+    state: directory
+  become: true
+
   #ntpsec removed in favour of chrony finally, because it stops
   #network coming up on pve 8 (BTW, if ever go back to NTP, ntp.conf
   #manpage says tinker settings should be at top of conf file before
