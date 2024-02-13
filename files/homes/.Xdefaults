@@ -179,6 +179,8 @@ XTerm*VT100.translations: #override \n\
                 ~Ctrl ~Meta <Btn1Up>: select-end(CLIPBOARD, PRIMARY) \n\
                 ~Ctrl ~Meta <Btn2Up>: insert-selection(CLIPBOARD, PRIMARY, CUT_BUFFER0) \n\
 
+! FIXME: if new treatment of CLIPBOARD vs PRIMARY gets too annoying, revert and try out wfreerdp switch "/clipboard:use-selection:PRIMARY"
+
 !                ~Ctrl ~Meta <Btn2Up>: insert-selection(PRIMARY, CLIPBOARD, CUT_BUFFER0) \n\
 !                Ctrl Shift <Btn2Up>:  insert-selection(CLIPBOARD) \n\
 
