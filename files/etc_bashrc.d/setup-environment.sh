@@ -81,7 +81,7 @@ function setup_environment() {
 
     export utf
 
-    unset LC_COLLATE LC_MESSAGES LC_TIME LANG
+    unset LC_COLLATE LC_MESSAGES LC_TIME LANG LANGUAGE
     if LANG=en_AU$utf perl -e 1 2>&1 | grep warning >/dev/null ; then
         export LC_COLLATE=POSIX
         export LC_TIME=POSIX

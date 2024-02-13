@@ -293,7 +293,7 @@
       debconf:
         name: locales
         question: locales/locales_to_be_generated
-        value: "en_AU.UTF-8 UTF-8, en_AU ISO-8859-1, en_DK ISO-8859-1, en_DK.ISO-8859-15 ISO-8859-15, en_DK.UTF-8 UTF-8, en_GB ISO-8859-1, en_GB.ISO-8859-15 ISO-8859-15, en_GB.UTF-8 UTF-8"
+        value: "en_AU.UTF-8 UTF-8, en_DK.UTF-8 UTF-8, en_GB.UTF-8 UTF-8"
         vtype: multiselect
       become: true
       notify: Reconfigure locales
