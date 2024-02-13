@@ -98,6 +98,171 @@
   ignore_errors: true # plocate isn't available on buster, which still
                       # makes up a couple of our VMs
 
+# caching name server etc per https://wiki.debian.org/NetworkConfiguration
+- name: setup systemd-resolved for caching nameserver
+  block:
+  - name: Install systemd-resolved
+    apt:
+      name: ['libnss-resolve', 'systemd-resolved']
+      autoremove: no
+      state: present
+    become: true
+
+  - name: install blank /etc/network/interfaces
+    copy:
+      src: etc_network_interfaces.network-manager
+      dest: /etc/network/interfaces
+    become: true
+    notify: restart network-manager
+
+  - name: Install network-manager
+    apt:
+      name: ['network-manager']
+      autoremove: no
+      state: present
+    become: true
+    notify: restart network-manager
+
+  - name: disable llmnr so don't get timeouts on NXDOMAIN lookups of local domain
+    lineinfile:
+      dest: "/etc/systemd/resolved.conf"
+      regexp: '^LLMNR='
+      line: 'LLMNR=no'
+      insertafter: 'LLMNR=yes'  # which is commented out if
+                                # above regexp didn't match
+    become: true
+    notify: restart systemd-resolved
+
+  # https://stackoverflow.com/questions/74312082/how-do-i-make-ansible-builtin-lineinfile-task-indempotent
+  # we want to order the nsswitch.conf host: entries per
+  # https://www.freedesktop.org/software/systemd/man/latest/nss-resolve.html
+
+  # Prepend the items we know we care about, first in the list.  First
+  # detect whether we have the correct order already
+  - name: "detect whether hosts: line in /etc/nsswitch.conf"
+    lineinfile:
+      dest: "/etc/nsswitch.conf"
+      # negative lookup - if the line starts with our desired match,
+      # then keep the line as is, otherwise append our desired match
+      # (and we'll clear up duplicates later)
+      # FIXME: not all machines will have mymachines (for docker containers - in fact only dirac has it)
+      regexp: '^hosts: *mymachines myhostname resolve \[!UNAVAIL=return\] files dns.*'
+      state: absent
+    check_mode: true
+    changed_when: false
+    register: nsswitch_hosts
+    become: true
+
+  # Do the actual prepending
+  - name: "try to reorder hosts: line in /etc/nsswitch.conf"
+    lineinfile:
+      dest: "/etc/nsswitch.conf"
+      # negative lookup - if the line starts with our desired match,
+      # then keep the line as is, otherwise append our desired match
+      # (and we'll clear up duplicates later)
+      regexp: '^hosts: *(.*)'
+      line: 'hosts:          mymachines myhostname resolve [!UNAVAIL=return] files dns \1'
+      backrefs: true
+    become: true
+    when: not nsswitch_hosts.found
+    notify: restart systemd-resolved
+
+  # Go back and remove the things that occur later, that were already
+  # added at the front
+  - name: "remove duplicates from hosts: line in /etc/nsswitch.conf"
+    lineinfile:
+      dest: "/etc/nsswitch.conf"
+      # can't use '\b' after {{ item }}, because we want to be able to
+      # detect nonword characters such as when ending with "resolve
+      # [!UNAVAIL=return]".  Safe to use before though.
+      regexp: "^hosts:(  *)(.*\\b{{ item }})( .*)? {{ item }}(.*)"
+      line: 'hosts:\1\2\3\4'
+      backrefs: yes
+    with_items:
+      - 'mymachines'
+      - 'myhostname'
+      - 'resolve \[!UNAVAIL=return\]'
+      - 'files'
+      - 'dns'
+    become: true
+    notify: restart systemd-resolved
+
+  - name: enable systemd-resolved
+    service:
+      name: systemd-resolved
+      enabled: yes
+      state: started
+    become: true
+
+  - name: setup systemd-resolv.conf link
+    file:
+      src: ../run/systemd/resolve/stub-resolv.conf
+      dest: /etc/resolv.conf
+      state: link
+      force: true
+    become: true
+    notify: restart systemd-resolved
+
+  when: (deb_release | default('bullseye') != 'buster') and
+        (host_is_using_systemd_resolver is defined)
+
+# dnsmasq as a caching name server per https://wiki.debian.org/dnsmasq#Local_Caching_using_NetworkManager
+- name: setup dnsmasq for caching nameserver
+  block:
+  - name: Install dnsmasq
+    apt:
+      name: ['dnsmasq']
+      autoremove: no
+      state: present
+    become: true
+
+  - name: install blank /etc/network/interfaces
+    copy:
+      src: etc_network_interfaces.network-manager
+      dest: /etc/network/interfaces
+    become: true
+    notify: restart network-manager
+
+  - name: Install network-manager
+    apt:
+      name: ['network-manager']
+      autoremove: no
+      state: present
+      install_recommends: false
+    become: true
+    notify: restart network-manager
+
+  - name: ensure dnsmasq doesn't enable itself (should be controlled through NetworkManager)
+    service:
+      name: dnsmasq
+      state: stopped
+      enabled: no
+    become: true
+    notify: restart network-manager
+    # FIXME: except maybe nfsroot machines such as pi
+
+  - name: ensure NetworkManager uses dnsmasq
+    ini_file:
+      path: /etc/NetworkManager/NetworkManager.conf
+      section: main
+      option: dns
+      value: dnsmasq
+    become: true
+    notify: restart network-manager
+
+  - name: Purge systemd-resolved
+    apt:
+      name: ['libnss-resolve', 'systemd-resolved']
+      autoremove: no
+      state: absent
+      purge: true
+    become: true
+    notify: restart network-manager
+
+  when: (deb_release | default('bullseye') != 'buster') and
+        (host_is_pve_server is not defined) and
+        (host_is_not_using_dnsmasq_cache is not defined)
+
 - name: Configure locales
   block:
     - name: List of locales
@@ -454,10 +619,6 @@
   become: true
   notify: "Update initramfs config"
   loop: "{{ modprobe | default([]) }}"
-
-# FIXME: consider caching name server etc per https://wiki.debian.org/NetworkConfiguration
-
-# FIXME: /etc/resolv.conf search rather.puzzling.org
 
 # FIXME: distribute ssh_known_hosts
 # https://stackoverflow.com/questions/59832034/how-to-include-all-host-keys-from-all-hosts-in-group

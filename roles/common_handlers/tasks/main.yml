@@ -1,0 +1,5 @@
+---
+- name: Gather the package facts
+  ansible.builtin.package_facts:
+    manager: auto
+  failed_when: false # not all providers have a list of packages

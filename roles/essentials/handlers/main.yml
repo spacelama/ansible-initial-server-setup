@@ -47,3 +47,15 @@
   become: true
   with_items: "{{ systemd_overrides }}"
   ignore_errors: yes # for those units that aren't defined on this system
+
+- name: restart systemd-resolved
+  systemd:
+    name: systemd-resolved
+    state: restarted
+  become: true
+
+- name: restart network-manager
+  systemd:
+    name: NetworkManager
+    state: restarted
+  become: true
