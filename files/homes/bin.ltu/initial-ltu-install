@@ -10,10 +10,13 @@ if ! [ -e /etc/ssh/sshd_config.d/local.conf ] || ! md5sum /etc/ssh/sshd_config.d
     echo -e 'Port 6022\nListenAddress 0.0.0.0' | tee /etc/ssh/sshd_config.d/local.conf
     systemctl restart ssh
 fi
-if ! [ -e /etc/systemd/system/xrdp.service.d/override.conf ] || ! /etc/systemd/system/xrdp.service.d/override.conf | grep md5sum b241d6057cfaa6b27ae34140b25abe5a
+if ! [ -e /etc/systemd/system/xrdp.service.d/override.conf ] || ! /etc/systemd/system/xrdp.service.d/override.conf | grep md5sum b241d6057cfaa6b27ae34140b25abe5a ; then
     # https://github.com/microsoft/WSL/issues/9303
     mkdir -p /etc/systemd/system/xrdp.service.d/
     echo -e '[Service]\nExecStartPre=/usr/bin/mount -o remount,rw /tmp/.X11-unix' | tee /etc/systemd/system/xrdp.service.d/override.conf
+fi
+if ! [ -e /etc/wsl.conf ] || ! md5sum /etc/wsl.conf | grep eb6e01d7002319c6f962662403def9e9 ; then
+    echo -e '[boot]\nsystemd=true' | tee /etc/wsl.conf
 fi
 # when we've remapped caps to ctrl in windows via autohotkey,
 # CAPS turns on when caps is pressed, but can't be turned off again.  This doesn't fix it:
