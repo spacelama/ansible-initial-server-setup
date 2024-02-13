@@ -89,6 +89,7 @@
       proto: "static"
       ipaddr: "192.168.{{ interface.value }}.{{ inet_addr_suffix }}"
       netmask: "255.255.255.0"
+      defaultroute: "{{ '0' if interface.value != 1 else omit }}"
   notify: uci commit
 
 - name: add gateway and DNS for APs

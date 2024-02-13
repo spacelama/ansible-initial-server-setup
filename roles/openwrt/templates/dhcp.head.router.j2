@@ -1,4 +1,5 @@
 config dnsmasq
+	option domainneeded '1'
 	option localise_queries '1'
 	option rebind_protection '1'
 	option rebind_localhost '1'
@@ -22,9 +23,9 @@ config dhcp 'LAN1'
 	option force '1'
 {#	option enable_tftp '1' #}
 {#	option tftp_root '/tftp/' #}
-	option dhcpv6 'server'
-	option ra 'server'
-	option ra_management '1'
+{#	option dhcpv6 'server'  #}
+{#	option ra 'server' #}
+{#	option ra_management '1' #}
 {# 252 is "\" is empty proxy server.pac file #}
 	list dhcp_option '252,"\n"'
 {# 6 is DNS #}
