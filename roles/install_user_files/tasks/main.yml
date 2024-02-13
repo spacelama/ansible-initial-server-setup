@@ -1,0 +1,7 @@
+---
+- name: Populate user and root's default config files
+  include_tasks: "install_user_files.yml"
+  loop_control:
+    loop_var: user
+  with_items: "{{ install_user_files.users }}"
+

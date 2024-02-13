@@ -522,12 +522,6 @@
 #    - bootlogd
   when: host_is_container is not defined
 
-- name: fix up utterly braindead config file defaults
-  include_tasks: "{{ playbook_dir }}/roles/common/tasks/fixup_user_conf_files.yml"
-  loop_control:
-    loop_var: user
-  with_items: "{{ fixup_user_conf_files.users }}"
-
 - name: "Remove undesired flags and whitespace from grub config"
   include_tasks: "{{ playbook_dir }}/roles/common/tasks/remove_boot_flag.yml"
   loop_control:

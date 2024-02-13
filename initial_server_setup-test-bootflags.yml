@@ -16,6 +16,7 @@
 #     - role: common_handlers
 #       become: true # the whole role, including handlers, will become root
 #     - install_files
+#     - install_user_files
 
 - hosts: "{{ target | default('all,!openwrt,!tasmota') }}"
   remote_user: ansible_adm

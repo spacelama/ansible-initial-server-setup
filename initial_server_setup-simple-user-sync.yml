@@ -7,4 +7,4 @@
   roles:
     - role: common_handlers
       become: true # the whole role, including handlers, will become root
-    - essentials # essentials is also responsible for fixup_user_conf_files
+    - install_user_files

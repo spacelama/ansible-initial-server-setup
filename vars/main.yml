@@ -206,7 +206,7 @@
       remove_sshkeys:
         - "{{ lookup('file', deprecated_public_key) }}"
 
-  fixup_user_conf_files:
+  install_user_files:
     users:
       - tconnors
       - root

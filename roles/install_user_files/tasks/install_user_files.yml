@@ -1,0 +1,7 @@
+---
+- name: "install conf files for user {{ user }}"
+  include_tasks: install_user_file.yml
+  loop_control:
+    loop_var: file_or_template
+  with_items: "{{ install_user_files.files }}"
+

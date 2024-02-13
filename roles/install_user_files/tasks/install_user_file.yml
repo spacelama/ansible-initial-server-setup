@@ -30,15 +30,15 @@
   with_items: "{{ file_or_template.lines }}"
   when: file_or_template.lines is defined
 
-- name: "fixup conf file under directory: ~{{ user }}/{{ file_or_template.name }}"
-  include_tasks: fixup_user_conf_file.yml   # recursively call ourselves, weeeee!
+- name: "install conf file under directory: ~{{ user }}/{{ file_or_template.name }}"
+  include_tasks: install_user_file.yml   # recursively call ourselves, weeeee!
   loop_control:
     loop_var: file_or_template   # FIXME: results in warning "[WARNING]: TASK: essentials : fixup conf file under directory: ~{{ user }}/{{ file_or_template.name }}: The loop variable 'file_or_template' is already in use. You should set the `loop_var` value in the `loop_control` option for the task to something else to avoid variable collisions and unexpected behavior." but that's exactly what we're trying to do (but it seems we're not recursing with the new variable properly...)
   with_items: "{{ lookup('fileglob', ( ( file_or_template.source | default( 'homes/' ~ file_or_template.name ) ) ~ \"/*\" ), wantlist=True) }}"
   when: file_or_template.name is defined and
           ( file_or_template.source | default ( 'homes/' ~ file_or_template.name ) ) is directory
 
-- name: "fixup conf file: ~{{ user }}/{{ file_or_template.name }}"
+- name: "install conf file: ~{{ user }}/{{ file_or_template.name }}"
   # default to homes/<name> if source: isn't provided
   copy:
     dest: "~{{ user }}/{{ file_or_template.name }}"
@@ -51,7 +51,7 @@
           ( file_or_template.source | default ( 'homes/' ~ file_or_template.name ) ) is not regex(".*.j2$") and
           ( file_or_template.source | default ( 'homes/' ~ file_or_template.name ) ) is not directory
 
-- name: "fixup conf file per template: ~{{ user }}/{{ file_or_template.name }} "
+- name: "install conf file per template: ~{{ user }}/{{ file_or_template.name }} "
   # default to homes/<name> if source: isn't provided
   template:
     dest: "~{{ user }}/{{ file_or_template.name }}"
