@@ -1,22 +1,14 @@
 #!/bin/bash
 
-apt install less most x11-utils xdm ssh man vim git xterm procmail curl keychain mgitstatus rsync telnet vim-pathogen plocate bash-completion net-tools lsof ncal x11-apps x11-xserver-utils lynx bind9-dnsutils systemd-resolved tcpdump snapd mesa-utils dlocate apt-file iperf3 snapd dstat firefox-esr bc ksh fvwm fvwm2 vim-gtk3 wget gcc strace netcat-openbsd
+apt install less most x11-utils xdm ssh man vim git xterm procmail curl keychain mgitstatus rsync telnet vim-pathogen plocate bash-completion net-tools lsof ncal x11-apps x11-xserver-utils lynx bind9-dnsutils systemd-resolved tcpdump snapd mesa-utils dlocate apt-file iperf3 snapd dstat firefox-esr bc ksh fvwm vim-gtk3 wget gcc strace netcat-openbsd
 
 apt install -t bookworm-backports emacs emacs-gtk elpa-session
 
-update-locale LANG=en_AU.UTF-8 LANGUAGE LC_ALL
+update-locale LANG=en_AU.UTF-8 LANGUAGE=en_AU:en LC_ALL
 
 if ! [ -e /etc/ssh/sshd_config.d/local.conf ] || ! md5sum /etc/ssh/sshd_config.d/local.conf | grep 1ef3493504a55c88f59511289c418628 ; then
     echo -e 'Port 6022\nListenAddress 0.0.0.0' | tee /etc/ssh/sshd_config.d/local.conf
     systemctl restart ssh
-fi
-if ! [ -e /etc/systemd/system/xrdp.service.d/override.conf ] || ! /etc/systemd/system/xrdp.service.d/override.conf | grep md5sum b241d6057cfaa6b27ae34140b25abe5a ; then
-    # https://github.com/microsoft/WSL/issues/9303
-    mkdir -p /etc/systemd/system/xrdp.service.d/
-    echo -e '[Service]\nExecStartPre=/usr/bin/mount -o remount,rw /tmp/.X11-unix' | tee /etc/systemd/system/xrdp.service.d/override.conf
-fi
-if ! [ -e /etc/wsl.conf ] || ! md5sum /etc/wsl.conf | grep eb6e01d7002319c6f962662403def9e9 ; then
-    echo -e '[boot]\nsystemd=true' | tee /etc/wsl.conf
 fi
 # when we've remapped caps to ctrl in windows via autohotkey,
 # CAPS turns on when caps is pressed, but can't be turned off again.  This doesn't fix it:
@@ -24,13 +16,35 @@ if ! grep ctrl:nocaps /etc/default/keyboard ; then
     sed -i 's/^XKBOPTIONS=.*/XKBOPTIONS="ctrl:nocaps,terminate:ctrl_alt_bksp,compose:rwin"/' /etc/default/keyboard
 fi
 
-#apt install xdm
-#if ! tail -n 1 /etc/X11/xdm/Xaccess | grep "CHOOSER BROADCAST" ; then
-#    echo "*              CHOOSER BROADCAST       #any indirect host can get a chooser" >> /etc/X11/xdm/Xaccess
-#fi
-# don't think xdmcp chooser is a viable option since needs udp and can't forward that on to the container
-apt install xrdp xinput rxvt-unicode fonts-freefont-ttf x2goserver # tightvncserver - can't find a client that passes through as many keystrokes as rdp; x2goserver has same line-drawing and ANSI characters being injected into input buffer problem as xrdp
+if [ -e ~tconnors/.bash_logout ] ; then
+    mv ~tconnors/.bash_logout ~tconnors/.bash_logout.orig
+fi
 
+virt=$( uname -r ; dmidecode -t1 )
+case "$virt" in
+    *WSL*)
+        #apt install xdm
+        #if ! tail -n 1 /etc/X11/xdm/Xaccess | grep "CHOOSER BROADCAST" ; then
+        #    echo "*              CHOOSER BROADCAST       #any indirect host can get a chooser" >> /etc/X11/xdm/Xaccess
+        #fi
+        # don't think xdmcp chooser is a viable option since needs udp and can't forward that on to the container
+        apt install xrdp xinput rxvt-unicode fonts-freefont-ttf x2goserver # tightvncserver - can't find a client that passes through as many keystrokes as rdp; x2goserver has same line-drawing and ANSI characters being injected into input buffer problem as xrdp
+        update-rc.d ssh enable
+        /etc/init.d/ssh restart
 
-#update-rc.d ssh enable   # FIXME: ???? in WSL2?
-#/etc/init.d/ssh restart  # FIXME: ???? in WSL2?
+        if ! [ -e /etc/systemd/system/xrdp.service.d/override.conf ] || ! /etc/systemd/system/xrdp.service.d/override.conf | grep md5sum b241d6057cfaa6b27ae34140b25abe5a ; then
+            # https://github.com/microsoft/WSL/issues/9303
+            mkdir -p /etc/systemd/system/xrdp.service.d/
+            echo -e '[Service]\nExecStartPre=/usr/bin/mount -o remount,rw /tmp/.X11-unix' | tee /etc/systemd/system/xrdp.service.d/override.conf
+        fi
+        if ! [ -e /etc/wsl.conf ] || ! md5sum /etc/wsl.conf | grep eb6e01d7002319c6f962662403def9e9 ; then
+            echo -e '[boot]\nsystemd=true' | tee /etc/wsl.conf
+        fi
+        ;;
+    *VirtualBox*)
+        apt install xorg fvwm xdm xinput rxvt-unicode fonts-freefont-ttf
+        ;;
+    *)
+        echo "Unknown virtualisation: "$virt"
+        ;;
+esac
