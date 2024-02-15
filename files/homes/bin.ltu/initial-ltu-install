@@ -98,3 +98,5 @@ case "$virt" in
         echo "Unknown virtualisation: $virt"
         ;;
 esac
+
+systemctl start plocate-updatedb.service &
