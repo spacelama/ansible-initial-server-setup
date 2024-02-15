@@ -1,6 +1,14 @@
 #!/bin/bash
 
-apt install less most x11-utils xdm ssh man vim git xterm procmail curl keychain mgitstatus rsync telnet vim-pathogen plocate bash-completion net-tools lsof ncal x11-apps x11-xserver-utils lynx bind9-dnsutils systemd-resolved tcpdump snapd mesa-utils dlocate apt-file iperf3 snapd dstat firefox-esr bc ksh fvwm vim-gtk3 wget gcc strace netcat-openbsd
+if ! grep non-free-firmware /etc/apt/sources.list | grep ' non-free ' ; then
+    # make sure non-free and contrib repos are enabled
+    sed -i 's/non-free-firmware/non-free non-free-firmware contrib/' /etc/apt/sources.list
+fi
+
+apt update
+apt dist-upgrade
+
+apt install less most x11-utils xdm ssh man vim git xterm procmail curl keychain mgitstatus rsync telnet vim-pathogen plocate bash-completion net-tools lsof ncal x11-apps x11-xserver-utils lynx bind9-dnsutils tcpdump snapd mesa-utils dlocate apt-file iperf3 snapd dstat firefox-esr bc ksh fvwm vim-gtk3 wget gcc strace netcat-openbsd dlocate dos2unix gnupg ssh-askpass xcompmgr # dnsmasq systemd-resolved
 
 apt install -t bookworm-backports emacs emacs-gtk elpa-session
 
@@ -43,8 +51,50 @@ case "$virt" in
         ;;
     *VirtualBox*)
         apt install xorg fvwm xdm xinput rxvt-unicode fonts-freefont-ttf
+
+        # http://wiki.debian.org/VirtualBox#Oracle_Virtualbox_third-party_repository
+        if [ ! -e /etc/apt/sources.list.d/backports.list ] ; then
+            echo "deb http://ftp.au.debian.org/debian $(lsb_release -cs)-backports main non-free non-free-firmware contrib" > /etc/apt/sources.list.d/backports.list
+            apt update
+        fi
+        apt install fasttrack-archive-keyring
+        if [ ! -e /etc/apt/sources.list.d/fasttrack.list ] ; then
+            echo "deb http://fasttrack.debian.net/debian-fasttrack/ $(lsb_release -cs)-fasttrack main contrib" > /etc/apt/sources.list.d/fasttrack.list
+            echo "deb http://fasttrack.debian.net/debian-fasttrack/ $(lsb_release -cs)-backports-staging main contrib" >> /etc/apt/sources.list.d/fasttrack.list
+            apt update
+        fi
+        if [ ! -e /etc/apt/sources.list.d/virtualbox.list ] ; then
+            echo "deb [arch=amd64] https://download.virtualbox.org/virtualbox/debian $(lsb_release -cs) contrib" > /etc/apt/sources.list.d/virtualbox.list
+            wget -O- https://www.virtualbox.org/download/oracle_vbox_2016.asc | apt-key add -
+        fi
+
+        # None of this may be necessary if we find we having a working system upon reverting to snapshot:
+        # FIXME: any need to enable testing repo at low priority?
+
+        # FIXME: if this works, revert the snapshot and try the
+        # packages again without manually installing through the ISO.
+
+        # FIXME: have installed kernel backports.
+
+        # FIXME: or maybe I can just deal with the xdm display bug in
+        # default vmware driver, and I think xrandr -s 1920x1080
+        # perhaps in combination with xcompmgr lets me run with no
+        # display problems anyway?
+
+        apt install virtualbox-guest-x11
+
+        apt install linux-headers-amd64
+#        apt install virtualbox-dkms --no-install-recommends
+#        apt install virtualbox-ext-pack --no-install-recommends  # FIXME: trial license - most likely not needed so will remove
+#        apt install virtualbox-guest-additions-iso # --no-install-recommends
+
+#        mkdir /mnt/vbox
+#        mount /usr/share/virtualbox/VBoxGuestAdditions.iso /mnt/vbox
+#        /mnt/vbox/VBoxLinuxAdditions.run
+
+        usermod -aG vboxsf tconnors   # get shared filesystem for windows
         ;;
     *)
-        echo "Unknown virtualisation: "$virt"
+        echo "Unknown virtualisation: $virt"
         ;;
 esac
