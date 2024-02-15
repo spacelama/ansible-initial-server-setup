@@ -2,15 +2,15 @@
 # https://stackoverflow.com/questions/18195142/safely-limiting-ansible-playbooks-to-a-single-machine
 - hosts: "fs"
   gather_facts: no
-  remote_user: ansible_adm
+  remote_user: "{{ ssh_user | default('ansible_adm') }}"
   roles:
     - role: munin-server
       when: inventory_hostname == 'fs'
 
 # to do a quick sync of commonly changed files, let's just push them
 # first without running a slow gather_facts first:
-- hosts: "{{ target | default('all,!openwrt,!tasmota') }}"
-  remote_user: ansible_adm
+- hosts: "{{ target | default('all,!openwrt,!tasmota,!work') }}"
+  remote_user: "{{ ssh_user | default('ansible_adm') }}"
   gather_facts: no
   vars_files:
     - vars/main.yml

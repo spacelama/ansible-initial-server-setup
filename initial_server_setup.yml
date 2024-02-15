@@ -2,7 +2,7 @@
 # https://stackoverflow.com/questions/18195142/safely-limiting-ansible-playbooks-to-a-single-machine
 - hosts: "iot"
   gather_facts: no
-  remote_user: ansible_adm
+  remote_user: "{{ ssh_user | default('ansible_adm') }}"
   roles:
     - role: common_handlers
       become: true # the whole role, including handlers, will become root
@@ -11,8 +11,8 @@
 
 # to do a quick sync of commonly changed files, let's just push them
 # first without running a slow gather_facts first:
-- hosts: "{{ target | default('all,!openwrt,!tasmota') }}"
-  remote_user: ansible_adm
+- hosts: "{{ target | default('all,!openwrt,!tasmota,!work') }}"
+  remote_user: "{{ ssh_user | default('ansible_adm') }}"
   gather_facts: no
   vars_files:
     - vars/main.yml
@@ -22,8 +22,8 @@
     - install_files
     - install_user_files
 
-- hosts: "{{ target | default('all,!openwrt,!tasmota') }}"
-  remote_user: ansible_adm
+- hosts: "{{ target | default('all,!openwrt,!tasmota,!work') }}"
+  remote_user: "{{ ssh_user | default('ansible_adm') }}"
 #  gather_facts: no  # when doing a very quick debug run
   vars_files:
     - vars/main.yml

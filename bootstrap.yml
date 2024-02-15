@@ -16,7 +16,7 @@
 
 #
 # https://stackoverflow.com/questions/18195142/safely-limiting-ansible-playbooks-to-a-single-machine
-- hosts: "{{ target | default('all,!openwrt,!tasmota') }}"
+- hosts: "{{ target | default('all,!openwrt,!tasmota,!work') }}"
   vars_files:
     - vars/main.yml
 

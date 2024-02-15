@@ -1,6 +1,6 @@
 ---
-- hosts: "{{ target | default('all,!openwrt,!tasmota') }}"
-  remote_user: ansible_adm
+- hosts: "{{ target | default('all,!openwrt,!tasmota,!work') }}"
+  remote_user: "{{ ssh_user | default('ansible_adm') }}"
 #  gather_facts: no  # when doing a very quick debug run
   vars_files:
     - vars/main.yml
