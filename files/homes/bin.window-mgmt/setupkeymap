@@ -21,32 +21,54 @@ set -xv
 #  };
 #  modifier_map Mod4 { <CAPS> };
 #};
-# then include these 
+# then include these
 # xkbcomp -I$HOME/.xkb ~/.xkb/keymap/twc $DISPLAY
 # but then, follow what he did in the section at the bottom.
 
-    xmodmap -pke > $HOME/Xmodmap-save-`uname -n`
-    xmodmap -pm > $HOME/Xmodmap-save-`uname -n`.modifiers
-#    setxkbmap -rules xorg -model pc104   #reset all the rules so we start of with a clean slate
-    if [ $HOSTNAME = gamow ] || [ $HOSTNAME = maxwell ] ; then # laptops with no keyboard attached
-        setxkbmap -rules evdev -model pc104 -option terminate:ctrl_alt_bksp -option ctrl:nocaps -option "compose:lwin"   #reset all the rules so we start of with a clean slate
-    else
-        setxkbmap -rules evdev -model pc104 -option terminate:ctrl_alt_bksp -option ctrl:nocaps -option "compose:rwin"   #reset all the rules so we start of with a clean slate
-    fi
-    # 2018/12/06: on weinberg, occasionally numlock still asserts via (xev: state: 0x10), and fvwm bindings all screw up.  We seem to be able to comlpetely ullify numlock via https://askubuntu.com/questions/80254/how-do-i-turn-off-caps-lock-the-lock-not-the-key-by-command-line/607915:
-    xkbset nullify mod2
-    # to clear again:
-    # xkbset nullify -mod2
+xmodmap -pke > $HOME/Xmodmap-save-`uname -n`
+xmodmap -pm > $HOME/Xmodmap-save-`uname -n`.modifiers
 
-    # might also be able to use:
-    # xdotool key Caps_Lock
-    # xte "key Caps_Lock"
+#reset all the rules so we start of with a clean slate, adding certain common custom rules at the same time
+case $LONGHOST-$SHORTDISPHOST in
+    gamow*|maxwell*) # laptops with no external keyboard attached
+        setxkbmap -rules evdev -model pc104 -option terminate:ctrl_alt_bksp -option ctrl:nocaps -option "compose:lwin"
+        ;;
+    *ltu.edu.au-*) # laptop accessed locally and with external
+        # keyboard, both with limited keys, but a right
+        # alt key we don't underwise use
+        setxkbmap -rules evdev -model pc104 -option terminate:ctrl_alt_bksp -option ctrl:nocaps -option "compose:ralt"
+        ;;
+    *)
+        #setxkbmap -rules evdev -model pc104 -option terminate:ctrl_alt_bksp -option ctrl:nocaps -option "compose:rwin"
 
-# -option ctrl:nocaps
+        # might as well be consistent everywhere, and seems to not
+        # conflict with keys we were already using?
+        setxkbmap -rules evdev -model pc104 -option terminate:ctrl_alt_bksp -option ctrl:nocaps -option "compose:ralt"
+        ;;
+esac
+# 2018/12/06: on weinberg, occasionally numlock still asserts via
+# (xev: state: 0x10), and fvwm bindings all screw up.  We seem to
+# be able to comlpetely ullify numlock via
+# https://askubuntu.com/questions/80254/how-do-i-turn-off-caps-lock-the-lock-not-the-key-by-command-line/607915:
+xkbset nullify mod2
+# to clear again:
+# xkbset nullify -mod2
+
+# might also be able to use:
+# xdotool key Caps_Lock
+# xte "key Caps_Lock"
+
+xmodmap $HOME/.Xmodmap #(done automagically, if left to its own devices)
+
+
+
+
+
+# legacy:
 
 ##    setxkbmap -option terminate:ctrl_alt_bksp -option ctrl:nocaps
 #    if [ -e /usr/share/xmodmap/xmodmap.us-101 ] ; then
-#        xmodmap /usr/share/xmodmap/xmodmap.us-101 
+#        xmodmap /usr/share/xmodmap/xmodmap.us-101
 #    fi
 
 #    if [[ `hostname` == aatpc2* ]] ; then
@@ -60,8 +82,8 @@ set -xv
 #    xmodmap -e "add mod4 = Mode_switch"
 
 #    xmodmap -e 'remove Lock = Caps_Lock'
-    #then try the next one, after the default is set up 
-    xmodmap $HOME/.Xmodmap #(done automagically, if left to its own devices)
+#then try the next one, after the default is set up
+
 #    case "$HOSTNAME" in
 #        dirac)
 #          xmodmap -e 'keycode 162 = XF86AudioPlay'

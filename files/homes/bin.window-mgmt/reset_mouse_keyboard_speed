@@ -39,7 +39,7 @@ case $LONGHOST-$SHORTDISPHOST in
                 k="libinput Accel Speed" ; v=0.9 ; dev='HID 046d:c521'
                 xinput list-props "pointer:$dev" | grep "$k"
                 xinput set-prop "pointer:$dev" "$k" $v
-                xinput list-props "pointer:$dev" | grep "$k" 
+                xinput list-props "pointer:$dev" | grep "$k"
             else
                 xset m 13/10 1
             fi

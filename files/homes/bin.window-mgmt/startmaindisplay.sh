@@ -120,8 +120,10 @@ if [[ $DISPLAY == :* ]] ; then
     setupkeymap # xmodmap etc
 fi
 
-synclient -l > $HOME/.touchpadrc-orig
-setup-touchpad
+if [ -x /usr/bin/synclient ] ; then
+    synclient -l > $HOME/.touchpadrc-orig
+    setup-touchpad
+fi
 
 repeat=0  # FIXME: turns out you've been able to address individual
           # monitors all along.  xterm -geometry 80x24+100+100@1

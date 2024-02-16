@@ -180,6 +180,7 @@ XTerm*VT100.translations: #override \n\
                 ~Ctrl ~Meta <Btn2Up>: insert-selection(CLIPBOARD, PRIMARY, CUT_BUFFER0) \n\
 
 ! FIXME: if new treatment of CLIPBOARD vs PRIMARY gets too annoying, revert and try out wfreerdp switch "/clipboard:use-selection:PRIMARY"
+! Of course, there's also just things like: permanently deal with mozilla clipboard shittiness with https://unix.stackexchange.com/questions/136229/copy-paste-does-not-always-work-from-firefox-to-terminal autocutsel or clipit, at fvwm statup
 
 !                ~Ctrl ~Meta <Btn2Up>: insert-selection(PRIMARY, CLIPBOARD, CUT_BUFFER0) \n\
 !                Ctrl Shift <Btn2Up>:  insert-selection(CLIPBOARD) \n\

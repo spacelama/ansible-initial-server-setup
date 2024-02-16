@@ -1,0 +1,105 @@
+!
+! Hard-code the keypad to numeric values as if numlock is always on
+! since I never use it for anything else.
+!Was just 0..9
+keycode 79=KP_7
+keycode 80=KP_8
+keycode 81=KP_9
+keycode 83=KP_4
+keycode 84=KP_5
+keycode 85=KP_6
+keycode 87=KP_1
+keycode 88=KP_2
+keycode 89=KP_3
+keycode 90=KP_0
+!Was "period"
+keycode 91=KP_Decimal
+! deactivate Num_Lock key since we don't need it now, and it fucks around with ctrl-alt-arrow etc.
+keycode 77 = NoSymbol Num_Lock
+
+! https://bugs.maemo.org/show_bug.cgi?id=6009 - after using less, or perhaps other ncurses programs, perhaps backgrounding them then foregrounding them, the KP_Enter key sends out ESCOM instead of Return, until such time that you issue an xterm->VT Options->Do Soft Reset
+! But there's no way to disable this permanently (less can still toggle it via escape codes):
+! XTerm*appkeypadDefault:         false
+! So this will work around for now as an alternative, because I have not yet got a need to differentiate Return from KP_Enter, there's no X11 chords that I need to use that require it, and I never use it with modifiers
+keycode 104=Return
+
+
+!keycode 22 = BackSpace NoSymbol NoSymbol Terminate_Server
+!keycode 22 = BackSpace
+!keycode  22 = BackSpace Terminate_Server BackSpace Terminate_Server
+
+! I hit CAPS by mistake sometimes, and besides, God intended CTRL to be where M$ put CAPS
+! and don't use it anyway. So make capslock act like ctrl.
+
+!keycode 66 = Control_L
+!clear lock
+
+
+!seems X4.3 broke Xemacs. Try removing these again later
+!souce the following only on telluirum - see .xmodmap-tellurium
+!keycode  67 = F1     !let us use ctrl-alt-F1 for now as an emergency
+!keycode  68 = F2
+!keycode  69 = F3
+!keycode  70 = F4
+!keycode  71 = F5
+!keycode  72 = F6
+!keycode  73 = F7
+!keycode  74 = F8
+!keycode  75 = F9
+!keycode  76 = F10
+!keycode  95 = F11
+!keycode  96 = F12
+
+! http://www.cl.cam.ac.uk/~mgk25/unicode.html
+!remove mod1=Alt_R
+!!!clear mod1
+!!!keycode 113             = Mode_switch Mode_switch
+!!!add mod1 = Meta_L
+! should resemble:
+
+!shift       Shift_L (0x32),  Shift_R (0x3e)
+!lock
+!control     Control_L (0x25),  Control_L (0x42),  Control_R (0x6d)
+!mod1        Alt_L (0x40),  Meta_L (0x9c)
+!mod2        BadKey (0x4d)
+!mod3
+!mod4        Super_L (0x7f),  Hyper_L (0x80)
+!mod5        Mode_switch (0x5d),  ISO_Level3_Shift (0x7c)
+
+!!!but on the other hand, I do actually use ctrl-alt_r cursor keys in my window manager when my left hand isn't free (ie, cats), so lets define right super as the alt-gr key instead:
+
+!keycode 93 =
+! 116 on all machines but the new aatpc2.  Need to work out how to reliably get the right menu key's keycode
+!keycode 116 = Mode_switch Mode_switch
+!which looks like:
+!shift       Shift_L (0x32),  Shift_R (0x3e)
+!lock
+!control     Control_L (0x25),  Control_L (0x42),  Control_R (0x6d)
+!mod1        Alt_L (0x40),  Alt_R (0x71),  Meta_L (0x9c)
+!mod2        BadKey (0x4d)
+!mod3
+!mod4        Super_L (0x7f),  Hyper_L (0x80)
+!mod5        Mode_switch (0x5d),  ISO_Level3_Shift (0x7c)
+
+! following was needed because in jun09, xemacs started complaining that mode_switch was defined for 2 keys (the above keycode 93, not found on my keyboards), and then started complaining that mod4 was defined for 2 different things in ways I didn't undestand.  Since I don't use Super, I just deleted it
+!clear mod4
+!add mod4 = Mode_switch
+
+!!keysym 1                = 1             exclam          Armenian_exclam         exclamdown
+!keysym 1                = 1             exclam          onesuperior             exclamdown
+!keysym slash            = slash         question        questiondown            U203D
+!!inverted interrobang: U2E18
+!keysym d                = d             NoSymbol        degree                  U2103
+!keysym m                = m             NoSymbol        emdash                  mu
+!keysym n                = n             NoSymbol        endash                  NoSymbol
+!keysym 2                = 2             at              twosuperior             onehalf
+!keysym 3                = 3             numbersign      threesuperior           sterling
+!keysym 4                = 4             dollar          EuroSign                cent
+!keysym space            = space         NoSymbol        nobreakspace            NoSymbol
+!keysym minus            = minus         underscore      U2212                   NoSymbol
+!keycode 34              = bracketleft   braceleft       leftsinglequotemark     leftdoublequotemark
+!keycode 35              = bracketright  braceright      rightsinglequotemark    rightdoublequotemark
+!keysym KP_Subtract      = KP_Subtract   XF86_Prev_VMode U2212                   XF86_Prev_VMode
+!keysym KP_Multiply      = KP_Multiply   XF86_ClearGrab  multiply                XF86_ClearGrab
+!keysym KP_Divide        = KP_Divide     XF86_Ungrab     division                XF86_Ungrab
+!keysym KP_Add           = KP_Add        XF86_Next_VMode plusminus               XF86_Next_VMode
