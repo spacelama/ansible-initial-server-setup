@@ -1,0 +1,66 @@
+#!/bin/bash
+# -*- Mode: shell-script -*-
+#template by ~tconnors/bin/newshscript
+#Fri Jul 13 22:02:40 EST 2012
+# $Revision: 1.4 $ $Date: 2021/08/03 02:45:52 $
+# $Id: reset_mouse_keyboard_speed,v 1.4 2021/08/03 02:45:52 tconnors Exp $
+# $Header: /home/tconnors/cvsroot/bin/reset_mouse_keyboard_speed,v 1.4 2021/08/03 02:45:52 tconnors Exp $
+# $RCSfile: reset_mouse_keyboard_speed,v $
+
+keyboard=true
+mouse=true
+
+case "$1" in
+    --keyboard)
+        mouse=false
+        ;;
+    --mouse)
+        keyboard=false
+        ;;
+esac
+
+if $keyboard ; then
+    xset r on
+    xset r rate 400 40
+fi
+
+if ! $mouse ; then
+    exit
+fi
+
+case $LONGHOST-$SHORTDISPHOST in
+    bohr*-galileo)
+        xset m 8/3                #set the mouse speed to something non-sucky
+    ;;
+    scuzzie*-*|dirac*-*|gamow*-*|maxwell*-*|bohr*-*|hubble*-*|penrose*-*|curie*-*)
+        if [ $SHORTHOST = scuzzie -o $SHORTHOST = dirac -o $SHORTHOST = gamow -o $SHORTHOST = maxwell ] ; then
+            if [ $SHORTHOST = dirac -o $SHORTHOST = gamow ] ; then
+                #xset m 30/10 10                #set the mouse speed to something non-sucky
+                k="libinput Accel Speed" ; v=0.9 ; dev='HID 046d:c521'
+                xinput list-props "pointer:$dev" | grep "$k"
+                xinput set-prop "pointer:$dev" "$k" $v
+                xinput list-props "pointer:$dev" | grep "$k" 
+            else
+                xset m 13/10 1
+            fi
+        else
+            xset m 8/3                #set the mouse speed to something non-sucky
+        fi
+    ;;
+    *.ltu.edu.au-*)
+        : #xset m 4/3 10                #set the mouse speed to something non-sucky
+    ;;
+    *.swin.edu.au-*)
+        case $LONGHOST in
+            oxygen*.swin.edu.au|polonium*.swin.edu.au)
+                xset m 10/3 2000
+            ;;
+            *)
+                xset m 4/3               #set the mouse speed to something non-sucky
+            ;;
+        esac
+    ;;
+    *)
+        xset m 11/3 8               #set the mouse speed to something non-sucky
+    ;;
+esac
