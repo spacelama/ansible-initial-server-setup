@@ -1,0 +1,595 @@
+#!/usr/bin/env perl
+# -*- Mode: perl -*-
+# $Revision: 1.104 $ $Date: 2021/04/27 07:14:27 $
+# $Id: weather,v 1.104 2021/04/27 07:14:27 tconnors Exp $
+# $Header: /home/tconnors/cvsroot/bin/weather,v 1.104 2021/04/27 07:14:27 tconnors Exp $
+# $RCSfile: weather,v $
+
+#displays the weather in an australian city/town in a small gnuplot
+#window at the bottom of your screen.  Embed in FvwmButtons if you
+#wish!  Change the internal URL to point to the Bureau of Meteorology
+#webpage for your city, or the weatherzone webpage for smaller towns
+#that BOM don't bother keeping a good time resolution for, and it
+#displays the last 72 hours, as well as keeping a permanent history
+#for later perusal - see the yearly trends!
+
+#idea initially inspired by Craig West, and he wrote the bad evil
+#looking parts of it.  Except that I also added bad evil parts, so
+#we can no longer differentiate them :)
+#Ported to perl and changed a heck of a lot by Tim Connors.
+#Copyright Tim Connors 2004, under GPL license
+
+# Patches by:
+# Andrew Hood <ajhood  at  fl.net.au.invalid>
+
+#TODO: Allow an average (particularly wind speed and direction -- good
+#      for biking, since the wind can change 180 degrees as you go
+#      around the bay), over several stations. Furthermore, let you
+#      weight stations by different amounts (eg,
+#      Chadstone=0.2*Melbourne+0.8*Scoresby)
+#      To average a wind speed/direction, sum the vectors to find the
+#      direction, then scale to the average of the amplitudes. Why?
+#      Because if you have two wind directions in opposite directions,
+#      with large amplitude, you want to tell the user that the wind
+#      is strong. Sure, the direction might be a bit meaningless
+#      anyway, they'll be battling wind somewhere on their trip, but
+#      at least they'll know it is strong!
+
+use warnings;
+use strict;
+use POSIX qw(mktime);
+
+#FIXME: supply pragma no cache???
+#undef $ENV{"http_proxy"};
+#undef $ENV{"WWW_http_GATEWAY"};
+
+#my $location="coona_AP";
+my $location="melbourne";
+
+
+sub min {
+  my ($a,$b)=(@_);
+  if ($a > $b) {
+    return $b;
+  }
+  return $a;
+}
+
+sub max {
+  my ($a,$b)=(@_);
+  if ($a < $b) {
+    return $b;
+  }
+  return $a;
+}
+
+my ($vert,$hor,$VERTSIZE,$HORSIZE,$ofh);
+my ($windangle);
+my ($date,$time,$temp,$dew,$hum,$dir,$speedkm,$gustkm,$speedknots,$gustknots,$press,$rain);
+
+my $yscale=45;
+my $restart=0;
+my $retrigger=0;
+
+my $testing;
+my (@SAVEARGV)=@ARGV;
+
+$| = 1;
+
+sub usageerror {
+  my ($error)=(@_);
+  if (defined($error)) {
+    print STDERR "Usage error: $error\n";
+    print STDERR "Usage was: @SAVEARGV\n";
+  }
+  usage(1);
+}
+
+sub usage {
+  my ($exit)=(@_);
+  print STDERR "Usage: $0 [--testing] [--proxy <proxy>] [--restartall|--killall|--retrigger] <gnuplot args>\n";
+  $exit=defined($exit) ? $exit : 0;
+  exit $exit;
+}
+
+sub pingall {
+#  open (PIDS, 'pgrep -l -f perl | grep \'\<weather\>\' | awk \'{print $1}\'|') or die "can't open grep";
+  open (PIDS, 'ps -ef | grep \'perl.*\<[w]eather\>\' | awk \'{print $2}\'|') or die "can't open grep";
+  my @pids;
+  while (my $pid=<PIDS>) {
+    chomp $pid;
+    next if $pid == $$;
+    push @pids, $pid;
+  }
+  if (!@pids) {
+    print "no running weather processes\n";
+  } else {
+    my $sig=$_[0];
+    if (defined $sig) {
+      print "Giving the $sig signal to pids @pids\n";
+    } else {
+      print "restarting @pids\n";
+      $sig="USR1"
+    }
+    system("ps -p @pids");
+    kill $sig, @pids;
+  }
+  exit;
+}
+
+sub parseinput {
+  sub setproxy {
+    defined ($ENV{http_proxy}=shift (@ARGV)) || usageerror("no proxy supplied");
+    return 1;
+  }
+
+  while (defined($_= shift (@ARGV))) {
+    /^--proxy$/ && setproxy() ||
+    /^--help$/ && usage() ||
+    /^--restartall$/ && pingall("USR1") ||
+    /^--retrigger$/ && pingall("USR2") ||
+    /^--killall$/ && pingall("TERM") ||
+    /^--location$/ && do { $location = shift(@ARGV) ; 1 ;} ||
+    /^--testing$/ && do { $testing = 1 ; } ||
+    last;
+  }
+  defined($_) && unshift @ARGV, $_;
+  print "location=$location\n";
+}
+
+#####################
+my $locked=0;
+sub quit {
+  #I had a problem with excess gnuplots hanging around after the fact. I think I solved this elsewhere though
+  print "exiting safely\n";
+  print GNUPLOT "\nexit\n";
+  close GNUPLOT;
+  unlink "$ENV{HOME}/weather_$location/weather.lock" if $locked;
+  exit;
+}
+
+sub parentrunning {
+
+  return 1;    # this should not be necessary (f'instance, i want to
+               # be able to start this from an xterm which I
+               # subsequently quit).  we should investigate why HUP is
+               # not being received instead
+
+
+
+
+#   print "Testing if parent to our pid $$ exists\n";
+   my $ppid=`ps -o pid -p \$XSESSIONPID | tail -n 1`;
+   chomp $ppid;
+#   print "Parent appears to be ppid $ppid.  Giving it signal 0 to find if it is still alive.\n";
+#   my $res=kill 0, $ppid;
+#   print "$$ found $ppid: res=$res\n";
+#   return $res;
+   return $ppid;
+}
+
+my $lasttime=time;
+sub loopdisplay {
+  do {
+    if (!parentrunning) {
+       quit();
+    }
+    #you can run this on more than 1 display! Wheee!
+    print "making lock\n";
+    system("lockfile -l 128 $ENV{HOME}/weather_$location/weather.lock");
+    print "made lock... fetching\n";
+    $locked=1;   #put this on the inside, so that we will never erronously delete lock when quiting, but may leave stale lockfiles behind
+    display();
+    print "fetched... removing lock\n";
+    $locked=0;
+    unlink "$ENV{HOME}/weather_$location/weather.lock";
+    $retrigger=0;
+    #only sleep small intervals so that we can check that the machine
+    #hasn't gone to sleep and has woken up 2 hours later.
+    my $thistime;
+    while (($thistime=time) - $lasttime < 30*60-120-10 && !$retrigger && !$restart && parentrunning) {
+      sleep 30;                #can get interrupted by the USR1/USR2 sig
+    }
+
+    if ($restart) {
+      print "SIGUSR1 received\n";
+      print "exiting safely\n";
+      print GNUPLOT "\nexit\n";
+      close GNUPLOT;
+      print "reexecing \"" . join ('" "', ( $0, @SAVEARGV )) . "\" because of user request\n";
+      exec { $0 } $0, @SAVEARGV or die "couldn't exec: $!";
+    }
+
+    sleep 120 if !$retrigger;
+    $lasttime=time;
+  } while (1);
+}
+
+sub display {
+  my ($temp,$time,$url,$file,%stations,$weight);
+
+  #THESE URLS OBTAINED FROM UPDATED PAGES AT
+  #   http://www.bom.gov.au/weather/vic/vic-observations-map.shtml
+
+  $url="http://www.bom.gov.au/products/IDV60901/IDV60901.94868.shtml"; # Melbourne
+  $stations{$url}=0.2;
+
+  $url="http://www.bom.gov.au/products/IDV60901/IDV60901.94870.shtml"; # Moorabbin
+  $stations{$url}=0.4;
+
+  $url="http://www.bom.gov.au/products/IDV60901/IDV60901.95867.shtml"; # Scoresby
+  $stations{$url}=0.2;
+
+  $url="http://www.bom.gov.au/products/IDV60901/IDV60901.95874.shtml"; # Viewbank
+  $stations{$url}=0.2;
+
+  if ($location eq "melbourne") {
+    #    $url="http://www.bom.gov.au/products/IDV60901/IDV60901.94868.shtml"; # Melbourne
+    $url="http://www.bom.gov.au/products/IDV60901/IDV60901.94866.shtml"; # Melbourne airport - more reliable sensors
+    #    $url="http://www.bom.gov.au/products/IDV60901/IDV60901.94870.shtml"; # But Moorabin airport is probably more representative of what I'm interested in.  Nope, too close to the coast.  Melbourne airport too far north, lets go with scoresby:
+    #    $url="http://www.bom.gov.au/products/IDV60901/IDV60901.95867.shtml"; # Scoresby
+#    $url="http://www.bom.gov.au/products/IDV60901/IDV60901.95874.shtml"; # Viewbank - because scoresby doesn't have a pressure sensor!
+#    $url="http://www.bom.gov.au/products/IDV60901/IDV60901.95936.shtml"; # new melbourne olympic park http://www.bom.gov.au/weather-services/announcements/vic/melb-olympic-park2013.shtml
+
+    $stations{$url}=0.2;
+  }
+
+  if ($location eq "coona_AP") {
+    $url="http://www.weatherzone.com.au/observations/history.jsp?wmo=95728&type=metar&order=-dtLocalDateTime&10min=true"; # Coonabarabran from Weatherzone
+    $url="http://www.bom.gov.au/products/IDN60801/IDN60801.95728.shtml"; #Coonabarabran from BoM
+  }
+  if ($location eq "home") {
+    $url="file:///home/tconnors/met.72.log"; #Coonabarabran from my backyard
+  }
+  $stations{$url}=1;
+#
+
+#http://www.weatherzone.com.au/observations/history.jsp?wmo=95728&type=synop
+#http://www.weatherzone.com.au/observations/history.jsp?wmo=95728&type=metar
+#http://www.weatherzone.com.au/local/local.jsp?obs=95728&fcast=94728&img=radar&rad=053&pcode=2357
+
+#  my $count=0;
+#  foreach $url (keys(%stations)) {
+#
+#    $weight=$stations{$url};
+  ($file=$url)=~s/.*\///;
+  my ($initialtime,$finaltime);
+  my $no_network=1;
+  if (!$testing) {
+    unlink $file;
+    print "fetching '$url'\n";
+    $no_network = int(system("wget -U \"Yes, keep trying to block those user agents BoM. It's not like you're the public service\" '$url' 2> wget.log") / 256);
+
+  }
+  ($initialtime,$finaltime)=parsefile($file,$weight, $no_network);
+
+
+#  $count++;
+#  }
+
+#  $windspeed/=$count;
+
+  #This weighting business is really hard. We would have to make sure
+  #the times correspond, and do it for the whole time displayed. Maybe
+  #just take current wind and temp, and bugger the history?
+
+  chomp ($temp=`tail -n 1 72hours.txt | awk '{print \$3}'`);
+  chomp ($time=`tail -n 1 72hours.txt | awk '{print \$2\"/\"\$1}'`);
+
+#  print "time,initialtime,finaltime=",time," $initialtime $finaltime\n";
+  my $stale=(time-$finaltime) > 5400;
+  #     echo "set title 'temp=${temp}{/Symbol \260}C',-3.7"
+
+  my $midxpoint=($finaltime-$initialtime)/2.0;
+  my $midypoint=$yscale/2.0;
+  my $midxpointn=$midxpoint-$initialtime;  #"normalised" -- the midpoint if we started x axis at 0 (which we do at graphing) rather than $initialtime
+
+  my $xscale2=($finaltime-$initialtime)/2.0;
+  my $yscale2=$yscale/2.0;
+
+#print "gust=$gustkm, speed=$speedkm, wind=$windangle\n" ;
+#print "midxpoint=$midxpoint, midypoint=$midypoint\n" ;
+#print "xscale2=$xscale2, yscale2=$yscale2\n" ;
+
+  #make the border red if stale data (more than 1 hour old)
+  my $border= $stale ? "15 lc 1" : "5 lc 2"; #'help border' - top,bottom
+  print GNUPLOT<<EOF
+#begin gnuplot code:
+    set terminal x11   #new gnuplot defaults to some stupid GUI
+    set xr [0:$finaltime-$initialtime]
+    set yr [0:$yscale]
+#    set out \"$ENV{HOME}/weather_$location/weather.ps\"
+    unset key
+    unset xtics
+    unset ytics
+    unset mouse
+
+    set margins 0,0,0,0
+
+#    set title 'T=${temp}',-3.7
+
+#$xscale2 and $yscale2 is to get aspect ratio and normalisation correct
+#/50.0 is to get scale correct
+#minus, because the wind direction is defined by BOM as coming from,
+#we want going to (a northerly wind is a wind going in the southerly direction).
+    windgustx(t)=$midxpoint+$xscale2*-$gustkm /50.0*t*sin($windangle*3.1415/180)
+    windgusty(t)=$midypoint+$yscale2*-$gustkm /50.0*t*cos($windangle*3.1415/180)
+    windx(t)=    $midxpoint+$xscale2*-$speedkm/50.0*t*sin($windangle*3.1415/180)
+    windy(t)=    $midypoint+$yscale2*-$speedkm/50.0*t*cos($windangle*3.1415/180)
+
+    set style line 1 lc 2 lw 2
+    set style line 2 lc 3 lw 2
+    set style line 3 lc 1
+    set style line 4 lc 2
+    set style line 5 lc 5
+    set style line 6 lc 2 lw 4
+
+    set pointsize 5
+    unset arrow
+    set arrow from windgustx(0),windgusty(0) to windgustx(1),windgusty(1) size screen 0.1,30,45 filled ls 1
+    set arrow from windx(0),windy(0) to windx(1),windy(1) size screen 0.1,30,45 filled ls 2
+#    print "set arrow from ",windgustx(0),windgusty(0)," to ",windgustx(1),windgusty(1)," ls 2"
+#    print "set arrow from ",windx(0),windy(0)," to ",windx(1),windy(1)," ls 1"
+
+    set border $border
+    set label 1 'T=${temp}' at ($finaltime-$initialtime)/4.5,$yscale-5.5 front tc lt 3
+    set label 2 'T=${temp}' at ($finaltime-$initialtime)/4.23,$yscale-5 front
+    set label 3 '${time}' at ($finaltime-$initialtime)/12,4.5 front tc lt 3
+    set label 4 '${time}' at ($finaltime-$initialtime)/10.3,5 front
+    plot '< echo $xscale2 $yscale2' w points lc 3, '72hours.txt' u (\$14-$initialtime):(\$5*$yscale/100) w lines ls 5, '72hours.txt' u (\$14-$initialtime):(\$13*1) w lines ls 4, '72hours.txt' u (\$14-$initialtime):3 w lines ls 3
+#end gnuplot code:
+EOF
+}
+
+sub parsefile {
+  my ($url,$weight,$no_network)=(@_);
+  my (@raw,$raw,$i,$delete,$newtime,$rainrate);
+  my %windangle=('N'=>     0.0, 'NNE'=>  22.5, 'NE'=>   45.0, 'ENE'=>  67.5,
+                 'E'=>    90.0, 'ESE'=> 112.5, 'SE'=>  135.0, 'SSE'=> 157.5,
+                 'S'=>   180.0, 'SSW'=> 202.5, 'SW'=>  225.0, 'WSW'=> 247.5,
+                 'W'=>   270.0, 'WNW'=> 292.5, 'NW'=>  315.0, 'NNW'=> 337.5
+  );
+
+  my ($initialtime,$finaltime);
+  my ($lastline,$line);
+  $lastline=`tail -n 1 72hours.txt`;   #record a dummy last read line
+  chomp $lastline;
+  open(OUT, ">latest.txt") or die "can't write latest.txt $!";
+  if (! $no_network) {
+    system("sed 's/&nbsp;/-/g' '$url' > raw.html");
+    system("LC_ALL=C w3m -cols 132 -dump raw.html > parsed.txt.1");
+    if (-s "parsed.txt.1") {
+      rename "parsed.txt.1", "parsed.txt";
+    }
+    system(" > table.txt");
+    #  system("echo '\t\t\t\tRel\tWind\tWind\tWind' >> table.txt");
+    #  system("echo 'Date Time |\tTemp |\tDew |\tHum |\tDir |\tSpeed (km/knots) |\tGust (km/knots) |\tPress |\tRain since 9am |\tRain rate' >> table.txt");
+    if ($url =~ /^ID.*html/) {    #looks like a BOM page to me!  Beauty ripper!
+      $raw=`grep '^|[0-9][0-9].[0-9][0-9]:[0-9][0-9]' parsed.txt | sed 's/|/ /g'`;
+      @raw=split /\n/, $raw;
+      if (grep(/\//, $raw)) {   #new format has an extra column for
+                                #dry bulb difference, which we don;t
+                                #want or need, and a different date
+                                #format.  Convert to old format
+        for (my $i=0;$i<$#raw;$i++) {
+          $raw[$i]=~s/^ *//;
+          $raw[$i]=~s/\// /;
+          my ($d, $time, $tmp, $junk, $dp, $rh, $junk2, $winddir, $spdkm, $gustkm, $spdkn, $gustkn, $pres, $pres_msl, $rain);
+          #        if ($url =~ /^IDN.*html/) {  #coona_AP
+          ($d, $time, $tmp, $junk, $dp, $rh, $junk2, $winddir, $spdkm, $gustkm, $spdkn, $gustkn, $pres, $pres_msl, $rain) = split(' ', $raw[$i]);
+          #        } else {                     #melb
+          #          ($d, $time, $tmp, $junk, $dp, $rh, $junk2, $winddir, $spdkm, $gustkm, $spdkn, $gustkn, $pres, $pres_msl, $rain) = split(' ', $raw[$i]);
+          #        }
+          #              print "2 -> $raw[$i]\n";
+          $raw[$i]= "$d - $time $tmp $dp $rh $winddir $spdkm $gustkm $spdkn $gustkn $pres $rain";
+          #              print "3 -> $raw[$i]\n";
+        }
+      }
+    } elsif ($url =~ /^history.jsp?.*/) {   #weatherzone format -- just translate it to something roughly resembling BOM format
+      $raw=`grep '^   [A-Z][a-z][a-z] [0-9][0-9]/[0-9][0-9] [0-9][0-9]:[0-9][0-9]' parsed.txt`;
+      @raw=split /\n/, $raw;
+      for (my $i=0;$i<$#raw;$i++) {
+        $raw[$i]=~s/^ *//;
+        $raw[$i]=~s/\// /;
+        my ($junk, $d, $m, $time, $winddir, $spdkn, $gustkn, $tmp, $dp, $rh, $feelslike, $fire, $rain, $qnh) = split(' ', $raw[$i]);
+        my ($spdkm,$gustkm)=($spdkn*1.852, $gustkn*1.852);
+        #      print "2 -> $raw[$i]\n";
+        $raw[$i]= "$d $m $time $tmp $dp $rh $winddir $spdkm $gustkm $spdkn $gustkn $qnh $rain";
+        #      print "3 -> $raw[$i]\n";
+      }
+    } elsif ($url =~ /.*72.log$/) {
+      $raw=`cat parsed.txt`;
+      @raw=split /\n/, $raw;
+    } else {
+      die "can't work out what filetype: $url";
+    }
+    my ($oldtime,$oldrain);
+    my ($first);
+    $first=1;
+    my ($oldwindangle);
+
+    my ($datetime,$now,$day,$month,$year);
+    $now=time;
+    my ($dsec,$dmin,$dhour,$dmday,$dmon,$dyear,$dwday,$dyday,$disdst) = localtime($now);
+    $dsec=0;
+
+    for ($i=$#raw-1; $i>=0; $i--) {
+      #    print "raw=$raw[$i]\n";
+      #    $raw[$i]=~s/-/0/g;   #this will make temps 0 as well, which I guess is a good sign that things have failed -- we want rain etc to all be 0, I think...
+      ($date,my $month, $time,$temp,$dew,$hum,$dir,$speedkm,$gustkm,$speedknots,$gustknots,$press,$rain) = split / /, $raw[$i];
+      my $pm=0;
+      if ($time =~ /am/) {
+        $time =~ s/am//;
+        if ($time =~ /12:.*/) {
+          $pm=-12;
+        }
+      } elsif ($time =~ /pm/) {
+        $time =~ s/pm//;
+        if (!($time =~ /12:.*/)) {
+          $pm=12;
+        }
+      }
+      my ($timeH,$timeM);
+      $timeH=$timeM=$time;
+      $timeH =~ s/:.*//;
+      $timeH+=$pm;
+      $timeM =~ s/.*://;
+      $time=sprintf "%02d:$timeM", $timeH;
+      $dmin=$timeM;
+      $dhour=$timeH;
+      $timeM = $timeH*60+$timeM;  #time in minutes (gauranteed to be an integer)
+      $timeH = $timeM/60.0;       #and time in hours (can be a float)
+
+      $year=$dyear;
+      $month=$dmon;
+      $day=$date;    #POSIX(3perl) talks of yday starting at 0, not mday!  mdays starts from 1 (see also mktime(3))
+      if ($day > $dmday) {
+        $month--;
+        if ($month<0) {
+          $month=11;
+          $year--;
+        }
+      }
+#          print "********** dsec,dmin,dhour,day,month,year,time,datetime = $dsec,$dmin,$dhour,$day,$month,$year,$time $datetime\n";
+      $datetime=mktime($dsec,$dmin,$dhour,$day,$month,$year);
+      $finaltime=$datetime;
+
+      $windangle=defined($windangle{$dir})?$windangle{$dir}:0.0;
+#      print "$day $time: wind = $windangle ";
+      if (defined($oldwindangle) && (abs($oldwindangle-$windangle)>180)) {
+        if ($oldwindangle>$windangle) {
+          $windangle+=360;
+        } else {
+          $windangle-=360;
+        }
+#        print "1> $windangle ";
+
+        if ($windangle>360) {
+          $windangle-=360;
+        }
+#        print "2> $windangle ";
+        if ($windangle<-360) {
+          $windangle+=360;
+        }
+#        print "3> $windangle ";
+      }
+      $oldwindangle=$windangle;
+#      print "-> $windangle ($oldwindangle)\n";
+
+      $gustkm=0    if $gustkm eq '-';
+      $gustknots=0 if $gustknots eq '-';
+
+      if ($first) {
+        $first=0;
+
+        $oldtime=$timeH;
+        $oldrain=$rain;
+      }
+      if ($timeH<$oldtime) {
+        $newtime= $timeH+24;
+      } else {
+        $newtime= $timeH;
+      }
+
+      #    print "oldrain=$oldrain,rain=$rain,newtime=$newtime,oldtime=$oldtime,time=$time,first=$first\n";
+      if ($newtime==$oldtime) {
+        $rainrate="N/A";
+      } elsif ($oldtime <= 9 && $timeH > 9.0) {
+        #bom measure's rain since 9am.  At 9am, the rain since 9am is from the previous day.  Immediately after measuring, it is emptied, and the next reading will be from 9am
+        #      print "1: rain, oldrain, newtime, timeH, oldtime=$rain, $oldrain, $newtime, $timeH, $oldtime\n";
+        $oldtime=9;
+        $rainrate=$rain/($newtime-$oldtime);
+      } else {
+        #      print "2: rain, oldrain, newtime, timeH, oldtime=$rain, $oldrain, $newtime, $timeH, $oldtime\n";
+        $rainrate = ($rain - $oldrain)/($newtime-$oldtime);
+        $newtime=$timeH; #revert back to original time
+      }
+      $oldrain=$rain;
+      $oldtime=$newtime;
+      #    print "rate=$rainrate\n";
+
+      #we want the rain rate to be visible on the graph when you get as
+      #low rain as 0.1 mm. You also want to be able to tell when there
+      #is 40mm of rain per hour. How do you reconcile both? By taking a
+      #fancy log curve - just like charging a capacitor :)
+
+      if ($rainrate ne "N/A") {
+        if ($rainrate>0) {
+          #      print "rainrate1=$rainrate\n";
+          $rainrate=sprintf "%0.2f", $yscale*(1-exp(-$rainrate/10));
+          #      print "rainrate2=$rainrate\n";
+        } else {
+          $rainrate=-999;#make off scale negative, so don't clutter the graph when no rain
+        }
+      }
+      $line = join ("\t", ($date,$time,$temp,$dew,$hum,$windangle,$speedkm,$gustkm,$speedknots,$gustknots,$press,$rain,$rainrate,$datetime)) . "\n";
+      #    print "4 -> $line";
+      print OUT $line;
+    }
+  } else {
+    $line=$lastline;
+  }   #if $no_network
+  close OUT;
+
+  my $date_time_last_recorded;
+  ($date,$time,$temp,$dew,$hum,$windangle,$speedkm,$gustkm,$speedknots,$gustknots,$press,$rain,$rainrate,$date_time_last_recorded) = split ' ', $lastline;
+  ($date,$time,$temp,$dew,$hum,$windangle,$speedkm,$gustkm,$speedknots,$gustknots,$press,$rain,$rainrate,$finaltime) = split ' ', $line;
+  $initialtime=$finaltime-3*24*60*60;
+
+  #now, combine the history file with the current days data, deleting those lines which are common between the 2.
+  $date_time_last_recorded=0.0 if !$date_time_last_recorded;
+  my $cmd="awk '{ if (\$14 > $date_time_last_recorded) ".
+    "{ print \$0 }}' latest.txt > latest.txt.notredund";
+  print "cmd=$cmd\n";
+  system($cmd);
+  system("cat latest.txt.notredund");
+  system("cat latest.txt.notredund >> 72hours.txt");
+  system("cat latest.txt.notredund >> history.txt");
+  system("cat latest.txt >> table.txt");
+
+  system("awk '{if (\$14 >= $initialtime) {print \$0}}' 72hours.txt > 72hours.txt.tmp");
+  rename "72hours.txt.tmp", "72hours.txt";
+
+  return($initialtime,$finaltime);
+}
+
+sub log10 {     #some version of perl define this, others don't.
+                #Don't be surprised if you get a warning, but at least
+                #it won't error out
+  my $n = shift;
+  return log($n)/log(10);
+}
+
+#########################
+
+parseinput();
+
+$VERTSIZE=`xdpyinfo | sed -n 's!.*dimensions: *\\([^x]*\\)x\\([^ ]*\\).*!\\2!p'`;
+$HORSIZE=`xdpyinfo | sed -n 's!.*dimensions: *\\([^x]*\\)x\\([^ ]*\\).*!\\1!p'`;
+
+#find a nice place to put the graph. Not relevant when embedded in a FvwmButtons
+if ( $HORSIZE >= 1280 ) {
+  $hor=768;
+} else {
+  $hor=820;
+}
+
+#where we put our history and working files
+if (! -d "$ENV{HOME}/weather_$location" ) {
+  mkdir "$ENV{HOME}/weather_$location" or die "can't mkdir \$HOME/weather_$location: $!";
+}
+chdir "$ENV{HOME}/weather_$location" or die "can't chdir \$HOME/weather_$location: $!";
+
+$SIG{HUP}=\&quit;
+$SIG{INT}=\&quit;
+$SIG{TERM}=\&quit;
+$SIG{PIPE}=\&quit;
+$SIG{USR1}=sub { $restart = 1};  #this just interrupts the sleep.  outside of the interrupt handler, we restart.  Can't do it here, because signals will still be blocked, and will be forever lost once we fork
+$SIG{USR2}=sub { $retrigger = 1};  #this just interrupts the sleep
+$vert=$VERTSIZE-81;
+open(GNUPLOT, "|gnuplot -xrm 'gnuplot*borderWidth: 1' -title gnuplot.weather -noraise @ARGV") or die "Can't open gnuplot pipe: $!";
+#open(GNUPLOT, "|gnuplot -xrm 'gnuplot*borderWidth: 1' -title gnuplot.weather -geometry 80x80+$hor+$vert -noraise @ARGV") or die "Can't open gnuplot pipe: $!";
+#open(GNUPLOT, "|cat") or die "Can't open gnuplot pipe: $!";
+$ofh = select(GNUPLOT); $| = 1; select ($ofh);
+loopdisplay();
+

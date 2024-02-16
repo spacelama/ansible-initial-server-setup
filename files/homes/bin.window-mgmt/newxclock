@@ -1,0 +1,80 @@
+#!/bin/bash
+
+PATH=$HOME/bin/`uname -s`:$PATH:/usr/local/bin
+export PATH
+
+export LANG=POSIX # disable UTF8 while offset positioning bug still exists
+
+kill `pidof xclock$SHORTCANONICALDISP` 2>/dev/null
+
+case $HOSTNAME in
+    bohr|scuzzie)
+        if [ "$HORSIZE" -gt 1024 ] ; then
+            defargs=(-padding 0 -face "courier:size=10")
+        else
+            defargs=(-padding 0 -face "courier:size=9")
+        fi
+        ;;
+    dirac|gamow)
+        defargs=(-padding 0 -face "courier:size=11:bold")
+        defargs2=(-padding 0 -face "courier:size=14:bold")
+        ;;
+    dirac-laptop)
+        defargs=(-padding 0 -face "courier:size=11:bold")
+        ;;
+    weinberg)
+        #            defargs=(-padding 0 -face "courier:size=12:bold")
+        defargs=(-padding 0 -face "courier:size=10")
+        #            def2args=(-padding 0 -face "courier:size=8")
+        ;;
+    curie)
+        defargs=(-padding 0 ) #-fn "-*-helvetica-medium-r-*-*-8-*-*-*-*-*-*-*")
+        ;;
+    pi)
+        defargs=(-face courier:size=14 -strftime '%T %a, %d %b')
+        ;;
+    *)
+        defargs=(-padding 0 -face "courier:size=10")
+        ;;
+esac
+
+
+if [ `uname -s` = Linux ] ; then
+    case $SHORTHOST in
+        scuzzie)
+            ( exec -a xclock$SHORTCANONICALDISP xclock -name xclockstandard "${defargs[@]}" -geometry 155x13+$(($HORSIZE-160))-1 ) &
+        ;;
+        dirac|gamow)
+#            ( exec -a xclock$SHORTCANONICALDISP xclock -name xclockstandard "${defargs[@]}" -geometry 320x23+$(($HOR0SIZE-354))-1 ) &
+            ( exec -a xclock$SHORTCANONICALDISP xclock -name xclockstandard "${defargs[@]}" -geometry 260x23+$(($HOR0SIZE-360+$HORSIZE))-1 ) &
+            ( exec -a xclock$SHORTCANONICALDISP xclock -name xclockstandard "${defargs2[@]}" -geometry 310x27+$(($HOR0SIZE-400+$HORSIZE+$HOR2SIZE))-1 ) &
+        ;;
+        dirac-laptop)
+            ( exec -a xclock$SHORTCANONICALDISP xclock -name xclockstandard "${defargs[@]}" -geometry 180x17+$(($HOR0SIZE-360+$HORSIZE))-1 ) &
+        ;;
+        bohr)
+            ( exec -a xclock$SHORTCANONICALDISP xclock -name xclockstandard "${defargs[@]}" -geometry 155x15+$(($HORSIZE-390))-1 ) &
+        ;;
+        pi)
+            ( exec -a xclock$SHORTCANONICALDISP xclock -name xclockstandard "${defargs[@]}" -geometry +0-1 ) &
+        ;;
+        aatpc2|aatlxd|aatlxa)
+            ( exec -a xclock$SHORTCANONICALDISP xclock -name xclockstandard "${defargs[@]}" -geometry 178x15+$(($HORSIZE-254))+$(($VERTSIZE-20)) ) &
+            ( exec -a xclock$SHORTCANONICALDISP xclock -name xclockstandard "${defargs[@]}" -geometry 178x15+$(($HORSIZE-254+$HOR2SIZE))+$(($VERT2SIZE-20)) ) &
+        ;;
+        weinberg)
+            ( exec -a xclock$SHORTCANONICALDISP xclock -name xclockstandard "${defargs[@]}" -geometry 198x15+$(($HOR0SIZE-204))+$(($VERT0SIZE-20)) ) &
+            ( exec -a xclock$SHORTCANONICALDISP xclock -name xclockstandard "${defargs[@]}" -geometry 198x15+$(($HOR0SIZE-454+$HORSIZE))+$(($VERTSIZE-20)) ) &
+            ( exec -a xclock$SHORTCANONICALDISP xclock -name xclockstandard "${defargs[@]}" -geometry 198x15+$(($HOR0SIZE-204+$HORSIZE+$HOR2SIZE))+$(($VERT2SIZE-20)) ) &
+        ;;
+        *)
+            ( exec -a xclock$SHORTCANONICALDISP xclock -name xclockstandard "${defargs[@]}" -geometry 195x18+$(($HORSIZE-270))-1 ) &
+        ;;
+    esac
+elif [ `uname -s` = Darwin ] ; then
+    ( exec -a xclock$SHORTCANONICALDISP xclock -name xclockstandard "${defargs[@]}" -geometry 165x15+$((2*$HORSIZE-240))-1 ) &
+elif [ `uname -s` = SunOS ] ; then
+    ( exec -a xclock$SHORTCANONICALDISP xclock -name xclockstandard "${defargs[@]}" -geometry 178x15+$(($HORSIZE-254))-1 ) &
+else
+    ( exec -a xclock$SHORTCANONICALDISP xclock -name xclockstandard "${defargs[@]}" -geometry 260x30+530-1 ) &
+fi
