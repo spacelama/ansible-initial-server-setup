@@ -8,12 +8,17 @@ fi
 apt update
 apt dist-upgrade
 
-apt install less most x11-utils xdm ssh man vim git xterm procmail curl keychain mgitstatus rsync telnet vim-pathogen plocate bash-completion net-tools lsof ncal x11-apps x11-xserver-utils lynx bind9-dnsutils tcpdump snapd mesa-utils dlocate apt-file iperf3 snapd dstat firefox-esr bc ksh fvwm vim-gtk3 wget gcc strace netcat-openbsd dlocate dos2unix gnupg ssh-askpass xcompmgr ansible ansible-mitogen
+apt install less most x11-utils xdm ssh man vim git xterm procmail curl keychain mgitstatus rsync telnet vim-pathogen plocate bash-completion net-tools lsof ncal x11-apps x11-xserver-utils lynx bind9-dnsutils tcpdump snapd mesa-utils dlocate apt-file iperf3 snapd dstat firefox-esr bc ksh fvwm vim-gtk3 wget gcc strace netcat-openbsd dlocate dos2unix gnupg ssh-askpass xcompmgr ansible ansible-mitogen gnuplot-qt w3m
 # dnsmasq systemd-resolved
 
 apt install -t bookworm-backports emacs emacs-gtk elpa-session
 
 update-locale LANG=en_AU.UTF-8 LANGUAGE=en_AU:en LC_ALL
+
+if ! [ -e /etc/sysctl.d/10-local.conf ] || ! md5sum /etc/sysctl.d/10-local.conf | grep 6fdd26992c003616c724e05e6e5719fe ; then
+    echo kernel.dmesg_restrict = 0 > /etc/sysctl.d/10-local.conf
+fi
+
 
 if ! [ -e /etc/ssh/sshd_config.d/local.conf ] || ! md5sum /etc/ssh/sshd_config.d/local.conf | grep 1ef3493504a55c88f59511289c418628 ; then
     echo -e 'Port 6022\nListenAddress 0.0.0.0' | tee /etc/ssh/sshd_config.d/local.conf

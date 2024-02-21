@@ -990,7 +990,7 @@ Style "Tools" NoButton 2, NoButton 4, Sticky, WindowListSkip
 
 #no "Respawn" following, since we may actually want them stopped dead
 
-#*FvwmButtons(2x11, Swallow (UseOld Close SwallowNew) "wmbattery" "Exec wmbattery")  #dirac-laptopINCLUDE gamowINCLUDE maxwellINCLUDE fermiINCLUDE weinbergINCLUDE
+#*FvwmButtons(2x11, Swallow (UseOld Close SwallowNew) "wmbattery" "Exec wmbattery")  #dirac-laptopINCLUDE gamowINCLUDE maxwellINCLUDE fermiINCLUDE weinbergINCLUDE DBJXCY3INCLUDE
 
 #*FvwmButtons(2x11, Swallow (UseOld Close SwallowNew) "wmxmms2" "Exec wmxmms2") #diracINCLUDE
 
@@ -1008,7 +1008,7 @@ Style "Tools" NoButton 2, NoButton 4, Sticky, WindowListSkip
 *FvwmButtons(2x16, Swallow (UseOld NoClose SwallowNew) "gnuplot.weather" "Exec true") #radiumEXCLUDE
 #*FvwmButtons(2x16, Swallow (UseOld NoClose SwallowNew) "gnuplot.weather" "Exec weather --location melb -bg gray44 -geometry 80x80") #radiumINCLUDE
 
-*FvwmButtons(2x16, Swallow (UseOld NoClose SwallowNew Respawn) "xbiff" "Exec xbiff -xrm 'XBiff*checkCommand:exec checkmaildir INBOX smtp' -bg gray44", Action(Mouse 1) "Exec read-mail") #aatpc2EXCLUDE #weinbergEXCLUDE 
+*FvwmButtons(2x16, Swallow (UseOld NoClose SwallowNew Respawn) "xbiff" "Exec xbiff -xrm 'XBiff*checkCommand:exec checkmaildir INBOX smtp' -bg gray44", Action(Mouse 1) "Exec read-mail") #aatpc2EXCLUDE #weinbergEXCLUDE DBJXCY3EXCLUDE
 #*FvwmButtons(2x16, Swallow (UseOld NoClose SwallowNew Respawn) "xbiff" "Exec xbiff -xrm 'XBiff*checkCommand:exec checkmaildir INBOX ant' -bg gray44", Action(Mouse 1) "Exec read-mail") #weinbergINCLUDE
 #*FvwmButtons(2x16, Swallow (UseOld NoClose SwallowNew Respawn) "xbiff" "Exec xbiff -xrm 'XBiff*checkCommand:exec checkmaildir INBOX aatlxz' -bg gray44", Action(Mouse 1) "Exec read-mail")                #aatpc2INCLUDE
 

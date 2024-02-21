@@ -8,6 +8,7 @@ lockfile -1 -r 10 -l 60 $HOME/.fvwm.lock || exit 1
 SHORTHOST=${SHORTHOST/aatpc2a/aatpc2}
 SHORTDISPHOST=${SHORTDISPHOST/aatpc2a/aatpc2}
 
+echo "setupfvwmrc: $(date): Running mktemplate $HOME/.fvwm/.fvwm2rc $HOME/.fvwm/.fvwm2rc.in $SHORTHOST $SHORTHOST-$SHORTDISPHOST" 1>&2
 if ! mktemplate $HOME/.fvwm/.fvwm2rc $HOME/.fvwm/.fvwm2rc.in $SHORTHOST $SHORTHOST-$SHORTDISPHOST ; then
     msg="cowardly refusing to overwrite the newer $HOME/.fvwm/.fvwm2rc, before starting fvwm"
     echo "$msg"
