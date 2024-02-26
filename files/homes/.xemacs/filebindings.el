@@ -13,6 +13,8 @@
 ;(delete-item 'auto-mode-alist nil 'assoc "\\.f\\'")
 ;(delete-item 'auto-mode-alist nil 'assoc "\\.F\\'")
 
+(setq auto-mode-alist (append '(("\\.yml$" . yaml-mode)) auto-mode-alist))
+(setq auto-mode-alist (append '(("\\.yaml$" . yaml-mode)) auto-mode-alist))
 (setq auto-mode-alist (append '(("\\.1html$" . html-mode)) auto-mode-alist))
 (setq auto-mode-alist (append '(("\\.bb$" . html-mode)) auto-mode-alist))
 (setq auto-mode-alist (append '(("\\.pp$" . puppet-mode)) auto-mode-alist))
