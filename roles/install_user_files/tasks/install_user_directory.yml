@@ -1,22 +1,8 @@
 ---
-- name: initialise file_list
-  set_fact:
-    file_list: []
+# copies a directory to .name, from .source, defaulting to homes/<name> if
+# .source isn't provided
 
-- name: "construct list of files to copy in {{ file_or_template.name }}"
-  set_fact:
-    file_list: "{{ file_list + [ file_recurse ] }}"
-  loop_control:
-    loop_var: file_recurse
-    label: "~{{ user }}/{{ file_or_template.name }}{{ file_recurse.path }}"
-  with_community.general.filetree: "{{ ( file_or_template.source | default( 'homes/' ~ file_or_template.name ) ) }}"
-  run_once: true
-  # filter in only files and links, and out all files in .git, CVS etc
-  when: ( ( file_recurse.state == 'file' ) or
-          ( file_recurse.state == 'link' ) ) and
-        ( ( file_recurse.path is not regex('(^|/).git(/|$)' ) ) and
-          ( file_recurse.path is not regex('(^|/)CVS(/|$)' ) ) and
-          ( file_recurse.path is not regex('(^|/)readme.txt(/|$)' ) ) )
+- include_tasks: calculate_directory_contents.yml
 
 - name: "install user file under directory: ~{{ user }}/{{ file_or_template.name }}"
   copy:

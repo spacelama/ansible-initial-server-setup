@@ -1,0 +1,19 @@
+---
+# delete contents of directory .name, where files exist in .source,
+# defaulting to homes/<name> if .source isn't provided.  Intended so
+# you can move a file in the source repo from <install_files> to
+# <remove_files> and have a file that was previously installed per
+# matching criteria, to now being removed
+
+- include_tasks: calculate_directory_contents.yml
+
+- name: "remove user file under directory: ~{{ user }}/{{ file_or_template.name }}"
+  file:
+    path: "~{{ user }}/{{ file_or_template.name }}{{ file_recurse.path }}"
+    state: absent
+  become: true
+  become_user: "{{ user }}"
+  loop_control:
+    loop_var: file_recurse
+    label: "~{{ user }}/{{ file_or_template.name }}{{ file_recurse.path }}"
+  with_items: "{{ file_list }}"

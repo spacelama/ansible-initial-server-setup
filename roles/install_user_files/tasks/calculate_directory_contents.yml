@@ -1,0 +1,21 @@
+---
+# generates list of files in a .source directory
+
+- name: initialise file_list
+  set_fact:
+    file_list: []
+
+- name: "construct list of files being {{ 'deleted' if ( file_or_template.delete | default(false) ) else 'installed' }} in {{ file_or_template.name }}"
+  set_fact:
+    file_list: "{{ file_list + [ file_recurse ] }}"
+  loop_control:
+    loop_var: file_recurse
+    label: "~{{ user }}/{{ file_or_template.name }}{{ file_recurse.path }}"
+  with_community.general.filetree: "{{ source }}"
+  run_once: true
+  # filter in only files and links, and out all files in .git, CVS etc
+  when: ( ( file_recurse.state == 'file' ) or
+          ( file_recurse.state == 'link' ) ) and
+        ( ( file_recurse.path is not regex('(^|/).git(/|$)' ) ) and
+          ( file_recurse.path is not regex('(^|/)CVS(/|$)' ) ) and
+          ( file_recurse.path is not regex('(^|/)readme.txt(/|$)' ) ) )

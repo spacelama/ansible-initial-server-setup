@@ -19,21 +19,32 @@
   become: true
   when: not dirtest.stat.exists
 
+- name: find source name and whether to delete
+  # might actually not be asked for - especially in the case of lines
+  # in file, but no harm calculating here to simplify later
+  set_fact:
+    source: "{{ file_or_template.source | default ( 'homes/' ~ file_or_template.name ) }}"
+
 - include_tasks: install_user_file_lines.yml
   when: file_or_template.lines is defined
 
 - include_tasks: install_user_directory.yml
   when: ( file_or_template.name is defined ) and
-        ( file_or_template.source | default ( 'homes/' ~ file_or_template.name ) ) is regex(".*/$")
+        ( source is regex(".*/$") ) and
+        ( not ( file_or_template.delete | default(false) ) )
 
+- include_tasks: delete_user_directory.yml
+  when: ( file_or_template.name is defined ) and
+        ( source is regex(".*/$") ) and
+        ( file_or_template.delete | default(false) )
 
 - include_tasks: install_user_file.yml
-  when: file_or_template.name is defined and
-          ( file_or_template.source | default ( 'homes/' ~ file_or_template.name ) ) is not regex(".*.j2$") and
-          ( file_or_template.source | default ( 'homes/' ~ file_or_template.name ) ) is not regex(".*/$")
+  when: ( file_or_template.name is defined ) and
+          ( source is not regex(".*.j2$") ) and
+          ( source is not regex(".*/$") )
 
 - include_tasks: install_user_template.yml
-  when: file_or_template.name is defined and
-          ( file_or_template.source | default ( file_or_template.name ) ) is regex(".*.j2$")
-          # can't also be directory
+  when: ( file_or_template.name is defined ) and
+          ( source is regex(".*.j2$") )
+          # implied can't also be directory
 

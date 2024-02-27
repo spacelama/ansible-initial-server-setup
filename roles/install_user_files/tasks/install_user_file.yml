@@ -1,11 +1,13 @@
 ---
+# copies a file to .name, from .source, defaulting to homes/<name> if
+# .source isn't provided
+
 - name: "install user file: ~{{ user }}/{{ file_or_template.name }}"
-  # default to homes/<name> if source: isn't provided
   copy:
     dest: "~{{ user }}/{{ file_or_template.name }}"
     owner: "{{ user }}"
     group: "{{ user }}"
-    src: "{{ file_or_template.source | default( 'homes/' ~ file_or_template.name ) }}"
+    src: "{{ source }}"
     mode: "{{ file_or_template.mode | default(omit) }}"
   become: true
   become_user: "{{ user }}"

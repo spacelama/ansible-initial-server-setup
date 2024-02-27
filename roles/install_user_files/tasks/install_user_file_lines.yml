@@ -1,4 +1,6 @@
 ---
+# ensures .lines in file .name
+
 name: "fixup line in conf file: ~{{ user }}/{{ file_or_template.name }}"
   lineinfile:
     dest: "~{{ user }}/{{ file_or_template.name }}"

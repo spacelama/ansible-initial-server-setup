@@ -1,11 +1,12 @@
 ---
+# generates a file .name, from template .source.j2
+
 - name: "install user file per template: ~{{ user }}/{{ file_or_template.name }} "
-  # default to homes/<name> if source: isn't provided
   template:
     dest: "~{{ user }}/{{ file_or_template.name }}"
     owner: "{{ user }}"
     group: "{{ user }}"
-    src: "{{ file_or_template.source | default( 'homes/' ~ file_or_template.name ) }}"
+    src: "{{ source }}"
     mode: "{{ file_or_template.mode | default(omit) }}"
   become: true
   become_user: "{{ user }}"
