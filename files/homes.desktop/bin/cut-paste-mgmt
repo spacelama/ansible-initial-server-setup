@@ -1,0 +1,15 @@
+#!/bin/bash
+
+killall diodon
+killall autocutsel
+
+# -pause is just the poll interval, not waiting that long after a selection is made-
+#autocutsel -selection CLIPBOARD -pause
+
+diodon &  # 20240218: settings:
+# 1 clipboard
+# 0 use primary selection
+# 0 add images to clipboard history
+# 1 keep clipboard content
+# synchronize clipboards
+# automatically paste selected item
