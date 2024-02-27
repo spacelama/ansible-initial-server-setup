@@ -1,7 +1,7 @@
 ---
-- name: "install user file: ~{{ user }}/{{ file_or_template.name }}"
+- name: "install user file per template: ~{{ user }}/{{ file_or_template.name }} "
   # default to homes/<name> if source: isn't provided
-  copy:
+  template:
     dest: "~{{ user }}/{{ file_or_template.name }}"
     owner: "{{ user }}"
     group: "{{ user }}"

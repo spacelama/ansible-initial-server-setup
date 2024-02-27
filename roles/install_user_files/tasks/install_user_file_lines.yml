@@ -1,0 +1,12 @@
+---
+name: "fixup line in conf file: ~{{ user }}/{{ file_or_template.name }}"
+  lineinfile:
+    dest: "~{{ user }}/{{ file_or_template.name }}"
+    owner: "{{ user }}"
+    group: "{{ user }}"
+    line: "{{ item }}"
+    mode: "{{ file_or_template.mode | default(omit) }}"
+    create: yes
+  become: true
+  become_user: "{{ user }}"
+  with_items: "{{ file_or_template.lines }}"

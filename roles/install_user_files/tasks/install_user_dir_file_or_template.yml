@@ -1,0 +1,56 @@
+---
+# allow the caller to supply {{ lines }} to ensure exist in the output
+# file, or a {{ source }} file or a {{ source.j2 }} template
+
+# ensure the destination directory exists so we can add a line to it
+# if necessary, but don't go converting any symlinks to dirs
+# - name: Take file_or_template_recurse from caller if set
+#   set_fact:
+#     file_or_template: "{{ file_or_template_recurse }}"
+#     file_or_template_recurse: ''
+#   when: "file_or_template_recurse | default('') != ''"
+#- name: Take file_or_template_recurse from caller if set
+#  set_fact:
+#    file_or_template[name]: "{{ file_or_template }}"
+#  when: "file_or_template.name is not defined"
+
+- name: "Does   {{ ( '~' ~ user ~ '/' ~ file_or_template.name ) | dirname }} exist?"
+  stat:
+    path:      "{{ ( '~' ~ user ~ '/' ~ file_or_template.name ) | dirname }}"
+  become: true
+  register: dirtest
+
+- name: "Create {{ ( '~' ~ user ~ '/' ~ file_or_template.name ) | dirname }}/"
+  file:
+    path:      "{{ ( '~' ~ user ~ '/' ~ file_or_template.name ) | dirname }}"
+    state: directory
+    owner: "{{ user }}"
+    group: "{{ user }}"
+  become: true
+  when: not dirtest.stat.exists
+
+- include_tasks: install_user_file_lines.yml
+  when: file_or_template.lines is defined
+
+- include_tasks: install_user_directory.yml
+  when: ( file_or_template.name is defined ) and
+        ( file_or_template.source | default ( 'homes/' ~ file_or_template.name ) ) is regex(".*/$")
+
+#- fail:
+#    msg: "got here"
+
+- include_tasks: install_user_file.yml
+  when: file_or_template.name is defined and
+          ( file_or_template.source | default ( 'homes/' ~ file_or_template.name ) ) is not regex(".*.j2$") and
+          ( file_or_template.source | default ( 'homes/' ~ file_or_template.name ) ) is not regex(".*/$")
+
+- include_tasks: install_user_template.yml
+  when: file_or_template.name is defined and
+          ( file_or_template.source | default ( file_or_template.name ) ) is regex(".*.j2$")
+          # can't also be directory
+
+#- name: "ensure permissions are correct on {{ file_or_template.name }} for user {{ user }}"
+#  when: file_or_template.mode is defined  # stop spurious messages about "changed" when the file is a symlink to common-files/
+#  file:
+#    dest: "~{{ user }}/{{ file_or_template.name }}"
+#  become: true
