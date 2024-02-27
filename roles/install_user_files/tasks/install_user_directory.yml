@@ -10,8 +10,6 @@
     loop_var: file_recurse
     label: "~{{ user }}/{{ file_or_template.name }}{{ file_recurse.path }}"
   with_community.general.filetree: "{{ ( file_or_template.source | default( 'homes/' ~ file_or_template.name ) ) }}"
-#  vars:
-#    file_list: []
   run_once: true
   # filter in only files and links, and out all files in .git, CVS etc
   when: ( ( file_recurse.state == 'file' ) or
@@ -20,18 +18,7 @@
           ( file_recurse.path is not regex('(^|/)CVS(/|$)' ) ) and
           ( file_recurse.path is not regex('(^|/)readme.txt(/|$)' ) ) )
 
-#- fail:
-#    msg: "{{ file_list }}"
-#- fail:  # we need to strip /home/tconnors/Ansible/files/homes/bin from src
-#    msg: "{{ lookup('fileglob', ( ( file_or_template.source | default( 'homes/' ~ file_or_template.name ) ) ~ \"/*\" ), wantlist=True) }}"
-
-#  FIXME: probably have to start doing ansible -vvv to trace this...
 - name: "install user file under directory: ~{{ user }}/{{ file_or_template.name }}"
-#  include_tasks: install_user_file.yml   # recursively call ourselves, weeeee!
-#  include_tasks: debug_install_user_file.yml   # recursively call ourselves, weeeee!
-#  loop_control:
-#    loop_var: file_or_template_recurse   # FIXME: results in warning "[WARNING]: TASK: essentials : fixup conf file under directory: ~{{ user }}/{{ file_or_template.name }}: The loop variable 'file_or_template' is already in use. You should set the `loop_var` value in the `loop_control` option for the task to something else to avoid variable collisions and unexpected behavior." but that's exactly what we're trying to do (but it seems we're not recursing with the new variable properly...)
-#  with_items: "{{ lookup('fileglob', ( ( file_or_template.source | default( 'homes/' ~ file_or_template.name ) ) ~ \"/*\" ), wantlist=True) }}"
   copy:
     dest: "~{{ user }}/{{ file_or_template.name }}{{ file_recurse.path }}"
     owner: "{{ user }}"
@@ -65,21 +52,3 @@
     label: "~{{ user }}/{{ file_or_template.name }}{{ file_recurse.path }}"
   with_items: "{{ file_list }}"
   when: ( file_recurse.state == 'link' )
-
-  #- name: "install user file under directory: ~{{ user }}/{{ file_or_template.name }}"
-  #    FIXME: doesn't work on dirac because we deliberately want symlinks.  Hold on. rsync_opts!
-  #  ansible.posix.synchronize:
-  #    dest: "~{{ user }}/{{ file_or_template.name }}"
-  #    src: "{{ file_or_template.source | default( 'homes/' ~ file_or_template.name ) }}"
-  #    recursive: yes
-  #    archive: yes # default anyway, but want links, time false, and owner, group the user in question
-  #    copy_links: true
-  #    times: false
-  #    owner: false
-  #    group: false
-  #    rsync_opts:
-  #      - "--exclude=.git"
-  #      - "--chown={{ user }}:{{ user }}"
-  #  become: true
-  #  when: file_or_template.name is defined and
-  #          ( file_or_template.source | default ( 'homes/' ~ file_or_template.name ) ) is regex(".*/$")
