@@ -29,7 +29,6 @@
   become: true
   when: not dirtest.stat.exists
 
-# FIXME: do all these as become_user, just in case someone does a follow: true somewhere
   # FIXME: the rest of these should be include_tasks too
 - name: "fixup line in conf file: ~{{ user }}/{{ file_or_template.name }}"
   lineinfile:
@@ -40,6 +39,7 @@
     mode: "{{ file_or_template.mode | default(omit) }}"
     create: yes
   become: true
+  become_user: "{{ user }}"
   with_items: "{{ file_or_template.lines }}"
   when: file_or_template.lines is defined
 
@@ -59,6 +59,7 @@
     src: "{{ file_or_template.source | default( 'homes/' ~ file_or_template.name ) }}"
     mode: "{{ file_or_template.mode | default(omit) }}"
   become: true
+  become_user: "{{ user }}"
   when: file_or_template.name is defined and
           ( file_or_template.source | default ( 'homes/' ~ file_or_template.name ) ) is not regex(".*.j2$") and
           ( file_or_template.source | default ( 'homes/' ~ file_or_template.name ) ) is not regex(".*/$")
@@ -72,6 +73,7 @@
     src: "{{ file_or_template.source | default( 'homes/' ~ file_or_template.name ) }}"
     mode: "{{ file_or_template.mode | default(omit) }}"
   become: true
+  become_user: "{{ user }}"
   when: file_or_template.name is defined and
           ( file_or_template.source | default ( file_or_template.name ) ) is regex(".*.j2$")
           # can't also be directory
