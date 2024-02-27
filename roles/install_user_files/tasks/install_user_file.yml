@@ -2,7 +2,18 @@
 # allow the caller to supply {{ lines }} to ensure exist in the output
 # file, or a {{ source }} file or a {{ source.j2 }} template
 
-# ensure the destination file exists so we can add a line to it if necessary
+# ensure the destination directory exists so we can add a line to it
+# if necessary, but don't go converting any symlinks to dirs
+# - name: Take file_or_template_recurse from caller if set
+#   set_fact:
+#     file_or_template: "{{ file_or_template_recurse }}"
+#     file_or_template_recurse: ''
+#   when: "file_or_template_recurse | default('') != ''"
+#- name: Take file_or_template_recurse from caller if set
+#  set_fact:
+#    file_or_template[name]: "{{ file_or_template }}"
+#  when: "file_or_template.name is not defined"
+
 - name: "Does   {{ ( '~' ~ user ~ '/' ~ file_or_template.name ) | dirname }} exist?"
   stat:
     path:      "{{ ( '~' ~ user ~ '/' ~ file_or_template.name ) | dirname }}"
@@ -18,6 +29,8 @@
   become: true
   when: not dirtest.stat.exists
 
+# FIXME: do all these as become_user, just in case someone does a follow: true somewhere
+  # FIXME: the rest of these should be include_tasks too
 - name: "fixup line in conf file: ~{{ user }}/{{ file_or_template.name }}"
   lineinfile:
     dest: "~{{ user }}/{{ file_or_template.name }}"
@@ -30,15 +43,14 @@
   with_items: "{{ file_or_template.lines }}"
   when: file_or_template.lines is defined
 
-- name: "install conf file under directory: ~{{ user }}/{{ file_or_template.name }}"
-  include_tasks: install_user_file.yml   # recursively call ourselves, weeeee!
-  loop_control:
-    loop_var: file_or_template   # FIXME: results in warning "[WARNING]: TASK: essentials : fixup conf file under directory: ~{{ user }}/{{ file_or_template.name }}: The loop variable 'file_or_template' is already in use. You should set the `loop_var` value in the `loop_control` option for the task to something else to avoid variable collisions and unexpected behavior." but that's exactly what we're trying to do (but it seems we're not recursing with the new variable properly...)
-  with_items: "{{ lookup('fileglob', ( ( file_or_template.source | default( 'homes/' ~ file_or_template.name ) ) ~ \"/*\" ), wantlist=True) }}"
-  when: file_or_template.name is defined and
-          ( file_or_template.source | default ( 'homes/' ~ file_or_template.name ) ) is directory
+- include_tasks: install_user_directory.yml
+  when: ( file_or_template.name is defined ) and
+        ( file_or_template.source | default ( 'homes/' ~ file_or_template.name ) ) is regex(".*/$")
 
-- name: "install conf file: ~{{ user }}/{{ file_or_template.name }}"
+#- fail:
+#    msg: "got here"
+
+- name: "install user file: ~{{ user }}/{{ file_or_template.name }}"
   # default to homes/<name> if source: isn't provided
   copy:
     dest: "~{{ user }}/{{ file_or_template.name }}"
@@ -49,9 +61,9 @@
   become: true
   when: file_or_template.name is defined and
           ( file_or_template.source | default ( 'homes/' ~ file_or_template.name ) ) is not regex(".*.j2$") and
-          ( file_or_template.source | default ( 'homes/' ~ file_or_template.name ) ) is not directory
+          ( file_or_template.source | default ( 'homes/' ~ file_or_template.name ) ) is not regex(".*/$")
 
-- name: "install conf file per template: ~{{ user }}/{{ file_or_template.name }} "
+- name: "install user file per template: ~{{ user }}/{{ file_or_template.name }} "
   # default to homes/<name> if source: isn't provided
   template:
     dest: "~{{ user }}/{{ file_or_template.name }}"
