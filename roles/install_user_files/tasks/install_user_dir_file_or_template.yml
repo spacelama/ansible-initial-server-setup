@@ -19,7 +19,7 @@
   become: true
   when: not dirtest.stat.exists
 
-- name: find source name and whether to delete
+- name: find source name
   # might actually not be asked for - especially in the case of lines
   # in file, but no harm calculating here to simplify later
   set_fact:
@@ -31,12 +31,12 @@
 - include_tasks: install_user_directory.yml
   when: ( file_or_template.name is defined ) and
         ( source is regex(".*/$") ) and
-        ( not ( file_or_template.delete | default(false) ) )
+        ( not ( file_or_template.remove | default(false) ) )
 
-- include_tasks: delete_user_directory.yml
+- include_tasks: remove_user_directory.yml
   when: ( file_or_template.name is defined ) and
         ( source is regex(".*/$") ) and
-        ( file_or_template.delete | default(false) )
+        ( file_or_template.remove | default(false) )
 
 - include_tasks: install_user_file.yml
   when: ( file_or_template.name is defined ) and

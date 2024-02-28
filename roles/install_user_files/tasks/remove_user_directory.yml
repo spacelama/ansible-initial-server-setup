@@ -7,7 +7,7 @@
 
 - include_tasks: calculate_directory_contents.yml
 
-- name: "remove user file under directory: ~{{ user }}/{{ file_or_template.name }}"
+- name: "remove user file under directory: ~{{ user }}/{{ file_or_template.name }} based on {{ source }}"
   file:
     path: "~{{ user }}/{{ file_or_template.name }}{{ file_recurse.path }}"
     state: absent

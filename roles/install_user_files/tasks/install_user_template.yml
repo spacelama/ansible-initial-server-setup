@@ -1,7 +1,7 @@
 ---
 # generates a file .name, from template .source.j2
 
-- name: "install user file per template: ~{{ user }}/{{ file_or_template.name }} "
+- name: "install user file per template: ~{{ user }}/{{ file_or_template.name }} from {{ source }}"
   template:
     dest: "~{{ user }}/{{ file_or_template.name }}"
     owner: "{{ user }}"

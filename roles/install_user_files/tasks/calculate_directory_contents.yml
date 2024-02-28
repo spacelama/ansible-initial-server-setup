@@ -1,13 +1,15 @@
 ---
 # generates list of files in a .source directory
 
-- name: initialise file_list
+- name: unconditionally (highest precedence) initialise file_list
   set_fact:
     file_list: []
 
-- name: "construct list of files being {{ 'deleted' if ( file_or_template.delete | default(false) ) else 'installed' }} in {{ file_or_template.name }}"
+- name: "construct list of files being {{ 'deleted' if ( file_or_template.delete | default(false) ) else 'installed' }} in {{ file_or_template.name }} from {{ source }}"
   set_fact:
     file_list: "{{ file_list + [ file_recurse ] }}"
+#  vars:
+#    file_list: []   # higher precedence than set_fact, and initialises correctly, but doesn't reinitialise each loop?
   loop_control:
     loop_var: file_recurse
     label: "~{{ user }}/{{ file_or_template.name }}{{ file_recurse.path }}"
