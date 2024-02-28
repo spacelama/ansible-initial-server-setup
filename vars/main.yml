@@ -211,36 +211,28 @@
       - tconnors
       - root
     files:
-      - name: .vimrc
-      - name: .bashrc.d/override-turnkey-prompt.sh
-        mode: "0755"
-      - name: .gitconfig
-      - name: .gitattributes
-      - name: .Xdefaults
-      - name: .Xdefaults.debian
-      - name: .emacs
-      - name: .gnu-emacs
-      - name: .gnu-emacs-custom
-      - name: .toprc
-      - name: .toprc-cpu
-      - name: .toprc-mem
-      - name: .xemacs/
-      - name: bin/
-      - name: bin/Linux-{{ arch | default ('x86_64') }}/
-        source: homes/bin.Linux-{{ arch | default ('x86_64') }}/
-      - name: bin/   # very me-specific window management stuff, only put on my desktops
-        source: homes/bin.window-mgmt/
+      # .source defaults to 'files/homes/'{{name}}
+      # dest is .name
+      - name: ./   # FIXME: verify permissions are copied - absolutely needed by bin/ at least, but also .bashrc.d/override-turnkey-prompt.sh etc
+      - name: ./
+        source: homes.Linux-{{ arch | default ('x86_64') }}/
+      - name: ./   # very me-specific window management stuff, only put on my desktops
+        source: homes.desktop/
         when: "{{ host_is_desktop is defined }}"
     # templates done by matching on .j2
       - name: .nanorc
         source: homes/.nanorc.j2
+      - name: ./
+        source: homes.remove/
+        remove: true
   # files that were in homes/bin/ and homes/bin.Linux-$arch were previously
   # dumped into /usr/local/bin.  We now dump them into the users bin
   # dir, so we should delete the redundant copies we put in
   # /usr/local/bin
   usr_local_bin_files_to_remove:
     - "{{ lookup('fileglob', \"homes/bin/*\", wantlist=True) }}"
-    - "{{ lookup('fileglob', \"homes/bin.Linux-{{ arch | default ('x86_64') }}/*\", wantlist=True) }}"
+    - "{{ lookup('fileglob', \"homes.Linux-{{ arch | default ('x86_64') }}/bin/Linux-{{ arch | default ('x86_64') }}/*\", wantlist=True) }}"
+    - "{{ lookup('fileglob', \"homes.desktop/bin/*\", wantlist=True) }}"
 
   # global /etc/bashrc files
   bashrc_files:
