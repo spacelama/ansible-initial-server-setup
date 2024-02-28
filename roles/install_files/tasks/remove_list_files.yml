@@ -7,7 +7,7 @@
 #   become: true
 #   when: file_details.source is defined
 
-- name: find all files but {{ file_details.files_not }} from {{ file_details.dir }}
+- name: find all files but {{ file_details.files_not | default([]) }} from {{ file_details.dir }}
   find:
     paths: "{{ file_details.dir }}"
     file_type: file
@@ -20,7 +20,15 @@
   file:
     path: "{{ item }}"
     state: absent
-  with_items: "{{ files_to_delete.files | map(attribute='path') }}"
+  with_items: "{{ files_to_delete.files | map(attribute='path') | sort }}"
   become: "{{ file_details.become | default(true) }}"
   when: file_details.files_not is defined
+  notify: "{{ file_details.notify | default(omit) }}"
+
+- name: remove {{ file_details.files | default([]) }} from {{ file_details.dir }}
+  file:
+    path: "{{ file_details.dir }}/{{ item }}"
+    state: absent
+  with_items: "{{ file_details.files | default([]) | sort }}"
+  become: "{{ file_details.become | default(true) }}"
   notify: "{{ file_details.notify | default(omit) }}"
