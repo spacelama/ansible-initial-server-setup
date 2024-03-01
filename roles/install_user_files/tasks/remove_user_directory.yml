@@ -16,4 +16,4 @@
   loop_control:
     loop_var: file_recurse
     label: "~{{ user }}/{{ file_or_template.name }}{{ file_recurse.path }}"
-  with_items: "{{ file_list }}"
+  with_items: "{{ file_list.file }}"  # kinda want to remove directories too, but we wouldn't want to try to remove all parent directories!

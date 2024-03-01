@@ -2,6 +2,16 @@
 # allow the caller to supply {{ lines }} to ensure exist in the output
 # file, or a {{ source }} file or a {{ source.j2 }} template
 
+- name: find source name
+  # might actually not be asked for - especially in the case of lines
+  # in file, but no harm calculating here to simplify later
+
+  # We prepend "homes/" by default.  We could remove "./" with "|
+  # regex_replace('/\\./', '/')", but it complicates things too much
+  # later
+  set_fact:
+    source: "{{ file_or_template.source | default ( 'homes/' ~ file_or_template.name ) }}"
+
 # ensure the destination directory exists so we can add a line to it
 # if necessary, but don't go converting any symlinks to dirs
 - name: "Does   {{ ( '~' ~ user ~ '/' ~ file_or_template.name ) | dirname }} exist?"
@@ -19,32 +29,22 @@
   become: true
   when: not dirtest.stat.exists
 
-- name: find source name
-  # might actually not be asked for - especially in the case of lines
-  # in file, but no harm calculating here to simplify later
-  set_fact:
-    source: "{{ file_or_template.source | default ( 'homes/' ~ file_or_template.name ) }}"
-
 - include_tasks: install_user_file_lines.yml
   when: file_or_template.lines is defined
 
 - include_tasks: install_user_directory.yml
-  when: ( file_or_template.name is defined ) and
-        ( source is regex(".*/$") ) and
+  when: ( source is regex(".*/$") ) and
         ( not ( file_or_template.remove | default(false) ) )
 
 - include_tasks: remove_user_directory.yml
-  when: ( file_or_template.name is defined ) and
-        ( source is regex(".*/$") ) and
+  when: ( source is regex(".*/$") ) and
         ( file_or_template.remove | default(false) )
 
 - include_tasks: install_user_file.yml
-  when: ( file_or_template.name is defined ) and
-          ( source is not regex(".*.j2$") ) and
-          ( source is not regex(".*/$") )
+  when: ( source is not regex(".*.j2$") ) and
+        ( source is not regex(".*/$") )
 
 - include_tasks: install_user_template.yml
-  when: ( file_or_template.name is defined ) and
-          ( source is regex(".*.j2$") )
-          # implied can't also be directory
+  when: ( source is regex(".*.j2$") )
+        # implied can't also be directory
 
