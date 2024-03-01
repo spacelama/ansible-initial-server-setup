@@ -27,7 +27,7 @@
     owner: "{{ user }}"
     group: "{{ user }}"
     src: "{{ file_recurse.src }}"
-    mode: "{{ file_or_template.mode | default(file_recurse.mode) }}"
+    mode: "{{ file_or_template.mode | default(file_recurse.mode | bitwise_and_oct('0777')) }}"
     follow: true # allow a user to symlink their files directly into
                  # this git repo if they happen to be treating their
                  # editing desktop environment as ansible master, and

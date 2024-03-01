@@ -6,3 +6,4 @@ files/ap.*
 host_vars
 tmp/
 *~
+filter_plugins/__pycache__
