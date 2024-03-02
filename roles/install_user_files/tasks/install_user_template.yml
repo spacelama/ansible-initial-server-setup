@@ -1,12 +1,12 @@
 ---
 # generates a file .name, from template .source.j2
 
-- name: "install user file per template: ~{{ user }}/{{ file_or_template.name }} from {{ source }}"
+- name: "install user file per template: ~{{ user }}/{{ dir_file_or_template.name }} from {{ source }}"
   template:
-    dest: "~{{ user }}/{{ file_or_template.name }}"
+    dest: "~{{ user }}/{{ dir_file_or_template.name }}"
     owner: "{{ user }}"
     group: "{{ user }}"
     src: "{{ source }}"
-    mode: "{{ file_or_template.mode | default(omit) }}"
+    mode: "{{ dir_file_or_template.mode | default(omit) }}"
   become: true
   become_user: "{{ user }}"

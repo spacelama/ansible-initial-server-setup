@@ -10,19 +10,19 @@
   # regex_replace('/\\./', '/')", but it complicates things too much
   # later
   set_fact:
-    source: "{{ file_or_template.source | default ( 'homes/' ~ file_or_template.name ) }}"
+    source: "{{ dir_file_or_template.source | default ( 'homes/' ~ dir_file_or_template.name ) }}"
 
 # ensure the destination directory exists so we can add a line to it
 # if necessary, but don't go converting any symlinks to dirs
-- name: "Does   {{ ( '~' ~ user ~ '/' ~ file_or_template.name ) | dirname }} exist?"
+- name: "Does   {{ ( '~' ~ user ~ '/' ~ dir_file_or_template.name ) | dirname }} exist?"
   stat:
-    path:      "{{ ( '~' ~ user ~ '/' ~ file_or_template.name ) | dirname }}"
+    path:      "{{ ( '~' ~ user ~ '/' ~ dir_file_or_template.name ) | dirname }}"
   become: true
   register: dirtest
 
-- name: "Create {{ ( '~' ~ user ~ '/' ~ file_or_template.name ) | dirname }}/"
+- name: "Create {{ ( '~' ~ user ~ '/' ~ dir_file_or_template.name ) | dirname }}/"
   file:
-    path:      "{{ ( '~' ~ user ~ '/' ~ file_or_template.name ) | dirname }}"
+    path:      "{{ ( '~' ~ user ~ '/' ~ dir_file_or_template.name ) | dirname }}"
     state: directory
     owner: "{{ user }}"
     group: "{{ user }}"
@@ -30,15 +30,15 @@
   when: not dirtest.stat.exists
 
 - include_tasks: install_user_file_lines.yml
-  when: file_or_template.lines is defined
+  when: dir_file_or_template.lines is defined
 
 - include_tasks: install_user_directory.yml
   when: ( source is regex(".*/$") ) and
-        ( not ( file_or_template.remove | default(false) ) )
+        ( not ( dir_file_or_template.remove | default(false) ) )
 
 - include_tasks: remove_user_directory.yml
   when: ( source is regex(".*/$") ) and
-        ( file_or_template.remove | default(false) )
+        ( dir_file_or_template.remove | default(false) )
 
 - include_tasks: install_user_file.yml
   when: ( source is not regex(".*.j2$") ) and

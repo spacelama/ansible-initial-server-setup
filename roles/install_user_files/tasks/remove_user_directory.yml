@@ -7,13 +7,13 @@
 
 - include_tasks: "{{ playbook_dir }}/roles/common/tasks/calculate_directory_contents.yml"
 
-- name: "remove user file under directory: ~{{ user }}/{{ file_or_template.name }} based on {{ source }}"
+- name: "remove user file under directory: ~{{ user }}/{{ dir_file_or_template.name }} based on {{ source }}"
   file:
-    path: "~{{ user }}/{{ file_or_template.name }}{{ file_recurse.path }}"
+    path: "~{{ user }}/{{ dir_file_or_template.name }}{{ file_recurse.path }}"
     state: absent
   become: true
   become_user: "{{ user }}"
   loop_control:
     loop_var: file_recurse
-    label: "~{{ user }}/{{ file_or_template.name }}{{ file_recurse.path }}"
+    label: "~{{ user }}/{{ dir_file_or_template.name }}{{ file_recurse.path }}"
   with_items: "{{ file_list.file }}"  # kinda want to remove directories too, but we wouldn't want to try to remove all parent directories!

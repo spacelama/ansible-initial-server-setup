@@ -8,7 +8,7 @@
       file: []
       link: []
 
-- name: "construct list of files being {{ 'deleted' if ( file_or_template.delete | default(false) ) else 'installed' }} in {{ file_or_template.name }} from {{ source }}"
+- name: "construct list of files being {{ 'deleted' if ( dir_file_or_template.delete | default(false) ) else 'installed' }} in {{ dir_file_or_template.name }} from {{ source }}"
   set_fact:
     # https://stackoverflow.com/questions/38143647/set-fact-with-dynamic-key-name-in-ansible
     file_list: "{{ file_list | combine({file_recurse.state: [file_recurse]}, recursive=true, list_merge='append') }}"
@@ -16,7 +16,7 @@
 #    file_list: []   # higher precedence than set_fact, and initialises correctly, but doesn't reinitialise each loop?
   loop_control:
     loop_var: file_recurse
-    label: "[{{file_recurse.state}}]=~{{ user }}/{{ file_or_template.name }}{{ file_recurse.path }}"
+    label: "[{{file_recurse.state}}]=~{{ user }}/{{ dir_file_or_template.name }}{{ file_recurse.path }}"
   with_community.general.filetree: "{{ source }}"
   run_once: true
   # filter in only files and links, and out all files in .git, CVS etc

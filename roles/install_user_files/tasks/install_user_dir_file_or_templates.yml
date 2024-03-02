@@ -2,6 +2,6 @@
 - name: "install conf files for user {{ user }}"
   include_tasks: install_user_dir_file_or_template.yml
   loop_control:
-    loop_var: file_or_template
+    loop_var: dir_file_or_template
   with_items: "{{ install_user_files.files }}"
-  when: file_or_template.when | default(omit)
+  when: dir_file_or_template.when | default(omit)

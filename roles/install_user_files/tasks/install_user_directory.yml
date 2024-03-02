@@ -7,27 +7,27 @@
 # FIXME: easy enough to generalise this to handle .j2 files as well
 #     dest: {{item | dirname}}/{{ item | basename | regex_replace('\\.j2$', '') }}
 
-- name: "Install user directory: ~{{ user }}/{{ file_or_template.name }} from {{ source }}"
+- name: "Install user directory: ~{{ user }}/{{ dir_file_or_template.name }} from {{ source }}"
   file:
-    path: "~{{ user }}/{{ file_or_template.name }}{{ file_recurse.path }}"
+    path: "~{{ user }}/{{ dir_file_or_template.name }}{{ file_recurse.path }}"
     state: directory
     owner: "{{ user }}"
     group: "{{ user }}"
-    mode: "{{ file_or_template.mode | default(file_recurse.mode | bitwise_and_oct('0777')) }}"
+    mode: "{{ dir_file_or_template.mode | default(file_recurse.mode | bitwise_and_oct('0777')) }}"
   become: true
   become_user: "{{ user }}"
   loop_control:
     loop_var: file_recurse
-    label: "~{{ user }}/{{ file_or_template.name }}{{ file_recurse.path }}"
+    label: "~{{ user }}/{{ dir_file_or_template.name }}{{ file_recurse.path }}"
   with_items: "{{ file_list.directory }}"
 
-- name: "install user file under directory: ~{{ user }}/{{ file_or_template.name }} from {{ source }}"
+- name: "install user file under directory: ~{{ user }}/{{ dir_file_or_template.name }} from {{ source }}"
   copy:
-    dest: "~{{ user }}/{{ file_or_template.name }}{{ file_recurse.path }}"
+    dest: "~{{ user }}/{{ dir_file_or_template.name }}{{ file_recurse.path }}"
     owner: "{{ user }}"
     group: "{{ user }}"
     src: "{{ file_recurse.src }}"
-    mode: "{{ file_or_template.mode | default(file_recurse.mode | bitwise_and_oct('0777')) }}"
+    mode: "{{ dir_file_or_template.mode | default(file_recurse.mode | bitwise_and_oct('0777')) }}"
     follow: true # allow a user to symlink their files directly into
                  # this git repo if they happen to be treating their
                  # editing desktop environment as ansible master, and
@@ -38,12 +38,12 @@
   become_user: "{{ user }}"
   loop_control:
     loop_var: file_recurse
-    label: "~{{ user }}/{{ file_or_template.name }}{{ file_recurse.path }}"
+    label: "~{{ user }}/{{ dir_file_or_template.name }}{{ file_recurse.path }}"
   with_items: "{{ file_list.file }}"
 
-- name: "install user file symlink under directory: ~{{ user }}/{{ file_or_template.name }} from {{ source }}"
+- name: "install user file symlink under directory: ~{{ user }}/{{ dir_file_or_template.name }} from {{ source }}"
   file:
-    dest: "~{{ user }}/{{ file_or_template.name }}{{ file_recurse.path }}"
+    dest: "~{{ user }}/{{ dir_file_or_template.name }}{{ file_recurse.path }}"
     owner: "{{ user }}"
     group: "{{ user }}"
     src: "{{ file_recurse.src }}"
@@ -53,5 +53,5 @@
   become_user: "{{ user }}"
   loop_control:
     loop_var: file_recurse
-    label: "~{{ user }}/{{ file_or_template.name }}{{ file_recurse.path }}"
+    label: "~{{ user }}/{{ dir_file_or_template.name }}{{ file_recurse.path }}"
   with_items: "{{ file_list.link }}"

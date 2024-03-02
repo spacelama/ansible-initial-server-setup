@@ -2,12 +2,12 @@
 # copies a file to .name, from .source, defaulting to homes/<name> if
 # .source isn't provided
 
-- name: "install user file: ~{{ user }}/{{ file_or_template.name }} from {{ source }}"
+- name: "install user file: ~{{ user }}/{{ dir_file_or_template.name }} from {{ source }}"
   copy:
-    dest: "~{{ user }}/{{ file_or_template.name }}"
+    dest: "~{{ user }}/{{ dir_file_or_template.name }}"
     owner: "{{ user }}"
     group: "{{ user }}"
     src: "{{ source }}"
-    mode: "{{ file_or_template.mode | default(omit) }}"
+    mode: "{{ dir_file_or_template.mode | default(omit) }}"
   become: true
   become_user: "{{ user }}"
