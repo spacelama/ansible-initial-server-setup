@@ -2,7 +2,7 @@
 # copies a directory to .name, from .source, defaulting to homes/<name> if
 # .source isn't provided
 
-- include_tasks: calculate_directory_contents.yml
+- include_tasks: "{{ playbook_dir }}/roles/common/tasks/calculate_directory_contents.yml"
 
 # FIXME: easy enough to generalise this to handle .j2 files as well
 #     dest: {{item | dirname}}/{{ item | basename | regex_replace('\\.j2$', '') }}
