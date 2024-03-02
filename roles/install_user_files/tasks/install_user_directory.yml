@@ -7,6 +7,15 @@
 # FIXME: easy enough to generalise this to handle .j2 files as well
 #     dest: {{item | dirname}}/{{ item | basename | regex_replace('\\.j2$', '') }}
 
+# FIXME: might need to implement "Does {{ ( '~' ~ user ~ '/' ~
+# dir_file_or_template.name ) | dirname }} exist?" style tests that
+# were in install_dir_file_or_template.yml, to ensure if directory
+# already exists but is a symlink, it is not recreated (which fails)
+# as a directory.  Not implementing for now because don't want the
+# extra tests on every loop, and it appears that we currently don't
+# have any links suffering from this.  Also should not affect new
+# builds.
+
 - name: "Install user directory: ~{{ user }}/{{ dir_file_or_template.name }} from {{ source }}"
   file:
     path: "~{{ user }}/{{ dir_file_or_template.name }}{{ file_recurse.path }}"
