@@ -5,6 +5,23 @@
 #- debug: msg="install_files = {{ install_files }}"
 #- debug: msg="remove_files = {{ remove_files }}"
 
+- name: populate list of files
+  include_tasks: "install_dir_file_or_templates.yml"
+  loop: "{{ install_files | default([]) }}"
+  loop_control:
+    loop_var: dir_file_or_template
+  when:
+    # ANDED: allow user to supply when and when_pkg_installed -
+    - (dir_file_or_template.when | default("true"))   # can't "omit" in a list, so since this is OR, default to true
+    - (dir_file_or_template.when_pkg_installed is defined) |
+       ternary(dir_file_or_template.when_pkg_installed | default("nil") in ansible_facts.packages | default([]), true)
+
+# FIXME: once we have files/ populated correctly, we'd likely be able
+# to do away with install list of both "install list of directories"
+# and "remove files not in list" because these could simply become
+# directories in the source tree
+
+# FIXME: when no more occurences of install_dirs, this can go
 - name: install list of directories
   file:
     path: "{{ item.dir }}"
@@ -15,17 +32,7 @@
   when: item.when | default(omit)
   notify: "{{ item.notify | default(omit) }}"
 
-- name: install list of files
-  include_tasks: install_list_files.yml
-  loop: "{{ install_files | default([]) }}"
-  loop_control:
-    loop_var: file_details
-  when:
-    # ANDED: allow user to supply when and when_pkg_installed -
-    - (file_details.when | default("true"))   # can't "omit" in a list, so since this is OR, default to true
-    - (file_details.when_pkg_installed is defined) |
-       ternary(file_details.when_pkg_installed | default("nil") in ansible_facts.packages | default([]), true)
-
+# FIXME: when no more occurences of remove_files, this can go
 - name: remove files not in list
   include_tasks: remove_list_files.yml
   loop: "{{ remove_files | default([]) }}"

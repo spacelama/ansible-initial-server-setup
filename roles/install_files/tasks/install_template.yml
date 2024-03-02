@@ -1,0 +1,12 @@
+---
+# generates a file .name, from template .source.j2
+
+- name: "install file per template: {{ dir_file_or_template.name }} from {{ source }}"
+  template:
+    dest: "{{ dir_file_or_template.name }}"
+    owner: "{{ dir_file_or_template.user | default('root') }}"
+    group: "{{ dir_file_or_template.group | default('root') }}"
+    src: "{{ source }}"
+    mode: "{{ dir_file_or_template.mode | default(omit) }}"
+  become: "{{ dir_file_or_template.become | default(true) }}"
+  notify: "{{ dir_file_or_template.notify | default(omit) }}"

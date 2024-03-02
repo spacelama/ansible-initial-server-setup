@@ -1,0 +1,33 @@
+---
+# allow the caller to supply {{ lines }} to ensure exist in the output
+# file, or a {{ source }} file or a {{ source.j2 }} template
+
+- name: find source name
+  # might actually not be asked for - especially in the case of lines
+  # in file, but no harm calculating here to simplify later
+
+  # We prepend "homes/" by default.  We could remove "./" with "|
+  # regex_replace('/\\./', '/')", but it complicates things too much
+  # later
+  set_fact:
+    source: "{{ dir_file_or_template.source | default ( 'tree/' ~ dir_file_or_template.name ) }}"
+
+#- include_tasks: install_file_lines.yml
+#  when: dir_file_or_template.lines is defined
+
+- include_tasks: install_directory.yml
+  when: ( source is regex(".*/$") ) and
+        ( not ( dir_file_or_template.remove | default(false) ) )
+
+- include_tasks: remove_directory.yml
+  when: ( source is regex(".*/$") ) and
+        ( dir_file_or_template.remove | default(false) )
+
+- include_tasks: install_file.yml
+  when: ( source is not regex(".*.j2$") ) and
+        ( source is not regex(".*/$") )
+
+- include_tasks: install_template.yml
+  when: ( source is regex(".*.j2$") )
+        # implied can't also be directory
+

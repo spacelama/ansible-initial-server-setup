@@ -4,6 +4,7 @@
   gather_facts: no
   remote_user: "{{ ssh_user | default('ansible_adm') }}"
   roles:
+    - role: common_handlers
     - role: munin-server
       when: inventory_hostname == 'fs'
 

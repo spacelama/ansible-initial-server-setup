@@ -465,14 +465,6 @@
     force: yes
   become: true
 
-- name: install cron.daily.backuppc_check_backups
-  file:
-    src: /usr/local/bin/backuppc_check_backups
-    dest: /etc/cron.daily/backuppc_check_backups
-    state: link
-    force: yes
-  become: true
-
 # https://forum.proxmox.com/threads/oom-kill-process-inside-lxc-memory-cgroup-out-of-memory.65106/
 - name: ensure /var/log/journal persistent journal exists
   file:

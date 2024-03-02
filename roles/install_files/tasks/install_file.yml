@@ -1,0 +1,14 @@
+---
+# copies a file to .name, from .source, defaulting to homes/<name> if
+# .source isn't provided
+
+- name: "install file: {{ dir_file_or_template.name }} from {{ source }}"
+  copy:
+    dest: "{{ dir_file_or_template.name }}"
+    owner: "{{ dir_file_or_template.user | default('root') }}"
+    group: "{{ dir_file_or_template.group | default('root') }}"
+    src: "{{ source }}"
+    local_follow: "{{ dir_file_or_template.local_follow | default(omit) }}"
+    mode: "{{ dir_file_or_template.mode | default(omit) }}"
+  become: "{{ dir_file_or_template.become | default(true) }}"
+  notify: "{{ dir_file_or_template.notify | default(omit) }}"

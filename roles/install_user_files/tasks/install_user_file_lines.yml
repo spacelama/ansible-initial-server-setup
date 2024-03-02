@@ -1,7 +1,7 @@
 ---
 # ensures .lines in file .name
 
-name: "fixup line in conf file: ~{{ user }}/{{ dir_file_or_template.name }}"
+name: "set line in conf file: ~{{ user }}/{{ dir_file_or_template.name }}"
   lineinfile:
     dest: "~{{ user }}/{{ dir_file_or_template.name }}"
     owner: "{{ user }}"
@@ -9,6 +9,6 @@ name: "fixup line in conf file: ~{{ user }}/{{ dir_file_or_template.name }}"
     line: "{{ item }}"
     mode: "{{ dir_file_or_template.mode | default(omit) }}"
     create: yes
+  with_items: "{{ dir_file_or_template.lines }}"
   become: true
   become_user: "{{ user }}"
-  with_items: "{{ dir_file_or_template.lines }}"

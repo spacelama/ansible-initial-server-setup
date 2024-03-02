@@ -16,55 +16,54 @@
 # have any links suffering from this.  Also should not affect new
 # builds.
 
-- name: "Install user directory: ~{{ user }}/{{ dir_file_or_template.name }} from {{ source }}"
+- name: "Install directory: {{ dir_file_or_template.name }} from {{ source }}"
   file:
-    path: "~{{ user }}/{{ dir_file_or_template.name }}{{ file_recurse.path }}"
+    path: "{{ dir_file_or_template.name }}{{ file_recurse.path }}"
     state: directory
-    owner: "{{ user }}"
-    group: "{{ user }}"
+    owner: "{{ dir_file_or_template.user | default('root') }}"
+    group: "{{ dir_file_or_template.group | default('root') }}"
     # AND existing mode in source tree with 0777 to make sure no
     # setuid or setgid bits are set in the filesystem
     mode: "{{ dir_file_or_template.mode | default(file_recurse.mode | bitwise_and_oct('0777')) }}"
   loop_control:
     loop_var: file_recurse
-    label: "~{{ user }}/{{ dir_file_or_template.name }}{{ file_recurse.path }}"
+    label: "{{ dir_file_or_template.name }}{{ file_recurse.path }}"
   with_items: "{{ file_list.directory }}"
-  become: true
-  become_user: "{{ user }}"
+  become: "{{ dir_file_or_template.become | default(true) }}"
+  notify: "{{ dir_file_or_template.notify | default(omit) }}"
 
-- name: "install user file under directory: ~{{ user }}/{{ dir_file_or_template.name }} from {{ source }}"
+- name: "install file under directory: {{ dir_file_or_template.name }} from {{ source }}"
   copy:
-    dest: "~{{ user }}/{{ dir_file_or_template.name }}{{ file_recurse.path }}"
-    owner: "{{ user }}"
-    group: "{{ user }}"
+    dest: "{{ dir_file_or_template.name }}{{ file_recurse.path }}"
+    owner: "{{ dir_file_or_template.user | default('root') }}"
+    group: "{{ dir_file_or_template.group | default('root') }}"
     src: "{{ file_recurse.src }}"
+    local_follow: "{{ dir_file_or_template.local_follow | default(omit) }}"
     # AND existing mode in source tree with 0777 to make sure no
     # setuid or setgid bits are set in the filesystem
     mode: "{{ dir_file_or_template.mode | default(file_recurse.mode | bitwise_and_oct('0777')) }}"
-    follow: true # allow a user to symlink their files directly into
+    follow: true # allow an admin to symlink their files directly into
                  # this git repo if they happen to be treating their
                  # editing desktop environment as ansible master, and
-                 # always have the latest copy of their config.  We do
-                 # have to be careful not to allow symlink attacks, so
-                 # become the user first
+                 # always have the latest copy of their config.
   loop_control:
     loop_var: file_recurse
-    label: "~{{ user }}/{{ dir_file_or_template.name }}{{ file_recurse.path }}"
+    label: "{{ dir_file_or_template.name }}{{ file_recurse.path }}"
   with_items: "{{ file_list.file }}"
-  become: true
-  become_user: "{{ user }}"
+  become: "{{ dir_file_or_template.become | default(true) }}"
+  notify: "{{ dir_file_or_template.notify | default(omit) }}"
 
-- name: "install user file symlink under directory: ~{{ user }}/{{ dir_file_or_template.name }} from {{ source }}"
+- name: "install file symlink under directory: {{ dir_file_or_template.name }} from {{ source }}"
   file:
-    dest: "~{{ user }}/{{ dir_file_or_template.name }}{{ file_recurse.path }}"
-    owner: "{{ user }}"
-    group: "{{ user }}"
+    dest: "{{ dir_file_or_template.name }}{{ file_recurse.path }}"
+    owner: "{{ dir_file_or_template.user | default('root') }}"
+    group: "{{ dir_file_or_template.group | default('root') }}"
     src: "{{ file_recurse.src }}"
     state: link
     force: true
   loop_control:
     loop_var: file_recurse
-    label: "~{{ user }}/{{ dir_file_or_template.name }}{{ file_recurse.path }}"
+    label: "{{ dir_file_or_template.name }}{{ file_recurse.path }}"
   with_items: "{{ file_list.link }}"
-  become: true
-  become_user: "{{ user }}"
+  become: "{{ dir_file_or_template.become | default(true) }}"
+  notify: "{{ dir_file_or_template.notify | default(omit) }}"

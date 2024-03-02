@@ -211,9 +211,11 @@
       - tconnors
       - root
     files:
+      # dest is .name.  "/dir/" means the destination takes the same name as the
+      # source, and the intervening directory is ensured to exist
       # .source defaults to 'files/homes/'{{name}}
-      # dest is .name
-      - name: ./   # FIXME: verify permissions are copied - absolutely needed by bin/ at least, but also .bashrc.d/override-turnkey-prompt.sh etc
+      # .j2 source files (under the templates directory) are treated as templates
+      - name: ./
       - name: ./
         source: homes.Linux-{{ arch | default ('x86_64') }}/
       - name: ./   # very me-specific window management stuff, only put on my desktops
@@ -222,6 +224,14 @@
     # templates done by matching on .j2
       - name: .nanorc
         source: homes/.nanorc.j2
+      - name: .bashrc.d/
+        # don't want this in the automatically copied homes/ because
+        # otherwise it gets installed back onto dirac, our ansible
+        # host, which is symlinked into this repo into the "wrong"
+        # directory, so it ends up getting installed globally where it
+        # has no effect and is just confusing
+        source: homes.custom/.bashrc.d/override-turnkey-prompt.sh
+        when: "{{ host_is_turnkey | default(false) }}"
       - name: ./
         source: homes.remove/
         remove: true
@@ -234,12 +244,10 @@
     - "{{ lookup('fileglob', \"homes.Linux-{{ arch | default ('x86_64') }}/bin/Linux-{{ arch | default ('x86_64') }}/*\", wantlist=True) }}"
     - "{{ lookup('fileglob', \"homes.desktop/bin/*\", wantlist=True) }}"
 
-  # global /etc/bashrc files
+  # global /etc/bashrc files (calculated for the purposes of removing
+  # excess files later)
   bashrc_files:
-    - "{{ lookup('fileglob', 'etc_bashrc.d/*.sh', wantlist=True) }}"
-  # /usr/local/bin files
-  bin_files:
-    - "{{ lookup('fileglob', 'bin/*', wantlist=True) }}"
+    - "{{ lookup('fileglob', 'tree/etc/bash.bashrc.d/*.sh', wantlist=True) }}"
 
   install_dirs: # these directories would normally be created by the
                 # packages we later install, but we want to be able to
@@ -254,79 +262,52 @@
     # "simple-sync" - let's just transfer a whole bunch of files,
     # according to simple criteria, with possible event triggering:
   install_files:
-    - { source: sbin/init.sysvinit,                     dest: /sbin/init.sysvinit,                     mode: "0755" } # https://wiki.debian.org/systemd recovery from a borked systemd: grub "init=/sbin/init.sysvinit"
-    - { source: usr_local_bin/hddtemp,                  dest: /usr/local/bin/hddtemp,                  mode: "0755" }
-    - { source: usr_local_bin/smart-intercept-spindown, dest: /usr/local/bin/smart-intercept-spindown, mode: "0755" }
-    - { source: usr_local_bin/smartctlnvme,             dest: /usr/local/bin/smartctlnvme,             mode: "0755", local_follow: true }
-    - { source: usr_local_bin/checkntp,                 dest: /usr/local/bin/checkntp,                 mode: "0755" }
-    - { source: usr_local_bin/is_all_mounted,           dest: /usr/local/bin/is_all_mounted,           mode: "0755" }
-    - { source: cron/cron.daily_get_conf_info,          dest: /usr/local/bin/get_conf_info,            mode: "0755" }
-    - { source: cron/cron.daily_backuppc_check_backups, dest: /usr/local/bin/backuppc_check_backups,   mode: "0755" }
-    - { template: var_spool_cron/root.j2,               dest: /var/spool/cron/crontabs/root,           mode: "0600", group: "crontab" }
+      # dest is .name.  "/dir/" means the destination takes the same name as the
+      # source, and the intervening directory is ensured to exist
+      # .source defaults to 'files/tree/'{{name}}
+      # .j2 source files (under the templates directory) are treated as templates
+    - name: /
+    - name: /
+      source: tree.remove/
+      remove: true
 
-    - { template: etc/modprobe.d/ansible-custom.conf.j2, dest: /etc/modprobe.d/ansible-custom.conf }
+    - { name: /usr/local/bin/smartctlnvme,   source: usr_local_bin/smartctlnvme,             mode: "0755",  }
+    - { name: /var/spool/cron/crontabs/root, source: var_spool_cron/root.j2,                 mode: "0600", group: "crontab" }
+    - { name: /etc/modprobe.d/ansible-custom.conf, source: etc/modprobe.d/ansible-custom.conf.j2 }
 
-    - { source: etc_systemd/system/103.scope.d/override.conf,  dest: /etc/systemd/system/103.scope.d/override.conf,  mode: "0644", when: "{{ inventory_hostname == 'pve1' }}"  }
-    - { source: usr_local_bin/powertop-custom.sh,              dest: /usr/local/bin/powertop-custom.sh,              mode: "0755", when: "{{ inventory_hostname == 'pve3' }}"  }
-    - { source: etc_systemd/system/powertop-custom.service,    dest: /etc/systemd/system/powertop-custom.service,    mode: "0644", when: "{{ inventory_hostname == 'pve3' }}"  }
-    - { source: usr_local_bin/pve-forcerestart-lxc-if-running, dest: /usr/local/bin/pve-forcerestart-lxc-if-running, mode: "0755", when: "{{ host_is_pve_server is defined }}" }
-
-    - { source: etc_bashrc.d/bash.bashrc, dest: /etc/bash.bashrc }
-    - { source: etc/bashcolors,           dest: /etc/bashcolors  }
-    - { source: etc/inputrc,              dest: /etc/inputrc     }
+    - { name: /etc/systemd/system/103.scope.d/override.conf,  source: etc_systemd/system/103.scope.d/override.conf,  mode: "0644", when: "{{ inventory_hostname == 'pve1' }}"  }
+    - { name: /usr/local/bin/powertop-custom.sh,              source: usr_local_bin/powertop-custom.sh,              mode: "0755", when: "{{ inventory_hostname == 'pve3' }}"  }
+    - { name: /etc/systemd/system/powertop-custom.service,    source: etc_systemd/system/powertop-custom.service,    mode: "0644", when: "{{ inventory_hostname == 'pve3' }}"  }
+    - { name: /usr/local/bin/pve-forcerestart-lxc-if-running, source: usr_local_bin/pve-forcerestart-lxc-if-running, mode: "0755", when: "{{ host_is_pve_server is defined }}" }
 
     # FIXME: suspect I need to set user to something other than fs and webserver etc - there might be fs on fastssd and fs on hdd, or both fs and webserver on fastssd, and we need to be able to access them both
-    - { source: etc/ceph/ceph.client.fs.keyring,        dest: /etc/ceph/, mode: "0600", when: '{{ mount_ceph_clients is defined }}' }
-    - { source: etc/ceph/ceph.client.webserver.keyring, dest: /etc/ceph/, mode: "0600", when: '{{ mount_ceph_clients is defined }}' }
-    - { source: etc/ceph/ceph.client.media.keyring,     dest: /etc/ceph/, mode: "0600", when: '{{ mount_ceph_clients is defined }}' }
-    - { source: etc/ceph/ceph.conf, dest: /etc/ceph/,                            when: '{{ mount_ceph_clients is defined }}' }
+    - { source: etc/ceph/ceph.client.fs.keyring,        name: /etc/ceph/, mode: "0600", when: '{{ mount_ceph_clients is defined }}' }
+    - { source: etc/ceph/ceph.client.webserver.keyring, name: /etc/ceph/, mode: "0600", when: '{{ mount_ceph_clients is defined }}' }
+    - { source: etc/ceph/ceph.client.media.keyring,     name: /etc/ceph/, mode: "0600", when: '{{ mount_ceph_clients is defined }}' }
+    - { source: etc/ceph/ceph.conf,                     name: /etc/ceph/,               when: '{{ mount_ceph_clients is defined }}' }
 
-    - { source: etc/auto.master,          dest: /etc/auto.master, notify: "restart autofs", when_pkg_installed: "autofs" }
-    - { template: etc/auto.nas.j2,        dest: /etc/auto.nas,    notify: "restart autofs", when_pkg_installed: "autofs" }
-    - { source: etc/autofs.conf,          dest: /etc/autofs.conf, notify: "restart autofs", when_pkg_installed: "autofs" }
-#    - { source: etc/default/autofs,       dest: /etc/default/autofs, notify: "restart autofs" }   MOUNT_NFS_DEFAULT_PROTOCOL seems to be ignored, and not causing me problems anyway, these days
-    - { template: etc/idmapd.conf.j2,     dest: /etc/idmapd.conf }
+    - { name: /etc/auto.master, source: etc/auto.master, notify: "restart autofs", when_pkg_installed: "autofs" }
+    - { name: /etc/auto.nas,    source: etc/auto.nas.j2, notify: "restart autofs", when_pkg_installed: "autofs" }
+    - { name: /etc/autofs.conf, source: etc/autofs.conf, notify: "restart autofs", when_pkg_installed: "autofs" }
+#    - { name: /etc/default/autofs, source: etc/default/autofs, notify: "restart autofs" }   MOUNT_NFS_DEFAULT_PROTOCOL seems to be ignored, and not causing me problems anyway, these days
+    - { name: /etc/idmapd.conf, source: etc/idmapd.conf.j2 }
 
-    - { source: etc/apache2/mods-available/userdir.conf, dest: /etc/apache2/mods-available/, notify: "restart apache2", when: '{{ ( host_is_user_web_server is defined ) and ( deb_release | default("bullseye") == "bookworm" ) }}' }
+    - { source: etc/apache2/mods-available/userdir.conf, name: /etc/apache2/mods-available/, notify: "restart apache2", when: '{{ ( host_is_user_web_server is defined ) and ( deb_release | default("bullseye") == "bookworm" ) }}' }
 
-    - { template: etc/rkhunter.conf.j2,   dest: /etc/rkhunter.conf }
-    - { source: etc/reportbug.conf,       dest: /etc/reportbug.conf, when_pkg_installed: "reportbug" }
+    - { name: /etc/rkhunter.conf,  source: etc/rkhunter.conf.j2 }
 
-    - { source: etc/cron.d/munin-node,     dest: /etc/cron.d/munin-node }
-    - { source: etc/munin/munin-node.conf, dest: /etc/munin/,   notify: "restart munin-node" }
+    - { source: etc/munin/munin-node.conf, name: /etc/munin/,   notify: "restart munin-node" }
 
-#    - { source: etc/fuse.conf,            dest: /etc/fuse.conf,                          mode: "0640", group: "{{ 'fuse' if inventory_hostname == 'fs' else 'root' }}", when_pkg_installed: "fuse3"  }
-#    - { source: etc/fuse.conf,            dest: /etc/fuse.conf,                          mode: "0640", group: "fuse", when: "{{ inventory_hostname == 'fs' }}" }
-#    - { source: etc/fuse.conf,            dest: /etc/fuse.conf,                          mode: "0640", group: "root", when: "{{ inventory_hostname != 'fs' }}" }
-    - { source: etc/fuse.conf,            dest: /etc/fuse.conf,                          mode: "0644", group: "root" }
-    - { source: cron/cron.daily_check-cmos-battery, dest: /etc/cron.daily/check-cmos-battery,    mode: "0755", when: "{{ host_is_physical is defined }}" }
-    - { source: etc/needrestart/notify.conf,                  dest: /etc/needrestart/ }
-    - { source: etc/X11/xorg.conf.d/80-maxclients.conf,       dest: /etc/X11/xorg.conf.d/ }
-    - { template: etc/chrony/sources.d/local.sources.j2,      dest: /etc/chrony/sources.d/local.sources,   notify: "restart chrony" }
+    - { name: /etc/cron.daily/check-cmos-battery,  source: cron/cron.daily_check-cmos-battery,    mode: "0755", when: "{{ host_is_physical is defined }}" }
+    - { name: /etc/chrony/sources.d/local.sources, source: etc/chrony/sources.d/local.sources.j2, notify: "restart chrony" }
 
-    - { source: etc/logrotate.d/btmp,          dest: /etc/logrotate.d/ }
-    - { source: etc/logrotate.d/wtmp,          dest: /etc/logrotate.d/ }
-    - { source: etc/logrotate.d/custom,        dest: /etc/logrotate.d/ }
-    - { source: etc/logrotate.d/sleep-browser, dest: /etc/logrotate.d/, when: "{{ host_is_desktop is defined }}" }
-    - { source: etc/logrotate.d/apache2,       dest: /etc/logrotate.d/, when_pkg_installed: "apache2"            }
-    - { source: etc/logrotate.d/iot,           dest: /etc/logrotate.d/, when: "{{ host_is_syslog is defined }}"  }
+    - { source: etc/logrotate.d/sleep-browser, name: /etc/logrotate.d/, when: "{{ host_is_desktop is defined }}" }
+    - { source: etc/logrotate.d/apache2,       name: /etc/logrotate.d/, when_pkg_installed: "apache2"            }
+    - { source: etc/logrotate.d/iot,           name: /etc/logrotate.d/, when: "{{ host_is_syslog is defined }}"  }
 
-    - { source: "etc/rsyslog.conf",                                 dest: /etc/rsyslog.conf }
-    - { source: "etc/rsyslog.d/remote.conf",                        dest: /etc/rsyslog.d/, when: "{{ host_is_syslog is not defined }}" }
-    - { source: "etc/rsyslog.d/syslog-collector.conf",              dest: /etc/rsyslog.d/, when: "{{ host_is_syslog is defined }}"     }
-    - { source: "etc/rsyslog.d/iot.conf",                           dest: /etc/rsyslog.d/, when: "{{ host_is_syslog is defined }}"     }
-    - { source: "etc/rsyslog.d/zz-0-allsyslog.conf",                dest: /etc/rsyslog.d/ }
-    - { source: "etc/rsyslog.d/zz-1-nosync.conf",                   dest: /etc/rsyslog.d/ }
-    - { source: "etc/rsyslog.d/zz-2-news-and-mail.conf",            dest: /etc/rsyslog.d/ }
-    - { source: "etc/rsyslog.d/zz-3-local,dhcp,sensors,squid.conf", dest: /etc/rsyslog.d/ }
-    - { source: "etc/rsyslog.d/zz-4-catchall.conf",                 dest: /etc/rsyslog.d/ }
-
-    - { source: etc/pulse/daemon.conf,    dest: /etc/pulse/,   when_pkg_installed: "pulseaudio"  }
-    - { source: etc/pulse/system.pa,      dest: /etc/pulse/,   when_pkg_installed: "pulseaudio"  }
-    - { source: etc/pulse/default.pa,     dest: /etc/pulse/,   when_pkg_installed: "pulseaudio"  }
-
-    - { files: "{{ bin_files | flatten }}", dir: /usr/local/bin/,         mode: "0755" }
-    - { files: "{{ bashrc_files | flatten }}", dir: /etc/bash.bashrc.d/                }
+    - { source: etc/rsyslog.d/remote.conf,           name: /etc/rsyslog.d/, when: "{{ host_is_syslog is not defined }}" }
+    - { source: etc/rsyslog.d/syslog-collector.conf, name: /etc/rsyslog.d/, when: "{{ host_is_syslog is defined }}"     }
+    - { source: etc/rsyslog.d/iot.conf,              name: /etc/rsyslog.d/, when: "{{ host_is_syslog is defined }}"     }
 
   remove_files:
     - { files_not: "{{ bashrc_files | flatten | map('basename') }}", dir: /etc/bash.bashrc.d/ } # FIXME: should carefully consider those containers that actually provided files in that directory, but I think the main concern is actually /etc/skel/.bashrc.d/ and by extension ~/.bashrc.d/  We're not yet overriding that, so should be fine for now...
