@@ -34,7 +34,7 @@
     - role: ssh_bootstrap
       become: true
     - role: webserver
-      when: host_is_ext_web_server is defined
+      when: (host_is_ext_web_server is defined) or (host_is_user_web_server is defined)
     - role: nutserver
       when: (host_is_nut_server is defined) or (host_is_nut_master is defined)
     - role: nutmaster

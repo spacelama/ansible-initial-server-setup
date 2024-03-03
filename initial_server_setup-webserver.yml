@@ -9,7 +9,7 @@
     - role: common_handlers
       become: true # the whole role, including handlers, will become root
     - role: webserver
-      when: host_is_ext_web_server is defined
+      when: (host_is_ext_web_server is defined) or (host_is_user_web_server is defined)
   # tasks:
   #   - debug:
   #       msg: "item = {{ mgmt_hosts | join(',') }}"

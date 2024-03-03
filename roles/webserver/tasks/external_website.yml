@@ -1,0 +1,117 @@
+---
+
+# an alternative to the following while the version of
+# community.general.dig in debian bookworm doesn't take a list as
+# input and output: vars/main.yml:
+#`mgmt_host_ips: "{{ query('community.general.dig', *mgmt_hosts, fail_on_error=true) }}"`
+- name: set mgmt_host_ips fact
+  set_fact:
+    mgmt_host_ips: "{{ mgmt_host_ips + [ lookup('community.general.dig', item, fail_on_error=true) ] }}"
+  vars:
+    mgmt_host_ips: []
+  with_items: "{{ mgmt_hosts }}"
+
+- name: install apache and letsencrypt certbot
+  apt:
+    name: [ 'apache2', 'javascript-common', 'python3-certbot-apache', 'apachetop', 'awstats' ]
+
+- name: localalize error pages
+  lineinfile:
+    dest: /etc/apache2/conf-enabled/localized-error-pages.conf
+    insertafter: '^#ErrorDocument 404'
+    line: 'ErrorDocument 404 /404.html'
+  become: true
+  notify: restart apache2
+
+- name: set up awstats apache conf
+  template:
+    src: awstats.conf.j2
+    dest: /etc/apache2/conf-enabled/awstats.conf
+  become: true
+  notify: restart apache2
+
+- name: install apache proxy and rewrite confs
+  copy:
+    src: etc/apache2/{{ item }}
+    dest: /etc/apache2/
+  become: true
+  notify: restart apache2
+  with_items:
+    - rather.puzzling.org-rewrite.conf
+    - rather.puzzling.org-proxy.conf
+
+- name: remove default apache 000-default.conf
+  file:
+    dest: /etc/apache2/sites-enabled/000-default.conf
+    state: absent
+  become: true
+  notify: restart apache2
+
+- name: install our apache sites
+  copy:
+    src: etc/apache2/sites-enabled/
+    dest: /etc/apache2/sites-enabled/
+  become: true
+  notify: restart apache2
+
+- name: install our apache sites
+  copy:
+    src: etc/apache2/secrets/
+    dest: /etc/apache2/secrets/
+    owner: www-data
+    group: www-data
+    mode: 0640
+  become: true
+#  notify: restart apache2
+
+- name: disable apache configurations
+  file:
+    path: /etc/apache2/conf-enabled/serve-cgi-bin.conf
+    state: absent
+  become: true
+  notify: restart apache2
+
+- name: enable apache modules
+  apache2_module:
+    name: "{{ item.name | default( item ) }}"
+    state: "{{ item.state | default('present') }}"
+  loop:
+    - proxy
+    - proxy_http
+    - proxy_wstunnel
+    - rewrite
+    - ssl
+  become: true
+  notify: restart apache2
+#FIXME: original mods-enabled:
+#cgi - later, if necessary
+#fcgid - later, if necessary
+#mpm_prefork instead of mpm_event, later, if necessary
+#perl, php, python if necessary, or will everything that needs that be redirected?
+# php*.ini if necessary (upload_tmp_dir = /tmp; sqlite3.defensive = 1 was turned off at one stage
+# php*.conf may need public_html section commented out
+# /etc/cron.d/php?
+
+- name: Setup monitoring against known letsencrypt failures and non-renewal of cert
+  copy:
+    src: etc/cron.daily/check_letsencrypt_certbot
+    dest: /etc/cron.daily/check_letsencrypt_certbot
+    mode: 0755
+  become: true
+
+#FIXME: we would rather let ansible do the letsencrypt bootstrapping
+#(since we're starting off setting apache to redirect all http->https
+#via a snakeoil cert, this makes it hard for us to bootstrap using
+#letsencypt using the official methods), but for now let's just seed
+#it with a copy from the original webserver, and store the letsencrypt
+#configuration directory in our proxmox host's non-volatile storage
+#FIXME: original letsencrypt contents saved in webserver:/etc/letsencrypt.orig/
+
+# caution (just remove them from the filesystem, install the scripts (which obviously can't be called from this non-cgi enabled machine anyway) since scripts should already be calling the correct master):
+#   ./.whether_in_bed
+#   ./.whether_phone_screen_on
+#   ./.whether_study_uninhabited
+#   ./.offdayshift
+#   temp-ac.ajaxy.js
+#   temp-ac.feedback.js
+

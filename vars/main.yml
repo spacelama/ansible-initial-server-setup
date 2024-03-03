@@ -292,7 +292,8 @@
 #    - { name: /etc/default/autofs, source: etc/default/autofs, notify: "restart autofs" }   MOUNT_NFS_DEFAULT_PROTOCOL seems to be ignored, and not causing me problems anyway, these days
     - { name: /etc/idmapd.conf, source: etc/idmapd.conf.j2 }
 
-    - { source: etc/apache2/mods-available/userdir.conf, name: /etc/apache2/mods-available/, notify: "restart apache2", when: '{{ ( host_is_user_web_server is defined ) and ( deb_release | default("bullseye") == "bookworm" ) }}' }
+    - { source: etc/apache2/mods-available/userdir-int.conf, name: /etc/apache2/mods-available/userdir.conf, notify: "restart apache2", when: '{{ ( host_is_user_web_server is defined ) and ( deb_release | default("bullseye") == "bookworm" ) }}' }
+    - { source: etc/apache2/mods-available/userdir-ext.conf, name: /etc/apache2/mods-available/userdir.conf, notify: "restart apache2", when: '{{ ( host_is_ext_web_server is defined ) and ( deb_release | default("bullseye") == "bookworm" ) }}' }
 
     - { name: /etc/rkhunter.conf,  source: etc/rkhunter.conf.j2 }
 
