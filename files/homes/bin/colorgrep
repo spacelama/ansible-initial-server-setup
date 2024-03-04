@@ -32,12 +32,14 @@ sub usageerror(;$) {
 
 sub usage(;$) {
   my ($exit)=(@_);
-  print STDERR "Usage: $0 [--exact-match|-X] [--ignore-case|-i] [--partial|-p] [--invert-match|-v] [--ignore-lines-no-match (implies --partial)|-N] <re> <files>\n";
+  print STDERR "Usage: $0 [--exact-match|-X] [--ignore-case|-i] [--partial|-p] [--invert-match|-v] [--ignore-lines-no-match (implies --partial)|-N] (-e <re1> -e <re2>... | <re>) <files>\n";
   $exit=defined($exit) ? $exit : 0;
   exit $exit;
 }
 
 my ($exactmatch,$re,$fullline,$invertmatch,$nocase,$ignorelinesnomatch,$colour);
+
+my (@REs);
 
 sub parseinput() {
   $fullline=1;
@@ -54,14 +56,19 @@ sub parseinput() {
     /^--partial$|^-p$/ && do { $fullline=0 ; 1; } ||
     /^--invert-match$|^-v$/ && do { $invertmatch=1 ; 1; } ||
     /^--colour$|^-c$/ && do { $colour=shift(@ARGV) ; 1; } ||
+    /^-e$/ && do { push @REs, shift(@ARGV) ; 1; } ||
     /^--help$/ && usage() ||
     /^--$/ && do { $_=shift(@ARGV) ; last ; } ||
     /^-/ && usageerror("Unrecognised switch: $_") ||
     last;
   }
   defined($_) && unshift @ARGV, $_;
-  if (!defined ($re=shift(@ARGV))) {
-    usageerror("no RE supplied");
+  if (@REs) {
+    $re = "(" . join("|", @REs) . ")";
+  } else {
+    if (!defined ($re=shift(@ARGV))) {
+      usageerror("no RE supplied");
+    }
   }
 #  if (!@ARGV) {
 #    usageerror("No files supplied");
