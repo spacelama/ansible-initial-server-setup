@@ -6,7 +6,7 @@ fermi                           linux,intel,amd,not247,desktop
 
 fs                              linux,intel,depends_on_pve1
 iot                             linux,intel
-met                             linux,intel
+met                             linux,intel,lxc
 #pve                             linux,intel,pve
 pve1                            linux,intel,pve
 pve2                            linux,intel,amd,pve

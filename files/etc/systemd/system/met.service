@@ -1,0 +1,11 @@
+[Unit]
+Description=Met
+After=network.target
+
+[Service]
+Type=simple
+Restart=always
+ExecStart=/home/tconnors/bin/met
+User=tconnors
+Group=tconnors
+WorkingDirectory=/home/tconnors

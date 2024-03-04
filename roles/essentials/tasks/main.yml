@@ -612,6 +612,20 @@
   become: true
   when: packages_to_install is defined
 
+- name: install custom systemd units
+  copy:
+    dest: "/etc/systemd/system/{{ item.dest | default('') }}"
+    src: "etc/systemd/system/{{ item.source | default(item) }}"
+  loop: "{{ systemd_services | default([]) }}"
+  become: true
+  notify: systemd daemon reload
+
+- name: start custom systemd services
+  service:
+    name: "{{ item.dest | default(item) }}"
+  loop: "{{ systemd_services | default([]) }}"
+  become: true
+
 - name: Install zram-generator
   apt:
     name: ['systemd-zram-generator' ]
