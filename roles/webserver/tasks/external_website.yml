@@ -30,27 +30,10 @@
   become: true
   notify: restart apache2
 
-- name: install apache proxy and rewrite confs
-  copy:
-    src: etc/apache2/{{ item }}
-    dest: /etc/apache2/
-  become: true
-  notify: restart apache2
-  with_items:
-    - rather.puzzling.org-rewrite.conf
-    - rather.puzzling.org-proxy.conf
-
 - name: remove default apache 000-default.conf
   file:
     dest: /etc/apache2/sites-enabled/000-default.conf
     state: absent
-  become: true
-  notify: restart apache2
-
-- name: install our apache sites
-  copy:
-    src: etc/apache2/sites-enabled/
-    dest: /etc/apache2/sites-enabled/
   become: true
   notify: restart apache2
 
@@ -76,6 +59,9 @@
     name: "{{ item.name | default( item ) }}"
     state: "{{ item.state | default('present') }}"
   loop:
+    - expires
+    - headers
+    - cgid
     - proxy
     - proxy_http
     - proxy_wstunnel

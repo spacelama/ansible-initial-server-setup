@@ -1,22 +1,61 @@
 ---
+- set_fact:
+    default_apache_modules:
+      - include
+      - userdir
+
 - name: enable apache modules
   apache2_module:
     name: "{{ item.name | default( item ) }}"
     state: "{{ item.state | default('present') }}"
-  loop:
-    - expires
-    - headers
-    - include
-    - userdir
-    - cgid
+  loop: "{{ default_apache_modules + ( apache_modules_to_enable | default([]) ) }}"
   become: true
   notify: restart apache2
+
+- name: install site
+  copy:
+    dest: "{{ item.dest | default('/etc/apache/sites-enabled/') }}"
+    src: "{{ item.source | default(item) }}"
+  loop: "{{ apache_sites | default([]) }}"
+  become: true
+  notify: restart apache2
+
+- block:
+    - name: find where /var/www points
+      stat:
+        path: /var/www
+      register: var_www
+
+    - name: delete /var/www
+      file:
+        state: absent
+        path: /var/www
+      when: var_www.stat.lnk_source | default('') != apache_root_symlink
+      become: true
+
+    - name: set apache root directory
+      file:
+        src: "{{ apache_root_symlink }}"
+        dest: /var/www
+        state: link
+      become: true
+  when: apache_root_symlink is defined
 
 - name: Fix permissions on /var/log/apache2
   file:
     dest: /var/log/apache2
     mode: 0755
   become: true
+
+- name: Fix permissions on /var/log/apache2/{access,error,other_vhosts_access}.log
+  file:
+    dest: "/var/log/apache2/{{ item }}"
+    mode: 0644
+  become: true
+  with_items:
+    - access.log
+    - error.log
+    - other_vhosts_access.log
 
 - name: include external website tasks
   include_tasks: external_website.yml
