@@ -1,6 +1,8 @@
 # add all the other bash settings we care about, paths, etc, that
 # would normally have gone in .bash_profile
 function setup_environment() {
+#    print_callers
+
     #UID=`uid` ; export UID   #already set by bash readonly
     USER=`id_username` ; export USER
 
