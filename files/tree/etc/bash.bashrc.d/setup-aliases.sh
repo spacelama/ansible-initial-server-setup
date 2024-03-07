@@ -118,48 +118,64 @@ function programexists () {
 }
 
 function addkeychain() {
+    # prime the PIDs - may be stale, but we'll find out soon
     if [ -e $HOME/.keychain/$HOSTNAME-sh ] ; then
         . $HOME/.keychain/$HOSTNAME-sh
     fi
+    if [ -e $HOME/.keychain/$HOSTNAME-sh-gpg ] ; then
+        . $HOME/.keychain/$HOSTNAME-sh-gpg
+    fi
 
-    keys=
-    for i in {id_dsa,id_rsa,identity} ; do
-        if [ -e $HOME/.ssh/$i ] ; then
-            keys="$keys $i"
-        fi
-    done
-    if [ "$1" = --withgpg ] ; then
-        #    set -xv
-        keys="$keys $( gpg --list-secret-keys | grep ^ssb | sed 's!/! !' | awk '{print $3}' )"
-        (
-            unset DISPLAY      # doesn't suffice to say --nogui, because there's a faut in keychain where it runs gpg_listmissing before unsetting DISPLAY, and listmissing ends up asking for the same authentication
-            GPG_TTY=$(tty) ; export GPG_TTY         # fall back to ncurses pinentry
+    # for gpg, always use ncurses on local tty rather than display:
+    GPG_TTY=$(tty) ; export GPG_TTY         # fall back to ncurses pinentry
 
-            #    if ! timeout .3 keychain --quiet --agents gpg,ssh $keys ; then
-            #        echo "Enter gpg details:" 1>&2
+    case "$#,$1" in
+        1,--withgpg)
+            keys="$( gpg --list-secret-keys | grep ^ssb | sed 's!/! !' | awk '{print $3}' )"
+            for i in {id_dsa,id_rsa,identity} ; do
+                if [ -e $HOME/.ssh/$i ] ; then
+                    keys="$keys $i"
+                fi
+            done
+            (
+                unset DISPLAY # doesn't suffice to say --nogui,
+                              # because there's a faut in keychain
+                              # where it runs gpg_listmissing before
+                              # unsetting DISPLAY, and listmissing
+                              # ends up asking for the same
+                              # authentication
 
+                echo "Starting keychain (perhaps in another screen)..." 1>&2
+                keychain --quiet --agents gpg,ssh --nogui $keys
+            )
+            ;;
+        0,)
+            keys=
+            for i in {id_dsa,id_rsa,identity} ; do
+                if [ -e $HOME/.ssh/$i ] ; then
+                    keys="$keys $i"
+                fi
+            done
             # try to be silent at first, but give up quickly and
             # mention what we're waiting on just in case the ssh
             # askpass prompt is coming up on a screen you can't see
             if ! ssh-add -l $keys | grep -v 'no identities' | grep -q . ; then
                 echo "Starting keychain (perhaps in another screen)..." 1>&2
-                keychain --quiet --agents gpg,ssh $keys
+                keychain --quiet $keys
             fi
-            #    fi
-            #    set +xv
-        )
-        . $HOME/.keychain/$HOSTNAME-sh-gpg
-    else
-        # try to be silent at first, but give up quickly and
-        # mention what we're waiting on just in case the ssh
-        # askpass prompt is coming up on a screen you can't see
-        if ! ssh-add -l $keys | grep -v 'no identities' | grep -q . ; then
-            echo "Starting keychain (perhaps in another screen)..." 1>&2
-            keychain --quiet $keys
-        fi
-    fi
+            ;;
+        *)
+            echo "Usage: addkeychain [--withgpg]" 1>&2
+            return 1
+            ;;
+    esac
 
+    # source them again in case the original had stale entries and
+    # have now changed
     if [ -e $HOME/.keychain/$HOSTNAME-sh ] ; then
         . $HOME/.keychain/$HOSTNAME-sh
+    fi
+    if [ -e $HOME/.keychain/$HOSTNAME-sh-gpg ] ; then
+        . $HOME/.keychain/$HOSTNAME-sh-gpg
     fi
 }
