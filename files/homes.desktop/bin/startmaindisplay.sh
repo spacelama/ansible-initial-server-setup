@@ -171,10 +171,11 @@ xterm -iconic -e 'inputplug -d -c bin/on-new-kbd' &
 
 # REMEMBER: the xterms that run something don't have -ls, but those that don't do!
 
+cut-paste-mgmt
 case $LONGHOST-$SHORTDISPHOST in
-    pi*-*)
+    met.*-*)
         pidisplay &
-        setupx2x --usebarrier --server dirac --left &
+#        setupx2x --usebarrier --server dirac --left &
         ;;
     bohr*-galileo)
         procmeter3 -geometry +$(($HORSIZE-108))+$(($VERTSIZE-364)) -xrm procmeter3*pane*backgroundPixmap: --resources.background=grey15 &
@@ -299,7 +300,11 @@ fi
 
 
 ####################           PI               #########
-[ `hostname` = pi ] && exit 0
+case `hostname` in
+    pi|met)
+        exit 0
+        ;;
+esac
 ####################           PI               #########
 
 if [ "`xdpyinfo |sed -n 's/.*depth of root window: *\([^ ]*\) .*/\1/p'`" -ge 16 -a `sed -n 's/^MemTotal:  *\([^ ]*\)  *kB/\1/p' /proc/meminfo` -gt 128000 ] ; then

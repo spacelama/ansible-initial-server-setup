@@ -330,7 +330,7 @@ Style "x2x*"             NoTitle, NoHandles, Sticky, BorderWidth 0, MouseFocus
 Style "FvwmConsole"      Title, Handles, Slippery, BorderWidth 3, HandleWidth 5
 Style "FvwmButtons"      Icon toolbox.xpm, NoTitle, NoHandles, Sticky, WindowListSkip, BorderWidth 0
 Style "FvwmIconMan"      NeverFocus
-#Style "FvwmIconMan"      StaysOnTop   #piINCLUDE
+#Style "FvwmIconMan"      StaysOnTop   #piINCLUDE metINCLUDE
 
 Style "Penguineyes"      NoTitle, NoHandles, Sticky, WindowListSkip, BorderWidth 0
 Style "Tuxeyes"          NoTitle, NoHandles, Sticky, WindowListSkip, BorderWidth 0
@@ -352,7 +352,7 @@ Style "wmrack"           NoTitle, NoHandles, Sticky, WindowListSkip, BorderWidth
 Style "xload"            NoTitle, NoHandles, Sticky, WindowListSkip, BorderWidth 0, NeverFocus
 Style "xclockstandard"   NoTitle, NoHandles, Sticky, WindowListSkip, BorderWidth 0, NeverFocus
 Style "pidisplay*"       NoTitle, NoHandles, Sticky, WindowListSkip, BorderWidth 0, StaysOnTop
-#Style "mpv"              NoTitle, NoHandles, Sticky, WindowListSkip, BorderWidth 0 #piINCLUDE
+#Style "mpv"              NoTitle, NoHandles, Sticky, WindowListSkip, BorderWidth 0 #piINCLUDE metINCLUDE
 Style "QupZilla"         NoTitle, NoHandles, Sticky, BorderWidth 0
 Style "maxwelldisplay"   NoTitle, NoHandles, Sticky, WindowListSkip, BorderWidth 0
 Style "xbattlocal"       NoTitle, NoHandles, Sticky, WindowListSkip, BorderWidth 0, NeverFocus
@@ -435,10 +435,10 @@ AddToFunc "StartFunction" "I" GotoPage 0 0
 +                         "I" Exec fvwm_alert_sizechange
 #+                         "I" Module FvwmWinList
 +                         "I" Module FvwmAnimate
-##+                         "I" Module FvwmIconMan      #piINCLUDE
+##+                         "I" Module FvwmIconMan      #piINCLUDE metINCLUDE
 +                         "I" Module FvwmCommandS
 # /var/tmp/FvwmCommand-`hostname`$[DISPLAY]
-+                         "I" Module FvwmButtons       #piEXCLUDE
++                         "I" Module FvwmButtons       #piEXCLUDE metEXCLUDE
 #+                         "I" Wait FvwmButtons        #diracINCLUDE gamowINCLUDE maxwellINCLUDE fermiINCLUDE weinbergINCLUDE
 #the delay is so that things get captured into a definite window instead of the race condition that seems to exist
 #+                         "I" Schedule 5000 Module FvwmButtons -g +$[HORSIZE]+1795    #maxwellINCLUDE fermiINCLUDE weinbergINCLUDE (VERT2SIZE is 1920, but we can't do arithmetic here)
@@ -906,7 +906,7 @@ Mouse 2		I	A	Function "Move-or-Iconify"
 Mouse 3		I	A	Function "window-ops-func"
 
 #key and mouse bindings:
-PipeRead 'bind_fvwm' Quiet    #piEXCLUDE
+PipeRead 'bind_fvwm' Quiet    #piEXCLUDE metEXCLUDE
 
 
 # Keyboard accelerators not to be overriden when in vnc
@@ -1078,9 +1078,9 @@ Style "Tools" NoButton 2, NoButton 4, Sticky, WindowListSkip
 #*FvwmIconMan: followfocus         True
 #*FvwmIconMan: shape               True
 
-#*FvwmIconMan: Action     Mouse     1 N sendcommand RaiseLower #piINCLUDE
-#*FvwmIconMan: Font       12x24                                #piINCLUDE
-#*FvwmIconMan: ManagerGeometry -1+0                            #piINCLUDE
+#*FvwmIconMan: Action     Mouse     1 N sendcommand RaiseLower #piINCLUDE metINCLUDE
+#*FvwmIconMan: Font       12x24                                #piINCLUDE metINCLUDE
+#*FvwmIconMan: ManagerGeometry -1+0                            #piINCLUDE metINCLUDE
 
 *FvwmWharf Animate
 *FvwmWharf BgColor white

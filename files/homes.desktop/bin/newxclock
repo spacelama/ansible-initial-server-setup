@@ -30,7 +30,7 @@ case $HOSTNAME in
     curie)
         defargs=(-padding 0 ) #-fn "-*-helvetica-medium-r-*-*-8-*-*-*-*-*-*-*")
         ;;
-    pi)
+    pi|met)
         defargs=(-face courier:size=14 -strftime '%T %a, %d %b')
         ;;
     *)
@@ -55,7 +55,7 @@ if [ `uname -s` = Linux ] ; then
         bohr)
             ( exec -a xclock$SHORTCANONICALDISP xclock -name xclockstandard "${defargs[@]}" -geometry 155x15+$(($HORSIZE-390))-1 ) &
         ;;
-        pi)
+        pi|met)
             ( exec -a xclock$SHORTCANONICALDISP xclock -name xclockstandard "${defargs[@]}" -geometry +0-1 ) &
         ;;
         aatpc2|aatlxd|aatlxa)
