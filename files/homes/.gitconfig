@@ -1,5 +1,14 @@
+# https://jvns.ca/blog/2024/02/16/popular-git-config-options/
 [user]
 	name = Tim Connors
+
+#[includeIf "gitdir:~/code/<work>/"]
+#	path = "~/code/<work>/.gitconfig"
+
+[url "git@github.com:"]
+	# replace accidentally https cloned github repos with
+	# git@github
+	insteadOf = "https://github.com/"
 
 [color]
 	status = auto
@@ -17,18 +26,29 @@
         # The number of files to consider when performing the copy/rename
         # detection; equivalent to the git diff option -l.
         renamelimit = 20
+	algorithm = histogram
+	colorMoved = dimmed-zebra
+	colorMovedWS = allow-indentation-change
 
 [diff "gzip"]
         binary = true
-        textconv = /bin/zcat
+	textconv = /bin/zcat
+
+[delta]
+	navigate = true    # use n and N to move between diff sections
+	light = false      # set to true if you're in a terminal w/ a light background color (e.g. the default macOS terminal)
 
 # from puppet/dotfiles/dot.gitconfig (jamie moore)
 #[merge]
 #        tool = vimdiff
+[merge]
+	conflictstyle = zdiff3
 
 [core]
 	editor = e
 	pager = less -F -X
+	# FIXME: work out how to use pager without causing myself more problems
+	# pager = delta
 
 [branch]
 # https://www.atlassian.com/git/tutorials/syncing/git-pull
