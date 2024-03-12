@@ -9,3 +9,7 @@ ExecStart=/home/tconnors/bin/met
 User=tconnors
 Group=tconnors
 WorkingDirectory=/home/tconnors
+
+[Install]
+Alias=met.service
+WantedBy=multi-user.target
