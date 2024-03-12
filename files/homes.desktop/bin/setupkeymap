@@ -36,14 +36,14 @@ case $LONGHOST-$SHORTDISPHOST in
     *ltu.edu.au-*) # laptop accessed locally and with external
         # keyboard, both with limited keys, but a right
         # alt key we don't underwise use
-        setxkbmap -rules evdev -model pc104 -option terminate:ctrl_alt_bksp -option ctrl:nocaps -option "compose:ralt"
+        setxkbmap -rules evdev -model pc104 -option terminate:ctrl_alt_bksp -option ctrl:nocaps -option "compose:lwin"
         ;;
     *)
         #setxkbmap -rules evdev -model pc104 -option terminate:ctrl_alt_bksp -option ctrl:nocaps -option "compose:rwin"
 
         # might as well be consistent everywhere, and seems to not
         # conflict with keys we were already using?
-        setxkbmap -rules evdev -model pc104 -option terminate:ctrl_alt_bksp -option ctrl:nocaps -option "compose:ralt"
+        setxkbmap -rules evdev -model pc104 -option terminate:ctrl_alt_bksp -option ctrl:nocaps -option "compose:lwin"
         ;;
 esac
 # 2018/12/06: on weinberg, occasionally numlock still asserts via
