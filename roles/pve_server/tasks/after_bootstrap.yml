@@ -301,9 +301,9 @@
       # swapping in and out on pve2:
       # https://rather.puzzling.org/munin/pve2/pve2/diskstats_throughput/md127.html
       options zfs zfs_arc_min=53687091
-         # 50MB
+      # 50MB
       options zfs zfs_arc_max=107374182
-         # 100MB
+      # 100MB
   become: true
   notify: "Update initramfs config"
 
