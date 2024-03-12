@@ -1,0 +1,1 @@
+ip=192.168.1.28:192.168.1.3:192.168.1.254:255.255.255.0:pi:eth0:off root=/dev/nfs nfsroot=192.168.1.3:/piroot,vers=3 rw consoleblank=0 zswap.enabled=1 rootdelay=15 panic=60 iomem=relaxed
