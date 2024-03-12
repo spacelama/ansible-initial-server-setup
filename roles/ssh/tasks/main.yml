@@ -32,21 +32,21 @@
     - /etc/ssh/ssh_config.d
     - /etc/ssh/sshd_config.d
 
-- name: install /etc/ssh/ssh_config.d/local.conf
+- name: install /etc/ssh/ssh_config.d/local.conf (ssh)
   copy:
     src: etc_ssh/ssh_config.d/local.conf
     dest: /etc/ssh/ssh_config.d/local.conf
     mode: 0644
   become: true
 
-- name: install /etc/ssh/sshd_config.d/local.conf
+- name: install /etc/ssh/sshd_config.d/local.conf (sshd)
   template:
     src: etc_ssh/sshd_config.d/local.conf
     dest: /etc/ssh/sshd_config.d/local.conf
     mode: 0644
   notify: restart ssh
   become: true
-  when: host_is_container is not defined # our containers are still Debian buster, whose sshd doesn't support Include
+  when: host_is_turnkey | default(false) # our containers are still Debian buster, whose sshd doesn't support Include
 
 #- name: Disable password authentication
 #  lineinfile:

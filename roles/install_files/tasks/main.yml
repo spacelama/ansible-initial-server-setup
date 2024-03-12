@@ -5,23 +5,10 @@
 #- debug: msg="install_files = {{ install_files }}"
 #- debug: msg="remove_files = {{ remove_files }}"
 
-- name: populate list of files
-  include_tasks: "install_dir_file_or_templates.yml"
-  loop: "{{ install_files | default([]) }}"
-  loop_control:
-    loop_var: dir_file_or_template
-  when:
-    # ANDED: allow user to supply when and when_pkg_installed -
-    - (dir_file_or_template.when | default("true"))   # can't "omit" in a list, so since this is OR, default to true
-    - (dir_file_or_template.when_pkg_installed is defined) |
-       ternary(dir_file_or_template.when_pkg_installed | default("nil") in ansible_facts.packages | default([]), true)
 
-# FIXME: once we have files/ populated correctly, we'd likely be able
-# to do away with install list of both "install list of directories"
-# and "remove files not in list" because these could simply become
-# directories in the source tree
-
-# FIXME: when no more occurences of install_dirs, this can go
+# FIXME: when no more occurences of install_dirs (but this currently
+# depends on figuring out how to deal with .j2 templates in the files
+# area), this can go
 - name: install list of directories
   file:
     path: "{{ item.dir }}"
@@ -39,3 +26,19 @@
   loop_control:
     loop_var: file_details
   when: file_details.when | default(omit)
+
+- name: populate list of files
+  include_tasks: "install_dir_file_or_template.yml"
+  loop: "{{ install_files | default([]) }}"
+  loop_control:
+    loop_var: dir_file_or_template
+  when:
+    # ANDED: allow user to supply when and when_pkg_installed -
+    - (dir_file_or_template.when | default("true"))   # can't "omit" in a list, so since this is OR, default to true
+    - (dir_file_or_template.when_pkg_installed is defined) |
+       ternary(dir_file_or_template.when_pkg_installed | default("nil") in ansible_facts.packages | default([]), true)
+
+# FIXME: once we have files/ populated correctly, we'd likely be able
+# to do away with install list of both "install list of directories"
+# and "remove files not in list" because these could simply become
+# directories in the source tree

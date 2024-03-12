@@ -434,7 +434,8 @@
     - { key: "XKBLAYOUT", value: "{{ XKBLAYOUT | default('us') }}" }
     - { key: "XKBVARIANT", value: "{{ XKBVARIANT | default('') }}" }
     - { key: "XKBOPTIONS", value: "{{ XKBOPTIONS | default('ctrl:nocaps,terminate:ctrl_alt_bksp,compose:rwin') }}" }
-  when: host_is_container is not defined
+  when: (host_is_container is not defined) and
+         ('keyboard-configuration' in ansible_facts.packages)
 
 - name: install cron.daily.get_conf_info custom host helpers
   copy:
@@ -600,6 +601,21 @@
   become: true
   when: mount_ceph_clients is defined
 
+- name: install custom host specific files
+  copy:
+    dest: "{{ item.dest | default(('/' ~ item) | dirname) }}"
+    src: "{{ item.source | default(item) }}"
+    state: "{{ item.state | default(omit) }}"
+  loop: "{{ custom_files | default([]) }}"
+  become: true
+
+- name: remove custom host specific files
+  file:
+    path: "{{ item }}"
+    state: absent
+  with_items: "{{ custom_remove_files | default([]) }}"
+  become: true
+
 - name: install host specific packages
   apt:
     # list of packages
@@ -616,6 +632,9 @@
   copy:
     dest: "/etc/systemd/system/{{ item.dest | default('') }}"
     src: "etc/systemd/system/{{ item.source | default(item) }}"
+    owner: root
+    group: root
+    mode: 0644
   loop: "{{ systemd_services | default([]) }}"
   become: true
   notify: systemd daemon reload
@@ -623,6 +642,8 @@
 - name: start custom systemd services
   service:
     name: "{{ item.dest | default(item) }}"
+    state: started
+    enabled: yes
   loop: "{{ systemd_services | default([]) }}"
   become: true
 
