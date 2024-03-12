@@ -58,7 +58,8 @@ if ! ps -u $USER -o pid,args | grep -q /[k]eychain ; then
 fi
 
 sleep 3 # resolve any race conditions from running xrandr and waiting for things to resize
-for i in  ~/.bash_profile ~/.profile ; do
+PS1='bogus'
+for i in /etc/profile ~/.bash_profile ~/.profile ; do
     if [ -e "$i" ] ; then
         . $i
         break
