@@ -108,7 +108,7 @@
 
 - name: Install essential packages (all)
   apt:
-    name: ['rsyslog', 'needrestart', 'rsync', 'sysstat', 'bsd-mailx', 'procmail', 'colordiff', 'net-tools', 'ccze'] # procmail for lockfile, ccze for cron.daily get_conf
+    name: ['rsyslog', 'needrestart', 'rsync', 'sysstat', 'bsd-mailx', 'procmail', 'colordiff', 'net-tools', 'ccze', 'bash-completion'] # procmail for lockfile, ccze for cron.daily get_conf
     autoremove: no
     state: present
   become: true
@@ -312,7 +312,7 @@
 
 - name: Install essential packages (not container)
   apt:
-    name: ['git', 'htop', 'iotop', 'smem', 'ethtool', 'iperf3', 'aptitude', 'dlocate', 'vim', 'nicstat', 'lshw', 'parted', 'sdparm', 'chrony', 'ifstat', 'iftop', 'apt-listchanges', 'apt-show-versions', 'etckeeper', 'apt-listbugs', 'apt-listbugs', 'rlwrap', 'strace', 'make', 'keychain', 'libstring-shellquote-perl', 'dmidecode', 'expect', 'initscripts', 'direnv', 'rkhunter', 'dstat', 'bc'] # expect for unbuffer, initscripts for bootlogs, pcp for `pcp dstat`, but that results in pmlogger cronjobs that spin up disks on fs, bc for checkntp
+    name: [ 'git', 'cvs', 'htop', 'iotop', 'smem', 'ethtool', 'iperf3', 'aptitude', 'dlocate', 'vim', 'nicstat', 'lshw', 'parted', 'sdparm', 'chrony', 'ifstat', 'iftop', 'apt-listchanges', 'apt-show-versions', 'etckeeper', 'apt-listbugs', 'apt-listbugs', 'rlwrap', 'strace', 'make', 'keychain', 'libstring-shellquote-perl', 'dmidecode', 'expect', 'initscripts', 'direnv', 'rkhunter', 'dstat', 'bc', 'curl', 'wget' ] # expect for unbuffer, initscripts for bootlogs, pcp for `pcp dstat`, but that results in pmlogger cronjobs that spin up disks on fs, bc for checkntp
     # atop
     autoremove: no
     state: present
