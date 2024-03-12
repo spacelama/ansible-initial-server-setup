@@ -31,7 +31,8 @@ idrac-r730xd                    drac
 netclock                        esp8266
 ac                              esp8266
 
-esp32cam                        esp82,not247,notyetproduction
+esp32cam                        esp32,not247,notyetproduction
+epaper-clock                    esp32,not247,notyetproduction
 
 airmon1                         tasmota,PMS5003,SCD40
 fishtank-temperature            tasmota,DS18B20
@@ -55,9 +56,9 @@ brewfridge-power                tasmota,switch,athom,accurate,powermon
 pvebackup-power                 tasmota,switch,newkogan,powermon,esp12s,accurate
 
 washingmachine-power            tasmota,switch,medion,accurate,powermon,repairedlimitresistor
-measure-power                   tasmota,switch,oldkogan,accurate,powermon,usbport,not247
+measure-power                   tasmota,switch,newkogan,accurate,powermon,not247
 #chromecast-lounge-power         tasmota,switch,newkogan,powermon,currentoffset,frequent-dies-need-power-supply-work
-panasonic-power                 tasmota,switch,newkogan,accurate,powermon
+panasonic-power                 tasmota,switch,oldkogan,accurate,powermon,usbport
 electricblanket-power           tasmota,switch,athom,accurate,powermon,not247
 loungefrontlight-power          tasmota,switch,athom,accurate,powermon
 study-power                     beken,switch,jinvooswitchindiv4boardusb,not247,1W_all_off,5W_all_on
