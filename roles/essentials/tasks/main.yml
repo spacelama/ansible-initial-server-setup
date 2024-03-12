@@ -519,7 +519,7 @@
   include_tasks: "{{ playbook_dir }}/roles/common/tasks/remove_boot_flag.yml"
   loop_control:
     loop_var: flag
-  with_items: { quiet, "   *" }   #for the sake of
+  with_items: [ "quiet", "   *" ] #for the sake of
                                   #/etc/kernel/cmdline, which doesn't
                                   #have the individual files of
                                   #/etc/default/boot.d/
