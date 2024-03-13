@@ -1,0 +1,13 @@
+#!/bin/bash
+
+# idea is to be sourced by the X environment so that we can decide how
+# to portably set up our requisite environment variables no matter
+# where we are
+
+PS1='bogus'
+for i in /etc/profile ~/.bash_profile ~/.profile ; do
+    if [ -e "$i" ] ; then
+        . $i
+        break
+    fi
+done

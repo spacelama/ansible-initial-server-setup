@@ -58,14 +58,7 @@ if ! ps -u $USER -o pid,args | grep -q /[k]eychain ; then
 fi
 
 sleep 3 # resolve any race conditions from running xrandr and waiting for things to resize
-PS1='bogus'
-for i in /etc/profile ~/.bash_profile ~/.profile ; do
-    if [ -e "$i" ] ; then
-        . $i
-        break
-    fi
-done
-
+. $HOME/bin/source-environment-setup
 setup_environment # in leui of .bashrc calling handleprompt() and
                   # bashrc_last() as very last thing, we setup all the
                   # aliases we later depend on

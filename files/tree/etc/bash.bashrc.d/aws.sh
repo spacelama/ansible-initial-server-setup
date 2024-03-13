@@ -1,1 +1,1 @@
-/home/tconnors/private-dot-files/.bashrc.d/aws.sh
+/home/tconnors/private-cmd-dot-files/.bashrc.d/aws.sh
