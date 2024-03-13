@@ -23,6 +23,10 @@ your SSIDs for example.
 
 * [Ansible](http://docs.ansible.com/ansible/intro_installation.html) installed locally on your machine
 
+Ideally, you'd create a gpg encrypted file in misc/vault-password.gpg,
+and verify it can be read with:
+misc/get-vault-pass.sh
+
 ## Configuration
 
 Clone the repo
