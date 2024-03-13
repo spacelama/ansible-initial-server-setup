@@ -133,8 +133,8 @@
     become: true
 
   - name: install blank /etc/network/interfaces
-    copy:
-      src: etc_network_interfaces.network-manager
+    template:
+      src: etc_network_interfaces.network-manager.j2
       dest: /etc/network/interfaces
     become: true
     notify: restart network-manager
@@ -241,8 +241,8 @@
     become: true
 
   - name: install blank /etc/network/interfaces
-    copy:
-      src: etc_network_interfaces.network-manager
+    template:
+      src: etc_network_interfaces.network-manager.j2
       dest: /etc/network/interfaces
     become: true
     notify: restart network-manager
