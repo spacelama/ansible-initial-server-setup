@@ -40,12 +40,12 @@ wait_for_idrac() {
     false
 }
 
-turn_on_machine() {
+power_on_machine() {
     # make sure we're already in the expected state.  If the machine
     # is already up, the admin might be doing something with it, or
     # yesterday's run still going.  Better let it stay powered up and
     # do nothing with it today.
-    echo "$(date) Turning on $remote_host"
+    echo "$(date) Powering on $remote_host"
     powerstatus=$( ssh root@$remote_idrac racadm serveraction powerstatus )
     if [[ "$powerstatus" == *ON* ]] ; then
         return 1  # allow the caller to deal with us
@@ -89,8 +89,8 @@ wait_for_machine_up() {
 
 turn_on_ups
 wait_for_idrac
-turn_on_machine || [ -t 0 ] # failure if machine was already on,
-                            # unless we're running interactively, in
-                            # which case we're clearly debugging this
-                            # script
+power_on_machine || [ -t 0 ] # failure if machine was already on,
+                             # unless we're running interactively, in
+                             # which case we're clearly debugging this
+                             # script
 wait_for_machine_up

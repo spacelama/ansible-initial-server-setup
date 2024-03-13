@@ -23,12 +23,27 @@ power_switch="$3"
 turn_off_machine() {
     echo "$(date) Turning off $remote_host"
     ssh root@$remote_host poweroff
+}
 
-    #FIXME: probably should have backup option to `ssh
-    #root@$remote_idrac racadm serveraction graceshutdown` after some
-    #time just in case ssh failed, but last time ssh failed,
-    #graceshutdown failed too, and certainly don't want to do anything
-    #harder than that automatically
+power_off_machine() {
+    # make sure we're already in the expected state.  If the machine
+    # is already up, the admin might be doing something with it, or
+    # yesterday's run still going.  Better let it stay powered up and
+    # do nothing with it today.
+    echo "$(date) Powering off $remote_host"
+    powerstatus=$( ssh root@$remote_idrac racadm serveraction powerstatus )
+    if [[ "$powerstatus" == *OFF* ]] ; then
+        return 1  # allow the caller to deal with us
+    elif ! [[ "$powerstatus" == *ON* ]] ; then
+        echo "Power status was not determined when we went to power it on"    # a definite error condition
+        exit 1
+    fi
+    ssh root@$remote_idrac racadm serveraction powerdown
+    sleep 2
+    if ! ssh root@$remote_idrac racadm serveraction powerstatus | grep OFF ; then
+        echo "Power was not off after we tried turning it off"
+        exit 1
+    fi
 }
 
 wait_for_machine_down() {
@@ -72,7 +87,7 @@ ensure_ups_off() {
 }
 
 
-turn_off_machine
+turn_off_machine || power_off_machine
 wait_for_machine_down
 turn_off_ups
 ensure_ups_off
