@@ -262,8 +262,8 @@
   # https://forum.proxmox.com/threads/pmxcfs-writing-to-disk-all-the-time.35828/ https://www.reddit.com/r/Proxmox/comments/i8e5fi/excessive_nvme_wear_out/g193xr2/
   service:
     name: "{{ item }}"
-    enabled: "{{ ( host_is_in_pve_cluster is defined and host_is_in_pve_cluster ) | ternary('yes', 'no') }}"
-    state: "{{ ( host_is_in_pve_cluster is defined and host_is_in_pve_cluster ) | ternary('started', 'stopped') }}"
+    enabled: "{{ ( host_is_in_pve_cluster | default(false) and host_is_in_pve_cluster ) | ternary('yes', 'no') }}"
+    state: "{{ ( host_is_in_pve_cluster | default(false) and host_is_in_pve_cluster ) | ternary('started', 'stopped') }}"
   become: true
   with_items:
     - pve-ha-lrm
@@ -370,14 +370,14 @@
   include_tasks: "{{ playbook_dir }}/roles/common/tasks/add_boot_flag.yml"
   loop_control:
     loop_var: flag
-  when: host_is_intel is defined
+  when: host_is_intel | default(false)
   with_items: [ 'intel_iommu=on', 'iommu=pt', 'pcie_acs_override=downstream,multifunction' ]
 
 - name: "Append amd_iommu=on boot config"
   include_tasks: "{{ playbook_dir }}/roles/common/tasks/add_boot_flag.yml"
   loop_control:
     loop_var: flag
-  when: host_is_amd is defined
+  when: host_is_amd | default(false)
   with_items: [ 'amd_iommu=on', 'iommu=pt', 'pcie_acs_override=downstream,multifunction' ]
 
 # - name: "host modules blacklist (radeon, snd_hda_intel, amdgpu, usb3)"

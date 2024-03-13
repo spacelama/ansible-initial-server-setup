@@ -41,7 +41,7 @@
     autoremove: no
     state: present
   become: true
-  when: host_is_smtp_relay is defined
+  when: host_is_smtp_relay | default(false)
 
 - name: Install dovecot when mda is configured (only tested when mda is also smtp)
   apt:
@@ -49,7 +49,7 @@
     autoremove: no
     state: present
   become: true
-  when: host_is_mda is defined
+  when: host_is_mda | default(false)
 
   # "touch" file if not exist: https://stackoverflow.com/questions/28347717/how-to-create-an-empty-file-with-ansible
   # https://dev.to/icy1900/ansible-create-empty-file-if-it-does-not-exist-1fof
@@ -61,21 +61,21 @@
     modification_time: preserve
     access_time: preserve
   become: true
-  when: (host_is_mda is defined) and (dovecot_insecure_logfile_creation is defined)
+  when: (host_is_mda | default(false)) and (dovecot_insecure_logfile_creation is defined)
 
 - name: Rotate imap-via-ssh logfile
   copy:
     src: etc/logrotate.d/dovecot-custom
     dest: /etc/logrotate.d/dovecot-custom
   become: true
-  when: (host_is_mda is defined) and (dovecot_insecure_logfile_creation is defined)
+  when: (host_is_mda | default(false)) and (dovecot_insecure_logfile_creation is defined)
 
 - name: Install dovecot/mail.conf
   copy:
     src: etc/dovecot/10-mail.conf
     dest: /etc/dovecot/conf.d/10-mail.conf
   become: true
-  when: host_is_mda is defined
+  when: host_is_mda | default(false)
   notify: restart dovecot
 
 - name: Install mail packages
@@ -116,7 +116,7 @@
     line: "#smtp_tls_security_level=may # disabled by ANSIBLE"
   become: true
   notify: restart postfix
-  when: host_is_smtp_relay is defined
+  when: host_is_smtp_relay | default(false)
 
 - name: add submission ports to postfix master
   lineinfile:
@@ -130,7 +130,7 @@
     - "127.0.0.1:submissions"
   become: true
   notify: restart postfix
-  when: host_is_smtp_relay is defined
+  when: host_is_smtp_relay | default(false)
 
 # - name: populate the virtual user table
 #   copy:
@@ -139,7 +139,7 @@
 #     content: "root {{ smtp_root_mail_to }}\n"
 #   become: true
 #   notify: postmap /etc/postfix/virtual
-#   when: host_is_smtp_relay is defined
+#   when: host_is_smtp_relay | default(false)
 
 - name: Ensure gmail configuration used in postfix/main.cf
   blockinfile:
@@ -183,7 +183,7 @@
 
   become: true
   notify: restart postfix
-  when: host_is_smtp_relay is defined
+  when: host_is_smtp_relay | default(false)
 
 - name: Make sure all handlers run
   meta: flush_handlers
@@ -196,5 +196,5 @@
     owner: "{{ smtp_crontab.user }}"
     group: crontab
   become: true
-  when: (smtp_crontab is defined) and (host_is_mda is defined)
+  when: (smtp_crontab is defined) and (host_is_mda | default(false))
 

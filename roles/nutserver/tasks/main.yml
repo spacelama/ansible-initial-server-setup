@@ -18,7 +18,7 @@
       {{ nut_ups_conf[inventory_hostname].content | string }}
   become: true
 #  notify: restart nut # not needed on pve8 - it seems to just autoreload on any changes?
-  when: host_is_nut_server is defined
+  when: host_is_nut_server | default(false)
 
 - name: set up nut nut.conf
   block:

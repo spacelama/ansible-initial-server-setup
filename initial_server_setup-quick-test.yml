@@ -24,7 +24,7 @@
     # - role: ssh_bootstrap
     #   become: true
     # - role: management
-    #   when: host_is_mgmt is defined
+    #   when: host_is_mgmt | default(false)
     # - user
     # - essentials
     # - logs
@@ -35,20 +35,20 @@
     # - role: hostname
     #   when: host_is_container is not defined
     # - role: fileserver
-    #   when: host_is_fileserver is defined
+    #   when: host_is_fileserver | default(false)
     # - role: mailserver
-    #   when: host_is_mailserver is defined
+    #   when: host_is_mailserver | default(false)
     # - role: pve_server
-    #   when: host_is_pve_server is defined
+    #   when: host_is_pve_server | default(false)
     # - role: virtual
-    #   when: host_is_virtual is defined
+    #   when: host_is_virtual | default(false)
     # - role: physical
-    #   when: host_is_physical is defined
+    #   when: host_is_physical | default(false)
     # - role: laptop
-    #   when: host_is_laptop is defined
+    #   when: host_is_laptop | default(false)
     # - role: dell_server
-    #   when: host_is_dell_server is defined
+    #   when: host_is_dell_server | default(false)
     # - role: desktop
-    #   when: host_is_desktop is defined
+    #   when: host_is_desktop | default(false)
     - role: ssh
     - role: fail2ban

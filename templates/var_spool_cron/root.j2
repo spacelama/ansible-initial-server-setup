@@ -15,7 +15,7 @@ MAILTO=tconnors
 {% if host_is_container is not defined %}
 00 4    * * *   /usr/local/bin/checkntp
 {% endif %}
-{% if host_is_munin_server is defined %}
+{% if host_is_munin_server | default(false) %}
 00 * * * * /usr/share/rsync/scripts/rsync-no-vanished -Hax --delete --exclude lost+found /var/cache/munin/www/ /var/cache/munin/www_copy/
 {% endif %}
 

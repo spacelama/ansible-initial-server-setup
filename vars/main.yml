@@ -220,7 +220,7 @@
         source: homes.Linux-{{ arch | default ('x86_64') }}/
       - name: ./   # very me-specific window management stuff, only put on my desktops
         source: homes.desktop/
-        when: "{{ host_is_desktop is defined }}"
+        when: "{{ host_is_desktop | default(false) }}"
     # templates done by matching on .j2
       - name: .nanorc
         source: homes/.nanorc.j2
@@ -278,7 +278,7 @@
     - { name: /etc/systemd/system/103.scope.d/override.conf,  source: etc_systemd/system/103.scope.d/override.conf,  mode: "0644", when: "{{ inventory_hostname == 'pve1' }}"  }
     - { name: /usr/local/bin/powertop-custom.sh,              source: usr_local_bin/powertop-custom.sh,              mode: "0755", when: "{{ inventory_hostname == 'pve3' }}"  }
     - { name: /etc/systemd/system/powertop-custom.service,    source: etc_systemd/system/powertop-custom.service,    mode: "0644", when: "{{ inventory_hostname == 'pve3' }}"  }
-    - { name: /usr/local/bin/pve-forcerestart-lxc-if-running, source: usr_local_bin/pve-forcerestart-lxc-if-running, mode: "0755", when: "{{ host_is_pve_server is defined }}" }
+    - { name: /usr/local/bin/pve-forcerestart-lxc-if-running, source: usr_local_bin/pve-forcerestart-lxc-if-running, mode: "0755", when: "{{ host_is_pve_server | default(false) }}" }
 
     # FIXME: suspect I need to set user to something other than fs and webserver etc - there might be fs on fastssd and fs on hdd, or both fs and webserver on fastssd, and we need to be able to access them both
     - { source: etc/ceph/ceph.client.fs.keyring,        name: /etc/ceph/, mode: "0600", when: '{{ mount_ceph_clients is defined }}' }
@@ -292,23 +292,23 @@
 #    - { name: /etc/default/autofs, source: etc/default/autofs, notify: "restart autofs" }   MOUNT_NFS_DEFAULT_PROTOCOL seems to be ignored, and not causing me problems anyway, these days
     - { name: /etc/idmapd.conf, source: etc/idmapd.conf.j2 }
 
-    - { source: etc/apache2/mods-available/userdir.conf.int, name: /etc/apache2/mods-available/userdir.conf, notify: "restart apache2", when: '{{ ( host_is_user_web_server is defined ) and ( deb_release | default("bullseye") == "bookworm" ) }}' }
-    - { source: tree.webserver/etc/apache2/, name: /etc/apache2/,           notify: "restart apache2", when: '{{ host_is_ext_web_server is defined }}' }
+    - { source: etc/apache2/mods-available/userdir.conf.int, name: /etc/apache2/mods-available/userdir.conf, notify: "restart apache2", when: '{{ ( host_is_user_web_server | default(false) ) and ( deb_release | default("bullseye") == "bookworm" ) }}' }
+    - { source: tree.webserver/etc/apache2/, name: /etc/apache2/,           notify: "restart apache2", when: '{{ host_is_ext_web_server | default(false) }}' }
 
     - { name: /etc/rkhunter.conf,  source: etc/rkhunter.conf.j2 }
 
     - { source: etc/munin/munin-node.conf, name: /etc/munin/,   notify: "restart munin-node" }
 
-    - { name: /etc/cron.daily/check-cmos-battery,  source: cron/cron.daily_check-cmos-battery,    mode: "0755", when: "{{ host_is_physical is defined }}" }
+    - { name: /etc/cron.daily/check-cmos-battery,  source: cron/cron.daily_check-cmos-battery,    mode: "0755", when: "{{ host_is_physical | default(false) }}" }
     - { name: /etc/chrony/sources.d/local.sources, source: etc/chrony/sources.d/local.sources.j2, notify: "restart chrony" }
 
-    - { source: etc/logrotate.d/sleep-browser, name: /etc/logrotate.d/, when: "{{ host_is_desktop is defined }}" }
+    - { source: etc/logrotate.d/sleep-browser, name: /etc/logrotate.d/, when: "{{ host_is_desktop | default(false) }}" }
     - { source: etc/logrotate.d/apache2,       name: /etc/logrotate.d/, when_pkg_installed: "apache2"            }
-    - { source: etc/logrotate.d/iot,           name: /etc/logrotate.d/, when: "{{ host_is_syslog is defined }}"  }
+    - { source: etc/logrotate.d/iot,           name: /etc/logrotate.d/, when: "{{ host_is_syslog | default(false) }}"  }
 
     - { source: etc/rsyslog.d/remote.conf,           name: /etc/rsyslog.d/, when: "{{ host_is_syslog is not defined }}" }
-    - { source: etc/rsyslog.d/syslog-collector.conf, name: /etc/rsyslog.d/, when: "{{ host_is_syslog is defined }}"     }
-    - { source: etc/rsyslog.d/iot.conf,              name: /etc/rsyslog.d/, when: "{{ host_is_syslog is defined }}"     }
+    - { source: etc/rsyslog.d/syslog-collector.conf, name: /etc/rsyslog.d/, when: "{{ host_is_syslog | default(false) }}"     }
+    - { source: etc/rsyslog.d/iot.conf,              name: /etc/rsyslog.d/, when: "{{ host_is_syslog | default(false) }}"     }
 
   remove_files:
     - { files_not: "{{ bashrc_files | flatten | map('basename') }}", dir: /etc/bash.bashrc.d/ } # FIXME: should carefully consider those containers that actually provided files in that directory, but I think the main concern is actually /etc/skel/.bashrc.d/ and by extension ~/.bashrc.d/  We're not yet overriding that, so should be fine for now...

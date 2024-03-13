@@ -36,7 +36,7 @@ iface eth0 inet manual
 {#
   dell poweredge machines with many network interfaces
 #}
-{% if (host_is_dell_server is defined) %}
+{% if (host_is_dell_server | default(false)) %}
 iface eno2 inet manual
 
 iface eno3 inet manual

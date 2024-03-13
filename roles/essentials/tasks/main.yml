@@ -228,7 +228,7 @@
     notify: restart systemd-resolved
 
   when: (deb_release | default('bullseye') != 'buster') and
-        (host_is_using_systemd_resolver is defined)
+        (host_is_using_systemd_resolver | default(false))
 
 # dnsmasq as a caching name server per https://wiki.debian.org/dnsmasq#Local_Caching_using_NetworkManager
 - name: setup dnsmasq for caching nameserver
@@ -343,7 +343,7 @@
   become: true
   # repos might not be set up correctly yet if still in check_mode, so
   # these packages might not yet be available
-  when: host_is_intel is defined and not ansible_check_mode
+  when: host_is_intel | default(false) and not ansible_check_mode
 
 - name: Install amd microcode
   apt:
@@ -353,7 +353,7 @@
   become: true
   # repos might not be set up correctly yet if still in check_mode, so
   # these packages might not yet be available
-  when: host_is_amd is defined and not ansible_check_mode
+  when: host_is_amd | default(false) and not ansible_check_mode
 
 - name: Remove intel and amd microcode
   apt:
@@ -490,7 +490,7 @@
 - name: "set ctrl-alt-delete {{ host_is_desktop is not defined }} (desktop=off, server=on)"
   systemd:
     name: ctrl-alt-del.target
-    masked: "{{ host_is_desktop is defined }}"
+    masked: "{{ host_is_desktop | default(false) }}"
   become: true
 
 - name: Unscrew systemd login defaults - kill user processes
@@ -654,7 +654,7 @@
     state: present
     install_recommends: no
   become: true
-  when: (deb_release | default('bullseye') == 'bookworm') and ((host_is_desktop is defined) or (host_is_pi is defined))
+  when: (deb_release | default('bullseye') == 'bookworm') and ((host_is_desktop | default(false)) or (host_is_pi | default(false)))
 
 - name: "Ensure custom modules in /etc/modules"
   lineinfile:

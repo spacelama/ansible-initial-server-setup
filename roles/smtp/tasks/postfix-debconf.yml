@@ -8,7 +8,7 @@
     value: "Internet with smarthost"
   become: true
   notify: reconfigure postfix
-  when: host_is_smtp_relay is defined
+  when: host_is_smtp_relay | default(false)
 
 - name: set as satellite mailer
   debconf:
@@ -28,7 +28,7 @@
     value: "{{ smtp_mail_name }}"
   become: true
   notify: reconfigure postfix
-  when: host_is_smtp_relay is defined
+  when: host_is_smtp_relay | default(false)
 
 - name: Set mailname
   debconf:
@@ -67,7 +67,7 @@
 #    value: "{{ smtp_local_destination_domains }}" for smtp relay?
   become: true
   notify: reconfigure postfix
-  when: host_is_smtp_relay is defined
+  when: host_is_smtp_relay | default(false)
 
 - name: Set destinations on satellites
   debconf:
@@ -87,7 +87,7 @@
     value: "[smtp.gmail.com]:587"
   become: true
   notify: reconfigure postfix
-  when: smtp_relay_to_gmail is defined and host_is_smtp_relay is defined
+  when: smtp_relay_to_gmail is defined and host_is_smtp_relay | default(false)
 
 - name: Set relayhost
   debconf:
@@ -97,7 +97,7 @@
     value: "{{ smtp_server }}"
   become: true
   notify: reconfigure postfix
-  when: not (smtp_relay_to_gmail is defined and host_is_smtp_relay is defined)
+  when: not (smtp_relay_to_gmail is defined and host_is_smtp_relay | default(false))
 
 - name: Set mynetworks
   debconf:
@@ -116,7 +116,7 @@
     value: "{{ smtp_root_alias }}"
   become: true
   notify: reconfigure postfix
-  when: host_is_smtp_relay is defined
+  when: host_is_smtp_relay | default(false)
 
 - name: "Since dpkg-reconfigure doesn't seem to set aliases with above, let's set ourselves"
   copy:
@@ -125,7 +125,7 @@
     mode: 0644
   become: true
   notify: newaliases
-  when: host_is_smtp_relay is defined
+  when: host_is_smtp_relay | default(false)
 
 - name: Set protocols
   debconf:
@@ -166,7 +166,7 @@
     value: "true"
   become: true
   notify: reconfigure postfix
-  when: host_is_smtp_relay is defined
+  when: host_is_smtp_relay | default(false)
 
 - name: Setup gmail forward
   copy:
@@ -176,4 +176,4 @@
   become: true
   no_log: true
   notify: postmap sasl_passwd
-  when: host_is_smtp_relay is defined
+  when: host_is_smtp_relay | default(false)

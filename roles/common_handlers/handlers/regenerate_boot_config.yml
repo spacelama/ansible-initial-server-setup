@@ -10,4 +10,4 @@
   # executed at every kernel dpkg install, it doesn't get executed
   # here unless we call it ourselves
   shell: "proxmox-boot-tool refresh && /etc/kernel/postinst.d/zz-zz-install-recovery-options"
-  when: host_is_pve_server is defined
+  when: host_is_pve_server | default(false)

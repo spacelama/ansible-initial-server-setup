@@ -28,6 +28,6 @@
     - install_files
     - bootstrap
     - role: pve_server
-      when: host_is_pve_server is defined
+      when: host_is_pve_server | default(false)
     - ssh_bootstrap
     - user

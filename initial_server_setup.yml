@@ -7,7 +7,7 @@
     - role: common_handlers
       become: true # the whole role, including handlers, will become root
     - role: munin-server
-      when: host_is_munin_server is defined
+      when: host_is_munin_server | default(false)
 
 # to do a quick sync of commonly changed files, let's just push them
 # first without running a slow gather_facts first:
@@ -34,13 +34,13 @@
     - role: ssh_bootstrap
       become: true
     - role: webserver
-      when: (host_is_ext_web_server is defined) or (host_is_user_web_server is defined)
+      when: (host_is_ext_web_server | default(false)) or (host_is_user_web_server | default(false))
     - role: nutserver
-      when: (host_is_nut_server is defined) or (host_is_nut_master is defined)
+      when: (host_is_nut_server | default(false)) or (host_is_nut_master | default(false))
     - role: nutmaster
-      when: host_is_nut_master is defined
+      when: host_is_nut_master | default(false)
     - role: management
-      when: host_is_mgmt is defined
+      when: host_is_mgmt | default(false)
     - user
     - apt_repos
     - essentials
@@ -50,25 +50,25 @@
     - role: hostname
       when: host_is_container is not defined
     - role: fileserver
-      when: host_is_fileserver is defined
+      when: host_is_fileserver | default(false)
     - role: mailserver
-      when: host_is_incoming_mailserver is defined
+      when: host_is_incoming_mailserver | default(false)
     - role: smtp
     # pve_server is loaded in bootstrap.yml as well, but that's just
     # to make sure all the repos are there.  No harm updating that
     # here as time goes on
     - role: pve_server
-      when: host_is_pve_server is defined
+      when: host_is_pve_server | default(false)
     - role: virtual
-      when: host_is_virtual is defined
+      when: host_is_virtual | default(false)
     - role: physical
-      when: host_is_physical is defined
+      when: host_is_physical | default(false)
     - role: laptop
-      when: host_is_laptop is defined
+      when: host_is_laptop | default(false)
     - role: dell_server
-      when: host_is_dell_server is defined
+      when: host_is_dell_server | default(false)
     - role: desktop
-      when: host_is_desktop is defined
+      when: host_is_desktop | default(false)
     - role: ssh
     - role: fail2ban
     - role: power_saving

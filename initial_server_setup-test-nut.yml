@@ -16,9 +16,9 @@
     - role: common_handlers
       become: true # the whole role, including handlers, will become root
     - role: nutserver
-      when: (host_is_nut_server is defined) or (host_is_nut_master is defined)
+      when: (host_is_nut_server | default(false)) or (host_is_nut_master | default(false))
     - role: nutmaster
-      when: host_is_nut_master is defined
+      when: host_is_nut_master | default(false)
     - role: management
-      when: host_is_mgmt is defined
+      when: host_is_mgmt | default(false)
     - monitoring

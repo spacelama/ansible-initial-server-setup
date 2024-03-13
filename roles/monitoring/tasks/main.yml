@@ -90,7 +90,7 @@
       user nut
       group nut
 
-      {{ munin_nut_config if host_is_nut_master is defined }}
+      {{ munin_nut_config if host_is_nut_master | default(false) }}
 
   become: true
   notify: restart munin-node
@@ -147,7 +147,7 @@
     state: absent
   become: true
   with_items: [ 'hddtemp_smartctl' ]
-  when: host_is_container is defined or host_is_virtual is defined or host_is_pi is defined
+  when: host_is_container | default(false) or host_is_virtual | default(false) or host_is_pi | default(false)
   notify: restart munin-node
 
 - name: Install node monitoring packages
@@ -186,7 +186,7 @@
   with_items:
     - nutups2_
   notify: restart munin-node
-  when: host_is_nut_master is defined
+  when: host_is_nut_master | default(false)
 
 - name: install webserver ssl munin monitoring plugins from munin-contrib, that take arguments, for hosts serving ssl https
   copy:
@@ -200,7 +200,7 @@
   with_items:
     - ssl_
   notify: restart munin-node
-  when: host_is_ext_web_server is defined
+  when: host_is_ext_web_server | default(false)
 
 - name: install custom chrony etc munin monitoring plugins from munin-contrib, that don't take arguments, for non-containers
   copy:
@@ -270,7 +270,7 @@
     - apache_accesses
     - apache_processes
     - apache_volume
-  when: (host_is_user_web_server is defined) or (host_is_ext_web_server is defined)
+  when: (host_is_user_web_server | default(false)) or (host_is_ext_web_server | default(false))
   notify: restart munin-node
 
 - name: existing munin plugins without params (physical machines)
@@ -280,7 +280,7 @@
     state: link
   become: true
   with_items: [ 'hddtemp_smartctl' ]
-  when: not ( host_is_container is defined or host_is_virtual is defined or host_is_pi is defined )
+  when: not ( host_is_container | default(false) or host_is_virtual | default(false) or host_is_pi | default(false) )
   notify: restart munin-node
 
 - name: munin ipmi plugins without params
@@ -290,7 +290,7 @@
     state: link
   become: true
   with_items: [ 'ipmi_temp', 'ipmi_power', 'ipmi_fans', 'ipmi_volts' ]
-  when: host_is_dell_server is defined
+  when: host_is_dell_server | default(false)
   notify: restart munin-node
 
 - name: existing munin plugins with params
@@ -334,7 +334,7 @@
     - zlist
     - zpool_capacity
     - zpool_iostat
-  when: host_is_zfs is defined
+  when: host_is_zfs | default(false)
   notify: restart munin-node
   ignore_errors: true # munin packages are on fs, which might not be alive
 
@@ -368,7 +368,7 @@
     - { src: 'zfsonlinux_stats_utilization', dest: 'zfsonlinux_stats_' }
     - { src: 'zfsonlinux_stats_l2utilization', dest: 'zfsonlinux_stats_' }
     - { src: 'zfsonlinux_stats_l2efficiency', dest: 'zfsonlinux_stats_' }
-  when: host_is_zfs is defined
+  when: host_is_zfs | default(false)
   notify: restart munin-node
 
 - name: optional extra existing munin plugins with params
@@ -418,7 +418,7 @@
     autoremove: no
     state: present
   become: true
-  when: (host_is_user_web_server is defined) or (host_is_ext_web_server is defined)
+  when: (host_is_user_web_server | default(false)) or (host_is_ext_web_server | default(false))
 
 - name: Install monitoring packages (except for containers)
   apt:

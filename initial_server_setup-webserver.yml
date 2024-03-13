@@ -10,7 +10,7 @@
       become: true # the whole role, including handlers, will become root
     - role: install_files    # the method we get the webserver conf into our external webserver
     - role: webserver
-      when: (host_is_ext_web_server is defined) or (host_is_user_web_server is defined)
+      when: (host_is_ext_web_server | default(false)) or (host_is_user_web_server | default(false))
   # tasks:
   #   - debug:
   #       msg: "item = {{ mgmt_hosts | join(',') }}"

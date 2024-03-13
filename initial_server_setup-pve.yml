@@ -9,4 +9,4 @@
     - role: common_handlers
       become: true # the whole role, including handlers, will become root
     - role: pve_server
-      when: host_is_pve_server is defined
+      when: host_is_pve_server | default(false)
