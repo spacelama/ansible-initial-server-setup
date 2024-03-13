@@ -12,7 +12,7 @@ MAILTO=tconnors
 {% if monitor_nut is defined %}
 * * * * * /root/bin/restart-nut-driver
 {% endif %}
-{% if host_is_container is not defined %}
+{% if not (host_is_container | default(false)) %}
 00 4    * * *   /usr/local/bin/checkntp
 {% endif %}
 {% if host_is_munin_server | default(false) %}

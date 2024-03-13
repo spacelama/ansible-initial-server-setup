@@ -18,7 +18,7 @@
     value: "Satellite system"
   become: true
   notify: reconfigure postfix
-  when: host_is_smtp_relay is not defined
+  when: not (host_is_smtp_relay | default(false))
 
 - name: Set mailname
   debconf:
@@ -38,7 +38,7 @@
     value: "{{ fqdn | default( inventory_hostname ~ '.' ~ domain ) }}"
   become: true
   notify: reconfigure postfix
-  when: host_is_smtp_relay is not defined
+  when: not (host_is_smtp_relay | default(false))
 
 - name: Set force sync
   debconf:
@@ -77,7 +77,7 @@
     value: "{{ hostname | default(inventory_hostname) }}.localdomain, localhost.localdomain, localhost"
   become: true
   notify: reconfigure postfix
-  when: host_is_smtp_relay is not defined
+  when: not (host_is_smtp_relay | default(false))
 
 - name: Set relayhost
   debconf:
@@ -156,7 +156,7 @@
     value: "false"
   become: true
   notify: reconfigure postfix
-  when: host_is_smtp_relay is not defined
+  when: not (host_is_smtp_relay | default(false))
 
 - name: Set procmail
   debconf:

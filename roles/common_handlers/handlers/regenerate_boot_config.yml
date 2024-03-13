@@ -1,7 +1,7 @@
 ---
 - name: "Regenerate grub config"
   shell: "/usr/sbin/update-grub"
-  when: host_is_pve_server is not defined
+  when: not (host_is_pve_server | default(false))
 
   #FIXME: only machines to use systemd-boot so far is proxmox hosts
 - name: "Regenerate systemdboot config on pve_server"

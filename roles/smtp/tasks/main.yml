@@ -84,7 +84,7 @@
     autoremove: no
     state: present
   become: true
-#  when: host_is_smtp_relay is not defined
+#  when: not (host_is_smtp_relay | default(false))
 
 - name: debconf Configure postfix first time
   include_tasks: postfix-debconf.yml

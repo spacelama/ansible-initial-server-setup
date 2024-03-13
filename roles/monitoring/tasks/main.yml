@@ -218,7 +218,7 @@
     - chrony_drift
     - ntp_thirdparty
     - raid
-  when: host_is_container is not defined
+  when: not (host_is_container | default(false))
   notify: restart munin-node
 
 - name: install custom munin monitoring plugins from eg munin-contrib, that don't take arguments, for all hosts
@@ -257,7 +257,7 @@
     state: link
   become: true
   with_items: [ 'df_abs', 'iostat', 'iostat_ios', 'netstat' ]
-  when: host_is_container is not defined
+  when: not (host_is_container | default(false))
   notify: restart munin-node
 
 - name: existing apache munin plugins without params
@@ -305,7 +305,7 @@
     - { src: 'ping_gw', dest: 'ping_' }
     - { src: 'ping_www.google.com.au', dest: 'ping_' }
     - { src: 'chrony_ntp.internode.com.au', dest: 'chrony_' }
-  when: host_is_container is not defined
+  when: not (host_is_container | default(false))
   notify: restart munin-node
 
 - name: install custom zfs_* munin monitoring plugins that don't take arguments
@@ -426,7 +426,7 @@
     autoremove: no
     state: present
   become: true
-  when: host_is_container is not defined
+  when: not (host_is_container | default(false))
 
 - name: create ssh directory for munin-async
   file:

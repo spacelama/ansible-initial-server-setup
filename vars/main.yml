@@ -306,7 +306,7 @@
     - { source: etc/logrotate.d/apache2,       name: /etc/logrotate.d/, when_pkg_installed: "apache2"            }
     - { source: etc/logrotate.d/iot,           name: /etc/logrotate.d/, when: "{{ host_is_syslog | default(false) }}"  }
 
-    - { source: etc/rsyslog.d/remote.conf,           name: /etc/rsyslog.d/, when: "{{ host_is_syslog is not defined }}" }
+    - { source: etc/rsyslog.d/remote.conf,           name: /etc/rsyslog.d/, when: "{{ not (host_is_syslog | default(false)) }}" }
     - { source: etc/rsyslog.d/syslog-collector.conf, name: /etc/rsyslog.d/, when: "{{ host_is_syslog | default(false) }}"     }
     - { source: etc/rsyslog.d/iot.conf,              name: /etc/rsyslog.d/, when: "{{ host_is_syslog | default(false) }}"     }
 

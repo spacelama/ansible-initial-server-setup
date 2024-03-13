@@ -16,7 +16,7 @@
     autoremove: no
     state: present
   become: true
-  when: host_is_container is not defined
+  when: not (host_is_container | default(false))
 
 #- name: Enable unattended upgrades
 #  copy:

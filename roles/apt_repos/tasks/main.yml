@@ -7,7 +7,7 @@
     group: root
     mode: 0644
   become: true
-  when: host_is_turnkey is not defined and host_is_still_debian_buster is not defined
+  when: not (host_is_turnkey | default(false)) and not (host_is_still_debian_buster | default(false))
 
 - name: Enable apt backports
   copy:
