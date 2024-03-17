@@ -1,0 +1,43 @@
+---
+#   # first check whether its installed at all
+# - name: Check if qiv is installed
+#   command: dpkg-query -W qiv
+#   register: archived_package_check_deb
+#   failed_when: archived_package_check_deb.rc > 1
+#   changed_when: archived_package_check_deb.rc == 1
+
+#   # first check whether the correct custom version is installed
+# - name: Check if qiv is installed
+#   shell: "dpkg-query -W qiv | grep 2.3.2-2"
+#   register: correct_archived_package_check_deb
+#   failed_when: correct_archived_package_check_deb.rc > 1
+#   changed_when: correct_archived_package_check_deb.rc == 1
+
+- name: Ensures ~ansible/Downloads dir exists
+  file:
+    path="/home/{{ ansible_env.USER }}/Downloads"
+    state=directory
+
+- name: Download archived .deb files
+  copy:
+    src: "deb/{{ item }}"
+    dest: "/home/{{ ansible_env.USER }}/Downloads/{{ item }}"
+#  when: correct_archived_package_check_deb.rc == 1
+  loop: "{{ install_packages }}"
+
+# - name: remove wrong version of downloaded .deb files
+#   apt:
+#     name: "{{ item }}"
+#     state: absent
+#   become: true
+# #  when: (correct_archived_package_check_deb.rc == 1) and (archived_package_check_deb.rc == 0)
+#   loop:
+#     - qiv
+
+- name: Install archived_package
+  apt:
+    deb: "/home/{{ ansible_env.USER }}/Downloads/{{ item }}"
+    force: yes # would rather --allow-change-held-packages https://github.com/ansible/ansible/issues/32092 https://github.com/ansible/ansible/issues/65325
+  become: true
+#  when: correct_archived_package_check_deb.rc == 1
+  loop: "{{ install_packages }}"

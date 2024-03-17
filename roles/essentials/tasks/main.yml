@@ -113,6 +113,11 @@
     state: present
   become: true
 
+- name: install custom locally build desktop packages
+  include_tasks: "{{ playbook_dir }}/roles/common/tasks/install_custom_packages.yml"
+  vars:
+    install_packages: "{{ local_packages_to_install | default([]) }}"
+
 - name: Install essential packages that might not be available (all)
   apt:
     name: ['plocate']
