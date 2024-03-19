@@ -50,6 +50,7 @@
  '(display-time-interval 30)
  '(display-time-mail-file "~/Mail/inbox")
  '(display-time-mode t)
+ '(enable-recursive-minibuffers t)
  '(european-calendar-style t t)
  '(f90-auto-keyword-case 'upcase-word)
  '(f90-beginning-ampersand nil)
