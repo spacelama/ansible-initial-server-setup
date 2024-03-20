@@ -81,16 +81,87 @@ function verboserun () {
     fi
 }
 
-function getdefaultsink() {
+function get_default_sink() {
     pactl get-default-sink
 }
 
-function setdefaultsink() {
+function get_current_sinks() {
+    equaliser=
+    cards=
+    scindex=
+    # $scindex: The Pulseaudio index of the current default sound card
+    # $cards: A list of card Pulseaudio indexes
+    while read header index ; do
+        if [ "$header" != 'Sink' ] ; then
+            continue
+        fi
+        read header1 name
+        [ "$header1" != "Name:" ] && continue
+        read header1 header2 descr
+        [ "$header1" != "device.description" ] && continue
+
+        index="${index#\#}"
+        name="${name#\<}"
+        name="${name%\>}"
+        descr="${descr#\"}"
+        descr="${descr%\"}"
+
+        echo "name: $name"
+        if [ "$name" = "$default_sink_name" -a -z "$scindex" ] && [[ "$name" != *.equalizer ]] ; then
+            echo "Setting non equaliser scindex to $index"
+            scindex=$index
+        fi
+        if [ "$name" = "$equaliser_master_device" ] ; then
+            echo "Setting equaliser scindex to $index"
+            scindex=$index
+        fi
+
+        while read blocked ; do
+            if [[ "$descr" = "FFT based equalizer on "* ]] &&
+                   [[ "$descr" != "FFT based equalizer on "*" on "*"@"* ]] ; then
+                equaliser=$index
+                echo "$index: found equaliser on: $descr"
+                continue 2
+            fi
+
+            if [[ "$descr" == $blocked ]] ; then
+                echo "ignoring $index: $descr"
+                continue 2
+            fi
+        done < <( echo "$blacklist" )
+        echo "$index: $descr"
+        cards="$cards $index"
+    done < <( pactl list sinks | grep -i -e '^Sink' -e 'name:' -e 'device.description' )
+}
+
+function get_next_sink() {
+    PICKNEXTCARD=1 # Is true when the previous card is default
+    count=0 # count of number of iterations
+    for CARD in $cards; do
+        # In case the current card is the last card, start off assuming
+        # the next card is looped back to the first first card - we can
+        # adjust that later when we discover that the current card is not
+        # in fact the last card
+        if [ $PICKNEXTCARD == 1 ]; then
+            # $nextsc: The pulseaudio index of the next sound card (to be switched to)
+            nextsc=$CARD
+            PICKNEXTCARD=0
+            # $nextind: The numerical index (1 to totalsc) of the next card
+            nextind=$count
+        fi
+        if [ $CARD == $scindex ]; then # Choose the next card as default
+            PICKNEXTCARD=1
+        fi
+        count=$((count+1))
+    done
+}
+
+function set_default_sink() {
     verboserun pactl set-default-sink "$@" # switch default sound card to next
 }
 
-function setallcurrentsink() {
-# $inputs: A list of currently playing inputs
+function set_all_current_active_sinks() {
+    # $inputs: A list of currently playing inputs
     inputs=
     while read header_sink header_input index ; do
         if [ "$header_sink $header_input" != 'Sink Input' ] ; then
@@ -141,6 +212,24 @@ function setallcurrentsink() {
     done
 }
 
+function calculate_status() {
+    # Regardless of success of previous commands, obtain what the new
+    # current default soundcard is.
+    # $nextscdec: The device.description of the new default sound card
+    nextscdesc=$( pactl list sinks |
+                      grep -e '^Sink' -e 'Description:' -e 'Name:' |
+                      grep -A1 -B1 $( pactl get-default-sink ) |
+                      grep Description |
+                      sed 's/^\s*Description: //' )
+}
+
+function display_status() {
+    #notify-send "Default sound-card changed to $nextscdesc"
+
+    kill `pidof paswitchmessage` >& /dev/null
+    ( exec -a "paswitchmessage" gxmessage -print -nearmouse -timeout 10 "Default sound card is now $nextscdesc" & )
+}
+
 green=
 red=
 yellow=
@@ -170,97 +259,20 @@ blacklist=$(
             sed 's/ *#.*// ; /^$/d' "$blacklist"
         fi
     done
-)
+         )
 
-default_sink_name=$( getdefaultsink )
-equaliser=
-cards=
-scindex=
-# $scindex: The Pulseaudio index of the current default sound card
-# $cards: A list of card Pulseaudio indexes
-while read header index ; do
-    if [ "$header" != 'Sink' ] ; then
-        continue
-    fi
-    read header1 name
-    [ "$header1" != "Name:" ] && continue
-    read header1 header2 descr
-    [ "$header1" != "device.description" ] && continue
-
-    index="${index#\#}"
-    name="${name#\<}"
-    name="${name%\>}"
-    descr="${descr#\"}"
-    descr="${descr%\"}"
-
-    echo "name: $name"
-    if [ "$name" = "$default_sink_name" -a -z "$scindex" ] && [[ "$name" != *.equalizer ]] ; then
-        echo "Setting non equaliser scindex to $index"
-        scindex=$index
-    fi
-    if [ "$name" = "$equaliser_master_device" ] ; then
-        echo "Setting equaliser scindex to $index"
-        scindex=$index
-    fi
-
-    while read blocked ; do
-        if [[ "$descr" = "FFT based equalizer on "* ]] &&
-           [[ "$descr" != "FFT based equalizer on "*" on "*"@"* ]] ; then
-            equaliser=$index
-            echo "$index: found equaliser on: $descr"
-            continue 2
-        fi
-
-        if [[ "$descr" == $blocked ]] ; then
-            echo "ignoring $index: $descr"
-            continue 2
-        fi
-    done < <( echo "$blacklist" )
-    echo "$index: $descr"
-    cards="$cards $index"
-done < <( pactl list sinks | grep -i -e '^Sink' -e 'name:' -e 'device.description' )
-
-PICKNEXTCARD=1 # Is true when the previous card is default
-count=0 # count of number of iterations
-for CARD in $cards; do
-    # In case the current card is the last card, start off assuming
-    # the next card is looped back to the first first card - we can
-    # adjust that later when we discover that the current card is not
-    # in fact the last card
-    if [ $PICKNEXTCARD == 1 ]; then
-# $nextsc: The pulseaudio index of the next sound card (to be switched to)
-        nextsc=$CARD
-        PICKNEXTCARD=0
-# $nextind: The numerical index (1 to totalsc) of the next card
-        nextind=$count
-    fi
-    if [ $CARD == $scindex ]; then # Choose the next card as default
-        PICKNEXTCARD=1
-    fi
-    count=$((count+1))
-done
-
-setdefaultsink $nextsc
-setallcurrentsink $nextsc
-
-# Regardless of success of previous commands, obtain what the new
-# current default soundcard is.
-# $nextscdec: The device.description of the new default sound card
-nextscdesc=$( pactl list sinks |
-                 grep -e '^Sink' -e 'Description:' -e 'Name:' |
-                 grep -A1 -B1 $( pactl get-default-sink ) |
-                 grep Description |
-                 sed 's/^\s*Description: //' )
+default_sink_name=$( get_default_sink )
+get_current_sinks
+get_next_sink
+set_default_sink $nextsc
+set_all_current_active_sinks $nextsc
+calculate_status
 
 # only if we want to set everything to the equaliser FFT sink
-#setdefaultsink $equaliser
+#set_default_sink $equaliser
+#set_all_current_active_sinks $equaliser
 
-
-#notify-send "Default sound-card changed to $nextscdesc"
-
-kill `pidof paswitchmessage` >& /dev/null
-( exec -a "paswitchmessage" gxmessage -print -nearmouse -timeout 10 "Default sound card is now $nextscdesc" & )
-
+display_status
 
 # Below text was from original author and remains unaltered
 # CC BY - creative commons
