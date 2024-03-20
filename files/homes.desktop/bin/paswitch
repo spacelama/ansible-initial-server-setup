@@ -6,10 +6,17 @@
 # WAS: Pulse Audio Sound Card Switcher v1.0 2010-01-13
 #   Switches between soundcards when run. All streams are moved to the new default sound-card.
 
+# sourced by Tim Connors circa 2015 from
+# https://askubuntu.com/questions/71863/how-to-change-pulseaudio-sink-with-pacmd-set-default-sink-during-playback
+# with more mods and port to pipewire in 2024
+
+
 debug=
 if [ "$1" = --debug ] ; then
     debug=true
 fi
+# get list with:
+# pactl list sinks | grep "^\s*Desc"
 if [ "$1" = --all ] ; then
     blacklist="$HOME/.paswitchblacklist-hard"
 else
@@ -68,42 +75,69 @@ function verboserun () {
         cmd+=($(printf "%q" "$arg")) # escape all args (could also use /usr/bin/shell-quote)
     done
     echocolour green "${cmd[*]}"
+    commands+=("${cmd[*]}")
     if [ -z "$noop" ] ; then
         "$@"
     fi
 }
 
+function getdefaultsink() {
+    pactl get-default-sink
+}
+
 function setdefaultsink() {
-    verboserun pacmd set-default-sink "$@" # switch default sound card to next 
+    verboserun pactl set-default-sink "$@" # switch default sound card to next
+}
+
+function setallcurrentsink() {
 # $inputs: A list of currently playing inputs
     inputs=
-    while read header index ; do
-        if [ "$header" != 'index:' ] ; then
+    while read header_sink header_input index ; do
+        if [ "$header_sink $header_input" != 'Sink Input' ] ; then
             continue
         fi
+        index="${index#\#}"
 
-        read header1 driver
-        [ "$header1" != "driver:" ] && continue
-#        [[ "$driver" == *"module-equalizer-sink.c"* ]] && continue
+        # FIXME: we don't currently use any equalizer module in
+        # pipewire, so no way to test what's needed now:
+        # FIXME:        read header1 driver
+        # FIXME:        [ "$header1" != "driver:" ] && continue
+        # FIXME:#        [[ "$driver" == *"module-equalizer-sink.c"* ]] && continue
 
-        read header1 flags
-        [ "$header1" != "flags:" ] && continue
-        [ "$flags" = "DONT_MOVE" ] && continue
+        # FIXME: Suspect DONT_MOVE was added as part of not erroring
+        # during when equalizer was configured.  Can't now test on
+        # pipewire
+        # FIXME:        read header1 flags
+        # FIXME:        [ "$header1" != "flags:" ] && continue
+        # FIXME:        [ "$flags" = "DONT_MOVE" ] && continue
 
-        read header1 state
-        [ "$header1" != "state:" ] && continue
-        [ "$state" != "RUNNING" ] && continue
+        # FIXME: cvs history doesn't tell me what we were mitigating
+        # here.  Maybe I only wanted sound to migrate if it was
+        # actually active?  If paused, wanted it to resume on the same
+        # device it was playing on before we switched?  Problem is, I
+        # don't seem to have access to that in pipewire
+        # FIXME:        read header1 state
+        # FIXME:        [ "$header1" != "state:" ] && continue
+        # FIXME:        [ "$state" != "RUNNING" ] && continue
 
         read header1 equals application_name
+        # echo header1=$header1-$equals-$pplication_name
         [ "$header1 $equals" != "application.name =" ] && continue
-        # ignore this source if the application is called "*headphone*" - the user has explicitly set the sink and doesn't want it changed
+        # ignore this source if the application is called
+        # "*headphone*" - the user has explicitly set the sink and
+        # doesn't want it changed
         [[ "$application_name" == *headphone* ]] && continue
-        
+        # echo application_name=$application_name
+
         inputs="$inputs $index"
-    done < <( pacmd list-sink-inputs | grep -e driver: -e index: -e flags: -e state: -e application.name )
+    done < <( pactl list sink-inputs | grep -e '^Sink Input' -e 'application.name = ' ) # -e State: -e Flags: 
+    # FIXME: sink, card, state can be obtained from `pactl list sources short`, flags from `pactl list sinks | grep -i flag`
+    # FLAG, STATE from `pactl list sinks | grep -i -e flag -e state`
+    # sink-inputs gets name but not state, flags; sinks gets flag, state but not name;
+    #   we need the name to be able to skip headphones!
 
     for INPUT in $inputs; do # Move all current inputs to the new default sound card
-        verboserun pacmd move-sink-input $INPUT "$@"
+        verboserun pactl move-sink-input $INPUT "$@"
     done
 }
 
@@ -116,16 +150,19 @@ color=
 if [ -t 1 ] ; then
     use_colour
 fi
+declare -a commands=()
 
 # $totalsc: Number of sound cards available
-totalsc=$(pacmd "list-sinks" | grep index: | wc -l) # total of sound cards: $totalsc
+totalsc=$(pactl list sinks | grep "^\s*Desc" | wc -l) # total of sound cards: $totalsc
 if [ $totalsc -le 1 ]; then # Check whether there are actually multiple cards available
     gxmessage -print -nearmouse -timeout 5 "Nothing to switch, system only has one sound card." &
     exit
 fi
 
-#equaliser_master_device=$(pacmd list-sinks | sed -n 's/.*device.master_device = "\(.*\)"$/\1/p' )
-equaliser_master_device=$(pacmd list-sink-inputs | grep -e driver: -e sink | grep -A1 module-equalizer-sink.c | sed -n 's/.*sink:.*<\(.*\)>$/\1/p' )
+#equaliser_master_device=$(pactl list sinks | sed -n 's/.*device.master_device = "\(.*\)"$/\1/p' )
+equaliser_master_device=$(
+    echo UNUSED in pipewire at this point # pactl list sink-inputs | grep -e driver: -e sink | grep -A1 module-equalizer-sink.c | sed -n 's/.*sink:.*<\(.*\)>$/\1/p'
+                       )
 
 blacklist=$(
     for blacklist in $blacklist ; do
@@ -135,27 +172,29 @@ blacklist=$(
     done
 )
 
+default_sink_name=$( getdefaultsink )
 equaliser=
 cards=
 scindex=
 # $scindex: The Pulseaudio index of the current default sound card
 # $cards: A list of card Pulseaudio indexes
 while read header index ; do
-    if [ "$header" != 'index:' -a "$header" != '*index:' ] ; then
+    if [ "$header" != 'Sink' ] ; then
         continue
     fi
     read header1 name
-    [ "$header1" != "name:" ] && continue
+    [ "$header1" != "Name:" ] && continue
     read header1 header2 descr
     [ "$header1" != "device.description" ] && continue
-    
+
+    index="${index#\#}"
     name="${name#\<}"
     name="${name%\>}"
     descr="${descr#\"}"
     descr="${descr%\"}"
 
     echo "name: $name"
-    if [ "$header" = "*index:" -a -z "$scindex" ] && [[ "$name" != *.equalizer ]] ; then
+    if [ "$name" = "$default_sink_name" -a -z "$scindex" ] && [[ "$name" != *.equalizer ]] ; then
         echo "Setting non equaliser scindex to $index"
         scindex=$index
     fi
@@ -165,13 +204,13 @@ while read header index ; do
     fi
 
     while read blocked ; do
-        if [[ "$descr" = "FFT based equalizer on "* ]] && 
+        if [[ "$descr" = "FFT based equalizer on "* ]] &&
            [[ "$descr" != "FFT based equalizer on "*" on "*"@"* ]] ; then
             equaliser=$index
             echo "$index: found equaliser on: $descr"
             continue 2
         fi
-        
+
         if [[ "$descr" == $blocked ]] ; then
             echo "ignoring $index: $descr"
             continue 2
@@ -179,11 +218,15 @@ while read header index ; do
     done < <( echo "$blacklist" )
     echo "$index: $descr"
     cards="$cards $index"
-done < <( pacmd list-sinks | sed 's|* |*|' | grep -e name: -e index: -e device.description )
-           
+done < <( pactl list sinks | grep -i -e '^Sink' -e 'name:' -e 'device.description' )
+
 PICKNEXTCARD=1 # Is true when the previous card is default
 count=0 # count of number of iterations
 for CARD in $cards; do
+    # In case the current card is the last card, start off assuming
+    # the next card is looped back to the first first card - we can
+    # adjust that later when we discover that the current card is not
+    # in fact the last card
     if [ $PICKNEXTCARD == 1 ]; then
 # $nextsc: The pulseaudio index of the next sound card (to be switched to)
         nextsc=$CARD
@@ -198,26 +241,21 @@ for CARD in $cards; do
 done
 
 setdefaultsink $nextsc
+setallcurrentsink $nextsc
 
+# Regardless of success of previous commands, obtain what the new
+# current default soundcard is.
 # $nextscdec: The device.description of the new default sound card
-while read header index ; do
-    [ "$header" != index: ] && continue
-    read header1 header2 descr
-    [ "$header1" != "device.description" ] && continue
-    
-    descr="${descr#\"}"
-    descr="${descr%\"}"
-    
-    if [ $index = $nextsc ] ; then
-        echo "found: $descr"
-        nextscdesc="$descr"
-    fi
-done < <( pacmd list-sinks | sed 's|*||' | grep -e index: -e device.description )
+nextscdesc=$( pactl list sinks |
+                 grep -e '^Sink' -e 'Description:' -e 'Name:' |
+                 grep -A1 -B1 $( pactl get-default-sink ) |
+                 grep Description |
+                 sed 's/^\s*Description: //' )
 
 # only if we want to set everything to the equaliser FFT sink
 #setdefaultsink $equaliser
 
-            
+
 #notify-send "Default sound-card changed to $nextscdesc"
 
 kill `pidof paswitchmessage` >& /dev/null
