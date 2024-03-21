@@ -6,6 +6,7 @@ use strict;
 use warnings;
 use File::Glob ':glob';
 use Sys::Syslog qw(:standard);
+use Text::ParseWords;
 
 my $scp_server   = "/usr/bin/scp";
 my $rsync_server = "/usr/bin/rsync";
@@ -14,8 +15,7 @@ my $sftp_server2  = "/usr/libexec/openssh/sftp-server";
 my %allowed_progs= ("scp" => $scp_server,
                     "rsync" => $rsync_server,
                     $sftp_server1 => $sftp_server1,
-                    $sftp_server2 => $sftp_server2,
-                    'internal-sftp' => $sftp_server1);
+                    $sftp_server2 => $sftp_server2);
 
 sub log;
 sub include;
@@ -27,20 +27,43 @@ my $ppid=getppid;
 my $username=getpwuid( $< );
 openlog("ssh/ssh-wrapper[$$]/[$ppid] ($username)", "", "user");
 
-$command = $ENV{SSH_ORIGINAL_COMMAND} || "sh";   # local-wrapper will be able to override whether a login without command is allowed to succeed, but by default sh doesn't appear in %allowed_progs, so gets blocked below
-$command =~ s/^\s+|\s+$//g ;  # whitespace at beginning or end is meaningless
+# local-wrapper will be able to override whether a login without
+# command is allowed to succeed, but by default sh doesn't appear in
+# %allowed_progs, so gets blocked below
+$command = $ENV{SSH_ORIGINAL_COMMAND} || "sh";
+
+# should behave as much like a shell as possible (without the security
+# flaws!) -- allow user to stop splitting of args on whitespace, when
+# they are single quoted or escaped etc, and expand out $HOME, $USER,
+# $$, $PRJ_DATA etc.  But of course, can't safely make use of eval()
+# FIXME: shellwords isn't complete - testing shows you can't escape an
+# escape, and from the regexp in ParseWords.pm, it's clear that '\\"'
+# will be a problem
+my @argv = shellwords($command);
+if ((@argv == 1) && ($argv[0] =~ / /)) {
+    # If the user passes the entire invocation as a single quoted
+    # argument with spaces in it, then it's something sshd normally
+    # passes to /bin/sh and it just runs it with those arguments
+    # FIXME: This can't possibly be right, although ssh does normally
+    # insist on offloading the entire problem to /bin/sh.
+    @argv = shellwords($argv[0]);
+}
+if (!@argv) {
+    fail "commandline parse error";
+}
+#print "argv=". join(' ; ', @argv) . "\n";
+my $program = shift @argv;
 
 my @SSH_CONNECTION = split(' ', $ENV{'SSH_CONNECTION'});
-
 my $SSHClient = $SSH_CONNECTION[0];
 my $SSHHost   = $SSH_CONNECTION[2];
 
 # sanitize environment, but make sure local-wrapper can still access the original environment if required
 my %env=%ENV;
 %ENV = ();
-
-my @argv = split /[ \t]+/, $command;   #will fail on filenames with spaces in them, and no way to escape them :(
-my $program = shift @argv;
+for my $allowed_env (qw(HOME USER PRJDATA)) {
+    $ENV{$allowed_env} = $env{$allowed_env} if defined $env{$allowed_env};
+}
 
 my $gmt = gmtime();
 
@@ -67,29 +90,30 @@ if ($program eq "scp") {
         $args_ok = 1;
         push @runargs, shift @argv;
     }
-} elsif ($program eq $sftp_server1 or $program eq $sftp_server2 or $program eq 'internal-sftp') {
+} elsif ($program eq $sftp_server1 or $program eq $sftp_server2) {
     $args_ok = 1;
 }
 
 fail "account restricted" unless $args_ok;
 
 foreach my $a (@argv) {
-    my @globs=bsd_glob($a);   # bsd_glob not susceptible to C shell injection like normal perl glob, nor splits on whitespace (man File::Glob)
+    # To behave more like a shell, we need to expand out environment
+    # variables such as $USER, $HOME, $$, $PRJDATA etc, only after
+    # $ENV has been sanitised, but before globbing
+    # FIXME: need to not expand $VARIABLE when a single escape
+    # character is front of it.  But do need to expand if $VARIABLE is
+    # first thing on line (so can't anchor with non "\" before match.
+    $a =~ s/\$([A-Za-z_0-9]+)/$ENV{$1}/g;
+
+    # bsd_glob not susceptible to C shell injection like normal perl
+    # glob, nor splits on whitespace (man File::Glob)
+    my @globs=bsd_glob($a, GLOB_NOCHECK | GLOB_TILDE);
 #    my @globs=glob($a);
-    if (!@globs) {            # we know the glob doesn't exist, but might as well give a meaningful error message back to caller
-        @globs=($a);
-    }
+#    print STDERR "globs after = @globs\n";
     push @runargs, @globs;
 }
 
-my $runargs = join (" ", map{"'$_'"} @runargs);
-my $env_str = join (" ", map{"$_='$ENV{$_}'"} keys %ENV);
-my $expanded_prog="";
-if (($env_str ne "") || ($program ne $allowed_progs{$program})) {
-    $env_str = "env $env_str " if $env_str ne "";
-    $expanded_prog = " (=$env_str$allowed_progs{$program})";
-}
-writelog("success: $SSHClient->$username\@$SSHHost: $program $runargs$expanded_prog");
+success();
 exec($allowed_progs{$program}, @runargs);
 
 #subroutines with full access to lexical globals above:
@@ -98,15 +122,38 @@ sub writelog {
     # break long lines into sets of 320 characters so syslog doesn't
     # truncate them, but long enough that context is adequate when
     # reviewing logs
-    my @syslog_items=unpack('(A320)*', $msg);
+    my @syslog_items=unpack('(A512)*', $msg);
     foreach my $syslog (@syslog_items) {
         syslog("notice", $syslog);
     }
 }
 
+sub expand_invocation_str {
+    # takes $program, @runargs as arguments, and assumes values from
+    # global %ENV, and global %allowed_progs has an entry for $program
+    my ($program, @runargs) = (@_);
+    my $print_runargs_str = join (" ", map{"'$_'"} @runargs);
+    my $print_env_str = join (" ", map{"$_='$ENV{$_}'"} keys %ENV);
+    my $print_prog_str="";
+    $print_env_str = "env $print_env_str " if $print_env_str ne "";
+    $print_prog_str = " (=$allowed_progs{$program})" if ($program ne $allowed_progs{$program});
+
+    my $invocation_str="$program $print_runargs_str$print_prog_str";
+    return ($invocation_str, $print_env_str);
+}
+
+sub success {
+    my ($invocation_str, $env_str) = expand_invocation_str($program, @runargs);
+    writelog("success: $SSHClient->$username\@$SSHHost: $invocation_str");
+    writelog("    env: $env_str");
+}
+
 sub fail {
     my ($msg) = @_;
-    writelog("fail: $msg: $SSHClient->$username\@$SSHHost: $program @argv");
+    $allowed_progs{$program} = "NO \$program=$program MAPPING FOUND" if !defined $allowed_progs{$program};
+    my ($invocation_str, $env_str) = expand_invocation_str($program, @argv);
+    writelog("fail: $msg: $SSHClient->$username\@$SSHHost: $invocation_str");
+    writelog(" env: $env_str");
     print STDERR "$0: ", $msg, "\n";
     exit 1;
 }
