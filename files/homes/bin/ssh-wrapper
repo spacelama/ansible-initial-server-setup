@@ -1,0 +1,103 @@
+#!/usr/bin/env perl
+# -*- Mode: cperl; cperl-indent-level: 4; tab-width: 4; indent-tabs-mode: nil; c-basic-offset: 4; c-basic-indent: 4; case-label: 4 -*-
+# vi: set ai tabstop=4 expandtab softtabstop=4 shiftwidth=4:
+
+use strict;
+use warnings;
+use File::Glob ':glob';
+use Sys::Syslog qw(:standard);
+
+my $scp_server   = "/usr/bin/scp";
+my $rsync_server = "/usr/bin/rsync";
+my $sftp_server1  = "/usr/lib64/ssh/sftp-server";
+my $sftp_server2  = "/usr/libexec/openssh/sftp-server";
+my %allowed_progs= ("scp" => $scp_server,
+                    "rsync" => $rsync_server,
+                    $sftp_server1 => $sftp_server1,
+                    $sftp_server2 => $sftp_server2);
+
+sub log;
+sub include;
+sub fail;
+
+my $command;
+
+my $ppid=getppid;
+my $username=getpwuid( $< );
+openlog("ssh/ssh-wrapper[$$]/[$ppid] ($username)", "", "user");
+
+$command = $ENV{SSH_ORIGINAL_COMMAND} || "sh";   # local-wrapper will be able to override whether a login without command is allowed to succeed, but by default sh doesn't appear in %allowed_progs, so gets blocked below
+$command =~ s/^\s+|\s+$//g ;
+
+# sanitize environment, but make sure local-wrapper can still access the original environment if required
+my %env=%ENV;
+%ENV = ();
+
+my @argv = split /[ \t]+/, $command;   #will fail on filenames with spaces in them, and no way to escape them :(
+my $program = shift @argv;
+
+my @runargs=();
+
+my $args_ok = 0;
+# give local-wrapper the ability to extend %allowed_progs, do extra arg munging etc
+include '/etc/ssh/wrapper/local-wrapper'
+  if (-e "/etc/ssh/wrapper/local-wrapper");
+
+fail "account restricted"
+  unless defined $allowed_progs{$program};
+
+if ($program eq "scp") {
+    foreach my $arg (@argv) {
+        if ($arg eq '-t' || $arg eq '-f') {
+            $args_ok = 1;
+            push @runargs, shift @argv;
+            last;
+        }
+    }
+} elsif ($program eq "rsync") {
+    if ($#argv >= 0 && $argv[0] eq "--server") {
+        $args_ok = 1;
+        push @runargs, shift @argv;
+    }
+} elsif ($program eq $sftp_server1 or $program eq $sftp_server2) {
+    $args_ok = 1;
+}
+
+fail "account restricted" unless $args_ok;
+
+foreach my $a (@argv) {
+    my @globs=bsd_glob($a);   # bsd_glob not susceptible to C shell injection like normal perl glob, nor splits on whitespace (man File::Glob)
+#    my @globs=glob($a);
+    if (!@globs) {            # we know the glob doesn't exist, but might as well give a meaningful error message back to caller
+        @globs=($a);
+    }
+    push @runargs, @globs;
+}
+
+my $runargs=join(" ", map{"'$_'"} @runargs);
+writelog("success: $program: $allowed_progs{$program} $runargs");
+exec($allowed_progs{$program}, @runargs);
+
+#subroutines with full access to lexical globals above:
+sub writelog {
+    syslog("notice", @_);
+}
+
+sub fail {
+    my ($msg) = @_;
+    writelog("fail: $msg");
+    print STDERR "$0: ", $msg, "\n";
+    exit 1;
+}
+sub include($) {
+    # http://www.perlmonks.org/?node_id=393426
+    package DB;   # causes eval to evaluate the string in the caller's
+    # scope.  Sometimes perl can be truly horrendous
+    my ($filename) = @_;
+    my $code = qq[#line 1 "$filename"\n] .
+      `cat "$filename"`;
+    #  print "evaling code: $code\n";
+    eval $code;
+    #  print "done...\n";
+}
+
