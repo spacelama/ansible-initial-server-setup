@@ -14,7 +14,8 @@ my $sftp_server2  = "/usr/libexec/openssh/sftp-server";
 my %allowed_progs= ("scp" => $scp_server,
                     "rsync" => $rsync_server,
                     $sftp_server1 => $sftp_server1,
-                    $sftp_server2 => $sftp_server2);
+                    $sftp_server2 => $sftp_server2,
+                    'internal-sftp' => $sftp_server1);
 
 sub log;
 sub include;
@@ -27,7 +28,12 @@ my $username=getpwuid( $< );
 openlog("ssh/ssh-wrapper[$$]/[$ppid] ($username)", "", "user");
 
 $command = $ENV{SSH_ORIGINAL_COMMAND} || "sh";   # local-wrapper will be able to override whether a login without command is allowed to succeed, but by default sh doesn't appear in %allowed_progs, so gets blocked below
-$command =~ s/^\s+|\s+$//g ;
+$command =~ s/^\s+|\s+$//g ;  # whitespace at beginning or end is meaningless
+
+my @SSH_CONNECTION = split(' ', $ENV{'SSH_CONNECTION'});
+
+my $SSHClient = $SSH_CONNECTION[0];
+my $SSHHost   = $SSH_CONNECTION[2];
 
 # sanitize environment, but make sure local-wrapper can still access the original environment if required
 my %env=%ENV;
@@ -35,6 +41,8 @@ my %env=%ENV;
 
 my @argv = split /[ \t]+/, $command;   #will fail on filenames with spaces in them, and no way to escape them :(
 my $program = shift @argv;
+
+my $gmt = gmtime();
 
 my @runargs=();
 
@@ -59,7 +67,7 @@ if ($program eq "scp") {
         $args_ok = 1;
         push @runargs, shift @argv;
     }
-} elsif ($program eq $sftp_server1 or $program eq $sftp_server2) {
+} elsif ($program eq $sftp_server1 or $program eq $sftp_server2 or $program eq 'internal-sftp') {
     $args_ok = 1;
 }
 
@@ -74,18 +82,31 @@ foreach my $a (@argv) {
     push @runargs, @globs;
 }
 
-my $runargs=join(" ", map{"'$_'"} @runargs);
-writelog("success: $program: $allowed_progs{$program} $runargs");
+my $runargs = join (" ", map{"'$_'"} @runargs);
+my $env_str = join (" ", map{"$_='$ENV{$_}'"} keys %ENV);
+my $expanded_prog="";
+if (($env_str ne "") || ($program ne $allowed_progs{$program})) {
+    $env_str = "env $env_str " if $env_str ne "";
+    $expanded_prog = " (=$env_str$allowed_progs{$program})";
+}
+writelog("success: $SSHClient->$username\@$SSHHost: $program $runargs$expanded_prog");
 exec($allowed_progs{$program}, @runargs);
 
 #subroutines with full access to lexical globals above:
 sub writelog {
-    syslog("notice", @_);
+    my ($msg)=(@_);
+    # break long lines into sets of 320 characters so syslog doesn't
+    # truncate them, but long enough that context is adequate when
+    # reviewing logs
+    my @syslog_items=unpack('(A320)*', $msg);
+    foreach my $syslog (@syslog_items) {
+        syslog("notice", $syslog);
+    }
 }
 
 sub fail {
     my ($msg) = @_;
-    writelog("fail: $msg");
+    writelog("fail: $msg: $SSHClient->$username\@$SSHHost: $program @argv");
     print STDERR "$0: ", $msg, "\n";
     exit 1;
 }
@@ -96,8 +117,11 @@ sub include($) {
     my ($filename) = @_;
     my $code = qq[#line 1 "$filename"\n] .
       `cat "$filename"`;
-    #  print "evaling code: $code\n";
+#     print STDERR "evaling code: $code\n";
     eval $code;
-    #  print "done...\n";
+    if ($@) {
+        die "$@";
+    }
+#     print STDERR "done...\n";
 }
 
