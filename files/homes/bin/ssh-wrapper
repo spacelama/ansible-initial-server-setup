@@ -2,30 +2,64 @@
 # -*- Mode: cperl; cperl-indent-level: 4; tab-width: 4; indent-tabs-mode: nil; c-basic-offset: 4; c-basic-indent: 4; case-label: 4 -*-
 # vi: set ai tabstop=4 expandtab softtabstop=4 shiftwidth=4:
 
+# allow a user/admin to have a locked down list of commands (defaults
+# to rsync/scp/sftp) that can be accepted in this account/keypair
+# combo.  If /etc/ssh/wrapper/local-wrapper exists, that is
+# additionally sourced by this script to allow additional sets of
+# programs and program args to be accepted
+
 use strict;
 use warnings;
 use File::Glob ':glob';
 use Sys::Syslog qw(:standard);
 use Text::ParseWords;
 
-my $scp_server   = "/usr/bin/scp";
-my $rsync_server = "/usr/bin/rsync";
+# all of these default allowed programs can be overriden by the admin
+# supplying their own list of programs in their ssh authorized_keys:
+# command=".../ssh-wrapper <program1> [--allow-all-args] <program2> ..."
+my $scp_server    = "/usr/bin/scp";
+my $rsync_server  = "/usr/bin/rsync";
 my $sftp_server1  = "/usr/lib64/ssh/sftp-server";
 my $sftp_server2  = "/usr/libexec/openssh/sftp-server";
-my %allowed_progs= ("scp" => $scp_server,
-                    "rsync" => $rsync_server,
-                    $sftp_server1 => $sftp_server1,
-                    $sftp_server2 => $sftp_server2);
+my $sftp_server3  = "/usr/lib/openssh/sftp-server";
+my %allowed_progs = ("scp" => $scp_server,
+                     "rsync" => $rsync_server,
+                     $sftp_server1 => $sftp_server1,
+                     $sftp_server2 => $sftp_server2,
+                     $sftp_server3 => $sftp_server3);
+my %all_args_allowed=($sftp_server1 => 1,
+                      $sftp_server2 => 2,
+                      $sftp_server3 => 3);
 
-sub log;
+sub writelog;
 sub include;
 sub fail;
+sub success;
 
 my $command;
 
 my $ppid=getppid;
 my $username=getpwuid( $< );
 openlog("ssh/ssh-wrapper[$$]/[$ppid] ($username)", "", "user");
+
+# allow the user/admin to override what programs are allowed by
+# supplying it on the commandline within authorized_keys (overriding
+# rsync/scp/sftp etc to become illegal):
+if (@ARGV) {
+    %allowed_progs=();
+    my $prev_cmd;
+    foreach my $arg (@ARGV) {
+        if ($arg eq "--allow-all-args") {
+            # allow the previously allowed command to accept any arguments
+            $all_args_allowed{$prev_cmd}=1;
+            writelog("$prev_cmd is allowed to supply any arguments");
+        } else {
+            $allowed_progs{$arg}=$arg;
+            writelog("$arg is allowed by admin/user");
+            $prev_cmd=$arg
+        }
+    }
+}
 
 # local-wrapper will be able to override whether a login without
 # command is allowed to succeed, but by default sh doesn't appear in
@@ -74,7 +108,7 @@ my $args_ok = 0;
 include '/etc/ssh/wrapper/local-wrapper'
   if (-e "/etc/ssh/wrapper/local-wrapper");
 
-fail "account restricted"
+fail "account restricted", "program not allowed"
   unless defined $allowed_progs{$program};
 
 if ($program eq "scp") {
@@ -90,11 +124,11 @@ if ($program eq "scp") {
         $args_ok = 1;
         push @runargs, shift @argv;
     }
-} elsif ($program eq $sftp_server1 or $program eq $sftp_server2) {
+} elsif ($all_args_allowed{$program}) {
     $args_ok = 1;
 }
 
-fail "account restricted" unless $args_ok;
+fail "account restricted", "args not allowed" unless $args_ok;
 
 foreach my $a (@argv) {
     # To behave more like a shell, we need to expand out environment
@@ -113,7 +147,7 @@ foreach my $a (@argv) {
     push @runargs, @globs;
 }
 
-success();
+success;
 exec($allowed_progs{$program}, @runargs);
 
 #subroutines with full access to lexical globals above:
@@ -149,10 +183,13 @@ sub success {
 }
 
 sub fail {
-    my ($msg) = @_;
+    my ($msg,$syslog) = @_;
+    if (!defined $syslog) {
+        $syslog=$msg;
+    }
     $allowed_progs{$program} = "NO \$program=$program MAPPING FOUND" if !defined $allowed_progs{$program};
     my ($invocation_str, $env_str) = expand_invocation_str($program, @argv);
-    writelog("fail: $msg: $SSHClient->$username\@$SSHHost: $invocation_str");
+    writelog("fail: $syslog: $SSHClient->$username\@$SSHHost: $invocation_str");
     writelog(" env: $env_str");
     print STDERR "$0: ", $msg, "\n";
     exit 1;
