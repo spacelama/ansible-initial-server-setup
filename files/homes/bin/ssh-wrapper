@@ -95,7 +95,7 @@ my $SSHHost   = $SSH_CONNECTION[2];
 # sanitize environment, but make sure local-wrapper can still access the original environment if required
 my %env=%ENV;
 %ENV = ();
-for my $allowed_env (qw(HOME USER PRJDATA)) {
+for my $allowed_env (qw(HOME USER PRJDATA DISPLAY XAUTHORITY)) {
     $ENV{$allowed_env} = $env{$allowed_env} if defined $env{$allowed_env};
 }
 
