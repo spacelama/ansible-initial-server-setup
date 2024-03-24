@@ -34,9 +34,9 @@ ac                              esp8266
 esp32cam                        esp32,not247,notyetproduction
 epaper-clock                    esp32,not247,notyetproduction
 
-airmon1                         tasmota,PMS5003,SCD40
+airmon1                         tasmota,tasmotaesp32,PMS5003,SCD40
+batterymon1                     tasmota,tasmotaesp8266,millivolts
 fishtank-temperature            tasmota,DS18B20
-batterymon1                     tasmota,millivolts
 fanstudy1                       tasmota,switch,dimmer,fan,not247
 ac-power                        tasmota,switch,medion,accurate,powermon
 angela-power                    tasmota,switch,sonoffs26,not247
