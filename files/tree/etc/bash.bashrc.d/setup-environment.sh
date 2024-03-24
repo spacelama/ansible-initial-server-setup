@@ -57,7 +57,7 @@ function setup_environment() {
 #     esac
 
     setpath PATH "/usr/lib/ccache:/usr/lib/colorgcc:/usr/local/bin:/usr/bin:/bin:/usr/games"
-    setpath PATH $HOME/bin:$HOME/bin/$SYSTEM-$KERNEL:$HOME/bin/$SYSTEM:$HOME/software/$SYSTEM/bin:PATH  #just set up an initial path with the essential private directories, to bootstrap ourselves -- the real paths are set in the .bash_profile.* files
+    setpath PATH $HOME/bin:$HOME/bin/$SYSTEM-$KERNEL:$HOME/bin/$SYSTEM:$HOME/software/$SYSTEM/bin:PATH:$HOME/.local/bin  #just set up an initial path with the essential private directories, to bootstrap ourselves -- the real paths are set in the .bash_profile.* files
     export PATH
 
     #LD_LIBRARY_PATH is always removed by xterm, because xterm is suid. So set it to a saved version
