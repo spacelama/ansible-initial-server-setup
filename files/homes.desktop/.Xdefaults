@@ -175,12 +175,14 @@ XTerm*VT100.translations: #override \n\
                 ~Ctrl Shift <Btn4Down>: string(0x1b) string("OA") \n\
                 ~Ctrl Shift <Btn5Down>: string(0x1b) string("OB") \n\
                 Ctrl Shift <Btn4Down>:  string(0x1b) string("[5~") \n\
-                Ctrl Shift <Btn5Down>:  string(0x1b) string("[6~") \n\
-                ~Ctrl ~Meta <Btn1Up>: select-end(CLIPBOARD, PRIMARY) \n\
-                ~Ctrl ~Meta <Btn2Up>: insert-selection(CLIPBOARD, PRIMARY, CUT_BUFFER0) \n\
+                Ctrl Shift <Btn5Down>:  string(0x1b) string("[6~")
+
+! following to enable copy of CLIPBOARD rather than PRIMARY, but it turns out its intensly more annoying to have to remember to shift-insert when wanting the normal PRIMARY behaviour from other apps within linux, than getting the occasional linux-windows interaction operate a bit more normally
+!                ~Ctrl ~Meta <Btn1Up>: select-end(CLIPBOARD, PRIMARY) \n\
+!                ~Ctrl ~Meta <Btn2Up>: insert-selection(CLIPBOARD, PRIMARY, CUT_BUFFER0)
 
 ! FIXME: if new treatment of CLIPBOARD vs PRIMARY gets too annoying, revert and try out wfreerdp switch "/clipboard:use-selection:PRIMARY"
-! Of course, there's also just things like: permanently deal with mozilla clipboard shittiness with https://unix.stackexchange.com/questions/136229/copy-paste-does-not-always-work-from-firefox-to-terminal autocutsel or clipit/diodon, at fvwm statup
+! Of course, there is also just things like: permanently deal with mozilla clipboard shittiness with https://unix.stackexchange.com/questions/136229/copy-paste-does-not-always-work-from-firefox-to-terminal autocutsel or clipit/diodon, at fvwm statup
 
 !                ~Ctrl ~Meta <Btn2Up>: insert-selection(PRIMARY, CLIPBOARD, CUT_BUFFER0) \n\
 !                Ctrl Shift <Btn2Up>:  insert-selection(CLIPBOARD) \n\
