@@ -7,8 +7,8 @@ function setup_aliases() {
     fi
     export forceenablecolor="--color"
 
-    alias ncal='ncal -c'
-    alias cal='cal -c'
+    alias ncal='ncal'
+    alias cal='ncal -b'
     alias cal3='ncal -3'
     alias read='read -e' # use readline when interactive anyway
     alias which=: ; unalias which   #you can't unalias something that isn't aliased, and only some systems are stupid enough to alias which
