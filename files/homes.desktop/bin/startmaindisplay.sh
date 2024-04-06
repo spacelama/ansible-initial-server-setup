@@ -206,7 +206,7 @@ case $LONGHOST-$SHORTDISPHOST in
 
                 #                barrier & # 20230627 - find proper method to start using tray and default config 20230801 disabled since no longer have work laptop
                 # following commandline taken from an invocation from within barrier
-                /usr/bin/barriers -f --debug INFO --name dirac -c ~/.barrier.conf --address :24800 &
+                /usr/bin/barriers -f --debug INFO --name dirac -c ~/.local/share/barrier/.barrier.conf --address :24800 &
                 # Barrier will be replaced by InputLeap when it hits
                 # 3.0.  In the meantime, keep using 2.4.0:
                 # https://github.com/input-leap/input-leap/issues/1414
