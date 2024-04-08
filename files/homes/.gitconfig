@@ -111,3 +111,5 @@
 
 [init]
 	defaultBranch = main
+[safe]
+	directory = /mnt/c/Users/tconnors/dot-files
