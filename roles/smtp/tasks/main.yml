@@ -51,6 +51,55 @@
   become: true
   when: host_is_mda | default(false)
 
+- name: install mariadb-server for roundcube
+  apt:
+    name: mariadb-server
+    autoremove: no
+    state: present
+  become: true
+  when: host_is_mda | default(false)
+
+- name: install roundcube
+  apt:
+    name: ['roundcube-plugins', 'roundcube']
+    autoremove: no
+    state: present
+  become: true
+  when: host_is_mda | default(false)
+
+- name: configure apache for roundcube
+  lineinfile:
+    line: Alias /roundcube /var/lib/roundcube/public_html
+    dest: /etc/apache2/conf-available/roundcube.conf
+  become: true
+  notify: restart apache2
+  when: host_is_mda | default(false)
+
+- name: configure username, pass in roundcube (comment out existing entries)
+  lineinfile:
+    dest: /etc/roundcube/config.inc.php
+    regexp: "^{{ item }}"
+    line: '// \1'
+    backrefs: true
+  with_items:
+    - "$config['smtp_pass'] = '%p';"
+    - "$config['smtp_user'] = '%u';"
+  become: true
+  notify: restart apache2
+  when: host_is_mda | default(false)
+
+- name: configure username, pass in roundcube (add our entries)
+  # FIXME: (some roundcube authentication help obtained here:   https://github.com/roundcube/roundcubemail/issues/7011 )
+  lineinfile:
+    dest: /etc/roundcube/config.inc.php
+    line: "{{ item }}"
+  with_items:
+    - "$config['smtp_pass'] = '';"
+    - "$config['smtp_user'] = '';"
+  become: true
+  notify: restart apache2
+  when: host_is_mda | default(false)
+
   # "touch" file if not exist: https://stackoverflow.com/questions/28347717/how-to-create-an-empty-file-with-ansible
   # https://dev.to/icy1900/ansible-create-empty-file-if-it-does-not-exist-1fof
 - name: Ensure (insecure) logfile for imap-via-ssh is writable if set
