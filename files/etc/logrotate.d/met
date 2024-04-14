@@ -1,0 +1,15 @@
+/var/log/met.log {
+        missingok
+        rotate 10
+        daily
+        compress
+        create 644 tconnors tconnors
+        postrotate
+                if which invoke-rc.d >/dev/null 2>&1; then
+                        invoke-rc.d met restart
+                else
+                        /etc/init.d/met restart
+                fi >/dev/null
+        endscript
+}
+

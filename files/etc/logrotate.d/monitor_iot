@@ -1,0 +1,8 @@
+/var/log/monitor_iot.log {
+        missingok
+        copytruncate
+        rotate 10
+        daily
+        compress
+        create 644 tconnors tconnors
+}

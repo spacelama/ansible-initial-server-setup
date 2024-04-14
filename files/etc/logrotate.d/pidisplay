@@ -1,0 +1,10 @@
+/var/log/pidisplay.log {
+        missingok
+        rotate 8
+        weekly
+        compress
+        delaycompress
+        notifempty
+        copytruncate
+        create 644 tconnors tconnors
+}

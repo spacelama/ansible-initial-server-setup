@@ -1,0 +1,8 @@
+/var/log/ac.log /var/log/ac.err /var/log/heater.err /var/log/heater.log /var/log/location.log {
+        missingok
+        copytruncate
+        rotate 10
+        daily
+        compress
+        create 644 tconnors tconnors
+}

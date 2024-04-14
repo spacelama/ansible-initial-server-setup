@@ -1,6 +1,7 @@
 /var/log/allsystem.log
 /var/log/sensord.log
 /var/log/dhcp.log
+/var/log/debug
 {
 	missingok
 	compress
