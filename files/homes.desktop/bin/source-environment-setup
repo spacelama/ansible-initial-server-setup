@@ -8,6 +8,8 @@ PS1='bogus'
 for i in /etc/profile ~/.bash_profile ~/.profile ; do
     if [ -e "$i" ] ; then
         . $i
-        break
+        if type -a setup_environment >& /dev/null ; then
+            break
+        fi
     fi
 done
