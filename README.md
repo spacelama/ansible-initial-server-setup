@@ -110,6 +110,18 @@ Likewise for tasmota and openwrt:
 
 `$ ansible-playbook tasmota_maintenance.yml --diff --limit patiofluro-power,loungefrontlight-power  --extra-vars "setpsk=true" --extra-vars "setsyslog=true"`
 
+## Using tags to limit the scope of changes
+
+initial_server_setup.yml uses tags on each role.
+
+Limit your changes to only apply webserver and smtp roles with eg:
+
+`$ ansible-playbook --diff initial_server_setup.yml --limit met,webserver,iot --tags webserver,smtp --check`
+
+or to stop the webserver role from running while still running everything else:
+
+`$ ansible-playbook --diff initial_server_setup.yml --limit met,webserver,iot --skip-tags webserver --check`
+
 # Openwrt routers, wireless APs, VLANs
 
 `vars/openwrt.yml` contains some settings for all your openwrt devices

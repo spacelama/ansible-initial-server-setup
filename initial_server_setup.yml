@@ -5,8 +5,10 @@
   remote_user: "{{ ssh_user | default('ansible_adm') }}"
   roles:
     - role: common_handlers
+      tags: [common_handlers,always]
       become: true # the whole role, including handlers, will become root
     - role: munin_server
+      tags: [munin_server]
       when: host_is_munin_server | default(false)
 
 # to do a quick sync of commonly changed files, let's just push them
@@ -18,9 +20,12 @@
     - vars/main.yml
   roles:
     - role: common_handlers
+      tags: [common_handlers,always]
       become: true # the whole role, including handlers, will become root
-    - install_files
-    - install_user_files
+    - role: install_files
+      tags: [install_files]
+    - role: install_user_files
+      tags: [install_user_files]
 
 - hosts: "{{ target | default('all,!openwrt,!tasmota,!work') }}"
   remote_user: "{{ ssh_user | default('ansible_adm') }}"
@@ -29,46 +34,71 @@
     - vars/main.yml
   roles:
     - role: common_handlers
+      tags: [common_handlers,always]
       become: true # the whole role, including handlers, will become root
     - role: bootstrap
+      tags: [bootstrap]
     - role: ssh_bootstrap
+      tags: [ssh_bootstrap]
       become: true
     - role: webserver
+      tags: [webserver]
       when: (host_is_ext_web_server | default(false)) or (host_is_user_web_server | default(false))
     - role: nutserver
+      tags: [nutserver]
       when: (host_is_nut_server | default(false)) or (host_is_nut_master | default(false))
     - role: nutmaster
+      tags: [nutmaster]
       when: host_is_nut_master | default(false)
     - role: management
+      tags: [management]
       when: host_is_mgmt | default(false)
-    - user
-    - apt_repos
-    - essentials
-    - monitoring
+    - role: user
+      tags: [user]
+    - role: apt_repos
+      tags: [apt_repos]
+    - role: essentials
+      tags: [essentials]
+    - role: monitoring
+      tags: [monitoring]
     - role: spectre_mitigations_disabled
+      tags: [spectre_mitigations]
       when: not (host_is_container | default(false)) and not (host_is_pi | default(false))
     - role: hostname
+      tags: [hostname]
       when: not (host_is_container | default(false))
     - role: fileserver
+      tags: [fileserver]
       when: host_is_fileserver | default(false)
     - role: mailserver
+      tags: [mailserver]
       when: host_is_incoming_mailserver | default(false)
     - role: smtp
+      tags: [smtp]
     # pve_server is loaded in bootstrap.yml as well, but that's just
     # to make sure all the repos are there.  No harm updating that
     # here as time goes on
     - role: pve_server
+      tags: [pve_server]
       when: host_is_pve_server | default(false)
     - role: virtual
+      tags: [virtual]
       when: host_is_virtual | default(false)
     - role: physical
+      tags: [physical]
       when: host_is_physical | default(false)
     - role: laptop
+      tags: [laptop]
       when: host_is_laptop | default(false)
     - role: dell_server
+      tags: [dell_server]
       when: host_is_dell_server | default(false)
     - role: desktop
+      tags: [desktop]
       when: host_is_desktop | default(false)
     - role: ssh
+      tags: [ssh]
     - role: fail2ban
+      tags: [fail2ban]
     - role: power_saving
+      tags: [power_saving]
