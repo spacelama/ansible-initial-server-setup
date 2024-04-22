@@ -117,7 +117,8 @@ pvs -o pv_name,pv_size,seg_size,vg_name,lv_name,lv_size,seg_pe_ranges > $data_di
 
 mailq > $data_dir/mailq 2>&1
 
-if [ -x /sbin/zpool ] ; then
+if grep -q ^zfs /proc/modules ; then
+    # FIXME: we're going to spin up disks doing this; it'd be nice to time it for when they're already spinning
     zpool status -v > $data_dir/zpool.status 2>&1 || true
     zfs get all > $data_dir/zfs.get.all 2>&1 || true
     zfs get -s local all > $data_dir/zfs.get.local.all 2>&1 || true
@@ -125,6 +126,9 @@ if [ -x /sbin/zpool ] ; then
     zpool list > $data_dir/zpool.list 2>&1 || true
     zpool list -v > $data_dir/zpool.list-v 2>&1 || true
     zfs list > $data_dir/zfs.list 2>&1 || true
+    /usr/local/bin/zpool.sh > $data_dir/zfs.zpool.nice 2>&1 || true
+    /usr/local/bin/zpool.sh iostat > $data_dir/zfs.zpool.iostat.nice 2>&1 || true
+    /usr/local/bin/zfs_print_all > $data_dir/zfs-create.script 2>&1 || true
 fi
 
 for i in /dev/sd? ; do

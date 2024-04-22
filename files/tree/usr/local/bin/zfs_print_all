@@ -1,0 +1,121 @@
+#!/bin/bash
+
+# https://lars.timmann.de/wiki/index.php/ZFS_on_Linux
+
+# Written by Lars Timmann <L@rs.Timmann.de> 2018
+# Tested on solaris 11.3 & Ubuntu Linux 
+
+# This script is a rotten bunch of code... rewrite it!
+
+AWK_CMD=/usr/bin/gawk
+ZPOOL_CMD=/sbin/zpool
+ZFS_CMD=/sbin/zfs
+ZDB_CMD=/sbin/zdb
+
+function print_local_options () {
+  DATASET=$1
+  OPTION=$2
+  EXCLUDE_REGEX=$3
+  ${ZFS_CMD} get -s local -Ho property,value -p ${OPTION} ${DATASET} | while read -r property value
+  do
+    if [[ ! ${property} =~ ${EXCLUDE_REGEX} ]]
+    then
+      if [ "_${property}_" == "_share.*_" ]
+      then
+        print_local_options "${DATASET}" 'share.all' '^$'
+      else
+        printf '\t-o %s=%s \\\n' "${property}" "${value}"
+      fi
+    fi
+  done
+}
+
+function print_filesystem () {
+  ZFS=$1
+
+  printf '%s create \\\n' "${ZFS_CMD}"
+  print_local_options "${ZFS}" 'all' '^$'
+  printf '\t%s\n' "${ZFS}"
+}
+
+function print_filesystems () {
+  ZPOOL=$1
+  for ZFS in $(${ZFS_CMD} list -Ho name -t filesystem -r ${ZPOOL})
+  do
+    if [ ${ZFS} == ${ZPOOL} ] ; then continue ; fi
+    printf '#\n## Filesystem: %s\n#\n\n' "${ZFS}"
+    print_filesystem ${ZFS}
+    printf '\n'
+  done
+}
+
+function print_volume () {
+  ZVOL=$1
+  volsize=$(${ZFS_CMD} get -Ho value volsize ${ZVOL})
+  volblocksize=$(${ZFS_CMD} get -Ho value volblocksize ${ZVOL})
+  
+  printf '%s create \\\n\t-V %s \\\n\t-b %s \\\n' "${ZFS_CMD}" "${volsize}" "${volblocksize}"
+  print_local_options "${ZVOL}" 'all' '(volsize|refreservation)'
+  printf '\t%s\n' "${ZVOL}"
+}
+
+function print_volumes () {
+  ZPOOL=$1
+  for ZVOL in $(${ZFS_CMD} list -Ho name -t volume -r ${ZPOOL})
+  do
+    printf '#\n## Volume: %s\n#\n\n' "${ZVOL}"
+    print_volume ${ZVOL}
+    printf '\n'
+  done
+}
+
+function print_vdevs () {
+  ZPOOL=$1
+  ${ZDB_CMD} -C ${ZPOOL} | ${AWK_CMD} -F':' '
+    $1 ~ /^[[:space:]]*type$/ {
+      gsub(/[ ]+/,"",$NF);
+      type=substr($NF,2,length($NF)-2);
+      if ( type == "mirror" ) {
+        printf " \\\n\t%s",type;
+      }
+    }
+    $1 ~ /^[[:space:]]*path$/ {
+      gsub(/[ ]+/,"",$NF);
+      vdev=substr($NF,2,length($NF)-2);
+      printf " \\\n\t%s",vdev;
+    }
+    END {
+      printf "\n";
+    }
+  '
+}
+
+function print_zpool () {
+  ZPOOL=$1
+  
+  printf '#############################################################\n'
+  printf '#\n## ZPool: %s\n#\n' "${ZPOOL}"
+  printf '#############################################################\n\n'
+
+  printf '%s create \\\n' "${ZPOOL_CMD}"
+  print_local_options "${ZPOOL}" 'all' '/@/'
+  printf '\t%s' "${ZPOOL}"
+  print_vdevs "${ZPOOL}"
+  printf '\n'
+
+  printf '#############################################################\n\n'
+  print_filesystems   "${ZPOOL}"
+  print_volumes       "${ZPOOL}"
+}
+
+OS=$(uname -s)
+eval $(uname -s)=1
+HOSTNAME=$(hostname)
+
+printf '#############################################################\n'
+printf '# Hostname: %s\n' "${HOSTNAME}"
+printf '#############################################################\n\n'
+for ZPOOL in $(${ZPOOL_CMD} list -Ho name)
+do
+  print_zpool ${ZPOOL}
+done
