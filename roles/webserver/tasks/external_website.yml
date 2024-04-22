@@ -13,7 +13,7 @@
 
 - name: install apache and letsencrypt certbot
   apt:
-    name: [ 'apache2', 'javascript-common', 'python3-certbot-apache', 'apachetop', 'awstats', 'curl' ] # curl for gold.nav.cgi
+    name: [ 'apache2', 'javascript-common', 'python3-certbot-apache', 'apachetop', 'awstats', 'curl', 'novnc' ] # curl for gold.nav.cgi
 
 - name: localalize error pages
   lineinfile:
@@ -83,6 +83,19 @@
     src: etc/cron.daily/check_letsencrypt_certbot
     dest: /etc/cron.daily/check_letsencrypt_certbot
     mode: 0755
+  become: true
+
+- name: setup /home noVNC
+  file:
+    src: "/usr/share/novnc"
+    dest: /var/www/html/home
+    state: link
+  become: true
+
+- name: setup /home/index.html
+  copy:
+    dest: /usr/share/novnc/index.html
+    content: ""
   become: true
 
 #FIXME: we would rather let ansible do the letsencrypt bootstrapping
