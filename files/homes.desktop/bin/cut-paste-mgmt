@@ -18,5 +18,7 @@ killall autocutsel
 # CLIPBOARD, but then it all falls to shit soon afterwards.  Let's try:
 # https://unix.stackexchange.com/questions/136229/copy-paste-does-not-always-work-from-firefox-to-terminal
 
-autocutsel -fork -selection CLIPBOARD
-autocutsel -fork -selection PRIMARY
+#autocutsel -debug -selection CLIPBOARD &
+#autocutsel -debug -selection PRIMARY &
+autocutsel -selection CLIPBOARD &
+autocutsel -selection PRIMARY &
