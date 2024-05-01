@@ -8,10 +8,21 @@ failed_tests=
 
 function fail() {
     code=$? ; CMD="$BASH_COMMAND"
-    echo " * -> Failed($code): $CMD"
 
-    failed_tests="$failed_tests$CMD ; "
-    fail=true
+    # FIXME: I should probably keep separate track over just warnings,
+    # and still actually warn about them, but for now, we won't exit
+    # failure code if we just recieve warnings
+    case "$code" in
+        1)
+            echo " * -> Warning($code): $CMD"
+            ;;
+        *)
+            echo " * -> Failed($code): $CMD"
+
+            failed_tests="$failed_tests$CMD ; "
+            fail=true
+            ;;
+    esac
 }
 
 cd /usr/local/bin/nagios
