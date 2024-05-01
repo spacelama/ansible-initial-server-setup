@@ -42,7 +42,9 @@
 #[merge]
 #        tool = vimdiff
 [merge]
+{% if deb_release | default('bullseye') != 'buster' %}
 	conflictstyle = zdiff3
+{% endif %}
 
 [core]
 	editor = e

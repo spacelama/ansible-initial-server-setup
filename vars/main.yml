@@ -224,6 +224,8 @@
     # templates done by matching on .j2
       - name: .nanorc
         source: homes/.nanorc.j2
+      - name: .gitconfig
+        source: homes/.gitconfig.j2
       - name: .bashrc.d/
         # don't want this in the automatically copied homes/ because
         # otherwise it gets installed back onto dirac, our ansible
