@@ -3,7 +3,9 @@
   # if want to go back to DAWN later, it is now better documented: https://github.com/berlin-open-wireless-lab/DAWN/blob/master/CONFIGURE.md
   # also, here: https://www.reddit.com/r/openwrt/comments/v26ybu/dawn_vs_usteer/
   opkg:
-    name: luci-app-dawn,dawn
+    name: luci-app-dawn,dawn,wpad-basic-mbedtls
+    # wpad-basic-mbedtls conflicts with hostapd-mbedtls
+    # https://forum.openwrt.org/t/why-return-to-mbed-tls/162957/4
     state: absent
 
 - name: install compulsory packages
@@ -102,7 +104,12 @@
   # place of wpad-wolfssl, since it's moved from wolfssl to mbedtls
 - name: install AP packages
   opkg:
-    name: usteer,luci-app-usteer
+    name: usteer,luci-app-usteer,hostapd-mbedtls
+    # hostapd-mbedtls seems to be needed by some APs with 23.05.3
+    # otherwise device doesn't get renamed from wlan0 and nothing
+    # comes up?:
+    # https://www.reddit.com/r/openwrt/comments/1793zzl/2305_changed_wireless_device_names_from_wlan0_to/
+    # https://forum.openwrt.org/t/why-return-to-mbed-tls/162957/4
     state: present
   when: type == "ap"
 
