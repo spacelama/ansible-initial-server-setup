@@ -5,6 +5,30 @@
 # backgrounded
 [ -z "$NONINTERACT" ] && PROMPT_COMMAND=handleprompt # likely to get overriden by git plugins later on
 
+# FIXME: Fixing PROMPT_COMMAND trap that writes command history before
+# command is invoked notes:
+#
+# Another problem with TRAP debug method of writing .bash_fullhistory
+# is that if a command doesn't actually run (eg, #blah), then it
+# doesn't get echoed yet to the history file.  Probably need to
+# combine it with PROMPT_COMMAND, in order to capture any history that
+# didn't get caught.  Problem with PROMPT_COMMAND by itself is that it
+# doesn't write to the history until the command returns.  OTOH, right
+# now, PROMPT_COMMAND *is* set on weinberg, and yet it doesn't seem to
+# result in the writing of history..... ; want something like
+# bash-preexec: https://github.com/rcaloras/bash-preexec
+# https://superuser.com/questions/175799/does-bash-have-a-hook-that-is-run-before-executing-a-command
+#
+# rewrite writetohistory so it doesn't trigger upon a #!/bin/bash -li
+# script (less important now that worked out -i is not needed for most
+# environment imports)
+#
+# sometimes, writetohistory is deleting the last history entry which
+# deletes the entire occurences of it when its not duplicated? ;;
+# suspect I've seen it when certain conditions are triggered on the
+# first command in a shell, possibly a compound command, and when we
+# were still using the old DEBUG trap rather than PS0
+
 # https://stackoverflow.com/questions/2575037/how-to-get-the-cursor-position-in-bash
 # https://stackoverflow.com/questions/62038398/bash-clearing-the-last-output-correctly/62040654#62040654
 # FIXME: oh, turns out zsh does this by default, and you can use that

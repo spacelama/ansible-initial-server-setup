@@ -28,7 +28,17 @@ xauth generate $DISPLAY . trusted
 #  . ~/.bash_profile # try calculate it again - might have a race condition on some startups
 #fi
 
-xcompmgr &   # 20240127 needed for xterm scrollback buffer not to be corrupted.  1014625: xterm: screen corruption of scrollback buffer; similar to https://bugs.freedesktop.org/show_bug.cgi?id=110214 but actually not fixed by that.
+xcompmgr &   # 20240127 needed for xterm scrollback buffer not to be
+             # corrupted.  1014625: xterm: screen corruption of
+             # scrollback buffer; similar to
+             # https://bugs.freedesktop.org/show_bug.cgi?id=110214 but
+             # actually not fixed by that ; but also very useful for
+             # firefox to not chew CPU updating windows that aren't
+             # visible; probably through:
+             # https://bugzilla.mozilla.org/show_bug.cgi?id=1820096
+             # and
+             # https://bugzilla.mozilla.org/show_bug.cgi?id=1693513
+
 xrandr --current
 for i in HORSIZE VERTSIZE HOR2SIZE VERT2SIZE ; do
     echo $i=`eval echo '$'$i`
