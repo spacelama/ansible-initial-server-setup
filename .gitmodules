@@ -5,7 +5,7 @@
 
 [submodule "files/homes.desktop/elisp/grip-mode"]
 	path = files/homes.desktop/elisp/grip-mode
-	url = https://github.com/seagle0128/grip-mode
+	url = https://github.com/spacelama/grip-mode
 
 [submodule "files/homes.desktop/elisp/undo-tree"]
 	path = files/homes.desktop/elisp/undo-tree
