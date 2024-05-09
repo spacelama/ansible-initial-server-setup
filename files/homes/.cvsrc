@@ -1,0 +1,11 @@
+#global options
+cvs -q -z6
+#unified diff, white space ignore
+diff -u -b
+#create directories
+checkout -P
+#create and delete directories
+update -d -P
+#Turn off recursive behavour.  Ideally, it would do nothing at all if files are not supplied on the command line
+commit -l
+
