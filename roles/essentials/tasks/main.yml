@@ -292,6 +292,9 @@
         (not (host_is_pve_server | default(false))) and
         (not (host_is_not_using_dnsmasq_cache | default(false)))
 
+#- fail:
+#    msg: done
+
 - name: Configure locales
   block:
     - name: List of locales
@@ -541,6 +544,22 @@
     - "GRUB_DISABLE_SUBMENU=y"
   notify: "Regenerate boot config"
   when: not (host_is_container | default(false)) and not (host_is_pi | default(false))
+
+- name: setup grub boot flags
+  copy:
+    dest: "/etc/default/grub.d/ansible-custom-boot-flags.cfg"
+    content: "GRUB_CMDLINE_LINUX_DEFAULT=\"$GRUB_CMDLINE_LINUX_DEFAULT {{ grub_boot_flags }}\"\n"
+  become: true
+  notify: "Regenerate boot config"
+  when: grub_boot_flags is defined
+
+- name: Remove custom grub boot flags
+  file:
+    dest: "/etc/default/grub.d/ansible-custom-boot-flags.cfg"
+    state: absent
+  become: true
+  notify: "Regenerate boot config"
+  when: grub_boot_flags is not defined
 
 - name: poll smartmontools only once per day
   # we want this so SAS disks are allowed to spin down (smartmontools
