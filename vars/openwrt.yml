@@ -21,7 +21,7 @@
 
   default_wifi_iface_settings:
     mobility_domain: "{{ mobility_domain }}"
-    encryption: psk2
+    encryption: "{{ encryption | default('sae-mixed') }}"  # It would be better if I could apply this per SSID as well
     ieee80211r: '1'
     ft_over_ds: '1'
     ft_psk_generate_local: '1'
