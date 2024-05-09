@@ -32,7 +32,7 @@ misc/get-vault-pass.sh
 Clone the repo
 
 ```
-$ git clone https://github.com/spacelama/ansible-initial-server-setup.git
+$ git clone --recurse-submodules https://github.com/spacelama/ansible-initial-server-setup.git
 ```
 
 # Debian Linux LXC and VMs, desktops, servers, Proxmox etc
