@@ -275,6 +275,19 @@ if [ -d /etc/pve ] ; then
                 echo
             done
         done > $data_dir/ceph.pool.volume.snapshots
+
+        for osd in $( ceph osd df | grep '^ *[0-9]' | awk '{print $1}' ) ; do
+            (
+                for param in bdev_enable_discard bdev_async_discard bluestore_use_optimal_io_size_for_min_alloc_size bluestore_min_alloc_size bluestore_min_alloc_size_hdd bluestore_min_alloc_size_ssd bluestore_max_alloc_size bluestore_compression_mode bluestore_compression_algorithm bluestore_compression_min_blob_size bluestore_compression_min_blob_size_hdd bluestore_compression_min_blob_size_ssd bluestore_compression_max_blob_size bluestore_compression_max_blob_size_hdd bluestore_compression_max_blob_size_ssd bluestore_max_blob_size bluestore_max_blob_size_hdd bluestore_max_blob_size_ssd ; do
+                    printf "%60s" "$osd-$param = "
+                    ceph config get osd.$osd $param
+                done
+            ) > $data_dir/ceph.osd.$osd.compression
+            ceph daemon osd.$osd perf dump > $data_dir/ceph.osd.$osd.perf.dump 2>/dev/null || true
+        done
+        ceph osd lspools | awk '{print $2}' | while read pool ; do
+            ceph osd pool get $pool all > $data_dir/ceph.pool.$pool.conf
+        done
     fi
 fi
 
