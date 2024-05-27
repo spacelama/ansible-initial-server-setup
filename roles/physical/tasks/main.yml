@@ -8,6 +8,16 @@
     state: present
   become: true
 
+- name: Install tools wanted by intel hardware
+  apt:
+    name: ['i7z', 'thermald'] # i8kutils for delll machines? thermald auto-disables itself if hardware doesn't have required capabilities
+    update_cache: yes
+    cache_valid_time: 3600
+    autoremove: no
+    state: present
+  become: true
+  when: host_is_intel | default(false)
+
 # FIXME: modprobe drivetemp, run sensors-detect, insert those modules into /etc/modprobe, and rerun munin-node:
 #  echo drivetemp > /etc/modules-load.d/drivetemp.conf
 # for hddtemps to be reported through `sensors`
