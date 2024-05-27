@@ -13,7 +13,7 @@
 
 - name: install apache and letsencrypt certbot
   apt:
-    name: [ 'apache2', 'javascript-common', 'python3-certbot-apache', 'apachetop', 'awstats', 'curl', 'novnc' ] # curl for gold.nav.cgi
+    name: [ 'apache2', 'javascript-common', 'python3-certbot-apache', 'apachetop', 'awstats', 'curl', 'dos2unix', 'novnc' ] # curl,dos2unix for gold.nav.cgi
 
 - name: localalize error pages
   lineinfile:
