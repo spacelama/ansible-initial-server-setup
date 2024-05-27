@@ -36,7 +36,6 @@ epaper-clock                    esp32,not247,notyetproduction
 
 airmon1                         tasmota,tasmotaesp32,PMS5003,SCD40
 batterymon1                     tasmota,tasmotaesp8266,millivolts
-fishtank-temperature            tasmota,DS18B20
 fanstudy1                       tasmota,switch,dimmer,fan,not247
 ac-power                        tasmota,switch,medion,accurate,powermon
 angela-power                    tasmota,switch,sonoffs26,not247
@@ -50,8 +49,6 @@ patiolights-power               tasmota,switch,sonoffs26
 laundrylights-power             tasmota,switch,sonoffs26
 christmaslights-power           tasmota,switch,arlecmaster4board
 beerfridges-power               tasmota,switch,medion,accurate,powermon
-aquapump-power                  tasmota,switch,oldkogan,accurate,powermon,usbport
-aquaheater-power                tasmota,switch,oldkogan,accurate,powermon,usbport
 brewfridge-power                tasmota,switch,athom,accurate,powermon
 pvebackup-power                 tasmota,switch,newkogan,powermon,esp12s,accurate
 
@@ -63,11 +60,15 @@ electricblanket-power           tasmota,switch,athom,accurate,powermon,not247
 loungefrontlight-power          tasmota,switch,athom,accurate,powermon
 study-power                     beken,switch,jinvooswitchindiv4boardusb,not247,1W_all_off,5W_all_on
 
+#fishtank-temperature            tasmota,DS18B20
+#fishtank-rm4                    iot
+#aquapump-power                  tasmota,switch,oldkogan,accurate,powermon,usbport
+#aquaheater-power                tasmota,switch,oldkogan,accurate,powermon,usbport
+
 pantech                         iot
 ecowitt                         iot
 study-rm4                       iot
 loungeroom-rm4                  iot
-fishtank-rm4                    iot
 chromecast-lounge               iot
 cam-garage                      iot
 cam-rear                        iot
