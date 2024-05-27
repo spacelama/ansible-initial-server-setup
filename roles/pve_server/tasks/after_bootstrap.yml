@@ -455,24 +455,22 @@
   notify: "Update initramfs config"
   when: vfio_ids is not defined
 
-- name: "Ensure vfio, vendor-reset in /etc/modules"
-  lineinfile:
-    dest: /etc/modules
-    line: "{{ item }}"
-    state: present
+- name: "Ensure vfio, vendor-reset in /etc/modules-load.d/ansible-pve.conf"
+  copy:
+    dest: /etc/modules-load.d/ansible-pve.conf
+    content: |2
+      # ansible controlled for GPU passthrough and reset by pve_server/after_bootstrap.yml
+      vfio
+      vfio_iommu_type1
+      vfio_pci
+      vfio_virqfd
+      # following for amd video cards in VMs
+      vendor-reset
+      # following modules are blacklisted on the kernel commandline to stop from autoloading, but now that vfio is loaded reserving the appropriate devices, we are free to load them again (nope, have to probe them manually)
+      #xhci_pci
+      #xhci_hcd
   become: true
   notify: "Update initramfs config"
-  with_items:
-    - "# ansible controlled for GPU passthrough and reset by pve_server/main.yml"
-    - vfio
-    - vfio_iommu_type1
-    - vfio_pci
-    - vfio_virqfd
-    # following for amd video cards in VMs
-    - vendor-reset
-    - "# following modules are blacklisted on the kernel commandline to stop from autoloading, but now that vfio is loaded reserving the appropriate devices, we are free to load them again (nope, have to probe them manually)"
-    - "#xhci_pci"
-    - "#xhci_hcd"
 
 # persistent network names (lan0): https://wiki.debian.org/NetworkInterfaceNames
 - name: install systemd network persistent net link

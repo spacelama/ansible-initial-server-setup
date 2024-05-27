@@ -18,6 +18,14 @@
   become: true
   when: host_is_intel | default(false)
 
-# FIXME: modprobe drivetemp, run sensors-detect, insert those modules into /etc/modprobe, and rerun munin-node:
+- name: "Ensure sensors in /etc/modules-load.d/sensors.conf for hddtemps to be reported through `sensors`"
+# FIXME: modprobe drivetemp, coretemp, run sensors-detect, insert those modules into /etc/modprobe, and rerun munin-node:
 #  echo drivetemp > /etc/modules-load.d/drivetemp.conf
-# for hddtemps to be reported through `sensors`
+  copy:
+    dest: /etc/modules-load.d/sensors.conf
+    content: |2
+      # ansible controlled for sensors by physical/tasks/main.yml
+      coretemp
+      drivetemp
+  become: true
+  notify: "Update initramfs config"

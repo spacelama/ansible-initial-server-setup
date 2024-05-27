@@ -680,14 +680,17 @@
   become: true
   when: (deb_release | default('bullseye') == 'bookworm') and ((host_is_desktop | default(false)) or (host_is_pi | default(false)))
 
-- name: "Ensure custom modules in /etc/modules"
-  lineinfile:
-    dest: /etc/modules
-    line: "{{ item }}"
-    state: present
+- name: "Ensure custom modules in /etc/modules-load.d/ansible-custom.conf"
+  copy:
+    dest: /etc/modules-load.d/ansible-custom.conf
+    content: |2
+      # Ansible controlled by essentials/tasks/main.yml
+      {% for line in modprobe | default([]) %}
+      {{ line }}
+      {% endfor %}
   become: true
   notify: "Update initramfs config"
-  loop: "{{ modprobe | default([]) }}"
+  when: not (host_is_container | default(false))
 
 # FIXME: distribute ssh_known_hosts
 # https://stackoverflow.com/questions/59832034/how-to-include-all-host-keys-from-all-hosts-in-group
