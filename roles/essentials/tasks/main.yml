@@ -561,6 +561,35 @@
   notify: "Regenerate boot config"
   when: grub_boot_flags is not defined
 
+- name: Ensure sar logs log everything available (comment existing)
+  lineinfile:
+    dest: /etc/sysstat/sysstat
+    regexp: '^(SADC_OPTIONS="-S (?!XALL).*".*)$'
+    line: '#\1'
+    backrefs: yes
+  become: true
+
+- name: Ensure sar logs log everything available
+  lineinfile:
+    dest: /etc/sysstat/sysstat
+    insertafter: 'SADC_OPTIONS'
+    line: 'SADC_OPTIONS="-S XALL"    # Ansible controlled'
+  become: true
+
+- name: Enable sar logs (sysv only)
+  lineinfile:
+    dest: /etc/default/sysstat
+    regexp: '^ENABLED='
+    line: 'ENABLED="true"    # Ansible controlled'
+  become: true
+
+- name: Enable sar logs (systemd)
+  systemd:
+    name: sysstat
+    enabled: true
+    state: started
+  become: true
+
 - name: poll smartmontools only once per day
   # we want this so SAS disks are allowed to spin down (smartmontools
   # only ignores spundown ATA disks)
