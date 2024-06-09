@@ -1,0 +1,24 @@
+# from /etc/sensor3.conf with our chip:
+chip "nct6798-*"
+
+    label in0 "Vcore"
+    label in2 "AVCC"
+    label in3 "+3.3V"
+    label in7 "3VSB"
+    label in8 "Vbat"
+
+    set in2_min  3.3 * 0.90
+    set in2_max  3.3 * 1.10
+    set in3_min  3.3 * 0.90
+    set in3_max  3.3 * 1.10
+    set in7_min  3.3 * 0.90
+    set in7_max  3.3 * 1.10
+    set in8_min  3.0 * 0.90
+    set in8_max  3.3 * 1.10
+
+# https://github.com/lm-sensors/lm-sensors/issues/441
+
+    ignore temp3
+#    ignore temp4   # seems valid on the B550-plus
+    ignore temp5
+    ignore temp6
