@@ -1,20 +1,64 @@
-# from /etc/sensor3.conf with our chip:
 chip "nct6798-*"
 
-    label in0 "Vcore"
-    label in2 "AVCC"
-    label in3 "+3.3V"
-    label in7 "3VSB"
-    label in8 "Vbat"
+# from original /etc/sensor3.conf with other nct67* devices:
+#    label in0 "Vcore"
+#    label in2 "AVCC"
+#    label in3 "+3.3V"
+#    label in7 "3VSB"
+#    label in8 "Vbat"
 
-    set in2_min  3.3 * 0.90
-    set in2_max  3.3 * 1.10
-    set in3_min  3.3 * 0.90
-    set in3_max  3.3 * 1.10
-    set in7_min  3.3 * 0.90
-    set in7_max  3.3 * 1.10
-    set in8_min  3.0 * 0.90
-    set in8_max  3.3 * 1.10
+#    set in2_min  3.3 * 0.90
+#    set in2_max  3.3 * 1.10
+#    set in3_min  3.3 * 0.90
+#    set in3_max  3.3 * 1.10
+#    set in7_min  3.3 * 0.90
+#    set in7_max  3.3 * 1.10
+#    set in8_min  3.0 * 0.90
+#    set in8_max  3.3 * 1.10
+
+#Munged from TUF-GAMING-X570-PLUS.conf:
+
+label in0 "Vcore"
+    set in0_min 0.2
+    set in0_max 1.5
+
+label in2 "AVSB"
+    set in2_min  3.3 * 0.95
+    set in2_max  3.3 * 1.05
+
+label in3 "3VCC"
+    set in3_min  3.3 * 0.95
+    set in3_max  3.3 * 1.05
+
+label in4 "+12V"
+    compute in4 @ * 12, @ / 12
+    set in4_min  12 * 0.95
+    set in4_max  12 * 1.05
+
+label in6 "+5V"
+    compute in6 @ * 5, @ / 5
+    set in6_min  5 * 0.95
+    set in6_max  5 * 1.05
+
+label in7 "3.3V"
+    set in7_min  3.3 * 0.95
+    set in7_max  3.3 * 1.05
+
+label in8 "Vbat"
+    set in8_min  3.3 * 0.95
+    set in8_max  3.3 * 1.05
+
+# From my isolation of which fan is which, pump has been repurposed as rear chassis fan,
+# always 1200RPM:
+
+label fan1 "Front Fan (top)"
+label fan2 "CPU Fan (rear)"
+    set fan2_min 200
+label fan3 "Front Fan (middle)"
+label fan4 "Front Fan (bottom)"
+label fan6 "Rear Chassis Fan"
+    set fan6_min 200
+label fan7 "CPU Fan (front)"
 
 # https://github.com/lm-sensors/lm-sensors/issues/441
 
@@ -22,3 +66,7 @@ chip "nct6798-*"
 #    ignore temp4   # seems valid on the B550-plus
     ignore temp5
     ignore temp6
+
+# Other possibilities are:
+# https://github.com/Fred78290/nct6687d
+# Lots of discussion here: https://bugzilla.kernel.org/show_bug.cgi?id=204807
