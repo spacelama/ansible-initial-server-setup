@@ -659,6 +659,9 @@
     dest: "{{ item.dest | default(('/' ~ item) | dirname) }}"
     src: "{{ item.source | default(item) }}"
     state: "{{ item.state | default(omit) }}"
+    mode: "{{ item.mode | default(omit) }}"
+    owner: "{{ item.owner | default('root') }}"
+    group: "{{ item.group | default('root') }}"
   loop: "{{ custom_files | default([]) }}"
   become: true
 

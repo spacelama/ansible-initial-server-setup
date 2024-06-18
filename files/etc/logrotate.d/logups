@@ -1,0 +1,10 @@
+/var/log/logups.log {
+	missingok
+	rotate 10
+	daily
+	compress
+	postrotate
+		systemctl reload logups
+	endscript
+}
+
