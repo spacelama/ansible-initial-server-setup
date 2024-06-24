@@ -299,6 +299,10 @@
 #    - { name: /etc/default/autofs, source: etc/default/autofs, notify: "restart autofs" }   MOUNT_NFS_DEFAULT_PROTOCOL seems to be ignored, and not causing me problems anyway, these days
     - { name: /etc/idmapd.conf, source: etc/idmapd.conf.j2 }
 
+    - { name: /etc/updatedb.conf, source: etc/updatedb.conf.dirac,   when: "{{ inventory_hostname == 'dirac' }}" }
+    - { name: /etc/updatedb.conf, source: etc/updatedb.conf.fs,      when: "{{ inventory_hostname == 'fs' }}" }
+    - { name: /etc/updatedb.conf, source: etc/updatedb.conf.default, when: "{{ (inventory_hostname != 'dirac') and (inventory_hostname != 'fs') }}" }
+
     - { source: etc/apache2/mods-available/userdir.conf.int, name: /etc/apache2/mods-available/userdir.conf, notify: "restart apache2", when: '{{ ( host_is_user_web_server | default(false) ) and ( deb_release | default("bullseye") == "bookworm" ) }}' }
     - { source: tree.webserver/etc/apache2/, name: /etc/apache2/,           notify: "restart apache2", when: '{{ host_is_ext_web_server | default(false) }}' }
 
