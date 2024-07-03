@@ -361,7 +361,7 @@ esac
 #weather &
 #wmcliphist -geometry +635+691 &
 #wmcliphist &
-#wmmoonclock -lat -37.833 -lon -145.033 &   #from http://www.calle.com/info.cgi?lat=-37.8333&long=145.0333&name=Hawthorn&cty=Australia&alt=380
+#wmmoonclock -lat -37.72 -lon -144.965 &   #from http://www.calle.com/info.cgi?lat=-37.72&long=144.965&name=Hawthorn&cty=Australia&alt=380
 #vumeter -v -x $(($HORSIZE - 50)) -y $(($VERTSIZE - 400)) &
 
 #xterm -geometry 200x200+0+0
