@@ -6,6 +6,7 @@
 192.168.1.252 asusrtax53u
 192.168.1.251 archerd7
 192.168.1.250 archerc7
+192.168.1.243 archerc72
 192.168.1.248 billion
 192.168.1.247 huawei
 192.168.1.245 ap1
@@ -13,8 +14,11 @@
 {#
   First pve entry is to ensure reverse DNS is correct (even though
   that IP is already defined in DHCP reservations, for the sake of
-  DHCP MAC mappings), and second entry is for the multiple records
-  in A record.
+  DHCP MAC mappings), and second entry is for the multiple records in
+  A record pretending to be a proxmox HA cluster address.  FIXME: need
+  to share SSL certs, or maybe have pve point to a HA LXC container
+  that forwards onto pve1,pve2,pve3.  See also:
+  https://github.com/lae/ansible-role-proxmox/blob/develop/tasks/ssl_config.yml
 #}
 192.168.1.6 pve2 pve
 192.168.1.7 pve3 pve

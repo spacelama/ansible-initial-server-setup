@@ -35,7 +35,7 @@
   loop_control:
     loop_var: uci_command
   with_items:
-    - "uci add network device ; uci set network.@device[-1].type='bridge' ; uci set network.@device[-1].name='br-{{ interface.key }}' ; uci add_list network.@device[-1].ports='eth0.{{ interface.value }}0'"
+    - "uci add network device ; uci set network.@device[-1].type='bridge' ; uci set network.@device[-1].name='br-{{ interface.key }}' ; uci add_list network.@device[-1].ports='{{ switch_interface | default('eth0') }}.{{ interface.value }}0'"
   when: openwrt_dsa_switch_config is not defined
 
 # just adding the interface manually without creating a vlan first yields this in luci:

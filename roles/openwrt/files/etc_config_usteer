@@ -169,3 +169,6 @@ config usteer
 	list ssid_list 'AsioStudy5'
 	list ssid_list 'AsioYard2.4'
 	list ssid_list 'AsioYard5'
+	list ssid_list 'AsioPatio2.4'
+	list ssid_list 'AsioPatio5'
+	list ssid_list 'Asio'

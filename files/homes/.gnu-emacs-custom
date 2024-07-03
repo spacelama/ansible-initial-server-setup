@@ -192,7 +192,7 @@
      ("^fs4-2$" "^root$" "/ssh:admin@fs4-2:")
      ("^fs5-1$" "^root$" "/ssh:admin@fs5-1:")
      ("^fs5-2$" "^root$" "/ssh:admin@fs5-2:")
-     ("^(archerc7|archerd7|asusrtax53u|b1300)$" ".*" "/scp:root@:%h:")
+     ("^(archerc7|archerc72|archerd7|asusrtax53u|b1300)$" ".*" "/scp:root@:%h:")
      ("^.*$" "^root$" "/ssh:%h:")
      ((regexp-quote
        (system-name))

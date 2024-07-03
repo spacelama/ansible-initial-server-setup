@@ -17,6 +17,7 @@
         /root/bin/log-daily-config
     fi
 {% if inventory_hostname == 'ap1' %}
+    echo "$( date ): starting wifi"
     wifi up
 {% endif %}
 ) > /tmp/boot.rc.local.log 2>&1 &
