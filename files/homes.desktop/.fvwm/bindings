@@ -161,6 +161,11 @@ Key F7                A       M      Exec exec currenttrackname
 #Key F7                A       MS     Exec exec ssh bohr currenttrackname
 #Key F7                A       CMS    Exec exec ssh scuzzie currenttrackname
 
+Key F11               A       M      Exec exec snip-movie-start
+Key F11               A       MS     Exec exec snip-movie-end
+Key F11               A       CMS    Exec exec snip-movie-end --end
+Key F11               A       CS     Exec exec snip-movie-end --redo
+
 Key XF86Suspend	      A       A      Exec exec suspendtoram
 Key XF86Suspend	      A       C      Exec exec suspendtodisk
 Key XF86Suspend	      A       CM     Exec exec wakeup.sh --override --period 07:50
