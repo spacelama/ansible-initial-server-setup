@@ -11,6 +11,8 @@
   ansible_was_run_by: "{{ lookup('env','USER') }@{{ lookup('env','HOSTNAME') }}"
   munin_async_ssh_key: "ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABgQC2gmBTbXpS3mgxzkOM5rpVWRxokfuCYdfF4oU41tyQFeP/lpf10KeUAj/7OT3FD3c0FQp0dKdfKS9sKZZMCAmLR4PHpNgJyF0zAaSUFXNgv3APvnfUaf4RX7hj8qh+KYv4wimmE9ayYMsIxA1ltlMkOa2IGOj4D5DiGAusg9MwtIzHJlJACCVwR7AFAr3ZWeYbP+Fdst5csYrA5Sv/QqFpIo56vBhiDqlpbMu7R+5NEVNxb0aOs5bQSe+AwrPBWWbd91Pt/JaYD23DUjyMPLR7IPdtlnjrYrRU6X9f7uJbCjZjtfYo2XDbZIHSJuUYxVFNTFe1392IfKu/Zq4Y+uuqm+mtzfTLSfURF1QXIfmddcgv91dOmSE4oPrCDeM6gRx+33+9Sg07JOXFtHR2Onsyl4Ml/BrVm9bWlSiNNriEBt+dAHBzBfdAJQipGuU2EuMCyxagLxHSSuPCf7f8BEgyEYbX4KBomg5L6klXS5/bN4/Y53DdadaH5uDSvMFDwaU= munin@iot"
   dkms_vendor_reset_git_commitid: 084881c
+  deb_release: "{{ debian_codename | default('bookworm') }}"
+  ceph_repo: reef bookworm no-subscription     # was quincy bullseye main
   smtp_server: smtp.rather.puzzling.org
   smtp_root_alias: tconnors
   smtp_aliases: |2
@@ -303,7 +305,7 @@
     - { name: /etc/updatedb.conf, source: etc/updatedb.conf.fs,      when: "{{ inventory_hostname == 'fs' }}" }
     - { name: /etc/updatedb.conf, source: etc/updatedb.conf.default, when: "{{ (inventory_hostname != 'dirac') and (inventory_hostname != 'fs') }}" }
 
-    - { source: etc/apache2/mods-available/userdir.conf.int, name: /etc/apache2/mods-available/userdir.conf, notify: "restart apache2", when: '{{ ( host_is_user_web_server | default(false) ) and ( deb_release | default("bullseye") == "bookworm" ) }}' }
+    - { source: etc/apache2/mods-available/userdir.conf.int, name: /etc/apache2/mods-available/userdir.conf, notify: "restart apache2", when: '{{ ( host_is_user_web_server | default(false) ) and ( deb_release == "bookworm" ) }}' }
     - { source: tree.webserver/etc/apache2/, name: /etc/apache2/,           notify: "restart apache2", when: '{{ host_is_ext_web_server | default(false) }}' }
 
     - { name: /etc/rkhunter.conf,  source: etc/rkhunter.conf.j2 }

@@ -81,7 +81,7 @@
   become: true
   #  when: archived_package_check_deb.rc == 0
   loop: "{{ srvadmin_depends_bookworm }}"
-  when: deb_release | default('bullseye') == 'bookworm'
+  when: deb_release == 'bookworm'
 
 - name: Install archived_package
   apt: deb="/home/{{ ansible_env.USER }}/Downloads/{{ item }}"

@@ -63,7 +63,7 @@ set nowrap
 ## Do regular expression searches by default
 # set regexp
 
-{% if deb_release | default('bullseye') == 'bullseye' %}
+{% if deb_release == 'bullseye' %}
 ## Use smooth scrolling as the default
 set smooth
 
@@ -72,7 +72,7 @@ set smooth
 # set speller aspell
 
 ## Allow nano to be suspended with ^Z
-{% if deb_release | default('bullseye') == 'bullseye' %}
+{% if deb_release == 'bullseye' %}
 set suspend
 {% else %}
 bind ^Z suspend main

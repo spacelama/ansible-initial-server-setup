@@ -37,7 +37,7 @@
       - 'dkms'
       - 'ifupdown2'
       - >
-         {{ ( deb_release | default('bullseye') == 'bullseye' ) |
+         {{ ( deb_release == 'bullseye' ) |
          ternary ( 'pve-headers', 'proxmox-default-headers' )}}
     autoremove: no
     state: present
@@ -60,7 +60,7 @@
 #     state: absent
 #     purge: true
 #   become: true
-#   when: deb_release | default('bullseye') == 'bookworm'
+#   when: deb_release == 'bookworm'
 
   # zfs root systems in pve8 might need systemd-boot package:
   # https://pve.proxmox.com/wiki/Roadmap#8.0-known-issues
@@ -71,7 +71,7 @@
     state: present
     install_recommends: no
   become: true
-  when: deb_release | default('bullseye') == 'bookworm'
+  when: deb_release == 'bookworm'
 
 - name: Ensures ~ansible/Downloads/vendor-reset-{{ dkms_vendor_reset_git_commitid }} dir exists
   file:

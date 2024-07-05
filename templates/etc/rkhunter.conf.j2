@@ -610,7 +610,7 @@ DISABLE_TESTS=suspscan hidden_procs deleted_files packet_cap_apps apps
 #
 # The default value is the null string.
 #
-{% if ( deb_release | default('bullseye') == 'bookworm' ) %}
+{% if ( deb_release == 'bookworm' ) %}
 SCRIPTWHITELIST=/usr/bin/egrep
 SCRIPTWHITELIST=/usr/bin/fgrep
 {% else %}
@@ -621,7 +621,7 @@ SCRIPTWHITELIST=/usr/bin/which
 SCRIPTWHITELIST=/usr/bin/ldd
 #SCRIPTWHITELIST=/usr/bin/lwp-request
 SCRIPTWHITELIST=/usr/bin/lwp-request
-{% if ( deb_release | default('bullseye') == 'bookworm' ) %}
+{% if ( deb_release == 'bookworm' ) %}
 SCRIPTWHITELIST=/usr/bin/which.debianutils
 {% endif %}
 SCRIPTWHITELIST=/usr/sbin/adduser

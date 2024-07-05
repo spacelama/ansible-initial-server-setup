@@ -232,7 +232,7 @@
     become: true
     notify: restart systemd-resolved
 
-  when: (deb_release | default('bullseye') != 'buster') and
+  when: (deb_release != 'buster') and
         (host_is_using_systemd_resolver | default(false))
 
 # dnsmasq as a caching name server per https://wiki.debian.org/dnsmasq#Local_Caching_using_NetworkManager
@@ -288,7 +288,7 @@
     become: true
     notify: restart network-manager
 
-  when: (deb_release | default('bullseye') != 'buster') and
+  when: (deb_release != 'buster') and
         (not (host_is_pve_server | default(false))) and
         (not (host_is_not_using_dnsmasq_cache | default(false)))
 
@@ -622,7 +622,7 @@
   lineinfile:
     dest: "/etc/default/debsecan"
     regexp: '^(SUITE=.*)'
-    line: 'SUITE={{deb_release | default("bullseye")}}'
+    line: 'SUITE={{ deb_release }}'
   become: true
   when: "'debsecan' in ansible_facts.packages"
 
@@ -710,7 +710,7 @@
     state: present
     install_recommends: no
   become: true
-  when: (deb_release | default('bullseye') == 'bookworm') and ((host_is_desktop | default(false)) or (host_is_pi | default(false)))
+  when: (deb_release == 'bookworm') and ((host_is_desktop | default(false)) or (host_is_pi | default(false)))
 
 - name: "Ensure custom modules in /etc/modules-load.d/ansible-custom.conf"
   copy:

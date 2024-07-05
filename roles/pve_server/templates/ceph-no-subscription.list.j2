@@ -1,1 +1,1 @@
-deb http://download.proxmox.com/debian/ceph-{{ ( deb_release | default('bullseye') == 'bullseye' ) | ternary('quincy bullseye main', 'reef bookworm no-subscription') }}
+deb http://download.proxmox.com/debian/ceph-{{ ceph_repo }}

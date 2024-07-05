@@ -1,7 +1,7 @@
 ---
 - name: Enable default set of repositories
   copy:
-    src: apt/sources.list.{{deb_release | default("bullseye")}}
+    src: apt/sources.list.{{ deb_release }}
     dest: /etc/apt/sources.list
     owner: root
     group: root
@@ -11,7 +11,7 @@
 
 - name: Enable apt backports
   copy:
-    src: apt/sources.list.d.backports.list.{{deb_release | default("bullseye")}}
+    src: apt/sources.list.d.backports.list.{{ deb_release }}
     dest: /etc/apt/sources.list.d/backports.list
     owner: root
     group: root
@@ -21,7 +21,7 @@
 
 - name: Enable apt stable pinning
   copy:
-    src: apt/preferences.d.pin-0stabletesting.{{deb_release | default("bullseye")}}
+    src: apt/preferences.d.pin-0stabletesting.{{ deb_release }}
     dest: /etc/apt/preferences.d/pin-0stabletesting
     owner: root
     group: root
