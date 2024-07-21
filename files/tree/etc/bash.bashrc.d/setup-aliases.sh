@@ -107,6 +107,12 @@ function setup_aliases() {
     function uid () {
         id | sed 's/^[^=]*=\([0-9]*\)(\([^ ]*\)).*/\1/' 
     }
+
+    function log-to-file() {
+        local out_file="$1"
+        exec > >(tee -a "$out_file" ) 2>&1
+    }
+
 }
 
 # some functions just always need to be defined
