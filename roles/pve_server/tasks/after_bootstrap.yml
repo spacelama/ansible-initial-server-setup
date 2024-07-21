@@ -1,4 +1,11 @@
 ---
+- name: ensure all pve hosts know about each other even when nameservers all down
+  blockinfile:
+    path: /etc/hosts
+    marker: "# {mark} ANSIBLE MANAGED BLOCK"
+    block: "{{ lookup('file', 'etc/hosts-pve') }}"
+  become: true
+
 - name: Purge some incompatible packages
   apt:
     name: ['ifupdown']   # some stale config files left from automatic
