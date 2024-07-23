@@ -15,13 +15,11 @@ pve-backup                      linux,intel,pve,not247
 pi                              linux,arm
 homeassistant                   linux,intel,hassio
 zm                              linux,intel,lxc,turnkey
-media                           linux,intel,lxc,turnkey,not247,notyetproduction
 zm12                            linux,intel,lxc,not247,notyetproduction
-jellyfin                        linux,intel,lxc,not247,notyetproduction
+jellyfin                        linux,intel,lxc
 syslog                          linux,intel,lxc
 smtp                            linux,intel,lxc
 webserver                       linux,intel,lxc
-#mda                             linux,intel,lxc,not247,notyetproduction
 
 #idrac                           drac
 idrac-r730xd                    drac
@@ -87,7 +85,7 @@ archerd7                        network,openwrt,wifi
 archerc7                        network,openwrt,wifi
 archerc72                       network,openwrt,wifi
 asusrtax53u                     network,openwrt,wifi
-ap1                             network,openwrt,wifi,depends_on_pve3
+#ap1                             network,openwrt,wifi,depends_on_pve3
 ap2                             network,openwrt,wifi,depends_on_pve2
 
 #b1300                           network,openwrt
