@@ -1,3 +1,1 @@
-ceph.client.fs.keyring
-ceph.client.webserver.keyring
-ceph.client.media.keyring
+ceph.*.keyring
