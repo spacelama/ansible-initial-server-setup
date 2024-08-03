@@ -1,6 +1,5 @@
 {% if inventory_hostname != 'fs' %}
 /home/tconnors/p -hard,noacl,nodev,nosuid,rw,strictatime,actimeo=600,async fs:/home/tconnors/p
-/home/tconnors/mp3 -hard,noacl,nodev,nosuid,rw,strictatime,async fs:/home/tconnors/mp3
 /home/tconnors/.mp3.low_qual -hard,noacl,nodev,nosuid,rw,strictatime,async fs:/home/tconnors/.mp3.low_qual
 /home/tconnors/background -hard,noacl,nodev,nosuid,rw,strictatime,async fs:/home/tconnors/background
 /home/tconnors/not_backed_up.tank -hard,noacl,nodev,nosuid,rw,strictatime,async fs:/home/tconnors/not_backed_up.tank
@@ -17,6 +16,7 @@
 {# commented out:
   # -o fsc comes from /usr/share/doc/cachefilesd/howto.txt.gz
 
+  # /home/tconnors/mp3 -hard,noacl,nodev,nosuid,rw,strictatime,async fs:/home/tconnors/mp3
   #/backuppc -hard,noacl,nodev,nosuid,rw,async fs:/backuppc
   #/home/tconnors/sysadmin -hard,noacl,nodev,nosuid,rw,strictatime,async fs:/home/tconnors/sysadmin
   #/var/spool/news -hard,noacl,nodev,nosuid,rw,strictatime,async fs:/var/spool/news
