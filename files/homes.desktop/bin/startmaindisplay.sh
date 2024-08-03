@@ -28,7 +28,7 @@ xauth generate $DISPLAY . trusted
 #  . ~/.bash_profile # try calculate it again - might have a race condition on some startups
 #fi
 
-xcompmgr &   # 20240127 needed for xterm scrollback buffer not to be
+picom &      # 20240127 needed for xterm scrollback buffer not to be
              # corrupted.  1014625: xterm: screen corruption of
              # scrollback buffer; similar to
              # https://bugs.freedesktop.org/show_bug.cgi?id=110214 but
