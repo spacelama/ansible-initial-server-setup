@@ -77,7 +77,7 @@
 
 - name: Remove (and purge) erroneous packages
   apt:
-    name: ['locales-all', 'tuned', 'tuned-utils', 'tuned-utils-systemtap', 'hddtemp', 'bootlogd', 'ntp', 'ntpdate', 'ntpsec', 'ntpsec-ntpdate', 'ntpsec-ntpdig']
+    name: ['locales-all', 'tuned', 'tuned-utils', 'tuned-utils-systemtap', 'hddtemp', 'bootlogd', 'ntp', 'ntpdate', 'ntpsec', 'ntpsec-ntpdate', 'ntpsec-ntpdig', 'netcat-traditional']
     state: absent
     purge: true
   become: true
@@ -320,7 +320,7 @@
 
 - name: Install essential packages (not container)
   apt:
-    name: [ 'git', 'cvs', 'htop', 'iotop', 'smem', 'ethtool', 'iperf3', 'aptitude', 'dlocate', 'vim', 'nicstat', 'lshw', 'parted', 'sdparm', 'chrony', 'ifstat', 'iftop', 'apt-listchanges', 'apt-show-versions', 'etckeeper', 'apt-listbugs', 'apt-listbugs', 'rlwrap', 'strace', 'make', 'keychain', 'libstring-shellquote-perl', 'dmidecode', 'expect', 'initscripts', 'direnv', 'rkhunter', 'dstat', 'bc', 'curl', 'wget' ] # expect for unbuffer, initscripts for bootlogs, pcp for `pcp dstat`, but that results in pmlogger cronjobs that spin up disks on fs, bc for checkntp
+    name: [ 'git', 'cvs', 'htop', 'iotop', 'smem', 'ethtool', 'iperf3', 'aptitude', 'dlocate', 'vim', 'nicstat', 'lshw', 'hwinfo', 'parted', 'sdparm', 'chrony', 'ifstat', 'iftop', 'apt-listchanges', 'apt-show-versions', 'etckeeper', 'apt-listbugs', 'apt-listbugs', 'rlwrap', 'strace', 'make', 'keychain', 'libstring-shellquote-perl', 'dmidecode', 'expect', 'initscripts', 'direnv', 'rkhunter', 'dstat', 'bc', 'curl', 'wget', 'netcat-openbsd' ] # expect for unbuffer, initscripts for bootlogs, pcp for `pcp dstat`, but that results in pmlogger cronjobs that spin up disks on fs, bc for checkntp
     # atop
     autoremove: no
     state: present
