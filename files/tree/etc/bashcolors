@@ -19,8 +19,8 @@ root smtp dark red bright magenta
 tconnors webserver bright yellow bright grey
 root webserver dark red bright grey
 
-tconnors coyote8 bright yellow bright blue
-tconnors DBJXCY3 bright yellow dark magenta
+#tconnors coyote8 bright yellow bright blue
+tconnors work bright yellow dark magenta
 
 tconnors * bright yellow dark red
 root * dark red dark red
