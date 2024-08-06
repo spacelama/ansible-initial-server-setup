@@ -79,6 +79,16 @@
   include_tasks: add_ssh_authorized_keys.yml
   loop: "{{ lookup('dict', my_users) }}"
 
+- name: revoke stale ssh keys against root as well
+  authorized_key:
+    user: "root"
+    key: "{{ key }}"
+    state: absent
+  loop_control:
+    loop_var: key
+  with_items: "{{ revoke_public_keys | default ([]) }}"
+  become: true
+
 - name: copy sudoers
   copy:
     src: "user/sudoers.d.{{ item.key }}"

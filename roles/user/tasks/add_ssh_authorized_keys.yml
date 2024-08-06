@@ -1,15 +1,27 @@
 ---
- # FIXME: remove deprecated keys
 # could also have multiple keys with exclusive: https://stackoverflow.com/questions/38879266/is-it-possible-to-use-ansible-authorized-key-exclusive-with-multiple-keys
 - name: Install authorized_keys for {{ item }}
   authorized_key:
     user: "{{ item.key }}"
     key: "{{ key }}"
-    state: "{{ item.value.state }}"
+    state: present
     # if user doesn't have a home directory, just dump the key into /tmp and otherwise let the system ignore it
     path: "{{ getent_passwd[item.key][4] is defined | ternary(omit, '/tmp/' ~ item.key ~ '_ssh_authorized_keys') }}"
     #    comment: "{{ item.value.comment }}"
   loop_control:
     loop_var: key
   with_items: "{{ item.value.sshkeys }}"
+  become: true
+
+- name: Revoke authorized_keys for {{ item }}
+  authorized_key:
+    user: "{{ item.key }}"
+    key: "{{ key }}"
+    state: absent
+    # if user doesn't have a home directory, just dump the key into /tmp and otherwise let the system ignore it
+    path: "{{ getent_passwd[item.key][4] is defined | ternary(omit, '/tmp/' ~ item.key ~ '_ssh_authorized_keys') }}"
+    #    comment: "{{ item.value.comment }}"
+  loop_control:
+    loop_var: key
+  with_items: "{{ item.value.revoke_public_keys | default ([]) }}"
   become: true
