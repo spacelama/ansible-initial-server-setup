@@ -70,6 +70,7 @@
         line: "# {{ item }}"
       notify: restart nut monitor
       with_items:
+        - "DEADTIME 15"
         - "POLLFREQ 5"
         - "POLLFREQALERT 5"
 
@@ -83,6 +84,8 @@
 
           MONITOR {{ nut_upsmon_conf[inventory_hostname].name }}@{{ nut_upsmon_conf[inventory_hostname].host | default('localhost') }} 1 nut {{ nut_password }} master
 
+          # I don't ever want DEADTIME triggering.  pve1 in particular always seem to consider the UPS is on battery power because its a doouble conversion unit.  Assuming a dead UPS needs the host to power down *immediately* is moronic.  So make it 3 years
+          DEADTIME 94608000
           POLLFREQ 1
           POLLFREQALERT 1
 
