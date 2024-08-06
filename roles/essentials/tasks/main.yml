@@ -371,6 +371,13 @@
   become: true
   when: not (host_is_intel | default(false)) and not (host_is_amd | default(false))
 
+- name: install or remove unattended-upgrades
+  apt:
+    name: ['unattended-upgrades']
+    autoremove: no
+    state: "{{ unattended_upgrades | default('true') | ternary('present', 'absent') }}"
+  become: true
+
   # FIXME: actually want to disable periodic updates, but need to find out how it's done on vanilla debian first.  Expecting APT::Periodic::Unattended-Upgrade in /etc/apt/apt.conf.d/ somewhere
 #- name: Enable unattended upgrades
 #  copy:
