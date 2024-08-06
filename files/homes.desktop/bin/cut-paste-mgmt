@@ -20,5 +20,5 @@ killall autocutsel
 
 #autocutsel -debug -selection CLIPBOARD &
 #autocutsel -debug -selection PRIMARY &
-autocutsel -selection CLIPBOARD &
-autocutsel -selection PRIMARY &
+## 20240801 disable this behaviour now that sharing with windows isn't in our workflow anymore: autocutsel -selection CLIPBOARD &
+## 20240801 disable this behaviour now that sharing with windows isn't in our workflow anymore: autocutsel -selection PRIMARY &
