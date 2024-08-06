@@ -37,15 +37,16 @@
       # now automated by the read-mail: 00 06 * * * mv_deleted_inbox_trash
 
   ceph_client_mounts:
-    - { mount: "/home/tconnors/photos",        name: "fs",        mds_namespace: "cephfs-hdd",  options: "nodev,nosuid,rw,strictatime,async", mons: "192.168.1.6,192.168.1.7,192.168.1.8", remote_path: "/mounts/fs/home.tconnors.photos" }
-    - { mount: "/home/tconnors/thesis",        name: "fs",        mds_namespace: "cephfs-hdd",  options: "nodev,nosuid,rw,strictatime,async", mons: "192.168.1.6,192.168.1.7,192.168.1.8", remote_path: "/mounts/fs/home.tconnors.thesis" }
-    - { mount: "/home/tconnors/not_backed_up", name: "fs",        mds_namespace: "cephfs-hdd",  options: "nodev,nosuid,rw,strictatime,async", mons: "192.168.1.6,192.168.1.7,192.168.1.8", remote_path: "/mounts/fs/home.tconnors.not_backed_up" }
-#    - { mount: "/var/cache/apt/archives.nfs",  name: "fs",        mds_namespace: "cephfs-hdd",  options: "nodev,nosuid,rw,strictatime,async", mons: "192.168.1.6,192.168.1.7,192.168.1.8", remote_path: "/mounts/fs/var.cache.apt.archives" }
-    - { mount: "/home/tconnors/public_html",   name: "webserver", mds_namespace: "cephfs-slow", options: "nodev,nosuid,rw,strictatime,async", mons: "192.168.1.6,192.168.1.7,192.168.1.8", remote_path: "/mounts/webserver/home.tconnors/public_html" }
-    - { mount: "/home/tconnors/movies",        name: "media",     mds_namespace: "cephfs-hdd",  options: "nodev,nosuid,rw,strictatime,async", mons: "192.168.1.6,192.168.1.7,192.168.1.8", remote_path: "/mounts/media/movies" }
-    - { mount: "/home/tconnors/qBT_dir",       name: "media",     mds_namespace: "cephfs-hdd",  options: "nodev,nosuid,rw,strictatime,async", mons: "192.168.1.6,192.168.1.7,192.168.1.8", remote_path: "/mounts/media/qBT_dir" }
-    - { mount: "/home/tconnors/mp3",           name: "media",     mds_namespace: "cephfs-slow", options: "nodev,nosuid,rw,strictatime,async", mons: "192.168.1.6,192.168.1.7,192.168.1.8", remote_path: "/mounts/media/mp3" }
-    - { mount: "/home/angela/media",           name: "media",     mds_namespace: "cephfs-hdd",  options: "nodev,nosuid,rw,strictatime,async", mons: "192.168.1.6,192.168.1.7,192.168.1.8", remote_path: "/mounts/media/angela" }
+    - { mount: "/home/tconnors/photos",        name: "cephfs-hdd.fs",         mds_namespace: "cephfs-hdd",  options: "nodev,nosuid,rw,strictatime,async", mons: "192.168.1.6,192.168.1.7,192.168.1.8", remote_path: "/mounts/fs/home.tconnors.photos" }
+    - { mount: "/home/tconnors/thesis",        name: "cephfs-hdd.fs",         mds_namespace: "cephfs-hdd",  options: "nodev,nosuid,rw,strictatime,async", mons: "192.168.1.6,192.168.1.7,192.168.1.8", remote_path: "/mounts/fs/home.tconnors.thesis" }
+    - { mount: "/home/tconnors/not_backed_up", name: "cephfs-hdd.fs",         mds_namespace: "cephfs-hdd",  options: "nodev,nosuid,rw,strictatime,async", mons: "192.168.1.6,192.168.1.7,192.168.1.8", remote_path: "/mounts/fs/home.tconnors.not_backed_up" }
+    # want the following to be accessible everywhere, not just ceph clients, so for now needs to remain NFS exported (maybe fs could re-export it?)
+    #    - { mount: "/var/cache/apt/archives.nfs",  name: "cephfs-hdd.fs",        mds_namespace: "cephfs-hdd",  options: "nodev,nosuid,rw,strictatime,async", mons: "192.168.1.6,192.168.1.7,192.168.1.8", remote_path: "/mounts/fs/var.cache.apt.archives" }
+    - { mount: "/home/tconnors/public_html",   name: "cephfs-slow.webserver", mds_namespace: "cephfs-slow", options: "nodev,nosuid,rw,strictatime,async", mons: "192.168.1.6,192.168.1.7,192.168.1.8", remote_path: "/mounts/webserver/home.tconnors/public_html" }
+    - { mount: "/home/tconnors/movies",        name: "cephfs-hdd.media",      mds_namespace: "cephfs-hdd",  options: "nodev,nosuid,rw,strictatime,async", mons: "192.168.1.6,192.168.1.7,192.168.1.8", remote_path: "/mounts/media/movies" }
+    - { mount: "/home/tconnors/qBT_dir",       name: "cephfs-hdd.media",      mds_namespace: "cephfs-hdd",  options: "nodev,nosuid,rw,strictatime,async", mons: "192.168.1.6,192.168.1.7,192.168.1.8", remote_path: "/mounts/media/qBT_dir" }
+    - { mount: "/home/tconnors/mp3",           name: "cephfs-slow.media",     mds_namespace: "cephfs-slow", options: "nodev,nosuid,rw,strictatime,async", mons: "192.168.1.6,192.168.1.7,192.168.1.8", remote_path: "/mounts/media/mp3" }
+    - { mount: "/home/angela/media",           name: "cephfs-hdd.media",      mds_namespace: "cephfs-hdd",  options: "nodev,nosuid,rw,strictatime,async", mons: "192.168.1.6,192.168.1.7,192.168.1.8", remote_path: "/mounts/media/angela" }
 
   pve_users:
     - "{{ lookup('file', 'main.pve_users.passwd') }}"
@@ -290,9 +291,10 @@
     - { name: /usr/local/bin/pve-forcerestart-lxc-if-running, source: usr_local_bin/pve-forcerestart-lxc-if-running, mode: "0755", when: "{{ host_is_pve_server | default(false) }}" }
 
     # FIXME: suspect I need to set user to something other than fs and webserver etc - there might be fs on fastssd and fs on hdd, or both fs and webserver on fastssd, and we need to be able to access them both
-    - { source: etc/ceph/ceph.client.fs.keyring,        name: /etc/ceph/, mode: "0600", when: '{{ mount_ceph_clients is defined }}' }
-    - { source: etc/ceph/ceph.client.webserver.keyring, name: /etc/ceph/, mode: "0600", when: '{{ mount_ceph_clients is defined }}' }
-    - { source: etc/ceph/ceph.client.media.keyring,     name: /etc/ceph/, mode: "0600", when: '{{ mount_ceph_clients is defined }}' }
+    - { source: etc/ceph/ceph.client.cephfs-hdd.fs.keyring,         name: /etc/ceph/, mode: "0600", when: '{{ mount_ceph_clients is defined }}' }
+    - { source: etc/ceph/ceph.client.cephfs-slow.webserver.keyring, name: /etc/ceph/, mode: "0600", when: '{{ mount_ceph_clients is defined }}' }
+    - { source: etc/ceph/ceph.client.cephfs-hdd.media.keyring,      name: /etc/ceph/, mode: "0600", when: '{{ mount_ceph_clients is defined }}' }
+    - { source: etc/ceph/ceph.client.cephfs-slow.media.keyring,     name: /etc/ceph/, mode: "0600", when: '{{ mount_ceph_clients is defined }}' }
     - { source: etc/ceph/ceph.conf,                     name: /etc/ceph/,               when: '{{ mount_ceph_clients is defined }}' }
 
     - { name: /etc/auto.master, source: etc/auto.master, notify: "restart autofs", when_pkg_installed: "autofs" }
