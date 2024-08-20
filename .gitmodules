@@ -10,3 +10,18 @@
 [submodule "files/homes.desktop/elisp/undo-tree"]
 	path = files/homes.desktop/elisp/undo-tree
 	url = https://gitlab.com/tsc25/undo-tree.git
+[submodule "repos/arcstat"]
+	path = repos/arcstat
+	url = git@github.com:spacelama/arcstat
+[submodule "repos/ceph-nagios-plugins"]
+	path = repos/ceph-nagios-plugins
+	url = https://github.com/valerytschopp/ceph-nagios-plugins
+[submodule "repos/munin"]
+	path = repos/munin
+	url = git@github.com:spacelama/munin.git
+[submodule "repos/munin-contrib"]
+	path = repos/munin-contrib
+	url = git@github.com:spacelama/munin-contrib.git
+[submodule "repos/munin-smart-nvme"]
+	path = repos/munin-smart-nvme
+	url = https://github.com/aranemac/munin-smart-nvme
