@@ -24,4 +24,4 @@
 	url = git@github.com:spacelama/munin-contrib.git
 [submodule "repos/munin-smart-nvme"]
 	path = repos/munin-smart-nvme
-	url = https://github.com/aranemac/munin-smart-nvme
+	url = https://github.com/spacelama/munin-smart-nvme
