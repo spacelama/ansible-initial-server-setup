@@ -18,16 +18,18 @@
   # iot itself caching on behalf of everyone, we'll have to delegate
   # to it
 - name: restart munin-node
-  service:
+  systemd:
     name: munin-node
     state: restarted
+    daemon_reload: yes
   when: "'munin-node' in ansible_facts.packages | default([])"
   notify: restart munin-async
 
 - name: restart munin-async
-  service:
+  systemd:
     name: munin-async
     state: restarted
+    daemon_reload: yes
   when: "'munin-async' in ansible_facts.packages | default([])"
 
 - name: restart nut server
