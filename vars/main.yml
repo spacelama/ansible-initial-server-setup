@@ -175,7 +175,7 @@
     tconnors:
       name: "Tim Connors"
       group: 'tconnors'
-      groups: 'tconnors,plugdev'
+      groups: "tconnors,plugdev{{ ( 'pipewire' in ansible_facts.packages ) | ternary(',pipewire', '') }}"
       uid: 738
       password: "{{ lookup('file', 'main.tconnors.passwd') }}"
       sshkeys:

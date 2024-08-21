@@ -18,6 +18,11 @@
     install_recommends: no
   become: true
 
+# debian bug #917931 wants either ibus removed (replaced with /home/tconnors/sysadmin/install/apt-source/ibus_1.5.23-1_all.deb ) or ibus-gtk3 installed and tested on chrome perhaps with GTK_IM_MODULE=ibus: https://github.com/ibus/ibus/issues/2073
+# We remove ibus altogether , since it causes
+# (recoverable) emacs keyboard lockups occasionally too:
+# https://emacs.stackexchange.com/questions/52225/emacs-not-responding-to-keyboard-input
+# ibus-daemon --xim -d -r
 - name: Remove wayland, gnome etc
   apt:
     name: ['desktop-base', 'gnome', 'xwayland', 'hunspell-en-us', 'nautilus', 'evolution', 'evince', 'gnome-shell', 'gnome-software', 'gnome-terminal', 'gnome-backgrounds', 'gnome-online-miners', 'mutter', 'gnome-settings-daemon-common', 'gnome-keyring', 'gedit', 'gnome-themes-extra', 'gnome-accessibility-themes', 'ibus', 'ibus-gtk3', 'ibus-gtk', 'im-config', 'pinentry-gnome3', 'vim-gtk', 'vim-gtk3']
@@ -26,15 +31,10 @@
     purge: yes
   become: true
 
-#FIXME: debian bug #917931 wants either ibus removed (replaced with /home/tconnors/sysadmin/install/apt-source/ibus_1.5.23-1_all.deb ) or ibus-gtk3 installed and tested on chrome perhaps with GTK_IM_MODULE=ibus: https://github.com/ibus/ibus/issues/2073
-
-# Very tempted to remove ibus all together, since it causes
-# (recoverable) emacs keyboard lockups occasionally too:
-# https://emacs.stackexchange.com/questions/52225/emacs-not-responding-to-keyboard-input
-# ibus-daemon --xim -d -r
 - name: install preferred backported/non-backported packages
   apt:
-    name: ['highlight']
+    name: ['highlight', 'pipewire', 'pipewire-audio', 'libspa-0.2-bluetooth'] # libspa-0.2-bluetooth for pipewire bluetooth support
+    # FIXME: emacs and/or emacs-gtk
     state: present
     default_release: "{{ host_has_backports | default(false) | ternary( deb_release ~ '-backports', omit ) }}"
   become: true

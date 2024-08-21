@@ -77,7 +77,7 @@
 
 - name: Remove (and purge) erroneous packages
   apt:
-    name: ['locales-all', 'tuned', 'tuned-utils', 'tuned-utils-systemtap', 'hddtemp', 'bootlogd', 'ntp', 'ntpdate', 'ntpsec', 'ntpsec-ntpdate', 'ntpsec-ntpdig', 'netcat-traditional']
+    name: ['locales-all', 'tuned', 'tuned-utils', 'tuned-utils-systemtap', 'hddtemp', 'bootlogd', 'ntp', 'ntpdate', 'ntpsec', 'ntpsec-ntpdate', 'ntpsec-ntpdig', 'netcat-traditional', 'pulseaudio', 'pulseaudio-equalizer', 'pulseaudio-module-bluetooth', 'pulseaudio-module-gsettings']
     state: absent
     purge: true
   become: true
