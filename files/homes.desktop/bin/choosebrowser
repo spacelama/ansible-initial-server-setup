@@ -7,9 +7,18 @@
 # $Header: /home/tconnors/cvsroot/bin/choosebrowser,v 1.21 2022/12/30 13:16:48 tconnors Exp $
 # $RCSfile: choosebrowser,v $
 
-# This program finds the best browser available
+# This program finds the best browser available for a given provided
+# URL or current desktop situation
 
 FLAGS=
+
+# First work out whether the user has deliberatly not yet started
+# firefox, but is already running chrome, and use it instead
+if ! pidof firefox-esr > /dev/null && pidof chromium > /dev/null ; then
+    BROWSER_OVERRIDE=chromium
+fi
+
+# Work out whether the site given requires a particular browser
 #if echo "$@" | grep -q ".pdf$" ; then
 #    BROWSER_OVERRIDE=firefox
 #el
@@ -20,7 +29,8 @@ if echo "$@" | grep -q "mercuryaero.sharepoint.com/" ; then
     BROWSER_OVERRIDE=chromium
 fi
 
-
+# If BROWSER has already been set, but we are running choosebrowser as
+# part of another script, run that browser preferentially
 if [ "$BROWSER" != choosebrowser ] ; then
     BROWSER_OVERRIDE="$BROWSER $BROWSER_OVERRIDE"
 fi
