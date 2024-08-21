@@ -38,7 +38,11 @@
     owner: "{{ dir_file_or_template.user | default('root') }}"
     group: "{{ dir_file_or_template.group | default('root') }}"
     src: "{{ file_recurse.src }}"
+    # FIXME: don't think local_follow will do anything since
+    # 5347842551a8d86b8576c404795782543c89bf26, since we're finding
+    # all symlinks in a separate loop to this one
     local_follow: "{{ dir_file_or_template.local_follow | default(omit) }}"
+    state: "{{ dir_file_or_template.state | default(omit) }}"
     # AND existing mode in source tree with 0777 to make sure no
     # setuid or setgid bits are set in the filesystem
     mode: "{{ dir_file_or_template.mode | default(file_recurse.mode | bitwise_and_oct('0777')) }}"

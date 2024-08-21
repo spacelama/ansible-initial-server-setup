@@ -29,7 +29,7 @@
 
 - name: populate list of files
   include_tasks: "install_dir_file_or_template.yml"
-  loop: "{{ install_files | default([]) }}"
+  loop: "{{ ( install_files | default([]) ) + ( custom_files | default([]) ) }}"
   loop_control:
     loop_var: dir_file_or_template
   when:

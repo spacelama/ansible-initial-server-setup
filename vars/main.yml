@@ -221,7 +221,7 @@
       # source, and the intervening directory is ensured to exist
       # .source defaults to 'files/homes/'{{name}}
       # .j2 source files (under the templates directory) are treated as templates
-      - name: ./
+      - name: ./    # install all of files/homes/ into such users ~/
       - name: ./
         source: homes.Linux-{{ arch | default ('x86_64') }}/
       - name: ./   # very me-specific window management stuff, only put on my desktops

@@ -78,3 +78,7 @@
     state: restarted
   become: true
   when: "'chrony' in ansible_facts.packages | default([])"
+
+- name: run sensors -s
+  command: 'sensors -s'
+  become: true

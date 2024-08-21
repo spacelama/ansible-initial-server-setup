@@ -4,7 +4,7 @@
 
 - name: "install file: {{ dir_file_or_template.name }} from {{ source }}"
   copy:
-    dest: "{{ dir_file_or_template.name }}"
+    dest: "{{ dir_file_or_template.name | default(('/' ~ dir_file_or_template) | dirname) }}"
     owner: "{{ dir_file_or_template.user | default('root') }}"
     group: "{{ dir_file_or_template.group | default('root') }}"
     src: "{{ source }}"

@@ -661,17 +661,6 @@
   become: true
   when: mount_ceph_clients is defined
 
-- name: install custom host specific files
-  copy:
-    dest: "{{ item.dest | default(('/' ~ item) | dirname) }}"
-    src: "{{ item.source | default(item) }}"
-    state: "{{ item.state | default(omit) }}"
-    mode: "{{ item.mode | default(omit) }}"
-    owner: "{{ item.owner | default('root') }}"
-    group: "{{ item.group | default('root') }}"
-  loop: "{{ custom_files | default([]) }}"
-  become: true
-
 - name: remove custom host specific files
   file:
     path: "{{ item }}"

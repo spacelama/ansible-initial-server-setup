@@ -10,7 +10,7 @@
   # regex_replace('/\\./', '/')", but it complicates things too much
   # later
   set_fact:
-    source: "{{ dir_file_or_template.source | default ( 'tree/' ~ dir_file_or_template.name ) }}"
+    source: "{{ dir_file_or_template.source | default ( ( 'tree/' ~ dir_file_or_template.name ) if dir_file_or_template.name is defined else dir_file_or_template ) }}"
 
 #- include_tasks: install_file_lines.yml
 #  when: dir_file_or_template.lines is defined

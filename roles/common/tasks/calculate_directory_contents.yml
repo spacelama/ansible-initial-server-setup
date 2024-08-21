@@ -11,7 +11,11 @@
 - name: "construct list of files being {{ 'deleted' if ( dir_file_or_template.delete | default(false) ) else 'installed' }} in {{ dir_file_or_template.name }} from {{ source }}"
   set_fact:
     # https://stackoverflow.com/questions/38143647/set-fact-with-dynamic-key-name-in-ansible
+    # For each file, link, directory, append that path to the lists of
+    # file_list.file, file_list.link, file_list.directory as
+    # appropriate
     file_list: "{{ file_list | combine({file_recurse.state: [file_recurse]}, recursive=true, list_merge='append') }}"
+    # FIXME: if link points to a location in our repos/ directory, perhaps we should automatically resolve it
 #  vars:
 #    file_list: []   # higher precedence than set_fact, and initialises correctly, but doesn't reinitialise each loop?
   loop_control:
