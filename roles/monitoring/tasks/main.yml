@@ -1,4 +1,11 @@
 ---
+- name: Install node monitoring packages
+  apt:
+    name: ['munin-node']
+    autoremove: no
+    state: present
+  become: true
+
 - name: intercept spundown disks in hddtemp_smartctl
   ini_file:
     path: /etc/munin/plugin-conf.d/munin-node
@@ -140,13 +147,6 @@
   with_items: [ 'hddtemp_smartctl' ]
   when: host_is_container | default(false) or host_is_virtual | default(false) or host_is_pi | default(false)
   notify: restart munin-node
-
-- name: Install node monitoring packages
-  apt:
-    name: ['munin-node']
-    autoremove: no
-    state: present
-  become: true
 
 - name: install custom numa,zfs,chrony etc munin monitoring plugins from munin-contrib, that take arguments, all hosts
   copy:
