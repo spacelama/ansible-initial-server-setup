@@ -17,7 +17,7 @@
     group: root
     mode: 0644
   become: true
-  when: host_has_backports is defined
+  when: host_has_backports | default(false)
 
 - name: Enable apt testing repo
   template:

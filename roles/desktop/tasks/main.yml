@@ -58,7 +58,7 @@
     cache_valid_time: 3600
     autoremove: no
     state: present
-  when: host_has_radeon is defined
+  when: host_has_radeon | default(false)
   become: true
 
   # https://www.reddit.com/r/linuxadmin/comments/fbfc6w/how_to_wrap_my_firefox_process_in_a_cgroup_to/
