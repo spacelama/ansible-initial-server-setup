@@ -2,13 +2,18 @@
 [user]
 	name = Tim Connors
 
-#[includeIf "gitdir:~/code/<work>/"]
-#	path = "~/code/<work>/.gitconfig"
-
 [url "git@github.com:"]
-	# replace accidentally https cloned github repos with
-	# git@github
-	insteadOf = "https://github.com/"
+#	# replace accidentally https cloned github repos with
+#	# git@github
+#	insteadOf = "https://github.com/"
+        pushInsteadOf = git://github.com/
+        pushInsteadOf = https://github.com/
+
+# set up per repo exceptions via includeIf instead
+#[url "git@gitlab.....au:"]
+#	email = ...
+[includeIf "gitdir:~/**/code/work/"]
+	path = "~/code/work/.gitconfig"
 
 [color]
 	status = auto
@@ -111,10 +116,6 @@
     echo \"git log --topo-order -u -L $2,${3:-$2}:\\\"$FILE\\\" $4 \";   \
     git log -w -b -p --ignore-blank-lines --topo-order -u -L $2,${3:-$2}:\"$FILE\" $4;\
 ' --"
-
-[url "git@github.com:"]
-        pushInsteadOf = git://github.com/
-        pushInsteadOf = https://github.com/
 
 [init]
 	defaultBranch = main

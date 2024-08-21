@@ -1,3 +1,7 @@
+#FIXME: is this needed?
+#[core]
+#  attributesFile = ~/.gitattributes
+
 #http://idnotfound.wordpress.com/2009/05/09/word-by-word-diffs-in-git/
 *.tex	diff=tex
 *.gz	diff=gzip
