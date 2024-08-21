@@ -373,7 +373,11 @@ ENABLE_TESTS=ALL
 # ANSIBLE: remove hidden_ports, but we might want to revisit that for
 # the NFS port warnings we were getting at one stage (not a problem
 # recently?)
-DISABLE_TESTS=suspscan hidden_procs deleted_files packet_cap_apps apps
+{% set disable_extra = '' %}
+{% if ( host_is_container | default(false) ) %}
+{% set disable_extra = disable_extra ~ ' avail_modules' %}
+{%endif%}
+DISABLE_TESTS=suspscan hidden_procs deleted_files packet_cap_apps apps{{ disable_extra }}
 
 #
 # The HASH_CMD option can be used to specify the command to use for the file
@@ -620,7 +624,9 @@ SCRIPTWHITELIST=/bin/fgrep
 SCRIPTWHITELIST=/usr/bin/which
 SCRIPTWHITELIST=/usr/bin/ldd
 #SCRIPTWHITELIST=/usr/bin/lwp-request
+{% if ( 'libwww-perl' in ansible_facts.packages ) %}
 SCRIPTWHITELIST=/usr/bin/lwp-request
+{% endif %}
 {% if ( deb_release == 'bookworm' ) %}
 SCRIPTWHITELIST=/usr/bin/which.debianutils
 {% endif %}
@@ -675,6 +681,9 @@ ALLOWHIDDENDIR=/dev/.static
 ALLOWHIDDENDIR=/dev/.initramfs
 ALLOWHIDDENDIR=/etc/.java
 ALLOWHIDDENDIR=/etc/.git
+{% if ( host_is_container | default(false) ) %}
+ALLOWHIDDENDIR=/dev/.lxc
+{% endif %}
 
 #
 # Allow the specified hidden file to be whitelisted.
@@ -701,6 +710,9 @@ ALLOWHIDDENFILE=/dev/.tmp-block-*:*
 ALLOWHIDDENFILE=/etc/.etckeeper
 ALLOWHIDDENFILE=/etc/.gitignore
 ALLOWHIDDENFILE=/usr/share/man/man5/.containerignore.5.gz
+{% if ( host_is_container | default(false) ) %}
+ALLOWHIDDENFILE=/dev/.lxc-boot-id
+{% endif %}
 
 #
 # Allow the specified process to use deleted files. The process name may be
@@ -782,6 +794,10 @@ ALLOWDEVFILE=/dev/shm/resolvconf/interface/wlan0
 ALLOWDEVFILE=/dev/shm/resolvconf/interface/lo.pdnsd
 ALLOWDEVFILE=/dev/shm/libpod_lock
 ALLOWDEVFILE=/dev/shm/ShM.*
+{% if ( host_is_container | default(false) ) %}
+ALLOWDEVFILE=/dev/.lxc/proc/kcore
+ALLOWDEVFILE=/dev/.lxc/proc/cmdline
+{% endif %}
 
 #
 # Allow the specified process pathnames to use shared memory segments.
@@ -797,7 +813,8 @@ ALLOWIPCPROC=/usr/bin/mpv
 ALLOWIPCPROC=/usr/bin/pavucontrol
 ALLOWIPCPROC=/usr/sbin/apache2
 ALLOWIPCPROC=/usr/bin/gthumb
-ALLOWIPCPROC=/usr/bin/python3.9 # pretty broad, but it's either that or increase the limit to above 4MB, because /usr/bin/blueman-applet is always running on desktops
+ALLOWIPCPROC=/usr/bin/python3.* # pretty broad, but it's either that or increase the limit to above 4MB, because /usr/bin/blueman-applet is always running on desktops
+ALLOWIPCPROC=/usr/bin/emacs-lucid
 #ALLOWIPCPROC=/usr/bin/vlc
 
 #

@@ -108,7 +108,7 @@
 
 - name: Install essential packages (all)
   apt:
-    name: ['rsyslog', 'needrestart', 'rsync', 'sysstat', 'bsd-mailx', 'procmail', 'colordiff', 'net-tools', 'ccze', 'bash-completion'] # procmail for lockfile, ccze for cron.daily get_conf
+    name: ['rsyslog', 'apt-listchanges', 'needrestart', 'rsync', 'sysstat', 'bsd-mailx', 'procmail', 'colordiff', 'net-tools', 'ccze', 'bash-completion', 'rkhunter', 'unhide', 'unhide.rb'] # procmail for lockfile, ccze for cron.daily get_conf
     autoremove: no
     state: present
   become: true
@@ -320,7 +320,7 @@
 
 - name: Install essential packages (not container)
   apt:
-    name: [ 'git', 'cvs', 'htop', 'iotop', 'smem', 'ethtool', 'iperf3', 'aptitude', 'dlocate', 'vim', 'nicstat', 'lshw', 'hwinfo', 'parted', 'sdparm', 'chrony', 'ifstat', 'iftop', 'apt-listchanges', 'apt-show-versions', 'etckeeper', 'apt-listbugs', 'apt-listbugs', 'rlwrap', 'strace', 'make', 'keychain', 'libstring-shellquote-perl', 'dmidecode', 'expect', 'initscripts', 'direnv', 'rkhunter', 'dstat', 'bc', 'curl', 'wget', 'netcat-openbsd' ] # expect for unbuffer, initscripts for bootlogs, pcp for `pcp dstat`, but that results in pmlogger cronjobs that spin up disks on fs, bc for checkntp
+    name: [ 'git', 'cvs', 'htop', 'iotop', 'smem', 'ethtool', 'iperf3', 'aptitude', 'dlocate', 'vim', 'nicstat', 'lshw', 'hwinfo', 'parted', 'sdparm', 'chrony', 'ifstat', 'iftop', 'apt-show-versions', 'etckeeper', 'apt-listbugs', 'rlwrap', 'strace', 'make', 'keychain', 'libstring-shellquote-perl', 'dmidecode', 'expect', 'initscripts', 'direnv', 'dstat', 'bc', 'curl', 'wget', 'netcat-openbsd' ] # expect for unbuffer, initscripts for bootlogs, pcp for `pcp dstat`, but that results in pmlogger cronjobs that spin up disks on fs, bc for checkntp
     # atop
     autoremove: no
     state: present
@@ -395,7 +395,7 @@
     line: '#\1\nwhich=both'
     state: present
   become: true
-  when: not (host_is_container | default(false))
+#  when: not (host_is_container | default(false))
 
 - name: setup apt listchanges confirm
   lineinfile:
@@ -405,6 +405,19 @@
     state: present
   become: true
   when: not (host_is_container | default(false))
+
+- name: enable rkhunter, setting CRON, APT = true
+  lineinfile:
+    dest: /etc/default/rkhunter
+    backrefs: yes
+    # match everything that's eg: ^CRON_DAILY_RUN, so long as it's not already '^CRON_DAILY_RUN="true"':
+    regexp: "^({{ item }}=(?!\"true\"))"
+    line: "#\\1\\n{{ item }}=\"true\""
+  with_items:
+    - CRON_DAILY_RUN
+    - CRON_DB_UPDATE
+    - APT_AUTOGEN
+  become: true
 
 - name: "listbugs, but don't ask questions"
   lineinfile:
