@@ -279,7 +279,6 @@
       source: tree.remove/
       remove: true
 
-    - { name: /usr/local/bin/smartctlnvme,   source: usr_local_bin/smartctlnvme,             mode: "0755",  }
     - { name: /var/spool/cron/crontabs/root, source: var_spool_cron/root.j2,                 mode: "0600", group: "crontab" }
     - { name: /etc/modprobe.d/ansible-custom.conf, source: etc/modprobe.d/ansible-custom.conf.j2 }
 

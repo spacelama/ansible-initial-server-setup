@@ -10,17 +10,6 @@
   become: true
   notify: restart munin-node
 
-- name: intercept spundown disks in smart_*
-  ini_file:
-    path: /etc/munin/plugin-conf.d/munin-node
-    section: "smart_*"
-    # no equals separating the key and value, so lets hack that up:
-    allow_no_value: true
-    option: "env.smartpath /usr/local/bin/smart-intercept-spindown"
-    state: present
-  become: true
-  notify: restart munin-node
-
   # FIXME: these should all be ini_file, I suspect, but do need to
   # consider what happens when we change value, given we can't specify
   # option and value
@@ -34,7 +23,7 @@
   become: true
   notify: restart munin-node
 
-- name: munin node conf - diskstats and chrony config
+- name: munin node conf - insert common config
   blockinfile:
     path: "/etc/munin/plugin-conf.d/munin-node"
     marker: "# {mark} ANSIBLE MANAGED BLOCK"
@@ -44,11 +33,13 @@
       [nvme_*]
       user root
 
-      # to transform smartctl nvme output to more resemble traditional
-      # output so existing munin plugins can monitor it
-      [smart_nvme*]
+      # to parse both SAS, NVME, and not spin a disk up (it is not
+      # sufficient to simply set ignorestandby to get munin plugin to
+      # supply smartctl -n standby, because that still spins up many
+      # of our drives):
+      [smart_*]
       user root
-      env.smartpath /usr/local/bin/smartctlnvme
+      env.smartpath /usr/local/bin/smart-intercept-spindown
 
       # for nice devicemapper names
       [diskstats]
