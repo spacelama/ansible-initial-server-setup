@@ -593,6 +593,9 @@
   lineinfile:
     dest: /etc/sysstat/sysstat
     insertafter: 'SADC_OPTIONS'
+    # At a minimum, we want DISK,XDISK,POWER,INT, but for historical
+    # reasons, SNMP seems to imply anything ipv4 related, so we might
+    # need that.  Which means we might as well go XALL
     line: 'SADC_OPTIONS="-S XALL"    # Ansible controlled'
   become: true
 
