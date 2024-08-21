@@ -32,6 +32,12 @@
 # (recoverable) emacs keyboard lockups occasionally too:
 # https://emacs.stackexchange.com/questions/52225/emacs-not-responding-to-keyboard-input
 # ibus-daemon --xim -d -r
+- name: install preferred backported/non-backported packages
+  apt:
+    name: ['highlight']
+    state: present
+    default_release: "{{ host_has_backports | default(false) | ternary( deb_release ~ '-backports', omit ) }}"
+  become: true
 
 - name: install custom locally build desktop packages
   include_tasks: "{{ playbook_dir }}/roles/common/tasks/install_custom_packages.yml"
