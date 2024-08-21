@@ -194,15 +194,6 @@
      dest: /etc/udev/rules.d/90-SMR-drive-timeout.rules
   become: true
 
-- name: install suspend-all
-  copy:
-    src: pve_server/{{ item }}
-    dest: /usr/local/bin/{{ item }}
-    mode: 0755
-  become: true
-  with_items:
-    - suspend-all
-
 # FIXME: limit zfs RAM usage to 8GB on pve itself if the only timely stuff its going to host is on SSD anyway: https://pve.proxmox.com/wiki/ZFS_on_Linux#sysadmin_zfs_limit_memory_usage
 
 # FIXME: We don't have any local storage on filesystems that aren't

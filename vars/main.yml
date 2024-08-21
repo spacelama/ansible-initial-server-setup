@@ -286,7 +286,7 @@
     - { name: /etc/systemd/system/103.scope.d/override.conf,  source: etc_systemd/system/103.scope.d/override.conf,  mode: "0644", when: "{{ inventory_hostname == 'pve1' }}"  }
     - { name: /usr/local/bin/powertop-custom.sh,              source: usr_local_bin/powertop-custom.sh,              mode: "0755", when: "{{ inventory_hostname == 'pve3' }}"  }
     - { name: /etc/systemd/system/powertop-custom.service,    source: etc_systemd/system/powertop-custom.service,    mode: "0644", when: "{{ inventory_hostname == 'pve3' }}"  }
-    - { name: /usr/local/bin/pve-forcerestart-lxc-if-running, source: usr_local_bin/pve-forcerestart-lxc-if-running, mode: "0755", when: "{{ host_is_pve_server | default(false) }}" }
+    - { source: tree.pve_server/, name: /,                    when: '{{ host_is_pve_server | default(false) }}' }
 
     # FIXME: suspect I need to set user to something other than fs and webserver etc - there might be fs on fastssd and fs on hdd, or both fs and webserver on fastssd, and we need to be able to access them both
     - { source: etc/ceph/ceph.client.cephfs-hdd.fs.keyring,         name: /etc/ceph/, mode: "0600", when: '{{ mount_ceph_clients is defined }}' }
