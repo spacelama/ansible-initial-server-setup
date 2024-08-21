@@ -711,7 +711,7 @@ AddToMenu "Utilities" "Program Menu" Title
 +              "Debian Modules" Popup "/Debian/FVWM_Modules"
 +              "Modules" Popup Module-Popup
 +              "" Nop
-+              "&Restart fvwm2" Function MyRestart --pass-args source-startup-exec-fvwm
++              "Restart fvwm2" Function MyRestart --pass-args source-startup-exec-fvwm
 +              "Exit Fvwm" Popup Quit-Verify
 
 #	Exec    "Xterm"		exec xterm -e bash &
@@ -750,7 +750,7 @@ AddToMenu "Window-Ops" "Window Ops" Title
 +              "&Close" Close
 +              "" Nop
 +              "R&efresh Screen" Refresh
-+              "Restart &Window Manager" Function MyRestart --pass-args source-startup-exec-fvwm
++              "Restart Window Manager" Function MyRestart --pass-args source-startup-exec-fvwm
 +              "" Nop
 +              "Exit" Popup Quit-Verify
 
