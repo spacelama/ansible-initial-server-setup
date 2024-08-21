@@ -63,6 +63,7 @@
     owner: "{{ dir_file_or_template.user | default('root') }}"
     group: "{{ dir_file_or_template.group | default('root') }}"
     src: "{{ file_recurse.src }}"
+    follow: false
     state: link
     force: true
   loop_control:

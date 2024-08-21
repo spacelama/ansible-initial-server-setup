@@ -65,6 +65,7 @@
     owner: "{{ user }}"
     group: "{{ user }}"
     src: "{{ file_recurse.src }}"
+    follow: false
     state: link
     force: true
   loop_control:
