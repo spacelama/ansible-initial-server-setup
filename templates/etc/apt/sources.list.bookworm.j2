@@ -4,6 +4,8 @@ deb http://ftp.au.debian.org/debian/ bookworm main non-free non-free-firmware co
 deb http://security.debian.org/ bookworm-security main non-free non-free-firmware contrib
 deb http://ftp.au.debian.org/debian/ bookworm-updates main non-free non-free-firmware contrib
 
+{% if not host_is_small | default(false) %}
 deb-src http://ftp.au.debian.org/debian/ bookworm main non-free non-free-firmware contrib
 deb-src http://security.debian.org/ bookworm-security main non-free non-free-firmware contrib
 deb-src http://ftp.au.debian.org/debian/ bookworm-updates main non-free non-free-firmware contrib
+{% endif %}

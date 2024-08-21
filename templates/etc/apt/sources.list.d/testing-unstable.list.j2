@@ -1,0 +1,13 @@
+deb http://ftp.au.debian.org/debian/ testing main non-free contrib
+deb http://ftp.au.debian.org/debian/ unstable main non-free contrib
+
+# FIXME: pull experimental in safely and only when appropriate, for
+# specific packages.  Maybe no need because it's pinned with low
+# priority and we haven't broken anything yet...
+deb http://ftp.debian.org/debian experimental main non-free contrib
+
+{% if not host_is_small | default(false) %}
+deb-src http://ftp.au.debian.org/debian/ testing main non-free contrib
+deb-src http://ftp.au.debian.org/debian/ unstable main non-free contrib
+deb-src http://ftp.debian.org/debian experimental main non-free contrib
+{% endif %}
