@@ -472,10 +472,14 @@
 
 # persistent network names (lan0): https://wiki.debian.org/NetworkInterfaceNames
 - name: install systemd network persistent net link
+  vars:
+    mac_addr: "{{ item.mac_addr }}"
+    interface_name: "{{ item.interface_name }}"
   template:
     src: systemd-network-persistent-net-link.j2
-    dest: /etc/systemd/network/10-persistent-net.link
+    dest: "/etc/systemd/network/10-persistent-net-{{ item.interface_name }}.link"
   become: true
+  with_items: "{{ network_interfaces }}"
 
 - name: install network interfaces
   template:

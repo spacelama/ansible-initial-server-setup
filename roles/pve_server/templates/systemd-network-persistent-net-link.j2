@@ -21,7 +21,7 @@ MACAddress={{ mac_addr }}
   eth0 can safely become eno1 or en1 again in pve 8, but we still have pve 7
   instances, and systemd would probably screw up auto-naming on the old r520 too
 #}
-Name=eth0
+Name={{ interface_name }}
 WakeOnLan=magic
 
 # while we could go NamePolicy=mac and end up with predictable names

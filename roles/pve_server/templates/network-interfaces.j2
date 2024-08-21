@@ -30,9 +30,12 @@ iface eth0 inet static
 	gateway 192.168.1.254
 
 {% else %}
-iface eth0 inet manual
-{{ eth0_interface_addendum | default('') }}
-
+iface enge0 inet manual
+{{ enge0_interface_addendum ~ '\n' if ( enge0_interface_addendum is defined ) else '' }}
+iface enxg0 inet manual
+{{ enxg0_interface_addendum ~ '\n' if ( enxg0_interface_addendum is defined ) else '' }}
+iface enxg1 inet manual
+{{ enxg1_interface_addendum ~ '\n' if ( enxg1_interface_addendum is defined ) else '' }}
 {#
   dell poweredge machines with many network interfaces
 #}
@@ -56,7 +59,7 @@ iface eno4 inet manual
 #}
 auto vmbr0
 iface vmbr0 inet manual
-	bridge-ports eth0
+	bridge-ports enxg0 enxg1 enge0
 	bridge-stp off
 	bridge-fd 0
 	bridge-vlan-aware yes
