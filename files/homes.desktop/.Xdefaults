@@ -145,7 +145,7 @@ XTerm*ttymodes: erase ^? kill ^U intr ^C quit ^\ eof ^D \
 XTerm.VT100.dynamicColors:	on
 
 ! Number of lines of scrollback to save
-XTerm*saveLines:		16384
+XTerm*saveLines:		32768
 
 XTerm*visualBell:		False
 XTerm*scrollTtyOutput:		True
