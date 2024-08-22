@@ -276,6 +276,8 @@
       # .j2 source files (under the templates directory) are treated as templates
     - name: /
     - name: /
+      source: tree.Linux-{{ arch | default ('x86_64') }}/
+    - name: /
       source: tree.remove/
       remove: true
 
