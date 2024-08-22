@@ -10,7 +10,7 @@
 
 # to do a quick sync of commonly changed files, let's just push them
 # first without running a slow gather_facts first:
-- hosts: "{{ target | default('all,!openwrt,!tasmota,!work') }}"
+- hosts: "{{ target | default('all,!openwrt,!tasmota') }}"
   remote_user: "{{ ssh_user | default('ansible_adm') }}"
   gather_facts: no
   vars_files:

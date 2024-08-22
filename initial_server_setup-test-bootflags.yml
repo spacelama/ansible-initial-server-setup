@@ -7,7 +7,7 @@
     - role: munin_server
       when: inventory_hostname == 'iot'
 
-# - hosts: "{{ target | default('all,!openwrt,!tasmota,!work') }}"
+# - hosts: "{{ target | default('all,!openwrt,!tasmota') }}"
 #   remote_user: "{{ ssh_user | default('ansible_adm') }}"
 #   gather_facts: no
 #   vars_files:
@@ -18,7 +18,7 @@
 #     - install_files
 #     - install_user_files
 
-- hosts: "{{ target | default('all,!openwrt,!tasmota,!work') }}"
+- hosts: "{{ target | default('all,!openwrt,!tasmota') }}"
   remote_user: "{{ ssh_user | default('ansible_adm') }}"
 #  gather_facts: no  # when doing a very quick debug run
   vars_files:

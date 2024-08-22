@@ -1,5 +1,5 @@
 ---
-- hosts: "{{ target | default('all,!openwrt,!tasmota,!work') }}"
+- hosts: "{{ target | default('all,!openwrt,!tasmota') }}"
   remote_user: "{{ ssh_user | default('ansible_adm') }}"
   vars_files:
     - vars/main.yml
