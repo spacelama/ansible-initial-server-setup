@@ -1,3 +1,8 @@
+{% if global_modprobe_options is defined %}
+{% for key,value in global_modprobe_options.items() %}
+options {{ key }} {{ value }}
+{% endfor %}
+{% endif %}
 {% if modprobe_options is defined %}
 {% for key,value in modprobe_options.items() %}
 options {{ key }} {{ value }}
