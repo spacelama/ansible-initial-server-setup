@@ -377,6 +377,9 @@ ENABLE_TESTS=ALL
 {% if ( host_is_container | default(false) ) %}
 {% set disable_extra = disable_extra ~ ' avail_modules' %}
 {%endif%}
+{% if ( host_is_nfsroot | default(false) ) %}
+{% set disable_extra = disable_extra ~ ' immutable' %}
+{%endif%}
 DISABLE_TESTS=suspscan hidden_procs deleted_files packet_cap_apps apps{{ disable_extra }}
 
 #
