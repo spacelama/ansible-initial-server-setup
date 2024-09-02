@@ -119,6 +119,13 @@
   when: (type == 'ap') and (htmode_24ghz is defined)
   notify: uci commit
 
+  # FIXME: work out why dirac-laptop can't bind to sae-mixed
+  # encryption: we'd rather use sae-mixed (WPA3) everywhere, but my
+  # intel wireless 7260 on debian seems to have a problem connecting
+  # wpa3 to sae-mixed: https://github.com/openwrt/openwrt/issues/7858
+  # Also test last comment here:
+  # https://askubuntu.com/questions/1388615/does-wpa3-support-depend-on-hardware-software-or-both
+  # We hence use psk2 on certain ssids that dirac-laptop connects to
 - name: set default_radio0
   uci:
     command: set
@@ -127,6 +134,7 @@
       'device': 'radio0',
       'ssid': ssid1_24ghz,
       'key': lookup('file', 'ap.wpa2.default_radio0.psk'),
+      'encryption': lookup('file', 'ap.wpa2.default_radio0.enc', errors='ignore') | default('sae-mixed', true),
       'network': 'LAN1',
       'ifname': 'wlan24-0',
     } ) }}"
@@ -150,6 +158,7 @@
       'device': 'radio1',
       'ssid': ssid1_5ghz,
       'key': lookup('file', 'ap.wpa2.default_radio1.psk'),
+      'encryption': lookup('file', 'ap.wpa2.default_radio1.enc', errors='ignore') | default('sae-mixed', true),
       'network': 'LAN1',
       'ifname': 'wlan5-0',
     } ) }}"
@@ -173,6 +182,7 @@
       'device': 'radio0',
       'ssid': lookup('file', 'ap.wpa2.wifinet4.ssid'),
       'key': lookup('file', 'ap.wpa2.wifinet4.psk'),
+      'encryption': lookup('file', 'ap.wpa2.wifinet4.enc', errors='ignore') | default('sae-mixed', true),
       'network': 'LANIOT4',
       'ifname': 'wlan24-1',
       'isolate': '1',
@@ -197,6 +207,7 @@
       'device': 'radio1',
       'ssid': lookup('file', 'ap.wpa2.wifinet5.ssid'),
       'key': lookup('file', 'ap.wpa2.wifinet5.psk'),
+      'encryption': lookup('file', 'ap.wpa2.wifinet5.enc', errors='ignore') | default('sae-mixed', true),
       'network': 'LANIOT4',
       'ifname': 'wlan5-1',
       'isolate': '1',
@@ -221,6 +232,7 @@
       'device': 'radio0',
       'ssid': lookup('file', 'ap.wpa2.wifinet6.ssid'),
       'key': lookup('file', 'ap.wpa2.wifinet6.psk'),
+      'encryption': lookup('file', 'ap.wpa2.wifinet6.enc', errors='ignore') | default('sae-mixed', true),
       'network': 'LANWINDOWS7',
       'ifname': 'wlan24-2',
     } ) }}"
@@ -244,6 +256,7 @@
       'device': 'radio1',
       'ssid': lookup('file', 'ap.wpa2.wifinet7.ssid'),
       'key': lookup('file', 'ap.wpa2.wifinet7.psk'),
+      'encryption': lookup('file', 'ap.wpa2.wifinet7.enc', errors='ignore') | default('sae-mixed', true),
       'network': 'LANWINDOWS7',
       'ifname': 'wlan5-2',
     } ) }}"
@@ -258,6 +271,7 @@
       'device': 'radio1',
       'ssid': lookup('file', 'ap.wpa2.wifinet8.ssid'),
       'key': lookup('file', 'ap.wpa2.wifinet8.psk'),
+      'encryption': lookup('file', 'ap.wpa2.wifinet8.enc', errors='ignore') | default('sae-mixed', true),
       'network': 'LAN1',
       'ifname': 'wlan5-3',
     } ) }}"
@@ -272,6 +286,7 @@
       'device': 'radio0',
       'ssid': lookup('file', 'ap.wpa2.wifinet9.ssid'),
       'key': lookup('file', 'ap.wpa2.wifinet9.psk'),
+      'encryption': lookup('file', 'ap.wpa2.wifinet9.enc', errors='ignore') | default('sae-mixed', true),
       'network': 'LAN1',
       'ifname': 'wlan24-3',
     } ) }}"
@@ -295,6 +310,7 @@
       'device': 'radio0',
       'ssid': ssid2_24ghz,
       'key': lookup('file', 'ap.wpa2.wifinet11.psk'),
+      'encryption': lookup('file', 'ap.wpa2.wifinet11.enc', errors='ignore') | default('sae-mixed', true),
       'network': 'LAN1',
       'ifname': 'wlan24-4',
     } ) }}"
@@ -318,6 +334,7 @@
       'device': 'radio1',
       'ssid': ssid2_5ghz,
       'key': lookup('file', 'ap.wpa2.wifinet10.psk'),
+      'encryption': lookup('file', 'ap.wpa2.wifinet10.enc', errors='ignore') | default('sae-mixed', true),
       'network': 'LAN1',
       'ifname': 'wlan5-4',
     } ) }}"
