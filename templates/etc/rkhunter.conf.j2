@@ -617,19 +617,16 @@ DISABLE_TESTS=suspscan hidden_procs deleted_files packet_cap_apps apps{{ disable
 #
 # The default value is the null string.
 #
-{% if ( deb_release == 'bookworm' ) %}
-SCRIPTWHITELIST=/usr/bin/egrep
-SCRIPTWHITELIST=/usr/bin/fgrep
-{% else %}
-SCRIPTWHITELIST=/bin/egrep
-SCRIPTWHITELIST=/bin/fgrep
+{% if ( 'ifupdown2' in ansible_facts.packages ) %}
+SCRIPTWHITELIST=/usr/share/ifupdown2/__main__.py
 {% endif %}
-SCRIPTWHITELIST=/usr/bin/which
-SCRIPTWHITELIST=/usr/bin/ldd
-#SCRIPTWHITELIST=/usr/bin/lwp-request
 {% if ( 'libwww-perl' in ansible_facts.packages ) %}
 SCRIPTWHITELIST=/usr/bin/lwp-request
 {% endif %}
+SCRIPTWHITELIST=/usr/bin/egrep
+SCRIPTWHITELIST=/usr/bin/fgrep
+SCRIPTWHITELIST=/usr/bin/which
+SCRIPTWHITELIST=/usr/bin/ldd
 {% if ( deb_release == 'bookworm' ) %}
 SCRIPTWHITELIST=/usr/bin/which.debianutils
 {% endif %}
@@ -765,6 +762,14 @@ ALLOWPROCLISTEN=/sbin/dhclient3
 # The default value is the null string.
 #
 #ALLOWPROMISCIF=eth0
+ALLOWPROMISCIF=tap100i0
+ALLOWPROMISCIF=tap100i1
+ALLOWPROMISCIF=tap103i0
+ALLOWPROMISCIF=tap104i0
+ALLOWPROMISCIF=tap105i0
+ALLOWPROMISCIF=tap121i0
+ALLOWPROMISCIF=tap123i0
+ALLOWPROMISCIF=tap131i0
 
 #
 # This option specifies how rkhunter should scan the '/dev' directory for
@@ -796,10 +801,19 @@ ALLOWDEVFILE=/dev/shm/resolvconf/interface/eth0
 ALLOWDEVFILE=/dev/shm/resolvconf/interface/wlan0
 ALLOWDEVFILE=/dev/shm/resolvconf/interface/lo.pdnsd
 ALLOWDEVFILE=/dev/shm/libpod_lock
+ALLOWDEVFILE=/dev/shm/ledmon.conf
 ALLOWDEVFILE=/dev/shm/ShM.*
+ALLOWDEVFILE=/dev/shm/sem.Mvlg_ada_lock
 {% if ( host_is_container | default(false) ) %}
 ALLOWDEVFILE=/dev/.lxc/proc/kcore
 ALLOWDEVFILE=/dev/.lxc/proc/cmdline
+{% endif %}
+{% if ( host_is_pve_server | default(false) ) %}
+ALLOWDEVFILE=/dev/shm/qb-*/*
+ALLOWDEVFILE=/dev/shm/qb-*
+{% endif %}
+{% if ( inventory_hostname == 'zm' ) %}
+ALLOWDEVFILE=/dev/shm/zm.mmap.*
 {% endif %}
 
 #
@@ -816,8 +830,11 @@ ALLOWIPCPROC=/usr/bin/mpv
 ALLOWIPCPROC=/usr/bin/pavucontrol
 ALLOWIPCPROC=/usr/sbin/apache2
 ALLOWIPCPROC=/usr/bin/gthumb
+ALLOWIPCPROC=/usr/bin/python
+ALLOWIPCPROC=/usr/bin/python3
 ALLOWIPCPROC=/usr/bin/python3.* # pretty broad, but it's either that or increase the limit to above 4MB, because /usr/bin/blueman-applet is always running on desktops
 ALLOWIPCPROC=/usr/bin/emacs-lucid
+ALLOWIPCPROC=/usr/bin/dunst
 #ALLOWIPCPROC=/usr/bin/vlc
 
 #
@@ -849,6 +866,7 @@ ALLOWIPCPROC=/usr/bin/emacs-lucid
 # The default is 1048576 (1M) bytes.
 #
 #IPC_SEG_SIZE=1048576
+IPC_SEG_SIZE=8388608
 
 #
 # This option is used to indicate if the Phalanx2 test is to perform a basic
