@@ -59,3 +59,19 @@
     name: NetworkManager
     state: restarted
   become: true
+
+- name: activate systemd timer
+  systemd:
+    name: warn-unattended.timer
+    state: started
+    enabled: yes
+    daemon_reload: yes
+  become_user: root
+  become: true
+
+- name: restart unattended-upgrades
+  systemd:
+    name: unattended-upgrades
+    state: restarted
+  become: true
+  when: unattended_upgrades | default('true')

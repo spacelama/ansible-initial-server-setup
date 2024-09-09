@@ -371,22 +371,6 @@
   become: true
   when: not (host_is_intel | default(false)) and not (host_is_amd | default(false))
 
-- name: install or remove unattended-upgrades
-  apt:
-    name: ['unattended-upgrades']
-    autoremove: no
-    state: "{{ unattended_upgrades | default('true') | ternary('present', 'absent') }}"
-  become: true
-
-  # FIXME: actually want to disable periodic updates, but need to find out how it's done on vanilla debian first.  Expecting APT::Periodic::Unattended-Upgrade in /etc/apt/apt.conf.d/ somewhere
-#- name: Enable unattended upgrades
-#  copy:
-#    src: apt/10periodic
-#    dest: /etc/apt/apt.conf.d/10periodic
-#    owner: root
-#    group: root
-#    mode: 0644
-
 - name: setup apt listchanges news
   lineinfile:
     dest: /etc/apt/listchanges.conf
@@ -429,6 +413,90 @@
   # listbugs might not be installed yet if still in check_mode, so
   # don't run anything relying on the conffile being there
   when: not (host_is_container | default(false)) and not ansible_check_mode
+
+- name: install unattended-upgrades
+  apt:
+    name: ['unattended-upgrades']
+    autoremove: no
+    state: present
+  become: true
+
+  # debian bookworm unattended upgrades:
+  # https://wiki.debian.org/UnattendedUpgrades
+- name: Configure unattended-upgrades
+  lineinfile:
+    dest: /etc/apt/apt.conf.d/{{ item.file }}
+    regexp: "^{{ item.key }} "
+    line: "{{ item.key }} \"{{ item.value }}\";"
+    state: present
+  become: true
+  with_items:
+    - { file: '50unattended-upgrades', key: "Unattended-Upgrade::Mail", value: "root" }
+    # don't want many mails from a system that's only doing dry-runs
+    # anyway, so unset minimal upgrades for those systems:
+    - { file: '50unattended-upgrades', key: "Unattended-Upgrade::MinimalSteps", value: "{{ ( unattended_upgrades | default('true') ) | ternary('true', 'false') }}" }
+    - { file: '20auto-upgrades',       key: "APT::Periodic::Unattended-Upgrade", value: "{{ ( unattended_upgrades | default('true') ) | ternary('1', '0') }}" }
+  notify: restart unattended-upgrades
+
+- name: enable or disable unattended upgrades
+  systemd:
+    name: "{{ item }}"
+    enabled: "{{ ( unattended_upgrades | default('true') ) | ternary(True, False) }}"
+    state: "{{ ( unattended_upgrades | default('true') ) | ternary('started', 'stopped') }}"
+  become: true
+  with_items:
+    - unattended-upgrades.service
+#    - apt-daily-upgrade.timer
+
+- name: warn un-applied unattended-upgrades timer
+  copy:
+    content: |
+      [Unit]
+      Description=Warn on un-applied unattended-upgrades - Run daily at 6am
+
+      [Timer]
+      OnCalendar=*-*-* 6:00:00
+      Persistent=true
+
+      [Install]
+      WantedBy=timers.target
+    dest:
+      /etc/systemd/system/warn-unattended.timer
+    mode: '0644'
+    owner: root
+    group: root
+  become: true
+  when: not (unattended_upgrades | default('true'))
+  notify: activate systemd timer
+
+- name: warn un-applied unattended-upgrades service
+  copy:
+    content: |
+      [Unit]
+      Description=Warn on un-applied unattended-upgrades
+
+      [Service]
+      Type=oneshot
+      ExecStart=unattended-upgrades --dry-run
+    dest:
+      /etc/systemd/system/warn-unattended.service
+    mode: '0644'
+    owner: root
+    group: root
+  become: true
+  when: not (unattended_upgrades | default('true'))
+  notify: activate systemd timer
+
+- name: remove warn un-applied unattended-upgrades timer and service
+  file:
+    path: "{{ item }}"
+    state: absent
+  become: true
+  with_items:
+    - /etc/systemd/system/warn-unattended.timer
+    - /etc/systemd/system/warn-unattended.service
+    - /etc/systemd/system/timers.target.wants/warn-unattended.timer
+  when: unattended_upgrades | default('true')
 
 - name: stop restricting dmesg pointlessly
   copy:
