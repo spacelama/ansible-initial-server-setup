@@ -432,9 +432,8 @@
   become: true
   with_items:
     - { file: '50unattended-upgrades', key: "Unattended-Upgrade::Mail", value: "root" }
-    # don't want many mails from a system that's only doing dry-runs
-    # anyway, so unset minimal upgrades for those systems:
-    - { file: '50unattended-upgrades', key: "Unattended-Upgrade::MinimalSteps", value: "{{ ( unattended_upgrades | default('true') ) | ternary('true', 'false') }}" }
+    # reduce the number of mails coming from systems that don't get shutdown routinely:
+    - { file: '50unattended-upgrades', key: "Unattended-Upgrade::MinimalSteps", value: "{{ ( host_is_laptop | default('false') ) | ternary('true', 'false') }}" }
     - { file: '20auto-upgrades',       key: "APT::Periodic::Unattended-Upgrade", value: "{{ ( unattended_upgrades | default('true') ) | ternary('1', '0') }}" }
   notify: restart unattended-upgrades
 
