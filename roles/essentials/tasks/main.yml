@@ -351,7 +351,7 @@
   become: true
   # repos might not be set up correctly yet if still in check_mode, so
   # these packages might not yet be available
-  when: host_is_intel | default(false) and not ansible_check_mode
+  when: ( host_is_intel | default(false) ) and not ansible_check_mode
 
 - name: Install amd microcode
   apt:
@@ -361,7 +361,7 @@
   become: true
   # repos might not be set up correctly yet if still in check_mode, so
   # these packages might not yet be available
-  when: host_is_amd | default(false) and not ansible_check_mode
+  when: ( host_is_amd | default(false) ) and not ansible_check_mode
 
 - name: Remove intel and amd microcode
   apt:
