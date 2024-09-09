@@ -34,9 +34,9 @@
     loop_var: dir_file_or_template
   when:
     # ANDED: allow user to supply when and when_pkg_installed -
-    - (dir_file_or_template.when | default("true"))   # can't "omit" in a list, so since this is OR, default to true
+    - (dir_file_or_template.when | default(true))   # can't "omit" in a list, so since this is OR, default to true
     - (dir_file_or_template.when_pkg_installed is defined) |
-       ternary(dir_file_or_template.when_pkg_installed | default("nil") in ansible_facts.packages | default([]), true)
+       ternary(dir_file_or_template.when_pkg_installed | default("unmatchable-package-name") in ansible_facts.packages | default([]), true)
 
 # FIXME: once we have files/ populated correctly, we'd likely be able
 # to do away with install list of both "install list of directories"
