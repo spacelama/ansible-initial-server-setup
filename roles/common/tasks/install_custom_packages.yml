@@ -13,6 +13,12 @@
 #   failed_when: correct_archived_package_check_deb.rc > 1
 #   changed_when: correct_archived_package_check_deb.rc == 1
 
+- name: Ensure frozen packages held at right version
+  template:
+    dest: /etc/apt/preferences.d/ansible-hold-packages
+    src: etc/apt/preferences.d/ansible-hold-packages.j2
+  become: true
+
 - name: Ensures ~ansible/Downloads dir exists
   file:
     path="/home/{{ ansible_env.USER }}/Downloads"
@@ -20,8 +26,8 @@
 
 - name: Download archived .deb files
   copy:
-    src: "deb/{{ item }}"
-    dest: "/home/{{ ansible_env.USER }}/Downloads/{{ item }}"
+    src: "deb/{{ item.file | default(item) }}"
+    dest: "/home/{{ ansible_env.USER }}/Downloads/{{ item.file | default(item) }}"
 #  when: correct_archived_package_check_deb.rc == 1
   loop: "{{ install_packages }}"
 
@@ -34,10 +40,17 @@
 #   loop:
 #     - qiv
 
+- name: Unhold previously held package
+  dpkg_selections:
+    name: "{{ item.package }}"
+    selection: install # unhold
+  when: item.package is defined
+  loop: "{{ install_packages }}"
+  become: true
+
 - name: Install archived_package
   apt:
-    deb: "/home/{{ ansible_env.USER }}/Downloads/{{ item }}"
-    force: yes # would rather --allow-change-held-packages https://github.com/ansible/ansible/issues/32092 https://github.com/ansible/ansible/issues/65325
+    deb: "/home/{{ ansible_env.USER }}/Downloads/{{ item.file | default(item) }}"
   become: true
 #  when: correct_archived_package_check_deb.rc == 1
   loop: "{{ install_packages }}"

@@ -48,14 +48,11 @@
   include_tasks: "{{ playbook_dir }}/roles/common/tasks/install_custom_packages.yml"
   vars:
     install_packages:
-    - qiv_2.3.2-2_amd64.deb
-    - softbeep_0.3-18_amd64.deb
-
-- name: Hold qiv package
-  dpkg_selections:
-    name: "qiv"
-    selection: hold
-  become: true
+    - softbeep_0.3-18_amd64.deb # no longer in debian
+    - { package: qiv, file: qiv_2.3.2-2_amd64.deb, freeze: "2.3.2-2" } # my additions
+    - { package: zoom, file: patched_ibus_removed_zoom_amd64_6.1.11.deb, freeze: "6.1.11" } # zoom bring in a useless dependency on ibus: https://devforum.zoom.us/t/annoying-ibus-dependency-in-zoom-deb-files/67293/20
+    - { package: wmtop, file: wmtop_0.84-7_amd64.deb, freeze: "0.84-7" }  # limit CPU wakeups
+    - { package: tsocks, file: tsocks_1.8beta5+ds1-1_amd64.deb, freeze: "1.8beta5+ds1-1" } # debian bug #471112
 
 - name: Install radeon firmware
   apt:

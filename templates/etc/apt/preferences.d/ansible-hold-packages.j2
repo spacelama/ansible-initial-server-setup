@@ -1,0 +1,9 @@
+#jinja2: lstrip_blocks: "True"
+{% for item in install_packages %}
+  {% if item.freeze is defined %}
+Package: {{ item.package }}
+Pin: version {{ item.freeze }}
+Pin-Priority: 501
+
+  {% endif %}
+{% endfor %}
