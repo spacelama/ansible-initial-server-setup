@@ -19,17 +19,19 @@
     src: etc/apt/preferences.d/ansible-hold-packages.j2
   become: true
 
-- name: Ensures ~ansible/Downloads dir exists
+- name: Ensures /dev/shm/ansible/Downloads dir exists  # large amount of temporary ramfs space
   file:
-    path="/home/{{ ansible_env.USER }}/Downloads"
+    path="/dev/shm/{{ ansible_env.USER }}/Downloads"
     state=directory
+  changed_when: false
 
 - name: Download archived .deb files
   copy:
     src: "deb/{{ item.file | default(item) }}"
-    dest: "/home/{{ ansible_env.USER }}/Downloads/{{ item.file | default(item) }}"
+    dest: "/dev/shm/{{ ansible_env.USER }}/Downloads/{{ item.file | default(item) }}"
 #  when: correct_archived_package_check_deb.rc == 1
   loop: "{{ install_packages }}"
+  changed_when: false
 
 # - name: remove wrong version of downloaded .deb files
 #   apt:
@@ -50,7 +52,7 @@
 
 - name: Install archived_package
   apt:
-    deb: "/home/{{ ansible_env.USER }}/Downloads/{{ item.file | default(item) }}"
+    deb: "/dev/shm/{{ ansible_env.USER }}/Downloads/{{ item.file | default(item) }}"
   become: true
 #  when: correct_archived_package_check_deb.rc == 1
   loop: "{{ install_packages }}"
