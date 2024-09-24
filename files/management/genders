@@ -35,6 +35,7 @@ epaper-clock                    esp32,not247,notyetproduction
 
 airmon1                         tasmota,tasmotaesp32,PMS5003,SCD40
 batterymon1                     tasmota,tasmotaesp8266,millivolts
+fridge1                         tasmota,tasmotaesp32,DS18B20,temperature
 fanstudy1                       tasmota,switch,dimmer,fan,not247
 ac-power                        tasmota,switch,medion,accurate,powermon
 angela-power                    tasmota,switch,sonoffs26,not247
@@ -52,6 +53,7 @@ brewfridge-power                tasmota,switch,athom,accurate,powermon
 pvebackup-power                 tasmota,switch,newkogan,powermon,esp12s,accurate
 
 washingmachine-power            tasmota,switch,medion,accurate,powermon,repairedlimitresistor
+ad-hoc-power                    tasmota,switch,athom,accurate,powermon,not247
 measure-power                   tasmota,switch,newkogan,accurate,powermon,not247
 #chromecast-lounge-power         tasmota,switch,newkogan,powermon,currentoffset,frequent-dies-need-power-supply-work
 panasonic-power                 tasmota,switch,oldkogan,accurate,powermon,usbport
@@ -74,6 +76,7 @@ cam-rear                        iot
 
 fan-1                           iot,tuya
 study-fluro-1                   iot,tuya
+blahblah-light-1                iot,tuya
 living-room-light-1             iot,tuya
 side-kitchen-light              iot,tuya,not247
 
