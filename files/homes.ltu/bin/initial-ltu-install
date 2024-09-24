@@ -8,7 +8,7 @@ fi
 apt update
 apt dist-upgrade
 
-apt install needrestart less most x11-utils xclip xdm ssh man vim git xterm procmail curl keychain mgitstatus rsync telnet vim-pathogen plocate bash-completion net-tools lsof ncal x11-apps x11-xserver-utils lynx bind9-dnsutils tcpdump snapd mesa-utils dlocate apt-file iperf3 snapd dstat firefox-esr bc ksh fvwm vim-gtk3 wget gcc strace netcat-openbsd dlocate dos2unix gnupg ssh-askpass picom ansible ansible-mitogen gnuplot-qt w3m cryptsetup cryptsetup-initramfs cryptmount colordiff apg autocutsel pkg-config pqiv qiv yq xpdf
+apt install needrestart less most x11-utils xclip xdm ssh man vim git xterm procmail curl keychain mgitstatus rsync telnet vim-pathogen plocate bash-completion net-tools lsof ncal x11-apps x11-xserver-utils lynx bind9-dnsutils tcpdump snapd mesa-utils dlocate apt-file iperf3 dstat firefox-esr bc ksh fvwm vim-gtk3 wget gcc strace netcat-openbsd dos2unix gnupg ssh-askpass picom ansible ansible-mitogen gnuplot-qt w3m cryptsetup cryptsetup-initramfs cryptmount colordiff apg autocutsel pkg-config pqiv qiv yq xpdf
 # dnsmasq systemd-resolved
 
 apt install -t bookworm-backports emacs emacs-gtk elpa-session elpa-yaml-mode
