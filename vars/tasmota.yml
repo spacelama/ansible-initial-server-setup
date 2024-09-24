@@ -79,8 +79,32 @@
     - command: FriendlyName4
       value: "{{ FriendlyName4 | default(omit) }}"
 
+    - command: AdcParam1
+      value: "{{ AdcParam1 | default(omit) }}"
+
     - command: SetOption65
       value: "{{ disable_default_reset_on_power_reset7 | default(0) }}"
+
+    - command: SetOption68
+      value: "{{ SetOption68 | default(omit) }}"
+
+    - command: SetOption91
+      value: "{{ SetOption91 | default(omit) }}"
+
+    - command: SetOption99
+      value: "{{ SetOption99 | default(omit) }}"
+
+    - command: LedTable
+      value: "{{ LedTable | default(omit) }}"
+
+    - command: TempRes
+      value: "{{ TempRes | default(omit) }}"
+
+    - command: SaveData
+      value: "{{ SaveData | default(omit) }}"
+
+    - command: PidDSmooth
+      value: "{{ PidDSmooth | default(omit) }}"
 
     - command: Latitude
       value: "{{ latitude }}"
