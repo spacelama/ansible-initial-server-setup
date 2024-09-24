@@ -279,8 +279,6 @@ function setup_environment() {
     LESSHISTSIZE=20480
     export LESSHISTSIZE
     LESS="-i -M -R -P%t?f%f:stdin .?pb%pb\%:?lbLine %lb:?bbByte %bb:-..."  #no -X - because this disables cursor movement (when and where was this? Works on debian unstable 20070130, mind you, it seems to be reasonably annoying when viewing multiple files in querybts and the previous file isnt cleared off the screen until you scroll, so it becomes hard to tell where the old file ends and the new file starts)
-    LESSOPEN="| highlight --out-format=xterm256 %s"
-    export LESSOPEN
     #FIXME: -g has been disabled temporary because of bug #459335, 460171
     case $OS in
         Darwin)
