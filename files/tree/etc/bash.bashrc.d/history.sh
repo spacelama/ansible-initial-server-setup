@@ -33,7 +33,16 @@ function write_history_in_background() {
         # writing history...
         mkdir -p /tmp/$USER
         lockfile -1 -r 30 -l 60 /tmp/$USER/.bash_history.lock
-        PWDENC="${PWD//!/\\!}"
+        PWDENC="$( printf "%q" "${PWD}")" # original purpose was to
+                                          # convert "!" to "\!" so
+                                          # that the sed replacement
+                                          # delimiter wouldn't be
+                                          # messed up by paths
+                                          # containing "!".  But
+                                          # printf "%q" converts "!"
+                                          # already as well as all the
+                                          # other characters sed cares
+                                          # about
         history=$(
             if [ -n "$1" ] ; then
                 echo "#"$(date +%s)
