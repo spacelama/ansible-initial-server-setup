@@ -91,6 +91,8 @@
       [digitemp_*]
       user nut
       group dialout
+      env.warning 60
+      env.critical 70
 
       {{ munin_nut_config if host_is_nut_master | default(false) }}
 
@@ -167,7 +169,10 @@
     - numa_
     - chrony_
     - nvme_
-    - tasmota_
+    - tasmota_    # would love to just put our modified plugins that
+                  # are already in upstream, directly into
+                  # /etc/munin/plugins, but these are the ones that
+                  # take arguments, so they need to go somewhere!
   notify: restart munin-node
 
 - name: install custom nutups2_ etc munin monitoring plugins from munin-contrib, that take arguments, to UPS nut monitoring nodes
