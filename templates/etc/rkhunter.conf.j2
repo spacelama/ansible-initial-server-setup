@@ -803,6 +803,8 @@ ALLOWDEVFILE=/dev/shm/resolvconf/interface/lo.pdnsd
 ALLOWDEVFILE=/dev/shm/libpod_lock
 ALLOWDEVFILE=/dev/shm/ledmon.conf
 ALLOWDEVFILE=/dev/shm/ShM.*
+# zoom:
+ALLOWDEVFILE=/dev/shm/aomshm.*
 ALLOWDEVFILE=/dev/shm/sem.Mvlg_ada_lock
 {% if ( host_is_container | default(false) ) %}
 ALLOWDEVFILE=/dev/.lxc/proc/kcore
