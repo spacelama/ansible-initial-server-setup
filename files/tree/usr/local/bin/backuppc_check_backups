@@ -7,7 +7,7 @@
 logf=/.backuppc_status
 date=$( date +%s )
 # excludes should be escaped in the same way paths in /etc/mtab is escaped
-excludes=( "/proc/.*" "/sys/.*" "/dev/.*" "/run/.*" "/backuppc" "/snapshots" "/home/tconnors/.mp3.low_qual" "/var/spool/squid" "/tank[^/]*" "/mnt/.*" "/media/.*" "/mnt/olddirac" "/var/cache/.*" ".*not_backed_up.*" ".*scratch" "/external_backups" "/tmp" "/home/angela" "/piroot-new" ".*subvol.*" ".*basevol.*" "/rpool.*" "/wavlink" "/net/.*" "/var/snap/.*" "/var/lib/jellyfin-transcodes" "/jellyfin" "/home/angela/media" "/angela"  ) # FIXME: we do want /hdd/template/iso though.  Only thing we don't want is  /hdd/subvol-* - perhaps we should be excluding those instead; jellyfin mounted from fs:.../movies
+excludes=( "/proc/.*" "/sys/.*" "/dev/.*" "/run/.*" "/backuppc" "/snapshots" "/home/tconnors/.mp3.low_qual" "/var/spool/squid" "/tank[^/]*" "/mnt/.*" "/media/.*" "/mnt/olddirac" "/home/tconnors/oppo" "/var/cache/.*" ".*not_backed_up.*" ".*scratch" "/external_backups" "/tmp" "/home/angela" "/piroot-new" ".*subvol.*" ".*basevol.*" "/rpool.*" "/wavlink" "/net/.*" "/var/snap/.*" "/var/lib/jellyfin-transcodes" "/jellyfin" "/home/angela/media" "/angela"  ) # FIXME: we do want /hdd/template/iso though.  Only thing we don't want is  /hdd/subvol-* - perhaps we should be excluding those instead; jellyfin mounted from fs:.../movies
 exclude_types=( "tmpfs" "devtmpfs" "devpts" "sysfs" "proc" "udf" "squashfs" "nfs" "nfs3" "nfs4" "fuse.sshfs" "fuse.lxcfs" "autofs" "fuse.afuse" )
 # exclude tuples of: "$dev $type $fs", in array of regexp form
 exclude_dev_type_matches=( "/dev/mapper/hdd.*/home/tconnors/.*" ) # these are bind mounted in
