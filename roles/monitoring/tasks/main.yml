@@ -344,11 +344,11 @@
     - numa_
     - smart_
     - sensors_
-    - tasmota_
     - if_
     - if_err_
     - nutups_
-#    - ipmi_  # wants to set all 4 on all hosts, so define them in dell instead
+    - "{{ ( host_is_munin_server | default(false) ) | ternary( 'tasmota_', omit) }}"
+#    - ipmi_  # wants to set all 4 on all hosts, so define them via a check on host_is_dell_server instead
 
 - name: existing munin plugins with params
   file:
