@@ -15,7 +15,7 @@
 
 - name: Ensure frozen packages held at right version
   template:
-    dest: /etc/apt/preferences.d/ansible-hold-packages
+    dest: "/etc/apt/preferences.d/ansible-hold-packages{{ apt_preferences_hold_suffix | default('') }}"
     src: etc/apt/preferences.d/ansible-hold-packages.j2
   become: true
 

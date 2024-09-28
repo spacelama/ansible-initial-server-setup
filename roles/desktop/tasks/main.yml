@@ -47,6 +47,7 @@
 - name: install custom locally build desktop packages
   include_tasks: "{{ playbook_dir }}/roles/common/tasks/install_custom_packages.yml"
   vars:
+    apt_preferences_hold_suffix: "-desktop"
     install_packages:
     - softbeep_0.3-18_amd64.deb # no longer in debian
     - { package: qiv, file: qiv_2.3.2-2_amd64.deb, freeze: "2.3.2-2" } # my additions
