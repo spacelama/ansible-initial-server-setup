@@ -1,0 +1,12 @@
+---
+# installs a symlink
+
+- name: "install symlink: {{ dir_file_or_template.name }} from {{ source }}"
+  file:
+    dest: "{{ dir_file_or_template.name | default(('/' ~ dir_file_or_template) | dirname) }}"
+    owner: "{{ dir_file_or_template.user | default('root') }}"
+    group: "{{ dir_file_or_template.group | default('root') }}"
+    src: "{{ source }}"
+    state: link
+  become: "{{ dir_file_or_template.become | default(true) }}"
+  notify: "{{ dir_file_or_template.notify | default(omit) }}"

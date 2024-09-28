@@ -88,6 +88,10 @@
       user nut
       group nut
 
+      [digitemp_*]
+      user nut
+      group dialout
+
       {{ munin_nut_config if host_is_nut_master | default(false) }}
 
   become: true
