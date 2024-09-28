@@ -167,6 +167,7 @@
     - numa_
     - chrony_
     - nvme_
+    - tasmota_
   notify: restart munin-node
 
 - name: install custom nutups2_ etc munin monitoring plugins from munin-contrib, that take arguments, to UPS nut monitoring nodes
