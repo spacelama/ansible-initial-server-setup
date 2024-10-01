@@ -1,0 +1,26 @@
+#!/bin/bash
+
+usage() {
+    echo "git-grep [--show-commits] <search>" 1>&2
+    exit 1
+}
+
+show_diffs=true
+while [[ "$1" == -* ]] ; do
+    case "$1" in
+        --show-commits)
+            show_diffs=false
+            ;;
+        *)
+            usage
+            ;;
+    esac
+    shift
+done
+
+if $show_diffs ; then
+    git log -p -G "$@"
+else
+    git grep "$@" $(git rev-list --all)
+fi
+
