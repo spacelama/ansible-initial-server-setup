@@ -38,8 +38,9 @@ excludes=( "/proc/.*"
            "/home/angela/media"
            "/angela"  )
 exclude_types=( "tmpfs" "devtmpfs" "devpts" "sysfs" "proc" "udf" "squashfs" "nfs" "nfs3" "nfs4" "fuse.sshfs" "fuse.lxcfs" "autofs" "fuse.afuse" )
-# exclude tuples of: "$dev $type $fs", in array of regexp form
-exclude_dev_type_matches=( "/dev/mapper/hdd.*/home/tconnors/.*" ) # these are bind mounted in
+# exclude tuples of: "$HOST $dev $type $fs", in array of regexp form
+exclude_host_dev_type_matches=( "dirac /dev/mapper/hdd.* .* /home/tconnors/.*" # these are bind mounted in
+                                "fermi /dev/mmcblk0p1 .* /\(usr\|opt\)/.*" )     # these are bind mounted in
 HOST=$( hostname )
 
 function get_logentry() {
@@ -65,8 +66,8 @@ function exclude() {
             fi
         done
 
-        for exclude_dev_type_match in "${exclude_dev_type_matches[@]}" ; do
-            if echo "$dev $type $fs" | grep -q "^$exclude_dev_type_match\$" ; then
+        for exclude_host_dev_type_match in "${exclude_host_dev_type_matches[@]}" ; do
+            if echo "$HOST $dev $type $fs" | grep -q "^$exclude_host_dev_type_match\$" ; then
                 # echo "fs $fs deliberately excluded"
                 continue 2
             fi
