@@ -1,0 +1,8 @@
+[Unit]
+Description=Monitor for changes of volume and display notification
+
+[Service]
+ExecStart=/home/tconnors/bin/volume-detect
+
+[Install]
+WantedBy=default.target

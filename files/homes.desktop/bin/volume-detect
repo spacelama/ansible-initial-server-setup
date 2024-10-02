@@ -1,0 +1,40 @@
+#!/bin/bash
+
+detect_vol() {
+    sound=$( amixer -D default -M get Master )
+    vol=$( echo "$sound" |
+               grep -Pio '(\d+)%' |
+               sed 's/%//' |
+               head -n 1
+       )
+    mute=false
+    echo "$sound" | grep -q "\[off\]" && mute=true && vol=0
+}
+
+detect_vol
+old_vol=$vol
+old_mute=$mute
+while : ; do
+    detect_vol
+
+    if [ "$mute" != "$old_mute" ] && $mute ; then
+        notify-send "Volume: Mute" -h "int:value:$vol" -h string:synchronous:volume --icon=audio-volume-muted
+    elif [ "$vol" != "$old_vol" ] ; then
+        case "$vol" in
+            ?|[0-2]?)
+                icon=audio-volume-low
+                ;;
+            [3-4]?)
+                icon=audio-volume-medium
+                ;;
+            [5-9]?|100)
+                icon=audio-volume-high
+                ;;
+        esac
+        notify-send "Volume: $vol" -h "int:value:$vol" -h string:synchronous:volume --icon=$icon
+    fi
+    old_vol="$vol"
+    old_mute="$mute"
+
+    sleep 0.1
+done
