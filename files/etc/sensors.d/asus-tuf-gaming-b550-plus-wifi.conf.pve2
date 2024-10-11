@@ -60,20 +60,52 @@ label in8 "Vbat"
 
 label fan1 "Front Fan (top)"
 label fan2 "CPU Fan (rear)"
-    set fan2_min 200
+set fan2_min 200
 label fan3 "Front Fan (middle)"
-label fan4 "Front Fan (bottom)"
+label fan4 "Front Fan (bottom) & 10gbe card (monitored)"
+# MB only has connectors for 3 chassis fans, 2 CPU fans, and AIO pump; no idea what fan5 is meant to be
+ignore fan5
 label fan6 "Rear Chassis Fan"
-    set fan6_min 200
+set fan6_min 200
 label fan7 "CPU Fan (front)"
+
+# Excellent documentation here (I can see i2c but can't seem to obtain
+# dimm temperatures) (and we should follow its advice on persistent
+# naming!): https://wiki.archlinux.org/title/Lm_sensors
 
 # https://github.com/lm-sensors/lm-sensors/issues/441
 
-    ignore temp3
-#    ignore temp4   # seems valid on the B550-plus
-    ignore temp5
-    ignore temp6
+ignore temp3
+#    ignore temp4   # seems valid on the B550-plus, perhaps same as SYSTIN
+ignore temp6
+
+label temp1 "temp Motherboard?"
+label temp4 "temp chipset?"
+label temp5 "temp 10gbe"
+label temp7 "temp Motherboard?"
 
 # Other possibilities are:
 # https://github.com/Fred78290/nct6687d
 # Lots of discussion here: https://bugzilla.kernel.org/show_bug.cgi?id=204807
+
+# cd /sys/class/hwmon/hwmon1 ; cat device/model ; ls -lA device/device
+chip "nvme-pci-0100"
+label temp1 "temp composite Samsung-EVO-970-1TB"
+label temp2 "temp sensor 1 Samsung-EVO-970-1TB"
+label temp3 "temp sensor 2 Samsung-EVO-970-1TB"
+
+# cd /sys/class/hwmon/hwmon0 ; cat device/model ; ls -lA device/device
+chip "nvme-pci-0600"
+label temp1 "temp composite Samsung-EVO-970-500GB"
+label temp2 "temp sensor 1 Samsung-EVO-970-500GB"
+label temp3 "temp sensor 2 Samsung-EVO-970-500GB"
+
+# cd /sys/class/hwmon/hwmon5 ; cat device/model ; l -d device/block/sd? ; grep sda /proc/partitions ; strings device/vpd_pg83 ; ls -lA device/block/sd?/device
+# nope, bitten by https://github.com/lm-sensors/lm-sensors/issues/230
+# https://github.com/lm-sensors/lm-sensors/pull/371/files
+#chip "drivetemp-scsi-*-*"
+#label temp1 "temp WD-WCAZAC682055 2TB"
+
+#chip "drivetemp-scsi-1-0"
+#chip "drivetemp-scsi-2-0"
+#chip "drivetemp-scsi-3-0"
