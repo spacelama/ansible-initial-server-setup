@@ -24,6 +24,7 @@
     path="/dev/shm/{{ ansible_env.USER }}/Downloads"
     state=directory
   changed_when: false
+  check_mode: false
 
 - name: Download archived .deb files
   copy:
@@ -32,6 +33,7 @@
 #  when: correct_archived_package_check_deb.rc == 1
   loop: "{{ install_packages }}"
   changed_when: false
+  check_mode: false
 
 # - name: remove wrong version of downloaded .deb files
 #   apt:
