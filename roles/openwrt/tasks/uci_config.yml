@@ -88,6 +88,7 @@
     key: wireless.radio0
     value: "{{ default_wifi_device_settings | combine( {
       'htmode': htmode_24ghz,
+      'band': '2g',
       'cell_density': density_24ghz,
       'distance': distance_24ghz,
       'txpower': power_24ghz | default(omit),
@@ -102,6 +103,7 @@
     key: wireless.radio1
     value: "{{ default_wifi_device_settings | combine( {
       'htmode': htmode_5ghz,
+      'band': '5g',
       'cell_density': density_5ghz,
       'distance': distance_5ghz,
       'txpower': power_5ghz | default(omit),
