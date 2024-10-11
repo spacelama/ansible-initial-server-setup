@@ -10,7 +10,18 @@ mkdir -p tasmota
 cd tasmota || exit 1
 tasmota_read_success=false
 while read h ; do
-    error=$( ( decode-config.py --source "$h" | jq > "$h.json" || echo jq failed: "$h" ) 2>&1 )
+    error=$(
+        (
+            decode-config.py --source "$h" | jq > "$h.json" || echo jq failed: "$h"
+            # because of bugs like
+            # https://github.com/tasmota/decode-config/issues/93,
+            # perhaps .dmp and .bin format backups are more complete
+            # than the textual representation, so store them as well.
+            # They all must succeed for the backup to be regarded
+            # successful
+            decode-config.py -o "$h.dmp" -t dmp --source "$h" 2> /dev/null || echo decode-config.py dmp failed: "$h"
+            decode-config.py -o "$h.bin" -t bin --source "$h" 2> /dev/null || echo decode-config.py bin failed: "$h"
+        ) 2>&1 )
 #    if [ -n "$error" ] && ! nodeattr -l $h | grep -q not247 ; then
 #        echo "$error"
 #    fi
@@ -19,6 +30,8 @@ while read h ; do
         # how to flag in a non-obtrusive manner that we should
         # occasionally deliberately get a known good dump
         cp -a "$data_dir_dest/tasmota/$h.json" "$h.json"
+        cp -a "$data_dir_dest/tasmota/$h.dmp" "$h.dmp"
+        cp -a "$data_dir_dest/tasmota/$h.bin" "$h.bin"
     else
         tasmota_read_success=true
     fi
@@ -29,6 +42,6 @@ cd "$data_dir" || exit 1
 get_conf_info.switch
 
 if ! $tasmota_read_success ; then
-    echo "Failed to read at least one tasmota device correctly, implying the scripts have broken again.  Thought about installing python3-configargparse"?
+    echo "Failed to read at least one tasmota device correctly, implying the scripts have broken again.  Thought about installing python3-configargparse?"
     exit 1
 fi
