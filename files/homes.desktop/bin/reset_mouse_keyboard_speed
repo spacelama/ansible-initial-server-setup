@@ -2,9 +2,9 @@
 # -*- Mode: shell-script -*-
 #template by ~tconnors/bin/newshscript
 #Fri Jul 13 22:02:40 EST 2012
-# $Revision: 1.4 $ $Date: 2021/08/03 02:45:52 $
-# $Id: reset_mouse_keyboard_speed,v 1.4 2021/08/03 02:45:52 tconnors Exp $
-# $Header: /home/tconnors/cvsroot/bin/reset_mouse_keyboard_speed,v 1.4 2021/08/03 02:45:52 tconnors Exp $
+# $Revision: 1.5 $ $Date: 2024/10/11 09:02:16 $
+# $Id: reset_mouse_keyboard_speed,v 1.5 2024/10/11 09:02:16 tconnors Exp $
+# $Header: /home/tconnors/cvsroot/bin/reset_mouse_keyboard_speed,v 1.5 2024/10/11 09:02:16 tconnors Exp $
 # $RCSfile: reset_mouse_keyboard_speed,v $
 
 keyboard=true
@@ -30,25 +30,49 @@ fi
 
 case $LONGHOST-$SHORTDISPHOST in
     bohr*-galileo)
-        xset m 8/3                #set the mouse speed to something non-sucky
+        xset m 8/3
     ;;
-    scuzzie*-*|dirac*-*|gamow*-*|maxwell*-*|bohr*-*|hubble*-*|penrose*-*|curie*-*)
-        if [ $SHORTHOST = scuzzie -o $SHORTHOST = dirac -o $SHORTHOST = gamow -o $SHORTHOST = maxwell ] ; then
-            if [ $SHORTHOST = dirac -o $SHORTHOST = gamow ] ; then
-                #xset m 30/10 10                #set the mouse speed to something non-sucky
-                k="libinput Accel Speed" ; v=0.9 ; dev='HID 046d:c521'
-                xinput list-props "pointer:$dev" | grep "$k"
-                xinput set-prop "pointer:$dev" "$k" $v
-                xinput list-props "pointer:$dev" | grep "$k"
-            else
+    scuzzie*-*|dirac*-*|gamow*-*|maxwell*-*|bohr*-*|hubble*-*|penrose*-*|curie*-*|fermi*-*)
+        case $SHORTHOST in
+            dirac|gamow|fermi)
+                #xset m 30/10 10
+                # xinput list: ->
+                for dev in 'HID 046d:c521' 'Logitech MX Master 3S' ; do
+                    list_props=$( xinput list-props "pointer:$dev" ) ||
+                        continue
+                    case "$dev" in
+                        Logitech\ MX\ Master\ 3S)
+                            k="libinput Accel Speed"
+                            v=0.2
+                        ;;
+                        HID*)
+                            k="libinput Accel Speed"
+                            v=0.9
+                            ;;
+                        *)
+                            echo "Forgot dev match? $dev"
+                            break
+                            ;;
+                    esac
+                    if echo "$list_props" | grep "$k" ; then
+                        xinput set-prop "pointer:$dev" "$k" $v
+                        echo " Setting pointer:$dev $k $v"
+                        echo -n "    --> "
+                        xinput list-props "pointer:$dev" | grep "$k"
+                    fi
+                done
+                ;;
+            scuzzie|dirac-laptop|maxwell)
                 xset m 13/10 1
-            fi
-        else
-            xset m 8/3                #set the mouse speed to something non-sucky
-        fi
+                ;;
+            *)
+                xset m 8/3
+                ;;
+        esac
     ;;
     *.ltu.edu.au-*)
-        : #xset m 4/3 10                #set the mouse speed to something non-sucky
+        #xset m 4/3 10
+        :
     ;;
     *.swin.edu.au-*)
         case $LONGHOST in
@@ -56,11 +80,11 @@ case $LONGHOST-$SHORTDISPHOST in
                 xset m 10/3 2000
             ;;
             *)
-                xset m 4/3               #set the mouse speed to something non-sucky
+                xset m 4/3
             ;;
         esac
     ;;
     *)
-        xset m 11/3 8               #set the mouse speed to something non-sucky
+        xset m 11/3 8
     ;;
 esac
