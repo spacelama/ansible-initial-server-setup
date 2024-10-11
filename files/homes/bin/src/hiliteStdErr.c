@@ -51,8 +51,17 @@ main (int argc, char **argv)
      int f,fs,fe;
      fd_set rfds;
      struct timeval tv;
+     int no_stdout;
      
      int flags;
+
+     no_stdout=0;
+
+     if (argc > 1 && !strcmp(argv[1],"--no-colour-stdout")){
+         no_stdout=1;
+         argc--;
+         argv++;
+     }
 
      if (argc < 2)
      {
@@ -125,7 +134,11 @@ main (int argc, char **argv)
                     fs=1;//make sure we really do loop again, unless there really is eof
                } else if (fs > 0) {
                     buf[fs] = 0;
-                    fprintf (stdout, "%s%s%s", SHEADER, buf, SFOOTER);
+                    if (no_stdout) {
+                        fprintf (stdout, "%s", buf);
+                    } else {
+                        fprintf (stdout, "%s%s%s", SHEADER, buf, SFOOTER);
+                    }
                }
           } while (fe > 0 || fs > 0);
           wait (&f);
@@ -161,7 +174,8 @@ main (int argc, char **argv)
           }
 
           execvp (argv[1], &argv[1]);
-          perror ("execvp");
+          // perror ("execvp");
+          fprintf (stderr, "%s %s: %s\n", "execvp:", argv[1], strerror(errno));
           return 1;
      }
 }
