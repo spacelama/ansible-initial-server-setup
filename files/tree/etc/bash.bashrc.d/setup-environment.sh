@@ -8,7 +8,11 @@ function setup_environment() {
 
     PTS=`readlink /dev/fd/0` ; PTS="${PTS#/dev/}"
 
-    export SHELL=bash
+    # No matter what shell we've been given, make sure we override it
+    # to bash if available.  Can't simply rely on "bash" and path
+    # expansion, because ~/.ssh/config exec flags needs to execute it
+    # with an explicit pathname
+    [ -x /bin/bash ] && export SHELL=/bin/bash
 
     #need to do this before quiting, because the original bash session might not have had a DISPLAY
     if [ -n "$PBS_ENVIRONMENT" ] ; then
