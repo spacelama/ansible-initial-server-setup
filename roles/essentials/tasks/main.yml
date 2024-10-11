@@ -321,8 +321,7 @@
 
 - name: Install essential packages (not container)
   apt:
-    name: [ 'git', 'cvs', 'htop', 'iotop', 'smem', 'ethtool', 'iperf3', 'aptitude', 'dlocate', 'vim', 'nicstat', 'lshw', 'hwinfo', 'parted', 'sdparm', 'chrony', 'ifstat', 'iftop', 'apt-show-versions', 'etckeeper', 'apt-listbugs', 'rlwrap', 'strace', 'make', 'keychain', 'libstring-shellquote-perl', 'dmidecode', 'expect', 'initscripts', 'direnv', 'dstat', 'bc', 'curl', 'wget', 'netcat-openbsd' ] # expect for unbuffer, initscripts for bootlogs, pcp for `pcp dstat`, but that results in pmlogger cronjobs that spin up disks on fs, bc for checkntp
-    # atop
+    name: [ 'git', 'cvs', 'htop', 'btop', 'glances', 'iotop', 'smem', 'ethtool', 'iperf3', 'aptitude', 'dlocate', 'vim', 'nicstat', 'lshw', 'hwinfo', 'parted', 'sdparm', 'chrony', 'ifstat', 'iftop', 'apt-show-versions', 'etckeeper', 'apt-listbugs', 'rlwrap', 'strace', 'make', 'keychain', 'libstring-shellquote-perl', 'dmidecode', 'expect', 'initscripts', 'direnv', 'dstat', 'bc', 'curl', 'wget', 'netcat-openbsd' ] # expect for unbuffer, initscripts for bootlogs, pcp for `pcp dstat`, but that results in pmlogger cronjobs that spin up disks on fs, bc for checkntp; not atop since it creates massive logfiles - left for desktops only
     autoremove: no
     state: present
     install_recommends: no
@@ -754,12 +753,9 @@
 
 - name: install host specific packages
   apt:
-    # list of packages
     name: "{{ packages_to_install }}"
-    # atop
     autoremove: no
     state: present
-#    install_recommends: yes
     install_recommends: no
   become: true
   when: packages_to_install is defined
