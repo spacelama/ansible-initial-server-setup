@@ -175,10 +175,20 @@ Key XF86Eject         A       A      Exec exec umount /cdrom   #vostro laptop: h
 
 #following in hotkeys.conf (which has a nice OSD)
 Key XF86AudioMute             A       A       Exec exec togglevolmute
-Key XF86AudioLowerVolume      A       A       Exec exec amixer set Master 1%- unmute
-Key XF86AudioRaiseVolume      A       A       Exec exec amixer set Master 1%+ unmute
-Key XF86AudioLowerVolume      A       S       Exec exec amixer set Master 10%- unmute
-Key XF86AudioRaiseVolume      A       S       Exec exec amixer set Master 10%+ unmute
+Key XF86AudioLowerVolume      A       A       Exec exec amixer set Master 5%- unmute
+Key XF86AudioRaiseVolume      A       A       Exec exec amixer set Master 5%+ unmute
+Key XF86AudioLowerVolume      A       S       Exec exec amixer set Master 1%- unmute
+Key XF86AudioRaiseVolume      A       S       Exec exec amixer set Master 1%+ unmute
+# and some easier ones on my normal keyboard where the volume buttons
+# need a hard-to-press FN button to be pressed as well.  Currently,
+# C-F10, C-F11 and C-F12 have no important bindings in any programs I
+# use
+Key F12             A       C       Exec exec togglevolmute
+Key F10             A       C       Exec exec amixer set Master 5%- unmute
+Key F11             A       C       Exec exec amixer set Master 5%+ unmute
+#Key F10             A       S5      Exec exec amixer set Master 1%- unmute
+#Key F11             A       S5      Exec exec amixer set Master 1%+ unmute
+
 
 #following in /usr/openwin/lib/speckeysd.map, restarting speckeysd
 #Key SunAudioMute A       A       Exec /usr/local/bin/volumeset 0

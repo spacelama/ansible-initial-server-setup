@@ -24,7 +24,7 @@
 # "state: 0x10") even though I've got it disabled in xmodmap.  Who
 # cares about the extra network traffic in 2018, as per `man fvwm`?
 
-IgnoreModifiers L25
+# IgnoreModifiers L2 # numlock only  #FIXME: 20241008 let's abide by the warning in https://www.fvwm.org/Man/fvwm3commands/ about how much extra traffic this generates, and note the slowness problems we've been having with bindings and changing of virtual pages when lots of windows are open
 
 # Me, I'm from Upstate New York, and live in New Hampshire, so I prefer
 # these dark muddy colors...
