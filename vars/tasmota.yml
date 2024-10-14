@@ -79,6 +79,18 @@
     - command: FriendlyName4
       value: "{{ FriendlyName4 | default(omit) }}"
 
+    - command: FriendlyName5
+      value: "{{ FriendlyName5 | default(omit) }}"
+
+    - command: FriendlyName6
+      value: "{{ FriendlyName6 | default(omit) }}"
+
+    - command: FriendlyName7
+      value: "{{ FriendlyName7 | default(omit) }}"
+
+    - command: FriendlyName8
+      value: "{{ FriendlyName8 | default(omit) }}"
+
     - command: AdcParam1
       value: "{{ AdcParam1 | default(omit) }}"
 
