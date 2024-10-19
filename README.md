@@ -1,11 +1,12 @@
-# Ansible Playbook for setting up a proxmox cluster with some debian and container VMs, some tasmota IOT devices, and some Openwrt Access Points and Routers with VLAN separation of the radios
+# Ansible Playbook for setting up a proxmox cluster with some debian and (LXC) container VMs, some tasmota IOT devices, and some Openwrt Access Points and Routers with VLAN separation of the SSIDs on each of the radios
 
 A couple of [Ansible](http://docs.ansible.com/) playbooks which runs a series of configuration steps to set up an SOE based on Debian, in order to provide a solid foundation for subsequent actions.
 
-It borrows heavily from the work of: [Bryan Kennedy](https://plusbryan.com/my-first-5-minutes-on-a-server-or-essential-security-for-linux-servers), [Ryan Eschinger](http://ryaneschinger.com/blog/securing-a-server-with-ansible/),  [Ashley Rich](https://github.com/A5hleyRich/wordpress-ansible), and [Digital Ocean](https://www.digitalocean.com/community/tutorials/initial-server-setup-with-ubuntu-14-04)
+It borrows heavily from the work of: [Luke Harvey](https://github.com/lukeharvey), [Bryan Kennedy](https://plusbryan.com/my-first-5-minutes-on-a-server-or-essential-security-for-linux-servers), [Ryan Eschinger](http://ryaneschinger.com/blog/securing-a-server-with-ansible/),  [Ashley Rich](https://github.com/A5hleyRich/wordpress-ansible), and [Digital Ocean](https://www.digitalocean.com/community/tutorials/initial-server-setup-with-ubuntu-14-04)
 
 It will perform the following:
 * Create a new ansible "super user" with with root privileges and public key authentication on your proxmox and debian machines as well as the containers
+* Set root user credentials, and a primary user credentials, ssh keys, sudoers to root
 * Implement several SSH hardening techniques
 * Configure the timezone and enable time synchronization
 * Modify the hostname and hosts file
@@ -15,17 +16,18 @@ It will perform the following:
 * Manage tasmota settings on your IOT devices
 * Manage openwrt settings on your openwrt devices, including installing VLANs 10,30,40,70 and configuring radios on them
 
-Note that it won't set up your OpenWRT APs and tasmota configurations
-from scratch - but it does make it easier to wholesale change all of
-your SSIDs for example.
+# What can we automate, what point-and-drool do we still need to do?
+For physical boxes, VMs and LXC containers, I take the vanilla debian install where I've just clicked through the install ISO steps in a fairly braindead fashion (our playbooks goes and fixes a bunch of things asked in install anyway), apply bootstrap.yml first, then initial_server_config.yml to bring the configuration up to my SOE and upon any further update to my config or after the machine is patched.  I don't automate the entire playbook being played because I still have far too many pets and manual changes that need checking, and the playbook is quite slow to run all the way through, so I'm frequently using `--diff`, `--check` and `--tags` to limit the scope of changes to what I'm currently concerned with.  It would be easy to email myself an output of `--check --diff initial_server_config.yml` every night, but I get enough email as-is.
+
+For OpenWRT APs and tasmota configurations however, we still rely on some manual configuration for a new device from scratch before applying these playbooks - but it does make it easier to wholesale change all of your SSIDs for example.  For upgrades however, we can automate all of the tasks needed to bring your device back into compliance with your config without any manual configuration.  I apply it routinely after any minor upgrade of the openwrt device, perhaps checking with `--diff` `--check` first if I'm a little nervous.  I do test on my VMs first (sometimes I'm even sensible enough to test on one of my virtualised APs before I test it on my internet gateway), and take a snapshot manually beforehand.  For major upgrades, it hasn't broken majorly for me yet, but my planning tends to be a little more careful around these events.  For setting up a new openwrt AP, my manual configuration tends to be limited to setting switch vlan tagging information in /etc/config/network, and assigning radio0 and radio1 consistently with my other devices, before letting uci_config.yml loose on VLAN and network definitions and what SSIDs we've assigned to which radios.  This sometimes involves swapping radio0 and radio1 pci/hardware devices in /etc/config/wireless.
 
 ## Requirements
 
 * [Ansible](http://docs.ansible.com/ansible/intro_installation.html) installed locally on your machine
-
-Ideally, you'd create a gpg encrypted file in misc/vault-password.gpg,
-and verify it can be read with:
-misc/get-vault-pass.sh
+* You probably want to install `ansible-mitogen` (and `python3-mitogen`) on your ansible server too, for my ansible.cfg sets `strategy = mitogen_linear` to greatly accelerate the playbook (it works with that setting disabled if you can't install migoten, but mitogen has never created any detectable problems for me).  I have only tested this from a debian machine (debian 11,12).
+* Ideally, you'd create a gpg encrypted file in misc/vault-password.gpg, and verify it can be read with: misc/get-vault-pass.sh
+* Openwrt plays rely on [ansible-openwrt](https://github.com/gekmihesg/ansible-openwrt), which is published as a [galaxy collection](https://galaxy.ansible.com/ui/repo/published/nn708/openwrt/).
+* Tasmota plays rely on [ansible-tasmota](https://github.com/tobias-richter/ansible-tasmota), which is available through [ansible galaxy](https://galaxy.ansible.com/ui/standalone/roles/tobias_richter/tasmota/), but which [I've modified](https://github.com/spacelama/ansible-tasmota) to allow for and transparently recovers from the tasmota device spontaneously rebooting after certain configurations are applied.
 
 ## Configuration
 
@@ -96,7 +98,7 @@ I frequently `--limit` to hosts or away from hosts.
 
 `$ ansible-playbook -v openwrt_maintenance.yml --diff --check`
 
-`$ ansible-playbook tasmota_maintenance.yml --diff --check --limit patiofluro-power,loungefrontlight-power  --extra-vars "setpsk=true" --extra-vars "setsyslog=true"`
+`$ ansible-playbook tasmota_maintenance.yml --diff --check --limit patiofluro-power,loungefrontlight-power --extra-vars "setpsk=true" --extra-vars "setsyslog=true"`
 
 ## Production
 
@@ -108,7 +110,7 @@ Likewise for tasmota and openwrt:
 
 `$ ansible-playbook -v openwrt_maintenance.yml --diff`
 
-`$ ansible-playbook tasmota_maintenance.yml --diff --limit patiofluro-power,loungefrontlight-power  --extra-vars "setpsk=true" --extra-vars "setsyslog=true"`
+`$ ansible-playbook tasmota_maintenance.yml --diff --limit patiofluro-power,loungefrontlight-power --extra-vars "setpsk=true" --extra-vars "setsyslog=true"`
 
 ## Using tags to limit the scope of changes
 
@@ -145,7 +147,9 @@ firewalls, banip etc), but I've been using this to configure fresh APs
 from scratch.  Have a good backup of your APs before you run this for
 the first time though if you've already set them up in any way.  The
 radio stuff is expected to be quite fragile, and has only received
-most testing on current openwrt 22.03.
+most testing on current openwrt 22.03. and 23.05.*
+
+My inventory is in hosts.yml, and tells us whether the openwrt device uses DSA switch config or the old definition, via `openwrt_dsa_switch_config`.  IP address are decided by `inet_addr_suffix` in your inventory to assign `192.168.{{interface}}.{{inet_addr_suffix}}` (where `interface` is decided by uci_config.yml per VLAN).  We might set `openwrt_heavy_installation` to false for devices with particularly small flash (but I was able to NFS mount a fileserver from even my smallest wavlink with 8MB of space) to manually offload the biggest of packages.  `type` is 'ap' or 'router' and decided which packages to install and how to set up DHCP.
 
 Run the playbook to configure all openwrt devices configured in
 hosts.yml:
@@ -157,7 +161,7 @@ hosts.yml:
 NTP, latitude, longitude, syslog, timezones, SSIDs are encoded in
 vars/tasmota.yml.  You'll need to tweak these.
 
-This will set both SSID1 and the fallback SSID2 - here, we set the
+This will set SSID1 and you might choose fallback SSID2 per host in your hosts.yml inventory - here, we set the
 first one to be your primary SSID that you mesh or roam between
 throughout your host, and SSID2 might be the *second* closest AP to
 where your device normally sits.  That way, tasmota will lock onto
@@ -178,7 +182,9 @@ reset.
 The ansible tasmota provider thinks PSK and syslog change every time
 you try to adjust them, even if actually unchanged, so by default, I
 don't set them.  They only get attempted to be set when you supply
-setpsk=true and setsyslog=true.  When making a mass change after
+setpsk=true and setsyslog=true.  But since writing that, I've set a lot more parameters, some of which unconditionally overwrite the setting even when unchanged, and some of these result in the tasmota device rebooting every time.  I've had to put a [workaround in ansible-tasmota](https://github.com/spacelama/ansible-tasmota) to allow the device to recover and continue setting subsequent parameters.
+
+When making a mass change after
 testing something well, I'll leave off --limit, but when configuring a
 new device, I'll use this:
 
