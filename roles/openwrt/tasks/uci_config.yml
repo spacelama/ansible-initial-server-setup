@@ -10,7 +10,7 @@
   when: type == 'ap'
   notify: restart firewall
 
-- name: delete LAN, WAN, WAN6 interfaces
+- name: delete default LAN, WAN, WAN6 interfaces that I want to rename
   include_tasks: uci_command.yml
   vars:
     uci_command: "uci delete network.{{ item }}"

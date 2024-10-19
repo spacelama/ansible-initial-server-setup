@@ -91,6 +91,9 @@
     - command: FriendlyName8
       value: "{{ FriendlyName8 | default(omit) }}"
 
+#    - command: FriendlyName9  # Max 8 friendlynames
+#      value: "{{ FriendlyName9 | default(omit) }}"
+
     - command: AdcParam1
       value: "{{ AdcParam1 | default(omit) }}"
 
