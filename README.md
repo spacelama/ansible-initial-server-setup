@@ -149,7 +149,17 @@ the first time though if you've already set them up in any way.  The
 radio stuff is expected to be quite fragile, and has only received
 most testing on current openwrt 22.03. and 23.05.*
 
-My inventory is in hosts.yml, and tells us whether the openwrt device uses DSA switch config or the old definition, via `openwrt_dsa_switch_config`.  IP address are decided by `inet_addr_suffix` in your inventory to assign `192.168.{{interface}}.{{inet_addr_suffix}}` (where `interface` is decided by uci_config.yml per VLAN).  We might set `openwrt_heavy_installation` to false for devices with particularly small flash (but I was able to NFS mount a fileserver from even my smallest wavlink with 8MB of space) to manually offload the biggest of packages.  `type` is 'ap' or 'router' and decided which packages to install and how to set up DHCP.
+My inventory is in hosts.yml, and tells us whether the openwrt device
+uses DSA switch config or the old definition, via
+`openwrt_dsa_switch_config`.  IP address are decided by
+`inet_addr_suffix` in your inventory to assign
+`192.168.{{interface}}.{{inet_addr_suffix}}` (where `interface` is
+decided by uci_config.yml per VLAN).  We might set
+`openwrt_heavy_installation: false` for devices with particularly
+small flash (but I was able to NFS mount a fileserver to manually
+offload the biggest of non-essential packages from even my smallest
+wavlink wn575a3 with 8MB of flash).  `type` is 'ap' or 'router' and
+decided which packages to install and how to set up DHCP.
 
 Run the playbook to configure all openwrt devices configured in
 hosts.yml:
