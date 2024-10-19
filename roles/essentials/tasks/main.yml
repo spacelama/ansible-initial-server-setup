@@ -742,7 +742,7 @@
     state: present
     install_recommends: no
   become: true
-  when: mount_ceph_clients is defined
+  when: mount_ceph_clients | default(false)
 
 - name: remove custom host specific files
   file:

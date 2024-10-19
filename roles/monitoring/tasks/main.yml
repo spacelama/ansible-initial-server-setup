@@ -462,4 +462,4 @@
     content: "[Service]\n# https://serverfault.com/questions/1006514/systemd-timer-for-unattended-upgrades ExecStart for some stupid reason are cumulative, so should be reset:\nExecStart=\nExecStart=/usr/share/munin/munin-asyncd --fork\n"
   become: true
   notify: restart munin-async
-  when: munin_no_fork is not defined
+  when: not (munin_no_fork | default(false))

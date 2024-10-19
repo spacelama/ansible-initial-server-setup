@@ -23,7 +23,7 @@
   register: systemdboot_cmdline
 
 - name: "Substitute flag {{ grub_setflag }} systemdboot config if already exists but needs updating"
-  when: (systemdboot_cmdline.stat.exists) and (recovery_systemdboot is not defined)
+  when: (systemdboot_cmdline.stat.exists) and not (recovery_systemdboot | default(false))
   lineinfile:
     dest: /etc/kernel/cmdline
     backrefs: yes
@@ -34,7 +34,7 @@
   notify: "Regenerate boot config"
 
 - name: "Search for {{ grub_setflag }} in systemdboot config"
-  when: (systemdboot_cmdline.stat.exists) and (recovery_systemdboot is not defined)
+  when: (systemdboot_cmdline.stat.exists) and not (recovery_systemdboot | default(false))
   register: systemdboot_variable_line_exists
   check_mode: yes # cause this to become just a test.  If there's already
                   # relevant settings, then this will think line is
@@ -60,7 +60,7 @@
   changed_when: false
 
 - name: "Append flag {{ grub_setflag }} systemdboot config"
-  when: (systemdboot_cmdline.stat.exists) and (recovery_systemdboot is not defined) and (systemdboot_variable_line_exists.msg == "line added")
+  when: (systemdboot_cmdline.stat.exists) and not (recovery_systemdboot | default(false)) and (systemdboot_variable_line_exists.msg == "line added")
   lineinfile:
     dest: /etc/kernel/cmdline
     backrefs: yes

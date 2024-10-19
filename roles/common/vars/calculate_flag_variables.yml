@@ -60,5 +60,5 @@
   # about it on the internet, so set this variable in the same way as
   # above... except that the same warning gets emitted anyway (haven't
   # noticed it cause any harm yet)...
-  grub_variable: "{{ 'GRUB_CMDLINE_LINUX' if recovery_systemdboot is defined else 'GRUB_CMDLINE_LINUX_DEFAULT' }}"
-  grub_file_ext: "{{ '-recovery' if recovery_systemdboot is defined else '' }}"
+  grub_variable: "{{ 'GRUB_CMDLINE_LINUX' if (recovery_systemdboot | default(false)) else 'GRUB_CMDLINE_LINUX_DEFAULT' }}"
+  grub_file_ext: "{{ '-recovery' if (recovery_systemdboot | default(false)) else '' }}"

@@ -28,7 +28,7 @@
 #}
 
 {# FIXME: might need wsize and rsize to not run out memory with mount/umount cycles: https://www.spinics.net/lists/ceph-users/msg60621.html #}
-{% if mount_ceph_clients is defined %}
+{% if mount_ceph_clients | default(false) %}
 {%   for mount in ceph_client_mounts %}
 {{ mount.mount }} -fstype=ceph,name={{ mount.name }},mds_namespace={{ mount.mds_namespace }},{{ mount.options }} {{ mount.mons }}:{{ mount.remote_path }}
 {%   endfor %}

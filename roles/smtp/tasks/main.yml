@@ -110,14 +110,14 @@
     modification_time: preserve
     access_time: preserve
   become: true
-  when: (host_is_mda | default(false)) and (dovecot_insecure_logfile_creation is defined)
+  when: (host_is_mda | default(false)) and (dovecot_insecure_logfile_creation | default(false))
 
 - name: Rotate imap-via-ssh logfile
   copy:
     src: etc/logrotate.d/dovecot-custom
     dest: /etc/logrotate.d/dovecot-custom
   become: true
-  when: (host_is_mda | default(false)) and (dovecot_insecure_logfile_creation is defined)
+  when: (host_is_mda | default(false)) and (dovecot_insecure_logfile_creation | default(false))
 
 - name: Install dovecot/mail.conf
   copy:

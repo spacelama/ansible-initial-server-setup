@@ -95,7 +95,7 @@
         regexp: '^#*enable-reflector='
         line: 'enable-reflector=yes'
         insertafter: '^#enable-relfector='
-  when: openwrt_router_packages is defined
+  when: openwrt_router_packages | default(false)
 
   # https://openwrt.org/docs/guide-user/network/wifi/usteer talks
   # about needing wpad full (wpad-wolfssl or wpad-openssl), but we
@@ -117,7 +117,7 @@
   opkg:
     name: tcpdump,strace,lsof,usbutils,ethtool,psmisc,procps-ng-ps,procps-ng-watch,procps-ng-vmstat,iftop,htop,btop,less,diffutils,perl,perlbase-tie # perlbase-tie for munin sensors_
     state: present
-  when: openwrt_heavy_installation is defined
+  when: openwrt_heavy_installation | default(true)
 
 - name: install host specific packages
   opkg:
@@ -130,7 +130,7 @@
   opkg:
     name: luci-app-nut,nut,nut-upscmd,nut-upsc,nut-upslog,nut-server,nut-driver-blazer_usb,nut-driver-usbhid-ups,nut-upssched,nut-avahi-service,nut-upsrw,nut-web-cgi
     state: present
-  when: nut_install is defined
+  when: nut_install | default(false)
 
 - name: install nut munin plugins
   file:
@@ -139,7 +139,7 @@
     state: link
     force: yes
   with_items: [ charge,voltages,freq,current ]
-  when: nut_install is defined
+  when: nut_install | default(false)
 
 - name: install temperature sensors munin plugin
   file:
@@ -224,7 +224,7 @@
 
 - name: include uci config
   include_tasks: uci_config.yml
-  when: run_uci_config is defined
+  when: run_uci_config | default(false)
 
 - name: commit changes
   meta: flush_handlers

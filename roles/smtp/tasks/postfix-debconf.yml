@@ -87,7 +87,7 @@
     value: "[smtp.gmail.com]:587"
   become: true
   notify: reconfigure postfix
-  when: smtp_relay_to_gmail is defined and host_is_smtp_relay | default(false)
+  when: (smtp_relay_to_gmail | default(false)) and (host_is_smtp_relay | default(false))
 
 - name: Set relayhost
   debconf:
@@ -97,7 +97,7 @@
     value: "{{ smtp_server }}"
   become: true
   notify: reconfigure postfix
-  when: not (smtp_relay_to_gmail is defined and host_is_smtp_relay | default(false))
+  when: not ((smtp_relay_to_gmail | default(false)) and (host_is_smtp_relay | default(false)))
 
 - name: Set mynetworks
   debconf:

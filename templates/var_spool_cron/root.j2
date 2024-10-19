@@ -9,9 +9,6 @@ MAILTO=tconnors
 {% if inventory_hostname is regex('^pve.$') %}
 @reboot if hostname | grep -q ^pve ; then echo schedutil | tee /sys/devices/system/cpu/cpu*/cpufreq/scaling_governor ; fi
 {% endif %}
-{% if monitor_nut is defined %}
-* * * * * /root/bin/restart-nut-driver
-{% endif %}
 {% if not (host_is_container | default(false)) %}
 00 4    * * *   /usr/local/bin/checkntp
 {% endif %}

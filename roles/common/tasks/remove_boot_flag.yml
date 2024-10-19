@@ -23,7 +23,7 @@
   register: systemdboot_cmdline
 
 - name: "Remove {{ grub_setflag_re }} from systemdboot config"
-  when: (systemdboot_cmdline.stat.exists) and (recovery_systemdboot is not defined)
+  when: (systemdboot_cmdline.stat.exists) and not (recovery_systemdboot | default(false))
   lineinfile:
     dest: /etc/kernel/cmdline
     backrefs: yes
