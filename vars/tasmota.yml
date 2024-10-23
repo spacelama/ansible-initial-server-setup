@@ -6,8 +6,9 @@
   ntp2: 192.168.1.3
   ntp3: "0.au.pool.ntp.org"
   mqtthost: 192.168.1.3
-  latitude: -37.72
-  longitude: 144.965
+  # float values below obtained from -vvv after initial writing, to mitigate having to rewrite it every invocation:
+  latitude: -37.720001
+  longitude: 144.964996
   #https://tasmota.github.io/docs/Commands/timezone_table/#management
   timezone: 99
   timestd: "1,1,4,1,3,600"
@@ -97,6 +98,14 @@
     - command: AdcParam1
       value: "{{ AdcParam1 | default(omit) }}"
 
+    # FIXME: generalise these.  Convert from "key: value" to [ "command": key, "value": value ] for all params matching AdcParam*, AdcGpio*, Setoption*, Channel*, PWM*, FriendlyName* etc
+
+    - command: AdcGpio17
+      value: "{{ AdcGpio17 | default(omit) }}"
+
+    - command: AdcGpio32
+      value: "{{ AdcGpio32 | default(omit) }}"
+
     - command: SetOption65
       value: "{{ disable_default_reset_on_power_reset7 | default(0) }}"
 
@@ -118,8 +127,90 @@
     - command: SaveData
       value: "{{ SaveData | default(omit) }}"
 
-    - command: PidDSmooth
-      value: "{{ PidDSmooth | default(omit) }}"
+    - command: Rule1
+      value: "{{ Rule1 | default(omit) }}"
+
+    - command: Rule1
+      value: "{{ '1' if ((Rule1 | default(0)) != 0) else omit }}"
+
+    - command: Channel1
+      value: "{{ Channel1 | default(omit) }}"
+
+    - command: Channel2
+      value: "{{ Channel2 | default(omit) }}"
+
+    - command: Channel3
+      value: "{{ Channel3 | default(omit) }}"
+
+    - command: Channel4
+      value: "{{ Channel4 | default(omit) }}"
+
+    - command: Channel5
+      value: "{{ Channel5 | default(omit) }}"
+
+    - command: Channel6
+      value: "{{ Channel6 | default(omit) }}"
+
+    - command: Channel7
+      value: "{{ Channel7 | default(omit) }}"
+
+    - command: Channel8
+      value: "{{ Channel8 | default(omit) }}"
+
+    - command: PWM1
+      value: "{{ PWM1 | default(omit) }}"
+
+    - command: PWM2
+      value: "{{ PWM2 | default(omit) }}"
+
+    - command: PWM3
+      value: "{{ PWM3 | default(omit) }}"
+
+    - command: PWM4
+      value: "{{ PWM4 | default(omit) }}"
+
+    - command: PWM5
+      value: "{{ PWM5 | default(omit) }}"
+
+    - command: PWM6
+      value: "{{ PWM6 | default(omit) }}"
+
+    - command: PWM7
+      value: "{{ PWM7 | default(omit) }}"
+
+    - command: PWM8
+      value: "{{ PWM8 | default(omit) }}"
+
+    - command: PWMFrequency
+      value: "{{ PWMFrequency | default(omit) }}"
+
+    - command: PWMFrequency
+      value: "{{ PWMFrequency1|default('') ~ ', 1' if (PWMFrequency1 is defined) else omit }}"
+
+    - command: PWMFrequency
+      value: "{{ PWMFrequency2|default('') ~ ', 2' if (PWMFrequency2 is defined) else omit }}"
+
+    - command: PWMFrequency
+      value: "{{ PWMFrequency3|default('') ~ ', 3' if (PWMFrequency3 is defined) else omit }}"
+
+    - command: PWMFrequency
+      value: "{{ PWMFrequency4|default('') ~ ', 4' if (PWMFrequency4 is defined) else omit }}"
+
+    - command: PWMFrequency
+      value: "{{ PWMFrequency5|default('') ~ ', 5' if (PWMFrequency5 is defined) else omit }}"
+
+    - command: PWMFrequency
+      value: "{{ PWMFrequency6|default('') ~ ', 6' if (PWMFrequency6 is defined) else omit }}"
+
+    - command: PWMFrequency
+      value: "{{ PWMFrequency7|default('') ~ ', 7' if (PWMFrequency7 is defined) else omit }}"
+
+    - command: PWMFrequency
+      value: "{{ PWMFrequency8|default('') ~ ', 8' if (PWMFrequency8 is defined) else omit }}"
+
+      # Not persistent over reboot
+#    - command: PidDSmooth
+#      value: "{{ PidDSmooth | default(omit) }}"
 
     - command: Latitude
       value: "{{ latitude }}"
