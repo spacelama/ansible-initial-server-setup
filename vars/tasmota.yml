@@ -133,6 +133,12 @@
     - command: Rule1
       value: "{{ '1' if ((Rule1 | default(0)) != 0) else omit }}"
 
+    - command: Rule2
+      value: "{{ Rule2 | default(omit) }}"
+
+    - command: Rule2
+      value: "{{ '1' if ((Rule2 | default(0)) != 0) else omit }}"
+
     - command: Channel1
       value: "{{ Channel1 | default(omit) }}"
 
