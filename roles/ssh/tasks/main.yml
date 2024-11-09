@@ -19,7 +19,7 @@
   # trick from https://docs.ansible.com/ansible/latest/playbook_guide/complex_data_manipulation.html
   with_items:
     - "/etc/ssh/ssh_config"
-    - "{{ (host_is_container | default(false)) | ternary (omit, '/etc/ssh/sshd_config') }}"
+    - "{{ (deb_release == 'buster') | ternary (omit, '/etc/ssh/sshd_config') }}"
   notify: restart ssh
   become: true
 
