@@ -25,3 +25,16 @@
     value: '0755'
   notify: restart smbd
   become: true
+
+- name: set our ZFS fileserver options
+  lineinfile:
+    dest: /etc/default/zfs
+    backrefs: yes
+    # using a negative lookahead, match everything that's eg:
+    # ^CRON_DAILY_RUN, so long as it's not already
+    # '^CRON_DAILY_RUN="true"':
+    regexp: "^({{ item.key }}=(?!'{{ item.value }}').*)"
+    line: "#\\1\\n{{ item.key }}='{{ item.value }}'"
+  become: true
+  with_items:
+    "{{ lookup('ansible.builtin.dict', default_zfs_flags) }}"

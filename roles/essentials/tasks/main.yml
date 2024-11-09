@@ -394,8 +394,10 @@
   lineinfile:
     dest: /etc/default/rkhunter
     backrefs: yes
-    # match everything that's eg: ^CRON_DAILY_RUN, so long as it's not already '^CRON_DAILY_RUN="true"':
-    regexp: "^({{ item }}=(?!\"true\"))"
+    # using a negative lookahead, match everything that's eg:
+    # ^CRON_DAILY_RUN, so long as it's not already
+    # '^CRON_DAILY_RUN="true"':
+    regexp: "^({{ item }}=(?!\"true\").*)"
     line: "#\\1\\n{{ item }}=\"true\""
   with_items:
     - CRON_DAILY_RUN
