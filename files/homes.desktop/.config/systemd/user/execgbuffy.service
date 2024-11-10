@@ -1,0 +1,10 @@
+[Unit]
+Description=Runs our gbuffy invocation
+
+[Service]
+ExecStart=/home/tconnors/bin/execgbuffy
+Restart=always
+RestartSec=10
+
+[Install]
+WantedBy=default.target

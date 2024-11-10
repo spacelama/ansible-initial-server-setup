@@ -322,9 +322,6 @@ if [ "`xdpyinfo |sed -n 's/.*depth of root window: *\([^ ]*\) .*/\1/p'`" -ge 16 
     ( sleep 120 ; nice updatebackground.sh ) &   #dont want this running on the 8 bit terminal, because it steals too many colors
 fi
 
-
-( sleep 60 ; execgbuffy ) &
-
 (
 #    [ -z "$HOR2SIZE" ] && HOR2SIZE=0
     trayer --monitor 0 --widthtype request --align right --expand true --alpha 50 --transparent true --distancefrom right --distance 0 &

@@ -1,0 +1,84 @@
+#!/bin/bash
+
+source ~/.bash_profile
+
+#ulimit -v $((1024*256)) # makes direnv in bash login scripts complain
+#ulimit -v $((1024*512))
+ulimit -v $((1024*1024*1))
+
+lockfile=/var/lock/gbuffy-$USER$DISPLAY$SHORTHOST.pids
+
+VERTSIZES=($VERT0SIZE $VERTSIZE $VERT2SIZE)
+HORSIZES=($HOR0SIZE $HORSIZE $HOR2SIZE)
+
+case $SHORTHOST in
+    aatlxd|aatpc2|aatpc2a|aatlxa)
+        repeat="0 $HORSIZE"
+        XOFFSETS=(-185)
+        YOFFSETS=(-592)
+        ;;
+    weinberg)
+        repeat="0 $HOR0SIZE $(($HOR0SIZE+$HORSIZE))"
+        XOFFSETS=(-663)
+        YOFFSETS=(-105 -105 -210)
+        ;;
+    dirac*)
+        repeat="0 $HORSIZE"
+        XOFFSETS=(-955 -1000)
+        YOFFSETS=(-80)
+        ;;
+    gamow)
+        #    repeat="0 1920"
+        repeat="0 $HORSIZE"
+        XOFFSETS=(-800)
+        YOFFSETS=(-80)
+        ;;
+    maxwell)
+        repeat=0
+        XOFFSETS=(-467)
+        YOFFSETS=(-123)
+        ;;
+    *)
+        echo "Hmm, what host are we on?"
+        exit 1
+        ;;
+esac
+
+PASS="GBUFFY_PASS_aatlxz=$HOME/.gbuffypass-aatlxz GBUFFY_PASS_fs=$HOME/.gbuffypass-fs GBUFFY_PASS_smtp=$HOME/.gbuffypass-smtp GBUFFY_PASS_gamow=$HOME/.gbuffypass-gamow GBUFFY_PASS_green=$HOME/.gbuffypass-green GBUFFY_PASS_192.168.1.2=$HOME/.gbuffypass-fs GBUFFY_PASS_192.168.1.15=$HOME/.gbuffypass-smtp GBUFFY_PASS_192.168.1.20=$HOME/.gbuffypass-gamow GBUFFY_PASS_192.168.1.22=$HOME/.gbuffypass-maxwell GBUFFY_PASS_ant=$HOME/.gbuffypass-ant GBUFFY_PASS_weinberg=$HOME/.gbuffypass-weinberg"
+
+if [ -e $lockfile ] ; then
+    kill `cat $lockfile`
+    rm -f $lockfile
+fi
+
+i=0
+for h in $repeat ; do
+    HORSIZE="${HORSIZES[i]}"
+    VERTSIZE="${VERTSIZES[i]}"
+    tmp="${XOFFSETS[i]}"
+    if [ -n "$tmp" ] ; then
+        XOFFSET=$tmp
+    fi
+    tmp="${YOFFSETS[i]}"
+    if [ -n "$tmp" ] ; then
+        YOFFSET=$tmp
+    fi
+    i=$((i+1))
+
+    geom="+$(($HORSIZE$XOFFSET+$h))+$(($VERTSIZE$YOFFSET))"
+    if [[ $LONGHOST == *aao.gov.au ]] && [ $SHORTHOST != aatpc2 ] && [ $SHORTHOST != aatpc2a ] ; then
+        xterm -iconic -e "ssh-repeat --noio --useXtokill twc@aatpc2 env LD_PRELOAD=/usr/lib/x86_64-linux-gnu/libtsocks.so $PASS GBUFFY_BEEP=false gbuffy -geometry $geom" &
+    else
+        env LD_PRELOAD=/usr/lib/x86_64-linux-gnu/libtsocks.so $PASS GBUFFY_BEEP=false gbuffy -geometry "$geom" &
+    fi
+    echo $! >> $lockfile
+    if [ -n "$VERT2SIZE" ] ; then
+        VERTSIZE=$VERT2SIZE
+        HORSIZE=$HOR2SIZE
+    fi
+    if [ -n "$Y2OFFSET" ] ; then
+        YOFFSET=$Y2OFFSET
+    fi
+done
+
+wait
