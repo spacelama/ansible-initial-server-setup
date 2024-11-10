@@ -1,15 +1,15 @@
 [Unit]
-Description=Converts Ecowitt GW1000 metstation via weewx and converts it into a format ~/bin/weather can use
+Description=Set up VNC server for met to be displayed on remote hosts
 After=network.target
 
 [Service]
 Type=simple
 Restart=always
-ExecStart=/home/tconnors/bin/met
+ExecStart=tigervncserver -localhost no :0 -geometry 656x416 -fg
 User=tconnors
 Group=tconnors
 WorkingDirectory=/home/tconnors
 
 [Install]
-Alias=met.service
+Alias=met-vncserver.service
 WantedBy=multi-user.target
