@@ -31,8 +31,9 @@
         ) and
         (
           ( file_recurse.path is not regex('(^|/).*~$' ) ) and
-          ( file_recurse.path is not regex('(^|/).git(/|$)' ) ) and
+          ( file_recurse.path is not regex('(^|/).git(/|ignore|$)' ) ) and
           ( file_recurse.path is not regex('(^|/)CVS(/|$)' ) ) and
+          ( file_recurse.path is not regex('(^|/).cvsignore$' ) ) and
           ( file_recurse.path is not regex('(^|/)readme.txt(/|$)' ) )
         )
 
