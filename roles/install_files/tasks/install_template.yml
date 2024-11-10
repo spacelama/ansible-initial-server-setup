@@ -1,6 +1,9 @@
 ---
 # generates a file .name, from template .source.j2
 
+# FIXME: need to work out how to read the templates from the file directory instead of
+# the template directory
+
 - name: "install file per template: {{ dir_file_or_template.name }} from {{ source }}"
   template:
     dest: "{{ dir_file_or_template.name | default(('/' ~ dir_file_or_template) | regex_replace('\\.j2$', '')) }}"

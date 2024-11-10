@@ -26,10 +26,15 @@
 - include_tasks: install_file.yml
   when: ( source is not regex(".*.j2$") ) and
         ( source is not regex(".*/$") ) and
-        ( not ( ( dir_file_or_template.type | default("file")) == "symlink" ) )
+        ( not (
+          ( ( dir_file_or_template.type | default("file")) == "symlink" ) &&
+          not ( dir_file_or_template.local_follow | default(false) )
+          )
+        )
 
 - include_tasks: install_symlink.yml
-  when: ( dir_file_or_template.type | default("file")) == "symlink"
+  when: ( ( dir_file_or_template.type | default("file")) == "symlink" ) and
+        not ( dir_file_or_template.local_follow | default(false) )
 
 - include_tasks: install_template.yml
   when: ( source is regex(".*.j2$") )

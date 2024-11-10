@@ -4,9 +4,6 @@
 
 - include_tasks: "{{ playbook_dir }}/roles/common/tasks/calculate_directory_contents.yml"
 
-# FIXME: easy enough to generalise this to handle .j2 files as well
-#     dest: {{item | dirname}}/{{ item | basename | regex_replace('\\.j2$', '') }}
-
 # FIXME: might need to implement "Does {{ ( '~' ~ user ~ '/' ~
 # dir_file_or_template.name ) | dirname }} exist?" style tests that
 # were in install_dir_file_or_template.yml, to ensure if directory
@@ -38,9 +35,6 @@
     owner: "{{ user }}"
     group: "{{ user }}"
     src: "{{ file_recurse.src }}"
-    # FIXME: don't think local_follow will do anything since
-    # 5347842551a8d86b8576c404795782543c89bf26, since we're finding
-    # all symlinks in a separate loop to this one
     local_follow: "{{ dir_file_or_template.local_follow | default(omit) }}"
     state: "{{ dir_file_or_template.state | default(omit) }}"
     # AND existing mode in source tree with 0777 to make sure no
