@@ -293,9 +293,6 @@
     - { name: /var/spool/cron/crontabs/root, source: var_spool_cron/root.j2,                 mode: "0600", group: "crontab" }
     - { name: /etc/modprobe.d/ansible-custom.conf, source: etc/modprobe.d/ansible-custom.conf.j2 }
 
-    - { name: /etc/systemd/system/103.scope.d/override.conf,  source: etc/systemd/system/103.scope.d/override.conf,  mode: "0644", when: "{{ inventory_hostname == 'pve1' }}"  }
-    - { name: /usr/local/bin/powertop-custom.sh,              source: usr/local/bin/powertop-custom.sh,              mode: "0755", when: "{{ inventory_hostname == 'pve3' }}"  }
-    - { name: /etc/systemd/system/powertop-custom.service,    source: etc/systemd/system/powertop-custom.service,    mode: "0644", when: "{{ inventory_hostname == 'pve3' }}"  }
     - { source: tree.pve_server/, name: /,                    when: '{{ host_is_pve_server | default(false) }}' }
 
     # FIXME: suspect I need to set user to something other than fs and webserver etc - there might be fs on fastssd and fs on hdd, or both fs and webserver on fastssd, and we need to be able to access them both
