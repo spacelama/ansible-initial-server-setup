@@ -1,9 +1,12 @@
 /var/log/iot.log {
-  daily
-  missingok
-  rotate 5
-  compress
-  delaycompress
-  notifempty
-  create 0644 root adm
+	daily
+	missingok
+	rotate 5
+	compress
+	delaycompress
+	notifempty
+	create 0644 root adm
+	postrotate
+		/usr/lib/rsyslog/rsyslog-rotate
+	endscript
 }
