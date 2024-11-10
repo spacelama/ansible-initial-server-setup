@@ -817,6 +817,7 @@ ALLOWDEVFILE=/dev/shm/qb-*
 {% if ( inventory_hostname == 'zm' ) %}
 ALLOWDEVFILE=/dev/shm/zm.mmap.*
 {% endif %}
+ALLOWDEVFILE=/dev/shm/ansible_adm/Downloads/*
 
 #
 # Allow the specified process pathnames to use shared memory segments.

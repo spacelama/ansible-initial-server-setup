@@ -55,6 +55,7 @@
 - name: Install archived_package
   apt:
     deb: "/dev/shm/{{ ansible_env.USER }}/Downloads/{{ item.file | default(item) }}"
+    allow_downgrade: true
   become: true
 #  when: correct_archived_package_check_deb.rc == 1
   loop: "{{ install_packages }}"
