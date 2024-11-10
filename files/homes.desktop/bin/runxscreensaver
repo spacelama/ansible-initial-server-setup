@@ -1,0 +1,26 @@
+#!/bin/bash
+
+# starts up xscreensaver with appropriate flags
+
+if [ `system` == home ] ; then
+    (
+        echo 'xscreensaver.mode: blank'
+        echo 'xscreensaver.timeout: 30'
+        echo 'xscreensaver.lock:false'
+    ) | xrdb -merge
+    (
+        sleep 60
+        echo "$(date): xset q before:"
+        xset q
+
+        xset dpms 0 0 1800
+        xset s off
+        xset s noblank
+
+        echo "$(date): xset q after:"
+        xset q
+    ) &
+fi
+# unbuffer could also be used, but gives us a blank grey X window that's permanently open
+stdbuf -oL -eL xscreensaver -verbose >> /tmp/xscreensaver.$DISPLAY.log 2>&1
+

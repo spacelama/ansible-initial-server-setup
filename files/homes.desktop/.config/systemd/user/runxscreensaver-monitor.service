@@ -1,0 +1,10 @@
+[Unit]
+Description=Monitor for xscreensaver emitting logs that we want to override (workaround for debian bug #1009864)
+
+[Service]
+ExecStart=/home/tconnors/bin/runxscreensaver-monitor
+Restart=always
+RestartSec=10
+
+[Install]
+WantedBy=default.target

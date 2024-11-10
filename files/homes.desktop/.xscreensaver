@@ -2,10 +2,13 @@
 # Written by xscreensaver-demo 6.06 for tconnors on Thu Aug 22 19:57:05 2024.
 # https://www.jwz.org/xscreensaver/
 
-timeout:	0:29:00
+# 40 minutes rather than 30, because the amount of times I come back from lunch and hear the screen locking just as I enter the room...
+timeout:	0:39:00
 cycle:		0:20:00
-lock:		False
-lockTimeout:	1:30:00
+# should enable this on laptops and perhaps even home...
+#lock:		False
+lock:		True
+lockTimeout:	0:10:00
 passwdTimeout:	0:01:00
 visualID:	default
 installColormap:    True

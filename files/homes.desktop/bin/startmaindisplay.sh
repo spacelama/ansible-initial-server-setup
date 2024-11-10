@@ -323,8 +323,6 @@ if [ "`xdpyinfo |sed -n 's/.*depth of root window: *\([^ ]*\) .*/\1/p'`" -ge 16 
 fi
 
 
-( sleep 60 ; runxscreensaver ; runxscreensaver-monitor ) &
-
 ( sleep 60 ; execgbuffy ) &
 
 (

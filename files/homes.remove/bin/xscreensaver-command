@@ -1,0 +1,25 @@
+#!/bin/bash
+
+function notify() {
+    echo "xscreensaver-command: $(date): $@"
+}
+
+if [[ "$*" == *-deactivate* ]] ; then
+    (
+        sleep 2 # the caller only logs their message after calling us.
+                # Background ourselves, claim we've done the
+                # deactivation, sleep, look for the message
+                # implication firefox as the caller, then ignore them
+        if tail -n 10 /tmp/xscreensaver.$DISPLAY.log | grep -q -i "inhibited by.*firefox" ; then
+            notify "-deactivate called by Firefox Caller.  Fucking them right off: " "$@" 1>&2
+            exit
+        else
+            notify "-deactivate called, and we did not find firefox at fault this time" 1>&2
+            notify Logging what we found recently to /tmp/xscreensaver.$DISPLAY.log.debug:
+            tail -n 14 /tmp/xscreensaver.$DISPLAY.log | grep -A20 -B20 --color=yes -i "inhibited by.*firefox" > /tmp/xscreensaver.$DISPLAY.log.debug
+        fi
+        exec /usr/bin/xscreensaver-command "$@"
+    ) &
+else
+    exec /usr/bin/xscreensaver-command "$@"
+fi

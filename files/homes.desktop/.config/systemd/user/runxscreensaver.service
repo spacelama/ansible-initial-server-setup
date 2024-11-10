@@ -1,0 +1,10 @@
+[Unit]
+Description=Runs xscreensaver with logs to detect occurrence of debian bug #1009864
+
+[Service]
+ExecStart=/home/tconnors/bin/runxscreensaver
+Restart=always
+RestartSec=10
+
+[Install]
+WantedBy=default.target

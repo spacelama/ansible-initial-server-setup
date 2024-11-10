@@ -1,0 +1,55 @@
+#!/bin/bash
+
+# monitors xscreensaver log to see whether it should restart it after
+# a blacklist of programs (eg, firefox) try to inhibit it.
+
+# My solution to Bug#1009864
+
+blacklist=(firefox-esr)
+
+log_in=/tmp/xscreensaver.$DISPLAY.log
+log_out=/tmp/xscreensaver-monitor.$DISPLAY.log
+
+function notify() {
+    echo "runxscreensaver-monitor: $(date): $@"
+}
+
+rotate_logfile() {
+    # append current contents to .old and create the new logfile
+    # afresh
+    cat "$log_out" >> "$log_out.old"
+    notify "rotating: $log_out" > "$log_out"
+
+    # if .old is big enough yet, rotate it too
+    maxsize=1000000
+    filesize=$(stat -c%s "$log_out.old")
+
+    if (( filesize > maxsize )); then
+        notify "rotating: $log_out.old"
+        > "$log_out.old"
+        notify "rotating: $log_out.old" >> "$log_out.old"
+    fi
+}
+
+restart_xscreensaver() {
+    rotate_logfile
+
+    notify "Found logfile line indicating we need to trigger restart of screensaver"
+
+    notify " - Will restart xscreensaver"
+    systemctl --user restart runxscreensaver.service
+    echo " *** $@"
+}
+
+exec >> $log_out 2>&1
+rotate_logfile
+
+tail -n 1 -F $log_in | grep --line-buffered -e "inhibited by" | while read inhibited_line ; do
+    for blacklisted in "${blacklist[@]}" ; do
+        if [[ "$inhibited_line" == *"$blacklisted"* ]] ; then
+            # we only kill it here.  We detect next loop around
+            # that it died via SIG message, which restarts it then
+            restart_xscreensaver "$inhibited_line"
+        fi
+    done
+done

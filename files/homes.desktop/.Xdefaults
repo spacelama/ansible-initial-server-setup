@@ -199,12 +199,13 @@ XTerm*keepSelection:	        true
 kbiff.NoTitle:			Yes
 
 ! number of minutes to logout button, -1 disables
-XLock*logoutButton:		-1
-XLock*remote:                   true
-XLock.erasedelay:               0
-XLock.nice:                     20
-XLock.dpmsoff:                  15
-XLock.allowaccess:              on
+! We use xscreensaver now rather than xlock
+!XLock*logoutButton:		-1
+!XLock*remote:                   true
+!XLock.erasedelay:               0
+!XLock.nice:                     20
+!XLock.dpmsoff:                  15
+!XLock.allowaccess:              on
 
 
 !!!!!!!!!!!!!!!!!!!!xmixer stuff follow:
