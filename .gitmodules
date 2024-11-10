@@ -1,5 +1,5 @@
-[submodule "files/etc_bash-git-prompt"]
-	path = files/etc_bash-git-prompt
+[submodule "files/etc/bash-git-prompt"]
+	path = files/etc/bash-git-prompt/
 	url = https://github.com/spacelama/bash-git-prompt
 	branch = timeout
 

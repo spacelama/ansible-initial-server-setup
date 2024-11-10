@@ -140,7 +140,7 @@
 
   - name: install blank /etc/network/interfaces
     template:
-      src: etc_network_interfaces.network-manager.j2
+      src: etc/network/interfaces.network-manager.j2
       dest: /etc/network/interfaces
     become: true
     notify: restart network-manager
@@ -248,7 +248,7 @@
 
   - name: install blank /etc/network/interfaces
     template:
-      src: etc_network_interfaces.network-manager.j2
+      src: etc/network/interfaces.network-manager.j2
       dest: /etc/network/interfaces
     become: true
     notify: restart network-manager
@@ -704,7 +704,7 @@
 
 - name: setup systemd overrides
   copy:
-    src: "etc_systemd/system/{{ item }}.d/override.conf"
+    src: "etc/systemd/system/{{ item }}.d/override.conf"
     dest: "/etc/systemd/system/{{ item }}.d/"
   with_items: "{{ systemd_overrides }}"
   become: true
@@ -728,7 +728,7 @@
 
 - name: Synchronize (rsync) and delete files in /etc/bash-git-prompt
   ansible.posix.synchronize:
-    src: etc_bash-git-prompt/
+    src: etc/bash-git-prompt/
     dest: /etc/bash-git-prompt/
     delete: yes
     recursive: yes
