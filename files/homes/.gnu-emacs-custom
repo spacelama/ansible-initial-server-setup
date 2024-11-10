@@ -83,6 +83,7 @@
  '(hl-fg-colors
    '("#002b36" "#002b36" "#002b36" "#002b36" "#002b36" "#002b36" "#002b36" "#002b36"))
  '(ibuffer-default-shrink-to-minimum-size t)
+ '(ibuffer-default-sorting-mode 'recency)
  '(ido-enable-prefix t)
  '(indent-tabs-mode nil)
  '(indicate-buffer-boundaries 'right)

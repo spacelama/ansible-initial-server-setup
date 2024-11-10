@@ -241,6 +241,7 @@
 ;;(vc-load-vc-hooks)
 (when (try-require 'vc)
   (load "~/.xemacs/myvc.el"))
+(try-require 'magit)
 
 ;(try-require 'type-break)
 
@@ -499,6 +500,7 @@
 (load "~/.xemacs/keysettings.el")
 (load "~/.xemacs/savefiles.el")
 (load "~/.xemacs/diary-helper.el")
+(load "~/.xemacs/buffers.el")
 (load "~/.xemacs/fun.el")
 
 (defun prepareprettyprint ()
