@@ -3,6 +3,8 @@ Description=Monitor for changes of volume and display notification
 
 [Service]
 ExecStart=/home/tconnors/bin/volume-detect
+Restart=always
+RestartSec=10
 
 [Install]
 WantedBy=default.target

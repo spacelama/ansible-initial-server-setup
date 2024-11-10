@@ -1,5 +1,8 @@
 #!/bin/bash
 
+# Listen for changes in the system volume, and send a notification so
+# the desktop can show the current volume level.
+
 detect_vol() {
     sound=$( amixer -D default -M get Master )
     vol=$( echo "$sound" |
@@ -14,7 +17,8 @@ detect_vol() {
 detect_vol
 old_vol=$vol
 old_mute=$mute
-while : ; do
+pactl subscribe | grep --line-buffered "change" | while read a ; do
+    # if any sort of changes occurs, it might be a change in volume
     detect_vol
 
     if [ "$mute" != "$old_mute" ] && $mute ; then
@@ -35,6 +39,4 @@ while : ; do
     fi
     old_vol="$vol"
     old_mute="$mute"
-
-    sleep 0.1
 done
