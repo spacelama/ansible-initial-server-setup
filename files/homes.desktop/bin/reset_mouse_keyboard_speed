@@ -2,9 +2,9 @@
 # -*- Mode: shell-script -*-
 #template by ~tconnors/bin/newshscript
 #Fri Jul 13 22:02:40 EST 2012
-# $Revision: 1.5 $ $Date: 2024/10/11 09:02:16 $
-# $Id: reset_mouse_keyboard_speed,v 1.5 2024/10/11 09:02:16 tconnors Exp $
-# $Header: /home/tconnors/cvsroot/bin/reset_mouse_keyboard_speed,v 1.5 2024/10/11 09:02:16 tconnors Exp $
+# $Revision: 1.6 $ $Date: 2024/10/17 04:10:26 $
+# $Id: reset_mouse_keyboard_speed,v 1.6 2024/10/17 04:10:26 tconnors Exp $
+# $Header: /home/tconnors/cvsroot/bin/reset_mouse_keyboard_speed,v 1.6 2024/10/17 04:10:26 tconnors Exp $
 # $RCSfile: reset_mouse_keyboard_speed,v $
 
 keyboard=true
@@ -28,6 +28,8 @@ if ! $mouse ; then
     exit
 fi
 
+declare -A adj=()
+list_props=
 case $LONGHOST-$SHORTDISPHOST in
     bohr*-galileo)
         xset m 8/3
@@ -40,26 +42,33 @@ case $LONGHOST-$SHORTDISPHOST in
                 for dev in 'HID 046d:c521' 'Logitech MX Master 3S' ; do
                     list_props=$( xinput list-props "pointer:$dev" ) ||
                         continue
+                    echo "Found $dev"
+                    echo
                     case "$dev" in
                         Logitech\ MX\ Master\ 3S)
-                            k="libinput Accel Speed"
-                            v=0.2
+                            adj=(
+                                ["libinput Accel Speed"]="0.01"
+                            )
                         ;;
                         HID*)
-                            k="libinput Accel Speed"
-                            v=0.9
+                            adj=(
+                                ["libinput Accel Speed"]="0.9"
+                            )
                             ;;
                         *)
                             echo "Forgot dev match? $dev"
                             break
                             ;;
                     esac
-                    if echo "$list_props" | grep "$k" ; then
-                        xinput set-prop "pointer:$dev" "$k" $v
-                        echo " Setting pointer:$dev $k $v"
-                        echo -n "    --> "
-                        xinput list-props "pointer:$dev" | grep "$k"
-                    fi
+                    for k in "${!adj[@]}" ; do
+                        if echo "$list_props" | grep "$k" ; then
+                            v="${adj[$k]}"
+                            xinput set-prop "pointer:$dev" "$k" "$v"
+                            echo " Setting pointer:$dev $k $v"
+                            echo -n "    --> "
+                            xinput list-props "pointer:$dev" | grep "$k"
+                        fi
+                    done
                 done
                 ;;
             scuzzie|dirac-laptop|maxwell)
