@@ -295,7 +295,6 @@
 
     - { source: tree.pve_server/, name: /,                    when: '{{ host_is_pve_server | default(false) }}' }
 
-    # FIXME: suspect I need to set user to something other than fs and webserver etc - there might be fs on fastssd and fs on hdd, or both fs and webserver on fastssd, and we need to be able to access them both
     - { source: etc/ceph/ceph.client.cephfs-hdd.fs.keyring,         name: /etc/ceph/, mode: "0600", when: '{{ mount_ceph_clients is defined }}' }
     - { source: etc/ceph/ceph.client.cephfs-slow.webserver.keyring, name: /etc/ceph/, mode: "0600", when: '{{ mount_ceph_clients is defined }}' }
     - { source: etc/ceph/ceph.client.cephfs-hdd.media.keyring,      name: /etc/ceph/, mode: "0600", when: '{{ mount_ceph_clients is defined }}' }
