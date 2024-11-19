@@ -28,16 +28,7 @@ xauth generate $DISPLAY . trusted
 #  . ~/.bash_profile # try calculate it again - might have a race condition on some startups
 #fi
 
-picom &      # 20240127 needed for xterm scrollback buffer not to be
-             # corrupted.  1014625: xterm: screen corruption of
-             # scrollback buffer; similar to
-             # https://bugs.freedesktop.org/show_bug.cgi?id=110214 but
-             # actually not fixed by that ; but also very useful for
-             # firefox to not chew CPU updating windows that aren't
-             # visible; probably through:
-             # https://bugzilla.mozilla.org/show_bug.cgi?id=1820096
-             # and
-             # https://bugzilla.mozilla.org/show_bug.cgi?id=1693513
+restart-compositor
 
 xrandr --current
 for i in HORSIZE VERTSIZE HOR2SIZE VERT2SIZE ; do
@@ -145,19 +136,28 @@ repeat=0  # FIXME: turns out you've been able to address individual
 #xhost -
 
 resources=$HOME/.Xdefaults
+echo "Trying $resources:"
 if [ -r "$resources" ]; then
+    echo "Loading $resources"
     xrdb -load "$resources"
 fi
 
+echo "Trying .Xdefaults.$system"
 if [ -e $HOME/.Xdefaults.$system ] ; then
+    echo "Merging .Xdefaults.$system"
     xrdb -merge $HOME/.Xdefaults.$system
 fi
+echo "Trying debian"
 if [ `head -n 1 /etc/issue | awk '{print $1}'` = Debian ] ; then
+    echo "Trying .Xdefaults.debian"
     if [ -e $HOME/.Xdefaults.debian ] ; then
+        echo "Merging .Xdefaults.debian"
         xrdb -merge $HOME/.Xdefaults.debian
     fi
 fi
+echo "Trying .Xdefaults.$SHORTHOST"
 if [ -e $HOME/.Xdefaults.$SHORTHOST ] ; then
+    echo "Merging .Xdefaults.$SHORTHOST"
     xrdb -merge $HOME/.Xdefaults.$SHORTHOST
 fi
 

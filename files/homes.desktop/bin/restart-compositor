@@ -1,0 +1,23 @@
+#!/bin/bash
+
+# 20240127 needed for xterm scrollback buffer not to be
+# corrupted.
+
+# #1014625: xterm: screen corruption of scrollback buffer; similar to
+# https://bugs.freedesktop.org/show_bug.cgi?id=110214 but
+# actually not fixed by that ; but also very useful for
+# firefox to not chew CPU updating windows that aren't
+# visible; probably through:
+# https://bugzilla.mozilla.org/show_bug.cgi?id=1820096
+# and
+# https://bugzilla.mozilla.org/show_bug.cgi?id=1693513
+
+# seems to drop load of all those background browser windows that are
+# uselessly endlessly updating into the void; might as well do this
+# both when sleeping (because no one cares) and when waking (because
+# by definition anything that is about to be shown is the only thing
+# we care about)
+
+export DISPLAY=:0
+killall picom 2>/dev/null
+picom < /dev/null >& /dev/null &
