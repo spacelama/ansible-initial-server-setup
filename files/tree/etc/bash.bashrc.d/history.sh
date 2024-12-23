@@ -28,35 +28,66 @@ function jobs() {
 # jobs() output as "Exit: "...
 
 function write_history_in_background() {
-(
     (
-        # writing history...
-        mkdir -p /tmp/$USER
-        lockfile -1 -r 30 -l 60 /tmp/$USER/.bash_history.lock
-        PWDENC="$( printf "%q" "${PWD}")" # original purpose was to
-                                          # convert "!" to "\!" so
-                                          # that the sed replacement
-                                          # delimiter wouldn't be
-                                          # messed up by paths
-                                          # containing "!".  But
-                                          # printf "%q" converts "!"
-                                          # already as well as all the
-                                          # other characters sed cares
-                                          # about
-        history=$(
-            if [ -n "$1" ] ; then
-                echo "#"$(date +%s)
-                #                    echo "#######################"  # doesn't seem to be necessary in 2023 anymore - don't end up with history composed of dates anymore
-            else
-                echo "$history"
-            fi | sed "/^#[0-9][0-9][0-9][0-9][0-9][0-9][0-9][0-9][0-9][0-9]$/s!\$! $PTS ${OPVIEW_VIEW:+$OPVIEW_VIEW/$OPVIEW_ITEM }$PWDENC$1!"
-               )
-        if [ -n "$history" ] ; then
-            echo "$history" >> "$BASH_FULLHIST"
+        (
+            #exec 255>&-
+            # exec 2>&-
+            # exec 0>&-
+            #exec 1>&-
+
+            # sleep 0.5
+            calling sleeped
+
+            # writing history...
+            mkdir -m 0700 -p /tmp/$USER
+            calling Locking .bash_history.lock
+            lockfile -1 -r 30 -l 60 /tmp/$USER/.bash_history.lock
+            called Locked .bash_history.lock
+            PWDENC="$( printf "%q" "${PWD}")" # original purpose was to
+            # convert "!" to "\!" so
+            # that the sed replacement
+            # delimiter wouldn't be
+            # messed up by paths
+            # containing "!".  But
+            # printf "%q" converts "!"
+            # already as well as all the
+            # other characters sed cares
+            # about
+            history=$(
+                if [ -n "$1" ] ; then
+                    echo "#"$(date +%s)
+                    #                    echo "#######################"  # doesn't seem to be necessary in 2023 anymore - don't end up with history composed of dates anymore
+                else
+                    echo "$history"
+                fi | sed "/^#[0-9][0-9][0-9][0-9][0-9][0-9][0-9][0-9][0-9][0-9]$/s!\$! $PTS ${OPVIEW_VIEW:+$OPVIEW_VIEW/$OPVIEW_ITEM }$PWDENC$1!"
+                   )
+            [ -n "$BASH_DEBUG" ] && ls -lA /proc/$$/fd 1>&2
+            if [ -n "$history" ] ; then
+                calling Appending .bash_history
+                echo "$history" >> "$BASH_FULLHIST"
+                called Appended .bash_history
+            fi
+            calling unlocking .bash_history.lock
+            command rm -f /tmp/$USER/.bash_history.lock
+            called unlocked .bash_history.lock
+
+            # sleep 2
+
+            called exiting write_history_in_background child
+        ) &
+
+        calling Our child was pid: $!
+        if [ -n "$BASH_DEBUG" ] ; then
+            ps $!
+            ls -lA /proc/$! /proc/$!/fd
+
+            # sleep 1
+
+            calling Second attempt at pid: $!
+            ps $!
+            ls -lA /proc/$! /proc/$!/fd
         fi
-        command rm -f /tmp/$USER/.bash_history.lock
-    ) &
-)
+    )
 }
 
 function writetohistory() {
@@ -66,21 +97,26 @@ function writetohistory() {
     if [ "$BASH_FULL_HISTFILE_LAST" != "$BASH_FULLHIST" ] ; then
         # time to read from the new file we're just setting, and start writing to it
         BASH_FULL_HISTFILE_LAST="$BASH_FULLHIST"
+        calling writetohistory/setup_bash_history_file
         setup_bash_history_file
+        called writetohistory/setup_bash_history_file
     fi
     history=$( history -a /dev/stdout ) # doesn't clear the history because in subshell
     if [ -z "$1" -a -z "$history" ] ; then
         return
     fi
+    calling write_history_in_background
     write_history_in_background "$1" # "$BASH_FULLHIST" "$history" "$PTS"
+    called write_history_in_background
     if HISTTIMEFORMAT= history 2 | sed 's/^[ 0-9]*//' | uniq -d | grep -q . ; then
         # duplicated history
         lasthist=$( history 1 | awk '{print $1}' )
-        echo "DEBUG: we found a duplicated history line - we will try to delete lasthist=$lasthist" 1>&2 >> /tmp/hist.$USER.dup
+        log_to_file append 022 /tmp/hist.$USER.dup "DEBUG: we found a duplicated history line - we will try to delete lasthist=$lasthist"
         history 10 | hiliteStdErr cat 1>&2 >> /tmp/hist.$USER.dup
         history -d $lasthist
     fi
     history -a /dev/null   # clear the history since the append is done in a subshell
+    called Exiting writetohistory
 }
 
 function setup_bash_history_file() {
@@ -90,7 +126,7 @@ function setup_bash_history_file() {
         #        echo reading history
         HISTSIZE2=$((HISTSIZE*2)) # only an approximation since we
                                   # have multiline history
-        tail -n $HISTSIZE2 "$BASH_FULLHIST" > /tmp/hist.$USER.$$
+        tail -n $HISTSIZE2 "$BASH_FULLHIST" | log_to_file create 022 /tmp/hist.$USER.$$
         history -r /tmp/hist.$USER.$$
         command rm -f /tmp/hist.$USER.$$
 

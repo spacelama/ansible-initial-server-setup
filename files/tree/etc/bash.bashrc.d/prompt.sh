@@ -3,7 +3,7 @@
 # when the promt returns, so such programs will never be disowned -
 # only those that are truly running at one point in time when
 # backgrounded
-[ -z "$NONINTERACT" ] && PROMPT_COMMAND=handleprompt # likely to get overriden by git plugins later on
+[ -z "$NONINTERACT" ] && PROMPT_COMMAND='calling prompt.sh: PROMPT_COMMAND/handleprompt ; handleprompt ; called prompt.sh: PROMPT_COMMAND/handleprompt' # likely to get overriden by git plugins later on
 
 # FIXME: Fixing PROMPT_COMMAND trap that writes command history before
 # command is invoked notes:
@@ -68,14 +68,56 @@ function handleprompt () {
     # some shell stuff first
     if [ -z "$BASHRC_LAST_INVOKED" ] ; then
         # echo invoking bashrc_last
+        calling handleprompt/bashrc_last
         bashrc_last
+        called handleprompt/bashrc_last
         BASHRC_LAST_INVOKED=true
     else
         statusbeep $retcode 1$SECONDS 1$CMD_START_SECONDS
     fi
+    calling handleprompt/generatetitlefromhistory
     generatetitlefromhistory
+    called handleprompt/generatetitlefromhistory
+    calling handleprompt/setprompt
     setprompt
+    called handleprompt/setprompt
     return $retcode
+}
+
+function generatetitlefromhistory () {
+    case "${BASH_COMMAND%% *}" in
+        # suppress recursive calls:
+        # http://unix.stackexchange.com/questions/196159/trap-to-debug-signal-was-evoked-twice-before-shell-function-executed-when-funct
+
+        # there is a bug in bash exit, such that immediately upon
+        # exit, it thinks BASH_COMMAND is the *last* command
+        # executed, which was setting PS1.  We also try to
+        # optimise not running these costly execs when we're not
+        # about to exec a command at the users request.  Also
+        # don't handle newlines since complicate output greatly -
+        # tried to get chomp to convert newlines, but they seem to
+        # be getting printed out somewhere else
+        generatetitlefromhistory|setprompt|handleprompt)
+            #                    echo "1: ${BASH_COMMAND}"
+            return
+            ;;
+    esac
+    #            echo "1got here: ${BASH_COMMAND}"
+    # does BASH_COMMAND help me at all with setwindowtitle and history etc?   ; eg trap 'echo "ERROR: $0: $LINENO: $BASH_COMMAND"' ERR
+
+    if [ "$SMALLPROMPT" != yes ] ; then
+        #            titlelastline="$BASH_COMMAND" # doesn't expand out sleep $i etc, so might as well use the full snippet:
+        titlelastline=`HISTTIMEFORMAT= history 1`
+
+        titlelastline="${titlelastline#*[0-9]  }"   # remove the number prefix since `history` can't be taught to not print a number
+        calling generatetitlefromhistory/generatetitle
+        generatetitle "$titlelastline"
+        called generatetitlefromhistory/generatetitle
+    fi
+
+    calling generatetitle/writetohistory
+    writetohistory
+    called generatetitle/writetohistory
 }
 
 if [ "$TERM" = xterm ] ; then
@@ -101,18 +143,6 @@ fi
 if [ "$SMALLPROMPT" = yes ] ; then
     function generatetitle () {
         :
-    }
-    function generatetitlefromhistory () {
-        # surpress recursivecalls:
-        # http://unix.stackexchange.com/questions/196159/trap-to-debug-signal-was-evoked-twice-before-shell-function-executed-when-funct
-        case "${BASH_COMMAND%% *}" in
-            generatetitlefromhistory|setprompt|handleprompt)
-                #                    echo "2: ${BASH_COMMAND}"
-                return
-                ;;
-        esac
-        #            echo "2got here: ${BASH_COMMAND}"
-        writetohistory
     }
     function setprompt () {
         stty echo
@@ -150,7 +180,7 @@ if [ "$SMALLPROMPT" = yes ] ; then
     function finalise_prompt() {
         # ESC=`echo -ne '\033'`
         # . ~/bash-git-prompt/gitprompt.sh
-        [ -z "$NONINTERACT" ] && PROMPT_COMMAND=handleprompt
+        [ -z "$NONINTERACT" ] && PROMPT_COMMAND='calling finalise_prompt_small: PROMPT_COMMAND/handleprompt ; handleprompt ; called finalise_prompt_small: PROMPT_COMMAND/handleprompt'
     }
 else
     function generatetitle () {
@@ -170,31 +200,6 @@ else
         fi
         winname  "$EXTRA_TITLE`date +%d/%m-%H:%M:%S` -- $PTS -- $cmd -- ${me}: `chomp --escapechars --right ... $((COLUMNS-60)) ${shortpwd}`" ;
         iconname "$EXTRA_TITLE`date +%d/%m-%H:%M:%S` -- $PTS -- $cmd -- ${me}: `chomp --escapechars --right ... 20 ${shortpwd}`"
-        writetohistory
-    }
-    function generatetitlefromhistory () {
-        case "${BASH_COMMAND%% *}" in
-            # there is a bug in bash exit, such that immediately upon
-            # exit, it thinks BASH_COMMAND is the *last* command
-            # executed, which was setting PS1.  We also try to
-            # optimise not running these costly execs when we're not
-            # about to exec a command at the users request.  Also
-            # don't handle newlines since complicate output greatly -
-            # tried to get chomp to convert newlines, but they seem to
-            # be getting printed out somewhere else
-            generatetitlefromhistory|setprompt|handleprompt)
-                #                    echo "1: ${BASH_COMMAND}"
-                return
-                ;;
-        esac
-        #            echo "1got here: ${BASH_COMMAND}"
-        # does BASH_COMMAND help me at all with setwindowtitle and history etc?   ; eg trap 'echo "ERROR: $0: $LINENO: $BASH_COMMAND"' ERR
-
-        #            titlelastline="$BASH_COMMAND" # doesn't expand out sleep $i etc, so might as well use the full snippet:
-        titlelastline=`HISTTIMEFORMAT= history 1`
-
-        titlelastline="${titlelastline#*[0-9]  }"   # remove the number prefix since `history` can't be taught to not print a number
-        generatetitle "$titlelastline"
     }
     function setprompt () {
         local shortpwd="${PWD/$HOME/~}"
@@ -253,10 +258,11 @@ else
             GIT_PROMPT_HAS_RUN=true
         fi
         if [ -z "$NONINTERACT" ] ; then
-            PROMPT_COMMAND=handleprompt # was likely just overriden
+            PROMPT_COMMAND='calling finalise_prompt_normal: PROMPT_COMMAND/handleprompt ; handleprompt ; called finalise_prompt_normal: PROMPT_COMMAND/handleprompt' # was likely just overriden
             if [ -x /usr/bin/direnv ] ; then
                 eval "$(direnv hook bash)"
             fi
         fi
     }
 fi
+
