@@ -136,7 +136,7 @@ function addkeychain() {
     fi
 
     # for gpg, always use ncurses on local tty rather than display:
-    GPG_TTY=$(tty) ; export GPG_TTY         # fall back to ncurses pinentry
+    GPG_TTY=$(tty) ; export GPG_TTY         # fall back to ncurses pinentry - but only if piece of shit pinentry-gnome3 is not installed, in which case it forces it to open on DISPLAY=:0 regardless of any of your settings
 
     case "$#,$1" in
         1,--withgpg)
