@@ -726,16 +726,19 @@
   become: true
   when: "'debsecan' in ansible_facts.packages"
 
-- name: Synchronize (rsync) and delete files in /etc/bash-git-prompt
+- name: Synchronize (rsync) and delete files in /etc/bash-git-prompt and /etc/bash-preexec
   ansible.posix.synchronize:
-    src: etc/bash-git-prompt/
-    dest: /etc/bash-git-prompt/
+    src: etc/{{ item }}/
+    dest: /etc/{{ bash-git-prompt }}/
     delete: yes
     recursive: yes
     rsync_opts:
       - "--exclude=.git"
       - "--delete-excluded"
   become: true
+  with_items:
+    - bash-git-prompt
+    - bash-preexec
 
 - name: install ceph and autofs packages
   apt:

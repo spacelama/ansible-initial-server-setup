@@ -2,11 +2,12 @@
 	path = files/etc/bash-git-prompt/
 	url = https://github.com/spacelama/bash-git-prompt
 	branch = timeout
-
+[submodule "files/etc/bash-preexec"]
+	path = files/etc/bash-preexec
+	url = https://github.com/rcaloras/bash-preexec
 [submodule "files/homes.desktop/elisp/grip-mode"]
 	path = files/homes.desktop/elisp/grip-mode
 	url = https://github.com/spacelama/grip-mode
-
 [submodule "files/homes.desktop/elisp/undo-tree"]
 	path = files/homes.desktop/elisp/undo-tree
 	url = https://gitlab.com/tsc25/undo-tree.git

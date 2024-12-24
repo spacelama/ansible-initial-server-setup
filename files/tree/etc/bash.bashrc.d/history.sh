@@ -10,103 +10,45 @@ function readfromhistory() {
     history -r
 }
 
-# ever since we put direnv in, we get this as an ugly jobs output:
-#: 33290,37; jobs
-#[1]   Done                    apt-cache policy bash
-#[2]   Exit 1                  apt-cache policy bash | apt-cache policy bash | apt-cache policy bash | apt-cache policy bash
+# we get this as an ugly jobs output after a simple, non-backgrounded
+# command exits (backgrounded jobs are worse):
+#: 56829,14; sleep 1
+#0-0-20:30:16, Mon Dec 23 tconnors@dirac:~/.bashrc.d [master ↑·7|✚ 66…29] (bash)                                       
+#: 56830,15; jobs
+#[1]   Done                    sleep 1
+#[2]   Exit 1                  sleep 1 | sleep 1 | sleep 1 | sleep 1
 # since jobs should only be outputting running and stopped jobs
 # because we've previously told jobs to output status immediately upon
 # exit, we should just be able to get same output from this:
-function jobs() {
+function jobsworkaround() {
     command jobs -r
     command jobs -s
 }
+unset jobs
+#alias jobs=jobsworkaround
 
-# if we didn't have the above jobs() function override, we'd have to
-# offload this to a shell script because no matter how we try to
-# double fork and background this shell, it always appears in the
-# jobs() output as "Exit: "...
-
-function write_history_in_background() {
-    (
-        (
-            #exec 255>&-
-            # exec 2>&-
-            # exec 0>&-
-            #exec 1>&-
-
-            # sleep 0.5
-            calling sleeped
-
-            # writing history...
-            mkdir -m 0700 -p /tmp/$USER
-            calling Locking .bash_history.lock
-            lockfile -1 -r 30 -l 60 /tmp/$USER/.bash_history.lock
-            called Locked .bash_history.lock
-            PWDENC="$( printf "%q" "${PWD}")" # original purpose was to
-            # convert "!" to "\!" so
-            # that the sed replacement
-            # delimiter wouldn't be
-            # messed up by paths
-            # containing "!".  But
-            # printf "%q" converts "!"
-            # already as well as all the
-            # other characters sed cares
-            # about
-            history=$(
-                if [ -n "$1" ] ; then
-                    echo "#"$(date +%s)
-                    #                    echo "#######################"  # doesn't seem to be necessary in 2023 anymore - don't end up with history composed of dates anymore
-                else
-                    echo "$history"
-                fi | sed "/^#[0-9][0-9][0-9][0-9][0-9][0-9][0-9][0-9][0-9][0-9]$/s!\$! $PTS ${OPVIEW_VIEW:+$OPVIEW_VIEW/$OPVIEW_ITEM }$PWDENC$1!"
-                   )
-            [ -n "$BASH_DEBUG" ] && ls -lA /proc/$$/fd 1>&2
-            if [ -n "$history" ] ; then
-                calling Appending .bash_history
-                echo "$history" >> "$BASH_FULLHIST"
-                called Appended .bash_history
-            fi
-            calling unlocking .bash_history.lock
-            command rm -f /tmp/$USER/.bash_history.lock
-            called unlocked .bash_history.lock
-
-            # sleep 2
-
-            called exiting write_history_in_background child
-        ) &
-
-        calling Our child was pid: $!
-        if [ -n "$BASH_DEBUG" ] ; then
-            ps $!
-            ls -lA /proc/$! /proc/$!/fd
-
-            # sleep 1
-
-            calling Second attempt at pid: $!
-            ps $!
-            ls -lA /proc/$! /proc/$!/fd
-        fi
-    )
+function choosehistoryfile() {
+    local BASH_FULLHIST="${BASH_FULL_HISTFILE:-$HOME/.bash_fullhistory}"
+    if [ "$BASH_FULL_HISTFILE_LAST" != "$BASH_FULLHIST" ] ; then
+        # time to read from the new file we're just setting, and start writing to it
+        BASH_FULL_HISTFILE_LAST="$BASH_FULLHIST"
+        calling choosehistoryfile/setup_bash_history_file
+        setup_bash_history_file
+        called choosehistoryfile/setup_bash_history_file
+    fi
 }
 
 function writetohistory() {
     #FIXME: ideally detect when we're inside emacs TRAMP and do nothing
     #    bt
     local BASH_FULLHIST="${BASH_FULL_HISTFILE:-$HOME/.bash_fullhistory}"
-    if [ "$BASH_FULL_HISTFILE_LAST" != "$BASH_FULLHIST" ] ; then
-        # time to read from the new file we're just setting, and start writing to it
-        BASH_FULL_HISTFILE_LAST="$BASH_FULLHIST"
-        calling writetohistory/setup_bash_history_file
-        setup_bash_history_file
-        called writetohistory/setup_bash_history_file
-    fi
+
     history=$( history -a /dev/stdout ) # doesn't clear the history because in subshell
     if [ -z "$1" -a -z "$history" ] ; then
         return
     fi
     calling write_history_in_background
-    write_history_in_background "$1" # "$BASH_FULLHIST" "$history" "$PTS"
+    write_history_in_background "$history" "$1" "$USER" "$PWD" "$BASH_FULLHIST" "$PTS"
     called write_history_in_background
     if HISTTIMEFORMAT= history 2 | sed 's/^[ 0-9]*//' | uniq -d | grep -q . ; then
         # duplicated history
