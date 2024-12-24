@@ -38,6 +38,57 @@ function choosehistoryfile() {
     fi
 }
 
+function write_history_in_background() {
+    # Handles history writing, inside a fork, for the shell, using file
+    # locking to mediate serialisation.
+
+    # Do some processing of the history in this command within the fork,
+    # that could have more simply be done in the caller.  But we want to
+    # call our fork ASAP and return control back to the shell without
+    # waiting for a whole bunch of expensive shell commands holding up the
+    # return to the shell.
+
+    # Now why isn't this all just a shell function in my .bashrc files?
+    # Job control is reporting on our job being backgrounded regardless of
+    # whether we've double forked it, or unset `set -m` `shopt -o
+    # checkjobs` etc: it always appears in the jobs() output as "Exit:
+    # "...
+
+    local history="$1"
+    local header="$2"
+    local USER="$3"
+    local PWD="$4"
+    local BASH_FULLHIST="$5"
+    local PTS="$6"
+
+    ( (
+        # original purpose was to convert "!" to "\!" so that the sed
+        # replacement delimiter wouldn't be messed up by paths
+        # containing "!".  But printf "%q" converts "!"  already as
+        # well as all the other characters sed cares about
+        PWDENC="$( printf "%q" "${PWD}")"
+        # even though we've escaped slashes alreayd, we're about to
+        # run it through sed, which will unescape the slashes, sigh
+        PWDENC="${PWDENC//\\/\\\\}"
+
+        history=$(
+            if [ -n "$header" ] ; then
+                echo "#"$(date +%s)
+                #                    echo "#######################"  # doesn't seem to be necessary in 2023 anymore - don't end up with history composed of dates anymore
+            else
+                echo "$history"
+            fi | sed "/^#[0-9][0-9][0-9][0-9][0-9][0-9][0-9][0-9][0-9][0-9]$/s!\$! $PTS ${OPVIEW_VIEW:+$OPVIEW_VIEW/$OPVIEW_ITEM }$PWDENC$header!"
+               )
+
+        mkdir -m 0700 -p /tmp/$USER
+        lockfile -1 -r 30 -l 60 /tmp/$USER/.bash_history.lock
+        if [ -n "$history" ] ; then
+            echo "$history" >> "$BASH_FULLHIST"
+        fi
+        rm -f /tmp/$USER/.bash_history.lock
+    ) & )
+}
+
 function writetohistory() {
     #FIXME: ideally detect when we're inside emacs TRAMP and do nothing
     #    bt
