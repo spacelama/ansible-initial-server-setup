@@ -24,6 +24,14 @@
 !Emacs*Font:    Bitstream Vera Sans Mono-18:dpi=100
 Emacs.fontBackend: xft
 Xft.antialias: 1
+Xft.autohint: 1
+Xft.hintstyle: hintslight
+! or hintfull
+!also relevant:
+!hinting
+!lcdfilter
+! see fonconfig docs
+
 
 
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
@@ -88,8 +96,15 @@ XTerm*VT100.eightBitOutput:  true
 XTerm*utf8Title: true
 
 !http://www.leonerd.org.uk/hacks/hints/xterm-sensible.html
-XTerm*VT100.faceName:        DejaVu Sans Mono
-XTerm*VT100.boldFont:        DejaVu Sans Mono:style=Bold
+! obtain the current values with:
+! xterm -xrm 'XTerm*VT100.allowWindowOps:true' -xrm 'XTerm*VT100.allowTitleOps:true' -xrm 'XTerm*VT100.allowFontOps:true'
+! xtermcontrol --get-font
+! There is also xterm -report-fonts
+! And possible names: fc-list
+!  - if unifont is installed, we do not necessarily want it winning ahead of "Noto Color Emoji"
+XTerm*VT100.faceName:        xft:DejaVu Sans Mono,xft:Noto Color Emoji
+XTerm*VT100.boldFont:        xft:DejaVu Sans Mono:style=Bold,xft:Noto Color Emoji:style=Bold
+!XTerm*VT100.faceNameDoubleSize:        xft:Noto Color Emoji
 XTerm*VT100.faceSize:        9
 
 !doesn't seem to set the relative sizes as monotonically increasing - can't slot default size=11 in between facesize4 and facesize5
@@ -163,7 +178,7 @@ XTerm*backarrowKey:		false
 !XTerm*foreground:		white
 
 ! Lot of discussion on man terminfo and application mode and normal mode here: https://vi.stackexchange.com/questions/15324/up-arrow-key-code-why-a-becomes-oa
-! There's also some mappings here: /usr/share/doc/xterm/xterm.faq.html
+! There is also some mappings here: /usr/share/doc/xterm/xterm.faq.html
 XTerm*VT100.translations: #override \n\
                 None<Key>Home: string(0x1b) string("[1~") \n\
 		None<Key>End: string(0x1b) string("[4~") \n\
