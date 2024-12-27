@@ -1,0 +1,33 @@
+#!/bin/ksh
+
+#doesn't do much more than run colorizecommand (but tells us the caller)
+
+shell=
+verbose=true
+while [[ "$1" == --* ]] ; do
+    case "$1" in
+        --shell)
+            shell="--shell"
+            shift
+            ;;
+        --verbose*)
+            case "$1" in
+                --verbose=false)
+                    verbose=false
+                    ;;
+            esac
+            shift
+            ;;
+        *)
+            break
+            ;;
+    esac
+done
+
+parent=$( ps --no-header -o cmd -p "$PPID" )
+
+if $verbose ; then
+    colorize --stderr -n bright yellow "$parent: "
+fi
+
+exec colorizecommand $shell --stderr bright cyan "$@"

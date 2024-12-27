@@ -3,6 +3,11 @@
 #template by ~tconnors/bin/newshscript
 #Sat May 24 01:15:18 EST 2003
 
+# plays a happy sound if the last command succeeded and it's been
+# sufficiently long since the command was started that the user could
+# concievably be interested in knowing their command succeeded, or a
+# sad sound if it failed
+
 if [ $# -ne 3 ] ; then
    echo "Usage: $0 <status> <newtime> <oldtime>" 1>&2
    echo "Usage was $@" 1>&2

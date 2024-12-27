@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/bin/ksh
 # -*- Mode: shell-script -*-
 #template by ~tconnors/bin/newshscript
 #Thu May  1 17:20:13 EST 2008
@@ -11,11 +11,11 @@
 
 #set -x 
 
-function highlight() {
+highlight() {
     if $notty ; then
         return
     fi
-    local hi="$2"
+    hi="$2"
 
     esc="\033["
     if $hi ; then
@@ -70,15 +70,13 @@ function highlight() {
     esac
 }
 
-function directoutput () {
-    if [ -z "$stderr" ] ; then
-        exec cat
-    else
-        exec cat 1>&2
+directoutput() {
+    if $stderr ; then
+        exec 1>&2
     fi
 }
 
-function usage () {
+usage() {
     echo "Usage: $0 [--stderr] [--notty] [-n|--nolf] [--PS1prompt] [--background <bg>] (bright|dark)? <color> <text>" 1>&2
     if [ -n "$1" ] ; then
         exit $1
@@ -86,7 +84,7 @@ function usage () {
     exit
 }
 
-function usageerror () {
+usageerror() {
     if [ "$#" != 0 ] ; then
         echo "Usage error: $@" 1>&2
         echo "Usage was $ARGS" 1>&2
@@ -94,14 +92,13 @@ function usageerror () {
     usage 1
 }
 
-declare -a args
-function parseinput () {
+parseinput() {
     ARGS="$*"
     open=
     close=
     nolf=false
     colour=
-    stderr=
+    stderr=false
     notty=false
     hi=false
     bg=false
@@ -134,7 +131,7 @@ function parseinput () {
                 shift
                 ;;
             --stderr)
-                stderr=1
+                stderr=true
                 ;;
             --help)
                 usage
@@ -175,11 +172,12 @@ function parseinput () {
     done
 }
 
+args=()
 parseinput "$@"
 
-( 
-    highlight "$colour" $hi $bg
-    echo -n "${args[@]}"
-    highlight normal false
-    $nolf || echo
-) | directoutput
+directoutput
+highlight "$colour" $hi $bg
+echo -n "${args[@]}"
+highlight normal false
+$nolf || echo
+

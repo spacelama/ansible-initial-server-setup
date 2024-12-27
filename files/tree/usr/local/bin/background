@@ -7,6 +7,10 @@
 # $Header: /home/tconnors/cvsroot/bin/background,v 1.2 2016/10/24 04:17:30 tconnors Exp $
 # $RCSfile: background,v $
 
+# Changes the background colour of your terminal, using normal X11 RGB
+# colour codes.  We only honour this when the output is a terminal.
+
 #http://invisible-island.net/xterm/ctlseqs/ctlseqs.pdf
 # see also: http://superuser.com/questions/157563/programmatic-access-to-current-xterm-background-color
+
 [ -t 1 ] && echo -en "\e]11;$*\a"
