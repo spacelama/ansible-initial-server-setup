@@ -1,7 +1,7 @@
 function exitcleanly() {
     #    exiting=true
     # cancel all traps we set up ourselves to manage prompt and history:
-    trap - 0 HUP DEBUG
+    trap - 0 HUP
     writetohistory "@$HOSTNAME CLOSE"
     exit $code
 }
@@ -9,23 +9,6 @@ function exitcleanly() {
 function readfromhistory() {
     history -r
 }
-
-# we get this as an ugly jobs output after a simple, non-backgrounded
-# command exits (backgrounded jobs are worse):
-#: 56829,14; sleep 1
-#0-0-20:30:16, Mon Dec 23 tconnors@dirac:~/.bashrc.d [master ↑·7|✚ 66…29] (bash)                                       
-#: 56830,15; jobs
-#[1]   Done                    sleep 1
-#[2]   Exit 1                  sleep 1 | sleep 1 | sleep 1 | sleep 1
-# since jobs should only be outputting running and stopped jobs
-# because we've previously told jobs to output status immediately upon
-# exit, we should just be able to get same output from this:
-function jobsworkaround() {
-    command jobs -r
-    command jobs -s
-}
-unset jobs
-#alias jobs=jobsworkaround
 
 function choosehistoryfile() {
     local BASH_FULLHIST="${BASH_FULL_HISTFILE:-$HOME/.bash_fullhistory}"
@@ -85,7 +68,7 @@ function write_history_in_background() {
         if [ -n "$history" ] ; then
             echo "$history" >> "$BASH_FULLHIST"
         fi
-        rm -f /tmp/$USER/.bash_history.lock
+        command rm -f /tmp/$USER/.bash_history.lock
     ) & )
 }
 

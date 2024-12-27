@@ -30,7 +30,7 @@ log_to_file() {
     (
         case $behaviour in
             create)
-                rm -f "$file"
+                command rm -f "$file"
                 ;;
             append)
                 :
