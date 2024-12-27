@@ -10,6 +10,8 @@ function readfromhistory() {
     history -r
 }
 
+# based on whether BASH_FULL_HISTFILE has been set by direnv, adjust
+# BASH_FULLHIST and make sure it's loaded
 function choosehistoryfile() {
     local BASH_FULLHIST="${BASH_FULL_HISTFILE:-$HOME/.bash_fullhistory}"
     if [ "$BASH_FULL_HISTFILE_LAST" != "$BASH_FULLHIST" ] ; then
@@ -75,6 +77,11 @@ function write_history_in_background() {
 function writetohistory() {
     #FIXME: ideally detect when we're inside emacs TRAMP and do nothing
     #    bt
+
+    calling writetohistory/choosehistoryfile
+    choosehistoryfile
+    called writetohistory/choosehistoryfile
+
     local BASH_FULLHIST="${BASH_FULL_HISTFILE:-$HOME/.bash_fullhistory}"
 
     history=$( history -a /dev/stdout ) # doesn't clear the history because in subshell

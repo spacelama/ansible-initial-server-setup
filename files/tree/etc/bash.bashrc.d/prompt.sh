@@ -57,9 +57,6 @@ function preexec_hook() {
     #            generatetitle "$BASH_COMMAND" # doesn't expand out sleep $i etc, so might as well use the full snippet:
     generatetitle "$1"
     called preexec_hook/generatetitle
-    calling preexec_hook/choosehistoryfile
-    choosehistoryfile
-    called preexec_hook/choosehistoryfile
     calling preexec_hook/writetohistory
     writetohistory
     called preexec_hook/writetohistory
@@ -72,9 +69,14 @@ function handleprompt () {
     if [ -n "$CMD_START_SECONDS" ] ; then
         statusbeep $retcode 1$SECONDS 1$CMD_START_SECONDS
     fi
+
+    # we need to make sure the right history file is loaded, after the
+    # previous command, which might have been a `cd` triggering a new
+    # history file to be set, before the prompt returns.  Do it now.
     calling handleprompt/choosehistoryfile
     choosehistoryfile
     called handleprompt/choosehistoryfile
+
     calling handleprompt/setprompt
     setprompt
     called handleprompt/setprompt
