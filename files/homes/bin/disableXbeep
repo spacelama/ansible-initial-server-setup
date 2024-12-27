@@ -1,0 +1,14 @@
+#!/bin/sh
+# -*- Mode: shell-script -*-
+#template by ~tconnors/bin/newshscript
+#Sun Sep 26 14:44:40 EST 2004
+# $Revision: 1.1 $ $Date: 2004/10/04 02:19:39 $
+# $Id: disableXbeep,v 1.1 2004/10/04 02:19:39 tconnors Exp $
+# $Header: /home/office/tconnors/cvsroot/bin/disableXbeep,v 1.1 2004/10/04 02:19:39 tconnors Exp $
+# $RCSfile: disableXbeep,v $
+
+# This program disable most X beeping, for when I start vnc
+
+touch $HOME/.disablebeep
+
+xset b off

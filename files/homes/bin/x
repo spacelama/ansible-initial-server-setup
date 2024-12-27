@@ -5,16 +5,28 @@
 # want to provide a file with a space in it, or a literal special
 # character, you have to escape it (eg with printf "%q") yourself.
 
-eval=eval
+eval="verboserun"
+noshell=true
+verbose=true
+verboserun=
 while [[ "$1" == --* ]] ; do
     case "$1" in
         --wait)
             shift
-            eval="wait-and-query-rerun"
+            eval='wait-and-query-rerun'
+            ;;
+        --noverbose)
+            shift
+            verbose=false
+            verboserun=
             ;;
         --no-eval)
             shift
             eval=
+            ;;
+        --shell)
+            shift
+            noshell=false
             ;;
         *)
             break
@@ -22,30 +34,33 @@ while [[ "$1" == --* ]] ; do
     esac
 done
 
-args=
-while [[ "$1" == -* ]] ; do
-    args="$args $1"
-    shift
-done
-
-cmd=
-while (( $# > 0 )); do
-    arg=$(printf "%q" "$1")
-    if [ -n "$eval" ] ; then
-        cmd="${cmd:+$cmd\\ }${arg}"
-    else
-        cmd="${cmd:+$cmd }${arg}"
+if [ $eval == wait-and-query-rerun ] ; then
+    if $verbose ; then
+        eval="$eval --verbose"
     fi
-    shift
-done
-if [ "$eval" != eval ] ; then
-    cmd=$( printf "%q" "$cmd" )
-else
-    eval='eval'
+    if ! $noshell ; then
+        eval="$eval --shell"
+    fi
 fi
 
-if [ "$cmd" != "" ] ; then
-    xterm $args -e "bash -c $eval\ $cmd"
+args=()
+while [[ "$1" == -* ]] ; do
+    args+=("$1")
+    shift
+done
+
+cmds=()
+while [ $# != 0 ] ; do
+    cmd="$1"
+#    if $noshell ; then
+#        cmd="$( printf "%q" "$cmd" )"
+#    fi
+    cmds+=("$cmd")
+    shift
+done
+
+if [ "${#cmds[@]}" != 0 ] ; then
+    $verboserun xterm "${args[@]}" -e bash $eval "${cmds[@]}" # ${cmds[*]}
 else
-    xterm $args
+    $verboserun xterm "${args[@]}"
 fi &

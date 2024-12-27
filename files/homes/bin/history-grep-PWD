@@ -1,0 +1,12 @@
+#!/bin/bash
+
+pwd="$( printf "%q" "$( pwd )" | sed "s/\\\'/'/" )"  # grep requires "'" to not be escaped
+
+# for reasons that I haven't worked out yet, it seems that grep
+# (sometimes!) has a long wait for reading from NFS mounted remote
+# files in a way that cat | grep doesn't(!)
+
+# FIXME: sometimes paths have " " escaped and other times it doesn't
+
+#cat "${BASH_FULL_HISTFILE:-$HOME/.bash_fullhistory}" | grep -A1 "$pwd$"
+grep -A1 "$pwd$" "${BASH_FULL_HISTFILE:-$HOME/.bash_fullhistory}"

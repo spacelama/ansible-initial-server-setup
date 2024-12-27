@@ -1,0 +1,176 @@
+#!/bin/ksh
+# -*- Mode: shell-script -*-
+#template by ~tconnors/bin/newshscript
+#Thu May  1 17:20:13 EST 2008
+# $Revision: 1.6 $ $Date: 2024/12/10 08:53:22 $
+# $Id: colorizecommand,v 1.6 2024/12/10 08:53:22 tconnors Exp $
+# $Header: /home/tconnors/cvsroot/bin/colorizecommand,v 1.6 2024/12/10 08:53:22 tconnors Exp $
+# $RCSfile: colorizecommand,v $
+
+# This program colourizes the text in the commandline args
+
+#set -x
+
+highlight() {
+    if $notty ; then
+        return
+    fi
+    bright="$2"
+
+    esc="\033["
+    if $bright ; then
+        bold=";1m"
+    else
+        bold="m"
+    fi
+    case "$1" in
+        grey|black) echo -ne "${open}${esc}30${bold}${close}"
+        ;;
+        red)        echo -ne "${open}${esc}31${bold}${close}"
+        ;;
+        green)      echo -ne "${open}${esc}32${bold}${close}"
+        ;;
+        yellow)     echo -ne "${open}${esc}33${bold}${close}"
+        ;;
+        blue)       echo -ne "${open}${esc}34${bold}${close}"
+        ;;
+        magenta|purple)    echo -ne "${open}${esc}35${bold}${close}"
+        ;;
+        cyan)       echo -ne "${open}${esc}36${bold}${close}"
+        ;;
+        white)      echo -ne "${open}${esc}37${bold}${close}"
+        ;;
+        normal)     echo -ne "${open}${esc}0m${close}"
+        ;;
+        *)          echo -ne "${open}${esc}32;1m${close}"
+        ;;
+    esac
+}
+
+directoutput() {
+    if $stderr ; then
+        exec 3>&1  # dup 1 -> 3
+        exec 1>&2  # direct output to stderr
+    fi
+}
+
+normaloutput() {
+    if $stderr ; then
+        exec 1>&3   # dup 3 back to 1
+        exec 3>&-   # Close FD 3
+    fi
+}
+
+usage() {
+    echo "Usage: $0 [--shell] [--stderr] [--notty] [--PS1prompt] [--colourall] <bright?> <colour> <command>" 1>&2
+    if [ -n "$1" ] ; then
+        exit $1
+    fi
+    exit
+}
+
+usageerror() {
+    if [ "$#" != 0 ] ; then
+        echo "Usage error: $@" 1>&2
+        echo "Usage was $ARGS" 1>&2
+    fi
+    usage 1
+}
+
+parseinput() {
+    ARGS="$*"
+    notty=false
+    open=
+    close=
+    bright=false
+    colour=
+    stderr=false
+    colourall=false
+    shell=false
+    first=true
+    while : ; do
+        if ! $first ; then
+            shift
+        fi
+        if [ "$#" -eq 0 ] ; then    #god, I wish there was an unshift in bash
+            break
+        fi
+        first=false
+        arg="$1"
+        case "$arg" in
+            --notty)
+                if [ ! -t 1 ] ; then
+                    notty=true
+                fi
+            ;;
+            --PS1prompt)
+                open='\['
+                close='\]'
+            ;;
+            --stderr)
+                stderr=true
+            ;;
+            --shell)
+                shell=true
+            ;;
+            --colourall)
+                colourall=true
+            ;;
+            --help)
+                usage
+            ;;
+            --)
+                shift
+                break
+            ;;
+            -*)
+                usageerror "Unknown option \"$arg\""
+            ;;
+            *)
+                break
+            ;;
+        esac
+    done
+    if [ "$#" -lt 2 ] ; then
+        usageerror "supply colour and text"
+    fi
+    if [ "$1" = "bright" ] ; then
+	bright=true
+    fi
+    shift
+    colour=$1
+    shift
+
+    #assign all uneaten params to an array
+    for arg in "$@" ; do
+        escaped_arg="$( printf "%q" "$arg" )"
+        if ! $shell ; then
+            arg="$escaped_arg"
+        fi
+        args+=("$arg")
+        escaped_args+=("$escaped_arg")
+    done
+}
+
+args=()
+escaped_args=()
+parseinput "$@"
+
+directoutput
+# select the colour to display either the header or the entire output:
+highlight "$colour" $bright
+
+# output the header if not asked to run the output directly
+if ! $colourall ; then
+    echo "${args[@]}"
+    highlight normal y
+fi
+
+normaloutput
+eval "${args[@]}"
+directoutput
+
+#and reset the colour if we were just colourizing the whole output:
+if $colourall ; then
+    highlight normal y
+fi

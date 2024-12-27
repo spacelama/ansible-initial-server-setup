@@ -1,0 +1,30 @@
+#!/bin/bash
+
+verbose=false
+if [ "$1" = --verbose ] ; then
+    shift
+    verbose=true
+fi
+
+while : ; do
+    if $verbose ; then
+        verboserun "$@"
+    else
+        "$@"
+    fi
+    exit=$?
+    while read -t 0.1 purge ; do
+        echo "purging STDIN: $purge"
+    done
+    if [ $exit = 0 ] ; then
+        echo "Press enter..."
+        read
+        exit
+    else
+        echo -e "Failed:\n$*\nType 'OK' or ctrl-D to exit, or anything else to retry"
+        read a || exit 1
+        if [ "$a" = OK ] ; then
+            exit 0
+        fi
+    fi
+done
