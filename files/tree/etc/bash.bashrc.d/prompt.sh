@@ -53,9 +53,10 @@ function setup_preexec_hook() {
 }
 
 function preexec_hook() {
-    calling preexec_hook/generatetitlefromhistory
-    generatetitlefromhistory "$1"
-    called preexec_hook/generatetitlefromhistory
+    calling preexec_hook/generatetitle
+    #            generatetitle "$BASH_COMMAND" # doesn't expand out sleep $i etc, so might as well use the full snippet:
+    generatetitle "$1"
+    called preexec_hook/generatetitle
     calling preexec_hook/choosehistoryfile
     choosehistoryfile
     called preexec_hook/choosehistoryfile
@@ -74,29 +75,10 @@ function handleprompt () {
     calling handleprompt/choosehistoryfile
     choosehistoryfile
     called handleprompt/choosehistoryfile
-    #calling handleprompt/generatetitlefromhistory
-    #generatetitlefromhistory
-    #called handleprompt/generatetitlefromhistory
     calling handleprompt/setprompt
     setprompt
     called handleprompt/setprompt
     return $retcode
-}
-
-function generatetitlefromhistory () {
-    if [ "$SMALLPROMPT" != yes ] ; then
-        #            titlelastline="$BASH_COMMAND" # doesn't expand out sleep $i etc, so might as well use the full snippet:
-        if [ -n "$1" ] ; then
-            titlelastline="$1"
-        else
-            titlelastline=`HISTTIMEFORMAT= history 1`
-
-            titlelastline="${titlelastline#*[0-9]  }"   # remove the number prefix since `history` can't be taught to not print a number
-        fi
-        calling generatetitlefromhistory/generatetitle
-        generatetitle "$titlelastline"
-        called generatetitlefromhistory/generatetitle
-    fi
 }
 
 # https://stackoverflow.com/questions/2575037/how-to-get-the-cursor-position-in-bash
