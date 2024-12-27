@@ -7,41 +7,47 @@
 logf=/.backuppc_status
 date=$( date +%s )
 # excludes should be escaped in the same way paths in /etc/mtab is escaped
-excludes=( "/proc/.*"
-           "/sys/.*"
-           "/dev/.*"
-           "/run/.*"
-           "/backuppc"
-           "/snapshots"
-           "/home/tconnors/.mp3.low_qual"
-           "/var/spool/squid"
-           "/tank[^/]*"
-           "/mnt/.*"
-           "/media/.*"
-           "/mnt/olddirac"
-           "/home/tconnors/oppo"   # obsolete hardware that's occasionally still booted and we don't want to capture changes made to it
-           "/var/cache/.*"
-           ".*not_backed_up.*"
-           ".*scratch"
-           ".*/zfs/snapshot"
-           "/external_backups"
-           "/tmp"
-           "/home/angela"
-           "/piroot-new"
-           ".*subvol.*"
-           ".*basevol.*"
-           "/rpool.*"
-           "/wavlink"
-           "/net/.*"
-           "/var/snap/.*"
-           "/var/lib/jellyfin-transcodes"
-           "/jellyfin"                          # jellyfin mounted from fs:.../movies
-           "/home/angela/media"
-           "/angela"  )
+excludes=( # these are anchored at ^ and $:
+    "/proc/.*"
+    "/sys/.*"
+    "/dev/.*"
+    "/run/.*"
+    "/backuppc"
+    "/snapshots"
+    "/home/tconnors/.mp3.low_qual"
+    "/var/spool/squid"
+    "/tank[^/]*"
+    "/mnt/.*"
+    "/media/.*"
+    "/mnt/olddirac"
+#    "/home/tconnors/archive/oppo"   # obsolete hardware that's occasionally still booted and we don't want to capture changes made to it
+    "/var/cache/.*"
+    ".*not_backed_up.*"
+    ".*scratch"
+    ".*/zfs/snapshot"
+    "/external_backups"
+    "/tmp"
+    "/home/angela"
+    "/piroot-new"
+    ".*subvol.*"
+    ".*basevol.*"
+    "/rpool.*"
+    "/wavlink"
+    "/net/.*"
+    "/var/snap/.*"
+    "/var/lib/jellyfin-transcodes"
+    "/jellyfin"                          # jellyfin mounted from fs:.../movies
+    "/mp3"                               # jellyfin/mp3 mounted from fs:.../mp3
+#    "/.cache/thumbnails"                 # jellyfin/mp3 mounted from fs:.../mp3
+    "/home/angela/media"
+    "/angela"
+)
 exclude_types=( "tmpfs" "devtmpfs" "devpts" "sysfs" "proc" "udf" "squashfs" "nfs" "nfs3" "nfs4" "fuse.sshfs" "fuse.lxcfs" "autofs" "fuse.afuse" )
 # exclude tuples of: "$HOST $dev $type $fs", in array of regexp form
-exclude_host_dev_type_matches=( "dirac /dev/mapper/hdd.* .* /home/tconnors/.*" # these are bind mounted in
-                                "fermi /dev/mmcblk0p1 .* /\(usr\|opt\)/.*" )     # these are bind mounted in
+exclude_host_dev_type_matches=(
+    "dirac /dev/mapper/hdd.* .* /home/tconnors/.*"  # these are bind mounted in
+    "fermi /dev/mmcblk0p1 .* /\(usr\|opt\)/.*"      # these are bind mounted in
+)
 HOST=$( hostname )
 
 function get_logentry() {
