@@ -84,7 +84,7 @@ MenuStyle * Font "xft:Helvetica:size=8"
 Style "*" Font "xft:Helvetica:size=10"
 Style "*" IconFont "xft:fixed:size=8"
 *FvwmButtonsFont "xft:Helvetica:style=Bold:size=6"
-*FvwmWinList: Font "xft:Helvetica:style=Bold:size=7"
+# not in fvwm2:  *FvwmWinList: Font "xft:Helvetica:style=Bold:size=7"
 *FvwmIdent: Font "xft:Helvetica:size=7"
 
 
@@ -379,12 +379,18 @@ Style "licq.real"        Sticky
 Style "xkbvleds"         NoTitle, NoHandles, Sticky, WindowListSkip, BorderWidth 0, NeverFocus
 Style "*lock"            NoTitle, NoHandles, Sticky, WindowListSkip
 #Style "faces"           NoTitle, NoHandles, Sticky, WindowListSkip, HandleWidth 5
-Style "xterm"            Icon xterm.xpm, Color black/grey
-Style "Emacs*"           Icon xemacs.xpm, Color black/grey
-Style "INBOX*"           Icon mail.xpm, Color black/grey
-Style "xcalc"            Icon xcalc.xpm, NoButton 2
-Style "xman"	         Icon xman.xpm
-Style "xmag"	         Icon mag_glass.xpm
+Style "xterm"            MiniIcon 16/xterm_16x16.xpm
+Style "Xpdf"             MiniIcon 16/pdf_16x16.png
+Style "y (pts/*"         MiniIcon 16/downloadManager16.xpm
+Style "f (pts/*"         MiniIcon 16/downloadManager16.xpm
+Style "Emacs*"           MiniIcon 16/emacs.png
+Style "Pine*"            MiniIcon 16/internet-mail.png
+Style "INBOX*"           MiniIcon 16/internet-mail.png
+Style "Pqiv"             MiniIcon 16/imageview.png
+Style "qiv"              MiniIcon 16/imageview.png
+Style "xcalc"            MiniIcon xcalc.xpm, NoButton 2
+Style "xman"	         MiniIcon xman.xpm
+Style "xmag"	         MiniIcon mag_glass.xpm
 Style "Xawtv"            ResizeOutline, Sticky
 Style "gnuplot"          ResizeOutline
 
@@ -435,7 +441,7 @@ ButtonStyle 4 4 50x65@1 35x35@1 65x35@1 50x65@0
 AddToFunc "StartFunction" "I" GotoPage 0 0
 #+                         "I" Function StartDropTerm
 +                         "I" Exec fvwm_alert_sizechange
-#+                         "I" Module FvwmWinList
+# not in fvwm2: +                         "I" Module FvwmWinList
 +                         "I" Module FvwmAnimate
 ##+                         "I" Module FvwmIconMan      #piINCLUDE metINCLUDE
 +                         "I" Module FvwmCommandS
@@ -574,9 +580,9 @@ AddToFunc "MyRestart" "I" Exec setupfvwmrc
 AddToFunc "MyQuit" "I" Exec fvwm_quittest
 
 
-AddToMenu "Quit-Verify" "Yes, Really Quit" Function MyQuit
-+ "Yes, Really and Trealy Quit" Quit
-+ "&Fvwm" Function MyRestart --pass-args source-startup-exec-fvwm
+AddToMenu "Quit-Verify" "%quit.png%Yes, Really Quit" Function MyQuit
++ "%32/bomb-kill.xpm%Yes, Really and Trealy Quit" Quit
++ "%32/system-restart.png%&Fvwm" Function MyRestart --pass-args source-startup-exec-fvwm
 + "Fvwm-&Shell" Function MyRestart /usr/bin/X11/fvwm-shell
 + "M&wm" Function MyRestart /usr/bin/mwm
 + "&Twm" Function MyRestart twm
@@ -599,7 +605,7 @@ AddToMenu "Module-Popup" "Modules" Title
 +              "SaveDesktop" Module FvwmSave
 +              "Debug" Module FvwmDebug
 +              "Pager" Module FvwmPager 0 3
-+              "FvwmWinList" Module FvwmWinList
+# not in fvwm2: +              "FvwmWinList" Module FvwmWinList
 
 # This menu will fire up some very common utilities
 AddToMenu "Apps" "&M Browser" Exec choosebrowser
@@ -685,14 +691,15 @@ AddToMenu "Network" "ppp-load" Exec kpppload
 
 # This menu will fire up some very common utilities
 AddToMenu "Utilities" "Program Menu" Title
-+              "&Xterm" Exec xterm
++              "%32/xterm_32x32.xpm%&Xterm" Exec xterm
 #+              "RandomCluster&Node" Exec xterm -e randomclusternode
 #+              "X&Emacs" Exec xemacs
 #+              "&Gnuclient" Exec runcommand gnuclient
-+              "&Gnuclient" Exec emacsclientserver
-+              "Mail (&Pine)" Exec read-mail
++              "%hicolor/32x32/apps/emacs.png%&Gnuclient" Exec emacsclientserver
++              "%32/internet-mail.png%Mail (&Pine)" Exec read-mail
 #+              "X&Emacs" Exec xemacsclient.sh
-+              "&m Browser" Exec choosebrowser
++              "%hicolor/32x32/apps/google-chrome.png%&m Browser" Exec choosebrowser
++              "&NTT" Exec /home/tconnors/NTTRDP-linux-x64/NTTRDP
 +              "&e clipboard" Exec mozclip
 +              "&Setuptv" Exec setuptv
 +              "&TV" Exec xawtv
@@ -713,8 +720,8 @@ AddToMenu "Utilities" "Program Menu" Title
 +              "Debian Modules" Popup "/Debian/FVWM_Modules"
 +              "Modules" Popup Module-Popup
 +              "" Nop
-+              "Restart fvwm2" Function MyRestart --pass-args source-startup-exec-fvwm
-+              "Exit Fvwm" Popup Quit-Verify
++              "%32/system-restart.png%Restart fvwm2" Function MyRestart --pass-args source-startup-exec-fvwm
++              "%quit.png%Exit Fvwm" Popup Quit-Verify
 
 #	Exec    "Xterm"		exec xterm -e bash &
 #	Exec    "Rxvt"		exec rxvt -bg Black -fg Wheat &
@@ -747,14 +754,14 @@ AddToMenu "Window-Ops" "Window Ops" Title
 +              "(Un)&Fully Maximize Vertical" Function MaximizeAll 0 100
 +              "(Un)Maximize &Horizontal" Function MaximizeAll 100 0
 +              "" Nop
-+              "Destroy" Destroy
++              "%32/bomb-kill.xpm%Destroy" Destroy
 #	Exec		"Destroy" exec xkill
-+              "&Close" Close
++              "%32/bomb-sparkle.xpm%&Close" Close
 +              "" Nop
 +              "R&efresh Screen" Refresh
-+              "Restart Window Manager" Function MyRestart --pass-args source-startup-exec-fvwm
++              "%32/system-restart.png%Restart Window Manager" Function MyRestart --pass-args source-startup-exec-fvwm
 +              "" Nop
-+              "Exit" Popup Quit-Verify
++              "%quit.png%Exit" Popup Quit-Verify
 
 # A trimmed down version of "Window Ops", good for binding to decorations
 AddToMenu "Window-Ops2" "Move" Function "Move-or-Raise-or-Shade"
@@ -764,8 +771,8 @@ AddToMenu "Window-Ops2" "Move" Function "Move-or-Raise-or-Shade"
 +              "Iconify" Iconify
 +              "(Un)Stick" Stick
 +              "" Nop
-+              "Destroy" Destroy
-+              "Close" Close
++              "%32/bomb-kill.xpm%Destroy" Destroy
++              "%32/bomb-sparkle.xpm%Close" Close
 #	Nop 		""
 #	Module		"ScrollBar" 	FvwmScroll 2 2
 
@@ -880,7 +887,7 @@ AddToFunc RollUnrollDropTerm
 #     Button	Context Modifi 	Function
 Mouse 1		R   	A       PopUp "Utilities"
 Mouse 2		R    	A      	PopUp "Window-Ops"
-Mouse 3         R       A       Module FvwmWinList transient
+# not in fvwm2: Mouse 3         R       A       Module FvwmWinList transient
 
 # Note the use of "Mouse 0" for AnyButton.
 
@@ -936,8 +943,8 @@ Style "Tools" NoButton 2, NoButton 4, Sticky, WindowListSkip
 *WinOpsGeometry -3-3
 *WinOpsColumns 1
 
-*WinOps(Title Kill,  Icon rbomb2.xpm,  Action Destroy)
-*WinOps(Title Close, Icon bomb.xpm,    Action Close)
+*WinOps(Title Kill,  Icon 32/bomb-kill.xpm,    Action Destroy)
+*WinOps(Title Close, Icon 32/bomb-sparkle.xpm, Action Close)
 *WinOps(Title Resize,Icon resize.xpm ,Action Resize)
 *WinOps(Title Move  ,Icon arrows2.xpm,Action Move  )
 *WinOps(Title Lower ,Icon Down       ,Action Lower )
@@ -951,8 +958,8 @@ Style "Tools" NoButton 2, NoButton 4, Sticky, WindowListSkip
 #*ToolsGeometry -1-1
 #*ToolsColumns 1
 
-#*Tools(Title Kill,  Icon rbomb2.xpm,  Action Destroy)
-#*Tools(Title Close, Icon bomb.xpm,    Action Close)
+#*Tools(Title Kill,  Icon 32/bomb-kill.xpm,  Action Destroy)
+#*Tools(Title Close, Icon 32/bomb-sparkle.xpm,    Action Close)
 
 ###########
 #*DebianXShellsPanelBack bisque2
@@ -1024,8 +1031,10 @@ Style "Tools" NoButton 2, NoButton 4, Sticky, WindowListSkip
 *FvwmButtons(2x13, Swallow (UseOld Close SwallowNew) "wmmoonclock" "Exec wmmoonclock -lat -31.14 -lon -149.18")
 *FvwmButtons: (2x8, NoSize, Title "Main menu", \
     Action(Mouse 1) "PopUp Utilities", \
-    Action(Mouse 2) "PopUp Window-Ops", \
-    Action(Mouse 3) "Module FvwmWinList transient")
+    Action(Mouse 2) "PopUp Window-Ops" )
+    #, \
+    # not in fvwm2:     Action(Mouse 3) "Module FvwmWinList transient"
+    # )
 
 ######################### No Clutter ########################################
 # I only wrote NoClutter as a simple test case, but maybe some big sites like
@@ -1095,3 +1104,7 @@ Style "Tools" NoButton 2, NoButton 4, Sticky, WindowListSkip
 MenuStyle * MenuFace HGradient 128 lightgrey rgb:44/44/ff, PopupOffset 1 100               #bohr-galileoEXCLUDE
 TitleStyle ActiveUp SGradient 50 2 rgb:00/00/ff 10 rgb:44/44/ee 40 rgb:ff/ff/ff            #bohr-galileoEXCLUDE
 TitleStyle Inactive SGradient 50 rgb:aa/aa/aa rgb:44/44/ff                                 #bohr-galileoEXCLUDE
+
+# https://fvwmforums.org/t/icons-in-menus/1034
+#MenuStyle * ItemFormat "%.4s%.1|%.5l%.5l%.5r%.5i%2.3>%1|"
+
