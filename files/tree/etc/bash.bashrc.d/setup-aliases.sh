@@ -67,24 +67,14 @@ function setup_aliases() {
 
     #some functions that can't be done by aliases
 
-    # http://wiki.bash-hackers.org/commands/builtin/caller
-    function bt() {
-        local frame=0
-        while caller $frame; do
-            ((frame++));
-        done
-        echo "$*"
-        #  exit 1
-    }
-
     # puppet functionality
     function validate_yaml { ruby -ryaml -e "YAML.load_file '$1'" ; }
     function validate_erb { erb -P -x -T '-' $1 | ruby -c ; }
 
-    function l- () {
+    function l-() {
         command ls -lA $enablecolor -"$@"
     }
-    function ls- () {
+    function ls-() {
         command ls $enablecolor -"$@"
     }
 
@@ -97,7 +87,7 @@ function setup_aliases() {
             pushd "$@"
         fi > /dev/null
     }
-    function fg () {
+    function fg() {
         if [ x"$*" != x ] ; then
             generatetitle `jobs "$@"`
         else
@@ -106,7 +96,7 @@ function setup_aliases() {
         command fg "$@"
     }
 
-    function uid () {
+    function uid() {
         id | sed 's/^[^=]*=\([0-9]*\)(\([^ ]*\)).*/\1/' 
     }
 
@@ -118,11 +108,11 @@ function setup_aliases() {
 }
 
 # some functions just always need to be defined
-function id_username () {
+function id_username() {
     id | sed 's/^[^=]*=\([0-9]*\)(\([^ ]*\)).*/\2/'
 }
 
-function programexists () {
+function programexists() {
     type -p "$1" >/dev/null
 }
 

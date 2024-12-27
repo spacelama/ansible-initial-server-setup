@@ -1,17 +1,27 @@
 # https://stackoverflow.com/questions/68768860/how-to-print-all-function-calling-orders-in-a-bash-script
 
+# http://wiki.bash-hackers.org/commands/builtin/caller
+bt() {
+    local frame=0
+    while caller $frame; do
+        ((frame++));
+    done | sed 's/^/line:/'
+    echo "$*"
+    #  exit 1
+}
+
 print_callers() {
   local func file line
 
   echo 'CALLERS:'
 
   for i in "${!FUNCNAME[@]}"; do
-    # Uncomment next line to skip the current function, i.e., `print_callers`.
-    # if [[ $i == 0 ]]; then continue; fi
-    func=${FUNCNAME[$i]}
-    file=${BASH_SOURCE[$i]}
-    line=${BASH_LINENO[$i - 1]}
-    echo " - $func ($file:$line)"
+      # Uncomment next line to skip the current function, i.e., `print_callers`.
+      if [[ $i == 0 ]]; then continue; fi
+      func=${FUNCNAME[$i]}
+      file=${BASH_SOURCE[$i]}
+      line=${BASH_LINENO[$i - 1]}
+      echo " - $func ($file:$line)"
   done
 
   echo
@@ -55,15 +65,17 @@ log_to_file() {
 # debugging trace functions
 calling() {
     if [ -n "$BASH_DEBUG" ] ; then
-        bt
-        echo calling "$@"
+        echo "Calling: $@"
+#        bt
+        print_callers
     fi 1>&2
 }
 
 called() {
     if [ -n "$BASH_DEBUG" ] ; then
-        bt
-        echo back from "$@"
+        echo "Returning from: $@"
+#        bt
+        print_callers
     fi 1>&2
 }
 # when finished debugging, can speed up the shell a little by instead setting:
