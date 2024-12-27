@@ -17,9 +17,7 @@ function choosehistoryfile() {
     if [ "$BASH_FULL_HISTFILE_LAST" != "$BASH_FULLHIST" ] ; then
         # time to read from the new file we're just setting, and start writing to it
         BASH_FULL_HISTFILE_LAST="$BASH_FULLHIST"
-        calling choosehistoryfile/setup_bash_history_file
         setup_bash_history_file
-        called choosehistoryfile/setup_bash_history_file
     fi
 }
 
@@ -78,9 +76,7 @@ function writetohistory() {
     #FIXME: ideally detect when we're inside emacs TRAMP and do nothing
     #    bt
 
-    calling writetohistory/choosehistoryfile
     choosehistoryfile
-    called writetohistory/choosehistoryfile
 
     local BASH_FULLHIST="${BASH_FULL_HISTFILE:-$HOME/.bash_fullhistory}"
 
@@ -88,9 +84,7 @@ function writetohistory() {
     if [ -z "$1" -a -z "$history" ] ; then
         return
     fi
-    calling write_history_in_background
     write_history_in_background "$history" "$1" "$USER" "$PWD" "$BASH_FULLHIST" "$PTS"
-    called write_history_in_background
     if HISTTIMEFORMAT= history 2 | sed 's/^[ 0-9]*//' | uniq -d | grep -q . ; then
         # duplicated history
         lasthist=$( history 1 | awk '{print $1}' )
@@ -99,7 +93,6 @@ function writetohistory() {
         history -d $lasthist
     fi
     history -a /dev/null   # clear the history since the append is done in a subshell
-    called Exiting writetohistory
 }
 
 function setup_bash_history_file() {
