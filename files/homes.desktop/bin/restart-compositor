@@ -19,5 +19,9 @@
 # we care about)
 
 export DISPLAY=:0
+
 killall picom 2>/dev/null
-picom < /dev/null >& /dev/null &
+sleep 5
+killall -9 picom 2>/dev/null
+
+picom & # redirection shouldn't be needed with 11.2-0.1 fixing #1053228: < /dev/null >& /dev/null &

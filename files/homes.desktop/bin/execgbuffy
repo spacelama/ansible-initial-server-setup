@@ -4,7 +4,7 @@ source ~/.bash_profile
 
 #ulimit -v $((1024*256)) # makes direnv in bash login scripts complain
 #ulimit -v $((1024*512))
-ulimit -v $((1024*1024*1))
+ulimit -v $((1024*1024*1)) # don't forget this has to cover all the children that gbuffy spawns, including pine, and its children, including a browser IPC process
 
 lockfile=/var/lock/gbuffy-$USER$DISPLAY$SHORTHOST.pids
 

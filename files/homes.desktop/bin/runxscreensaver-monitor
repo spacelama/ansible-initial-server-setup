@@ -11,7 +11,7 @@ log_in=/tmp/xscreensaver.$DISPLAY.log
 log_out=/tmp/xscreensaver-monitor.$DISPLAY.log
 
 function notify() {
-    echo "runxscreensaver-monitor: $(date): $@"
+    echo "$( colorize -n bright green runxscreensaver-monitor: $(date): ) $( colorize -n dark green "$@")"
 }
 
 rotate_logfile() {
@@ -40,6 +40,8 @@ restart_xscreensaver() {
     systemctl --user restart runxscreensaver.service
     echo " *** $@"
 }
+
+export PATH=$PATH:$HOME/bin
 
 exec >> $log_out 2>&1
 rotate_logfile

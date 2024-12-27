@@ -2,6 +2,10 @@
 Description=Runs our gbuffy invocation
 
 [Service]
+# we could set memory limits here given gbuffy's leaks, but delegate
+# it to execgbuffy instead. But also don't forget this has to cover
+# all the children that gbuffy spawns, including pine, and its
+# children, including a browser IPC process
 ExecStart=/home/tconnors/bin/execgbuffy
 Restart=always
 RestartSec=10

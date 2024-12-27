@@ -39,7 +39,7 @@ case $LONGHOST-$SHORTDISPHOST in
             dirac|gamow|fermi)
                 #xset m 30/10 10
                 # xinput list: ->
-                for dev in 'HID 046d:c521' 'Logitech MX Master 3S' ; do
+                for dev in 'HID 046d:c521' 'Logitech MX Master 3' 'Logitech MX Master 3S' ; do
                     list_props=$( xinput list-props "pointer:$dev" ) ||
                         continue
                     echo "Found $dev"
@@ -50,6 +50,11 @@ case $LONGHOST-$SHORTDISPHOST in
                                 ["libinput Accel Speed"]="0.01"
                             )
                         ;;
+                        Logitech\ MX\ Master\ 3)
+                            adj=(
+                                ["libinput Accel Speed"]="0.7"
+                            )
+                            ;;
                         HID*)
                             adj=(
                                 ["libinput Accel Speed"]="0.9"

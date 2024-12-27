@@ -28,7 +28,9 @@ xauth generate $DISPLAY . trusted
 #  . ~/.bash_profile # try calculate it again - might have a race condition on some startups
 #fi
 
+unthrottle_browser &
 restart-compositor
+[ $SHORTHOST = fermi ] && daemon-work-external-display
 
 xrandr --current
 for i in HORSIZE VERTSIZE HOR2SIZE VERT2SIZE ; do
@@ -135,31 +137,7 @@ repeat=0  # FIXME: turns out you've been able to address individual
 #xhost +localhost
 #xhost -
 
-resources=$HOME/.Xdefaults
-echo "Trying $resources:"
-if [ -r "$resources" ]; then
-    echo "Loading $resources"
-    xrdb -load "$resources"
-fi
-
-echo "Trying .Xdefaults.$system"
-if [ -e $HOME/.Xdefaults.$system ] ; then
-    echo "Merging .Xdefaults.$system"
-    xrdb -merge $HOME/.Xdefaults.$system
-fi
-echo "Trying debian"
-if [ `head -n 1 /etc/issue | awk '{print $1}'` = Debian ] ; then
-    echo "Trying .Xdefaults.debian"
-    if [ -e $HOME/.Xdefaults.debian ] ; then
-        echo "Merging .Xdefaults.debian"
-        xrdb -merge $HOME/.Xdefaults.debian
-    fi
-fi
-echo "Trying .Xdefaults.$SHORTHOST"
-if [ -e $HOME/.Xdefaults.$SHORTHOST ] ; then
-    echo "Merging .Xdefaults.$SHORTHOST"
-    xrdb -merge $HOME/.Xdefaults.$SHORTHOST
-fi
+xrdb-reinitialise
 
 if [ $HORSIZE -ge 1024 ] ; then
     xterm -ls -geometry +0+0   &
