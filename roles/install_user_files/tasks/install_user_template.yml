@@ -1,9 +1,6 @@
 ---
 # generates a file .name, from template .source.j2
 
-# FIXME: need to work out how to read the templates from the file directory instead of
-# the template directory
-
 - name: "install user file per template: ~{{ user }}/{{ dir_file_or_template.name }} from {{ source }}"
   template:
     dest: "~{{ user }}/{{ dir_file_or_template.name }}"

@@ -31,13 +31,14 @@
         ) and
         (
           ( file_recurse.path is not regex('(^|/).*~$' ) ) and
-          ( file_recurse.path is not regex('(^|/).git(/|ignore|$)' ) ) and
+          ( file_recurse.path is not regex('(^|/)\\.#.*$' ) ) and
+          ( file_recurse.path is not regex('(^|/)#.*#$' ) ) and
+          ( file_recurse.path is not regex('(^|/)\\.git(/|ignore|$)' ) ) and
           ( file_recurse.path is not regex('(^|/)CVS(/|$)' ) ) and
-          ( file_recurse.path is not regex('(^|/).cvsignore$' ) ) and
+          ( file_recurse.path is not regex('(^|/)\\.cvsignore$' ) ) and
           ( file_recurse.path is not regex('(^|/)readme.txt(/|$)' ) )
         )
-
-# FIXME: it'd be nice to act on .j2 files as well, but if we try to
-# template them, the template will search templates/ rather than under
-# files/ where we intend to find them with file_recurse
-# https://serverfault.com/questions/578544/deploying-a-folder-of-template-files-using-ansible
+          # backup files
+          # emacs temporary files
+          # version control files
+          # documentation of directory structure in this repo

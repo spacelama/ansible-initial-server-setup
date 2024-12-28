@@ -24,10 +24,10 @@
         ( dir_file_or_template.remove | default(false) )
 
 - include_tasks: install_file.yml
-  when: ( source is not regex(".*.j2$") ) and
+  when: ( source is not regex(".*\\.j2$") ) and
         ( source is not regex(".*/$") ) and
         ( not (
-          ( ( dir_file_or_template.type | default("file")) == "symlink" ) &&
+          ( ( dir_file_or_template.type | default("file")) == "symlink" ) and
           not ( dir_file_or_template.local_follow | default(false) )
           )
         )
@@ -37,6 +37,6 @@
         not ( dir_file_or_template.local_follow | default(false) )
 
 - include_tasks: install_template.yml
-  when: ( source is regex(".*.j2$") )
+  when: ( source is regex(".*\\.j2$") )
         # implied can't also be directory
 

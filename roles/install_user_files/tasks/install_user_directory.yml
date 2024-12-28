@@ -29,12 +29,13 @@
   become: true
   become_user: "{{ user }}"
 
+  # FIXME: should modify install_user_file.yml to take a generic argument that we can use here
 - name: "install user file under directory: ~{{ user }}/{{ dir_file_or_template.name }} from {{ source }}"
   copy:
     dest: "~{{ user }}/{{ dir_file_or_template.name }}{{ file_recurse.path }}"
     owner: "{{ user }}"
     group: "{{ user }}"
-    src: "{{ file_recurse.src }}"
+    src: "{{ file_recurse.root }}{{ file_recurse.path }}"
     local_follow: "{{ dir_file_or_template.local_follow | default(omit) }}"
     state: "{{ dir_file_or_template.state | default(omit) }}"
     # AND existing mode in source tree with 0777 to make sure no
@@ -50,9 +51,29 @@
     loop_var: file_recurse
     label: "~{{ user }}/{{ dir_file_or_template.name }}{{ file_recurse.path }}"
   with_items: "{{ file_list.file }}"
+  when: file_recurse.path is not regex(".*\\.j2$")
   become: true
   become_user: "{{ user }}"
 
+  # FIXME: should modify install_user_template.yml to take a generic argument that we can use here (don't forget that in this directory version, we consult ../files/ )
+- name: "install user file per template under directory: ~{{ user }}/{{ dir_file_or_template.name }} from (files/){{ source }}"
+  template:
+    dest: "~{{ user }}/{{ dir_file_or_template.name }}{{ file_recurse.path | regex_replace('\\.j2$', '') }}"
+    owner: "{{ user }}"
+    group: "{{ user }}"
+    src: "{{ file_recurse.root }}{{ file_recurse.path }}"
+    # AND existing mode in source tree with 0777 to make sure no
+    # setuid or setgid bits are set in the filesystem
+    mode: "{{ dir_file_or_template.mode | default(file_recurse.mode | bitwise_and_oct('0777')) }}"
+  loop_control:
+    loop_var: file_recurse
+    label: "~{{ user }}/{{ dir_file_or_template.name }}{{ file_recurse.path }}"
+  with_items: "{{ file_list.file }}"
+  when: file_recurse.path is regex(".*\\.j2$")
+  become: true
+  become_user: "{{ user }}"
+
+  # FIXME: should modify install_user_symlink.yml to take a generic argument that we can use here
 - name: "install user file symlink under directory: ~{{ user }}/{{ dir_file_or_template.name }} from {{ source }}"
   file:
     dest: "~{{ user }}/{{ dir_file_or_template.name }}{{ file_recurse.path }}"

@@ -29,12 +29,13 @@
   become: "{{ dir_file_or_template.become | default(true) }}"
   notify: "{{ dir_file_or_template.notify | default(omit) }}"
 
+  # FIXME: should modify install_file.yml to take a generic argument that we can use here
 - name: "install file under directory: {{ dir_file_or_template.name }} from {{ source }}"
   copy:
     dest: "{{ dir_file_or_template.name }}{{ file_recurse.path }}"
     owner: "{{ dir_file_or_template.user | default('root') }}"
     group: "{{ dir_file_or_template.group | default('root') }}"
-    src: "{{ file_recurse.src }}"
+    src: "{{ file_recurse.root }}{{ file_recurse.path }}"
     local_follow: "{{ dir_file_or_template.local_follow | default(omit) }}"
     state: "{{ dir_file_or_template.state | default(omit) }}"
     # AND existing mode in source tree with 0777 to make sure no
@@ -48,9 +49,29 @@
     loop_var: file_recurse
     label: "{{ dir_file_or_template.name }}{{ file_recurse.path }}"
   with_items: "{{ file_list.file }}"
+  when: file_recurse.path is not regex(".*\\.j2$")
   become: "{{ dir_file_or_template.become | default(true) }}"
   notify: "{{ dir_file_or_template.notify | default(omit) }}"
 
+  # FIXME: should modify install_template.yml to take a generic argument that we can use here (don't forget that in this directory version, we consult ../files/ )
+- name: "install file per template under directory: {{ dir_file_or_template.name }} from (files/){{ source }}"
+  template:
+    dest: "{{ dir_file_or_template.name }}{{ file_recurse.path | regex_replace('\\.j2$', '') }}"
+    owner: "{{ dir_file_or_template.user | default('root') }}"
+    group: "{{ dir_file_or_template.group | default('root') }}"
+    src: "{{ file_recurse.root }}{{ file_recurse.path }}"
+    # AND existing mode in source tree with 0777 to make sure no
+    # setuid or setgid bits are set in the filesystem
+    mode: "{{ dir_file_or_template.mode | default(file_recurse.mode | bitwise_and_oct('0777')) }}"
+  loop_control:
+    loop_var: file_recurse
+    label: "{{ dir_file_or_template.name }}{{ file_recurse.path }}"
+  with_items: "{{ file_list.file }}"
+  when: file_recurse.path is regex(".*\\.j2$")
+  become: "{{ dir_file_or_template.become | default(true) }}"
+  notify: "{{ dir_file_or_template.notify | default(omit) }}"
+
+  # FIXME: should modify install_symlink.yml to take a generic argument that we can use here
 - name: "install file symlink under directory: {{ dir_file_or_template.name }} from {{ source }}"
   file:
     dest: "{{ dir_file_or_template.name }}{{ file_recurse.path }}"
