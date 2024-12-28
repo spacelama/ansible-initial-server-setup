@@ -1,9 +1,10 @@
 ---
   domain: rather.puzzling.org
-  install_dirs:
-    - { dir: "/root/bin", mode: "0755", become: false }
 
   install_files:
+    - { source: "roles/openwrt/files/bin/", name: "/root/bin/", mode: "0755", become: false } # permissions supplied because gekmihesg.openwrt can't deal with python 0o755 style octal numerals
+    - { source: "roles/openwrt/files/colordiffrc", local_follow: true, name: "/etc/", become: false }
+    - { source: "roles/openwrt/files/.bash_profile", name: "/root/", become: false }
     - { source: "roles/openwrt/files/etc_config_usteer", name: /etc/config/usteer, mode: "0644", when: "{{ type == 'ap'}}", become: false }
     - { source: "roles/openwrt/files/etc_dropbear_authorized_keys", name: /etc/dropbear/authorized_keys, mode: "0644", become: false }
     - { source: "roles/openwrt/templates/etc_rc.local.j2", name: /etc/rc.local, mode: "0644", become: false }

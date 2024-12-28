@@ -180,23 +180,6 @@
     src: dnsmasq.hosts.j2
   notify: restart dnsmasq
 
-- name: setup some custom binaries
-  copy:
-    dest: "/root/bin/{{ item }}"
-    src: "bin/{{ item }}"
-    mode: "0755"
-  with_items:
-    - add-batch-dhcp
-    - add-dhcp
-    - list-installed-packages
-    - log-daily-config
-    - show_wifi_clients2.sh
-    - show_wifi_clients2.sh.helper
-    - show_wifi_clients2.sh.helper2
-    - opkg-search
-    - nutups_
-    - sensors_
-
 - name: set root account passwd
   lineinfile:
     dest: /etc/passwd

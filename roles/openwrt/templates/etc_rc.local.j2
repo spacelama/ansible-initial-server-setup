@@ -20,6 +20,11 @@
     echo "$( date ): starting wifi"
     wifi up
 {% endif %}
+
+{% if type == 'ap' %}
+    /root/bin/disable-AP-when-no-internet.sh &
+{% endif %}
+
 ) > /tmp/boot.rc.local.log 2>&1 &
 
 exit 0
