@@ -61,7 +61,5 @@
   include_tasks: external_website.yml
   when: host_is_ext_web_server | default(false)
 
-
-
-
-
+- name: Make sure all handlers run
+  meta: flush_handlers

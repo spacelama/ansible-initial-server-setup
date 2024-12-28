@@ -28,3 +28,6 @@
     autoremove: no
     state: present
   become: true
+
+- name: Make sure all handlers run
+  meta: flush_handlers

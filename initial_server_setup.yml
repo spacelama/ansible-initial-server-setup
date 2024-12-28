@@ -45,6 +45,12 @@
     - role: munin_server
       tags: [munin_server]
       when: host_is_munin_server | default(false)
+      # WARNING: any flush handlers in any of the conditionally
+      # included roles will cause handlers invoked prior to then be
+      # ignored for any host where that host is not running this role!
+      # That warning message for smtp was a little bit not urgent
+      # enough! (likely mitigated if there's a flushhandler at the end
+      # of each role like we do these days)
     - role: bootstrap
       tags: [bootstrap]
     - role: ssh_bootstrap

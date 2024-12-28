@@ -4,3 +4,6 @@
   loop_control:
     loop_var: user
   with_items: "{{ install_user_files.users }}"
+
+- name: Make sure all handlers run
+  meta: flush_handlers

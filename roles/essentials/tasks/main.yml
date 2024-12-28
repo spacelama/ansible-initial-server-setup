@@ -805,5 +805,8 @@
   notify: "Update initramfs config"
   when: not (host_is_container | default(false))
 
+- name: Make sure all handlers run
+  meta: flush_handlers
+
 # FIXME: distribute ssh_known_hosts
 # https://stackoverflow.com/questions/59832034/how-to-include-all-host-keys-from-all-hosts-in-group

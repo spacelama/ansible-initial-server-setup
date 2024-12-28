@@ -8,4 +8,7 @@
     state: present
   become: true
 
+- name: Make sure all handlers run
+  meta: flush_handlers
+
 # FIXME: Still to be fleshed out...  Needs to set up a properly hardened mailserver, firewalled off, selinux, etc...

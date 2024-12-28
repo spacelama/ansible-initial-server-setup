@@ -38,3 +38,6 @@
   become: true
   with_items:
     "{{ lookup('ansible.builtin.dict', default_zfs_flags) }}"
+
+- name: Make sure all handlers run
+  meta: flush_handlers

@@ -37,3 +37,6 @@
   # we don't include those entries in nut_upsmon_conf where .host is defined,
   # because that monitoring node is talking to another machine with a UPS attached
   when: nut_upsmon_conf[item[0]].host | default('localhost') == 'localhost'
+
+- name: Make sure all handlers run
+  meta: flush_handlers

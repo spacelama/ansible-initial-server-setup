@@ -112,3 +112,6 @@
     group: root
     mode: 0644
   when: root_authorized_keys is defined
+
+- name: Make sure all handlers run
+  meta: flush_handlers

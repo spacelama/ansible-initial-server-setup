@@ -42,3 +42,6 @@
 # to do away with install list of both "install list of directories"
 # and "remove files not in list" because these could simply become
 # directories in the source tree
+
+- name: Make sure all handlers run
+  meta: flush_handlers

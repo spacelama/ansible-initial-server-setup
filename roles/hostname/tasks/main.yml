@@ -49,3 +49,6 @@
     state: absent
   notify: restart hostname
   become: true
+
+- name: Make sure all handlers run
+  meta: flush_handlers

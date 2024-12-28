@@ -99,3 +99,6 @@
     mode: 0440
   loop: "{{ lookup('dict', my_users) }}"
   become: true
+
+- name: Make sure all handlers run
+  meta: flush_handlers

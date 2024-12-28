@@ -14,3 +14,6 @@
     loop_var: flag
   when: host_can_have_spectre_mitigations | default(true)
   with_items: [ nopti, nospectre_v2, nospectre_v1, noibrs, noibpb, nospec_store_bypass_disable, no_stf_barrier, mds, mitigations, l1tf ]
+
+- name: Make sure all handlers run
+  meta: flush_handlers

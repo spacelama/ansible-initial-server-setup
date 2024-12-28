@@ -17,3 +17,6 @@
   with_items:
    - rrdcached
   notify: restart munin-node
+
+- name: Make sure all handlers run
+  meta: flush_handlers

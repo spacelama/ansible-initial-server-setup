@@ -44,3 +44,5 @@
 #    upgrade: safe
 #    autoremove: no
 
+- name: Make sure all handlers run
+  meta: flush_handlers

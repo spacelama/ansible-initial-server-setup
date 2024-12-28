@@ -463,3 +463,6 @@
   become: true
   notify: restart munin-async
   when: not (munin_no_fork | default(false))
+
+- name: Make sure all handlers run
+  meta: flush_handlers

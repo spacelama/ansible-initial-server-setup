@@ -247,3 +247,5 @@
   become: true
   when: (smtp_crontab is defined) and (host_is_mda | default(false))
 
+- name: Make sure all handlers run
+  meta: flush_handlers
