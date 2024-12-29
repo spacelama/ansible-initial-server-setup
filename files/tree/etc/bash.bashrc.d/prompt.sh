@@ -26,6 +26,7 @@ function setup_preexec_hook() {
         precmd_functions+=("$prior_PROMPT_COMMAND")
         precmd_functions+=(handleprompt)
 
+        __bp_enable_subshells=true # https://github.com/rcaloras/bash-preexec/issues/25
         if [ -e /etc/bash-preexec/bash-preexec.sh ] ; then
             . /etc/bash-preexec/bash-preexec.sh
         else

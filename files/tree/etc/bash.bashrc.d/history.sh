@@ -38,7 +38,7 @@ function write_history_in_background() {
     # "...
 
     local history="$1"
-    local header="$2"
+    local marker="$2"
     local USER="$3"
     local PWD="$4"
     local BASH_FULLHIST="$5"
@@ -54,13 +54,33 @@ function write_history_in_background() {
         # run it through sed, which will unescape the slashes, sigh
         PWDENC="${PWDENC//\\/\\\\}"
 
+        # we first write out all of $history==$1, if there was any
+        # provided (this could still happen at the end of a session if
+        # a bug (eg bash-preexec#25) triggered bash-preexec not to
+        # fire, and we had history saved up, and then the session
+        # ended and we wanted to write a CLOSE MARKER), and then we
+        # write out any marker==$2 provided.
         history=$(
-            if [ -n "$header" ] ; then
+            if [ -n "$marker" ] ; then
+                if [ -n "$history" ] ; then
+                    echo "$history"
+                fi
                 echo "#"$(date +%s)
                 #                    echo "#######################"  # doesn't seem to be necessary in 2023 anymore - don't end up with history composed of dates anymore
             else
                 echo "$history"
-            fi | sed "/^#[0-9][0-9][0-9][0-9][0-9][0-9][0-9][0-9][0-9][0-9]$/s!\$! $PTS ${OPVIEW_VIEW:+$OPVIEW_VIEW/$OPVIEW_ITEM }$PWDENC$header!"
+            fi |
+                # ok, we have all all the history provided to us and
+                # then the marker if any present, so select any lines
+                # that consist of the timestamp, and append
+                # OPVIEW_VIEW/OPVIEW_ITEM (Cray) if it's present, and
+                # the encoded PWD followed by any marker if its
+                # present (if CLOSE appears at the end of an ordinary
+                # history line, that's a very good indication we've
+                # found a bug in bash-preexec, so I'm not inclined to
+                # fix that bit of lazyness because I want to know
+                # about such bugs)
+                sed "/^#[0-9][0-9][0-9][0-9][0-9][0-9][0-9][0-9][0-9][0-9]$/s!\$! $PTS ${OPVIEW_VIEW:+$OPVIEW_VIEW/$OPVIEW_ITEM }$PWDENC$marker!"
                )
 
         mkdir -m 0700 -p /tmp/$USER
