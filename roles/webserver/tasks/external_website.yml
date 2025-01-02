@@ -37,16 +37,6 @@
   become: true
   notify: restart apache2
 
-- name: install our apache sites
-  copy:
-    src: etc/apache2/secrets/
-    dest: /etc/apache2/secrets/
-    owner: www-data
-    group: www-data
-    mode: 0640
-  become: true
-#  notify: restart apache2
-
 - name: disable apache configurations
   file:
     path: /etc/apache2/conf-enabled/serve-cgi-bin.conf

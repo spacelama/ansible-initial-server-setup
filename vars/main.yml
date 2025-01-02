@@ -227,20 +227,35 @@
       - root
     files:
       # dest is .name.  "/dir/" means the destination takes the same name as the
-      # source, and the intervening directory is ensured to exist
+      # source, and the intervening directory is ensured to exist.
+      #
+      # source (including those implied when not supplied) ending in
+      # "/" is treated as a recursively copied directory
+      #
       # .source defaults to 'files/homes/'{{name}}
-      # .j2 source files (under the templates directory) are treated as templates
+      #
+      # .j2 source files (under the templates directory) are treated
+      # as templates.  .j2 source files under a directory in the
+      # files/ directory are similarly treated as templates.
+      #
+      # Why can't you just put all your files under one of these
+      # recursively copied trees?  Probably best to avoid putting
+      # files under such directories that rely on special permissions,
+      # because we don't treat permissions specially if no mode: is
+      # supplied.  Likewise, files that depend on notify: will have to
+      # be done outside your global tree.
+      #
+      # Stick to 'homes.*' names when it's a simple sync.  Move it out
+      # of 'homes.*' directories if you want an notify action or
+      # customisation, unless perhaps that directory already exists in
+      # the files/ area because it's relevant to a whole bunch of
+      # hosts and you have a further customisation here.
       - name: ./    # install all of files/homes/ into such users ~/
       - name: ./
         source: homes.Linux-{{ arch | default ('x86_64') }}/
       - name: ./   # very me-specific window management stuff, only put on my desktops
         source: homes.desktop/
         when: "{{ host_is_desktop | default(false) }}"
-    # templates done by matching on .j2
-      - name: .nanorc
-        source: homes/.nanorc.j2
-      - name: .gitconfig
-        source: homes/.gitconfig.j2
       - name: .bashrc.d/
         # don't want this in the automatically copied homes/ because
         # otherwise it gets installed back onto dirac, our ansible
@@ -266,34 +281,45 @@
   bashrc_files:
     - "{{ lookup('fileglob', 'tree/etc/bash.bashrc.d/*.sh', wantlist=True) }}"
 
-  install_dirs: # these directories would normally be created by the
-                # packages we later install, but we want to be able to
-                # install these files before the package is.  Only
-                # really need to create the directories that hold
-                # files built by templates below, because templates
-                # need a full destination path specified, whereas
-                # "copy" files can just have the path specified, which
-                # implies the creation of that directory first
-    - { dir: "/etc/chrony/sources.d", mode: "0755" }
-
     # "simple-sync" - let's just transfer a whole bunch of files,
     # according to simple criteria, with possible event triggering:
   install_files:
       # dest is .name.  "/dir/" means the destination takes the same name as the
-      # source, and the intervening directory is ensured to exist
+      # source, and the intervening directory is ensured to exist.
+      #
+      # source (including those implied when not supplied) ending in
+      # "/" is treated as a recursively copied directory
+      #
       # .source defaults to 'files/tree/'{{name}}
-      # .j2 source files (under the templates directory) are treated as templates
+      #
+      # .j2 source files (under the templates directory) are treated
+      # as templates.  .j2 source files under a directory in the
+      # files/ directory are similarly treated as templates.
+      #
+      # Why can't you just put all your files under one of these
+      # recursively copied trees?  Probably best to avoid putting
+      # files under such directories that rely on special permissions,
+      # because we don't treat permissions specially if no mode: is
+      # supplied.  Likewise, files that depend on notify: will have to
+      # be done outside your global tree.
+      #
+      # Stick to 'tree.*' names when it's a simple sync.  Move it out
+      # of 'tree.*' directories if you want an notify action or
+      # customisation, unless perhaps that directory already exists in
+      # the files/ area because it's relevant to a whole bunch of
+      # hosts and you have a further customisation here.
     - name: /
     - name: /
       source: tree.Linux-{{ arch | default ('x86_64') }}/
     - name: /
       source: tree.remove/
       remove: true
+    - name: /,
+      source: tree.pve_server/,
+      when: '{{ host_is_pve_server | default(false) }}'
 
-    - { name: /var/spool/cron/crontabs/root, source: var_spool_cron/root.j2,                 mode: "0600", group: "crontab" }
+    - { name: /var/spool/cron/crontabs/root, source: var/spool/cron/root.j2,                 mode: "0600", group: "crontab" }
     - { name: /etc/modprobe.d/ansible-custom.conf, source: etc/modprobe.d/ansible-custom.conf.j2 }
-
-    - { source: tree.pve_server/, name: /,                    when: '{{ host_is_pve_server | default(false) }}' }
 
     - { source: etc/ceph/ceph.client.cephfs-hdd.fs.keyring,         name: /etc/ceph/, mode: "0600", when: '{{ mount_ceph_clients is defined }}' }
     - { source: etc/ceph/ceph.client.cephfs-slow.webserver.keyring, name: /etc/ceph/, mode: "0600", when: '{{ mount_ceph_clients is defined }}' }
@@ -306,21 +332,20 @@
     - { name: /etc/auto.nas,    source: etc/auto.nas.j2, notify: "restart autofs", when_pkg_installed: "autofs" }
     - { name: /etc/autofs.conf, source: etc/autofs.conf, notify: "restart autofs", when_pkg_installed: "autofs" }
 #    - { name: /etc/default/autofs, source: etc/default/autofs, notify: "restart autofs" }   MOUNT_NFS_DEFAULT_PROTOCOL seems to be ignored, and not causing me problems anyway, these days
-    - { name: /etc/idmapd.conf, source: etc/idmapd.conf.j2 }
 
     - { name: /etc/updatedb.conf, source: etc/updatedb.conf.dirac,   when: "{{ inventory_hostname == 'dirac' }}" }
     - { name: /etc/updatedb.conf, source: etc/updatedb.conf.fs,      when: "{{ inventory_hostname == 'fs' }}" }
     - { name: /etc/updatedb.conf, source: etc/updatedb.conf.default, when: "{{ (inventory_hostname != 'dirac') and (inventory_hostname != 'fs') }}" }
 
     - { source: etc/apache2/mods-available/userdir.conf.int, name: /etc/apache2/mods-available/userdir.conf, notify: "restart apache2", when: '{{ ( host_is_user_web_server | default(false) ) and ( deb_release == "bookworm" ) }}' }
-    - { source: tree.webserver/etc/apache2/, name: /etc/apache2/,           notify: "restart apache2", when: '{{ host_is_ext_web_server | default(false) }}' }
+    - { name: /etc/apache2/,         source: etc/apache2.webserver.ext/, notify: "restart apache2", when: '{{ host_is_ext_web_server | default(false) }}' }
+    - { name: /etc/apache2/secrets/, source: etc/apache2.webserver.secrets, owner: www-data, group: www-data, mode: "0640", when: '{{ host_is_ext_web_server | default(false) }}' }
 
-    - { name: /etc/rkhunter.conf,  source: etc/rkhunter.conf.j2 }
-
+    - { name: /etc/rkhunter.conf,  source: etc/rkhunter.conf.j2 }  # kept separate to the tree because we want to store the various distribution versions for easier comparison
     - { source: etc/munin/munin-node.conf, name: /etc/munin/,   notify: "restart munin-node" }
 
     - { name: /etc/cron.daily/check-cmos-battery,  source: cron/cron.daily_check-cmos-battery,    mode: "0755", when: "{{ host_is_physical | default(false) }}" }
-    - { name: /etc/chrony/sources.d/local.sources, source: etc/chrony/sources.d/local.sources.j2, notify: "restart chrony" }
+    - { name: /etc/chrony/,  source: etc/chrony/,            notify: "restart chrony" }
 
     - { source: etc/logrotate.d/sleep-browser, name: /etc/logrotate.d/, when: "{{ host_is_desktop | default(false) }}" }
     - { source: etc/logrotate.d/apache2,       name: /etc/logrotate.d/, when_pkg_installed: "apache2"            }
