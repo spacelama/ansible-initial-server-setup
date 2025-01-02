@@ -82,6 +82,8 @@ function handleprompt () {
 # to search better for people who dunnit before (and who fixed other
 # problems such as clearing in the input buffer):
 # https://stackoverflow.com/questions/19943482/configure-shell-to-always-print-prompt-on-new-line-like-zsh
+# Finally, there's some near cursor positioning advice here in the usual place (the Arch wiki):
+# https://wiki.archlinux.org/title/Bash/Prompt_customization
 function fetch_cursor_position() {
     local getCpos
     local oldstty

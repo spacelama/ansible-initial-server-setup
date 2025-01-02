@@ -202,6 +202,9 @@ function setup_environment() {
     #export GREP_OPTIONS='--color=auto'
     #export LS_OPTIONS #no such thing, cant remove the aliases
 
+    # ZFS_COLOR doesn't have an =auto or =yes option, but fortunately =1 seems to imply auto
+    export ZFS_COLOR=1 # although `zpool iostat -v 1 | zpool-iostat--color` is nicer than `ZFS_COLOR=1 zpool iostat -v 1`
+
     # is the world composed entirely of idiots? https://ubuntuhandbook.org/index.php/2019/09/make-scrollbar-always-visible-ubuntu-18-04/
     # gtk4 will further fuck it up: https://wiki.archlinux.org/index.php/GTK%2B#Disable_overlay_scrollbars
     export GTK_OVERLAY_SCROLLING=0
@@ -348,40 +351,8 @@ function setup_environment() {
         fi
     done
 
-    #export PRINTER=astroplw2@suphys
-
-    #force core dump for severe errors: fortran:
-
-    export decfort_dump_flag=y
-
     export PDSH_RCMD_TYPE=ssh
-
-    RSHCOMMAND=ssh
-    CLUSTERLOADSORT_RSH=ssh
-    CLUSTERLOADSORT_RSH_OPTIONS="-x"    #wanted with ssh, so that X is not forwarded, so we don't get locking errors
-    #CLUSTERLOADSORT_RSH=fsh #rsh
-    #CLUSTERLOADSORT_RSH_OPTIONS=
-    ##LOADBALANCE_MPI_RSH=fshtimeout
-    ##LOADBALANCE_MPI_RSH_OPTIONS="--timeout 2 fsh"   #"-t" for ssh - so /dev/stderr is propogated
-    LOADBALANCE_MPI_RSH=fsh
-    LOADBALANCE_MPI_RSH_OPTIONS=   #"-t" for ssh - so /dev/stderr is propogated
-    LOOPLOADBALANCE_RSH=fsh
-    LOOPLOADBALANCE_RSH_OPTIONS=
-    LOADBALANCE_RSH=fsh
-    LOADBALANCE_RSH_OPTIONS=
-    export RSHCOMMAND CLUSTERLOADSORT_RSH CLUSTERLOADSORT_RSH_OPTIONS LOADBALANCE_MPI_RSH LOADBALANCE_MPI_RSH_OPTIONS LOADBALANCE_RSH LOADBALANCE_RSH_OPTIONS
-
-    #for i in $HOME/install/mozilla /opt/mozilla ; do
-    #    if [ -d "$i" ] ; then
-    #        export MOZILLA_FIVE_HOME=$i
-    #        break
-    #    fi
-    #done
-    if [ -d $HOME/.mozilla/plugins ] ; then
-        #make sure all of the plugins I actually want are in this directory, if it exists. Don't copy the crap like nppdf.so
-        export MOZ_PLUGIN_PATH=$HOME/.mozilla/plugins
-    fi
-
+    export RSHCOMMAND=ssh
 
     case "$TERM-$SHORTHOST" in
         emacs-*)
@@ -394,9 +365,8 @@ function setup_environment() {
         #    ;;
     esac
 
-    #export RAID=/nfs/cluster/cosmic/tconnors
-    #export RAID2=/nfs/cluster/cosmic2/tconnors
-
+    #force core dump for severe errors: fortran:
+    # export decfort_dump_flag=y
     #export CFLAGS="-O3 -g -tpp7 -axW"
     #export CXXFLAGS="$CFLAGS"
     #export CC=icc
@@ -406,9 +376,7 @@ function setup_environment() {
 
     export INFO_PRINT_COMMAND=a2ps
 
-    #export TZ=Australia/Sydney   # rely on /etc/timezone, since perl Date::Manip can't handle arbitrary TZ
-
-    #export FSHCLUSTERDEFAULT=ignis1
+    #export TZ=Australia/Melbourne   # rely on /etc/timezone, since perl Date::Manip can't handle arbitrary TZ
 
     # We do want to addkeychain on dirac, not on any ssh sessions from
     # dirac, on ltu, and not on any ssh sessions from ltu (ie,
@@ -440,7 +408,7 @@ function setup_environment() {
     fi
 
     #export HOSTALIASES=$HOME/.scuzzieaddress
-    export HOSTALIASES=$HOME/.hostaliases
+    #export HOSTALIASES=$HOME/.hostaliases
 
     if programexists pathstat ; then
         for i in LD_LIBRARY_PATH PATH PERL5LIB ; do # PERLLIB

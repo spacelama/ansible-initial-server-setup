@@ -16,8 +16,8 @@
 
 
 ; WARNING: This file doesn't seem to be executed by modern xemacs
-; anymore, and possibly not even gnu-emacs.  Make sure it is the bare
-; minimum and put anything common in a common file sourced by both
+; anymore.  Make sure it is the bare minimum and put anything
+; common in a common file sourced by both it and gnu-emacs
 
 (XEmacs
     ;;; XEmacs backwards compatibility file

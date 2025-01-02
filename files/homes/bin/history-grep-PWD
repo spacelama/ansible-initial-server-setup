@@ -1,12 +1,20 @@
 #!/bin/bash
 
-pwd="$( printf "%q" "$( pwd )" | sed "s/\\\'/'/" )"  # grep requires "'" to not be escaped
+# assuming a history file of format:
+##<unix epoch> pts/$pts $PWD
+#command history...
+#
+# output all commands that were run from our current directory.  Don't
+# anchor the endpoint, so also finds commands that were run from our
+# children (and FIXME: also directories at the same level starting
+# with the same name as ours)
+
+pwd_grep_escaped="$( printf "%q" "$( pwd )" | sed "s/\\\'/\'/g" )"  # grep requires "'" to not be escaped
+pwd_grep_double_escaped="$( printf "%q" "$( pwd )" | sed "s/\\\'/\'/g" | sed 's/\\/\\\\/g' )"  # grep requires "'" to not be escaped, and sometimes our history file has spaces quoted in the filename and sometimes (historically) not
 
 # for reasons that I haven't worked out yet, it seems that grep
 # (sometimes!) has a long wait for reading from NFS mounted remote
 # files in a way that cat | grep doesn't(!)
 
-# FIXME: sometimes paths have " " escaped and other times it doesn't
-
 #cat "${BASH_FULL_HISTFILE:-$HOME/.bash_fullhistory}" | grep -A1 "$pwd$"
-grep -A1 "$pwd$" "${BASH_FULL_HISTFILE:-$HOME/.bash_fullhistory}"
+grep -A1 -e "$pwd_grep_escaped$" -e "$pwd_grep_double_escaped" "${BASH_FULL_HISTFILE:-$HOME/.bash_fullhistory}"
