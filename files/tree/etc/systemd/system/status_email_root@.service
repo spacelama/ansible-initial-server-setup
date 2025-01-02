@@ -1,0 +1,11 @@
+# https://wiki.archlinux.org/title/Systemd/Timers#MAILTO
+
+[Unit]
+Description=status email for %i to user
+
+[Service]
+Type=oneshot
+ExecStart=/usr/local/bin/systemd-email root %i
+#User=nobody
+DynamicUser=true
+Group=systemd-journal
