@@ -1,0 +1,13 @@
+#!/bin/bash
+
+# notify any core files laying about in random parts of the
+# filesystem, forever, and those in the systemd managed part of the
+# filesystem only for a couple of days after they're created - they'll
+# be cleaned up automatically at some point
+
+(
+    locate -r '/core\.' | grep -e '/core$' -e '/core.[0-9]*$' -e '/core.*zst$' | grep /var/lib/systemd/coredump | xargs '-I{}' find '{}' -ctime -2
+    locate -r '/core\.' | grep -e '/core$' -e '/core.[0-9]*$' -e '/core.*zst$' | grep -v /var/lib/systemd/coredump
+) | xargs --delim='\n' --no-run-if-empty file
+
+exit 0
