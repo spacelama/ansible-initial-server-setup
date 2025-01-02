@@ -1,0 +1,18 @@
+# Allow a systemd-timer cronjob to limit the amount of the machine
+# taken up by the 5 minute polls.  This ought not let the collected
+# data to back up because we are using the munin async caching
+# mechanism
+
+[Unit]
+Description=Run Munin Cron Jobs
+After=network.target
+OnFailure=status_email_root@%n.service
+
+[Service]
+Type=oneshot
+Slice=munin.slice
+#Nice=20
+#IOSchedulingClass=3
+ExecStart=/usr/bin/munin-cron
+User=munin
+Group=munin

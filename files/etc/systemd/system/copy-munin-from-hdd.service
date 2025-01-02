@@ -1,0 +1,14 @@
+[Unit]
+Description=Copy hard copy of /var/cache/munin/www
+After=network.target
+Before=apache2.service cron.service munin-cron.timer munin-cron.service
+
+[Service]
+Type=oneshot
+ExecStart=rsync -Hax --delete --exclude lost+found /var/cache/munin/www_copy/ /var/cache/munin/www/
+RemainAfterExit=true
+ExecStop=rsync -Hax --delete --exclude lost+found /var/cache/munin/www/ /var/cache/munin/www_copy/
+StandardOutput=journal
+
+[Install]
+WantedBy=multi-user.target
