@@ -45,7 +45,7 @@ power_on_machine() {
     # is already up, the admin might be doing something with it, or
     # yesterday's run still going.  Better let it stay powered up and
     # do nothing with it today.
-    echo "$(date) Powering on $remote_host"
+    echo "$(date) Determining power status of $remote_host"
     powerstatus=$( ssh root@$remote_idrac racadm serveraction powerstatus )
     if [[ "$powerstatus" == *ON* ]] ; then
         return 1  # allow the caller to deal with us
@@ -53,6 +53,7 @@ power_on_machine() {
         echo "Power status was not determined when we went to power it on"    # a definite error condition
         exit 1
     fi
+    echo "$(date) Powering on $remote_host"
     ssh root@$remote_idrac racadm serveraction powerup
     sleep 2
     if ! ssh root@$remote_idrac racadm serveraction powerstatus | grep ON ; then

@@ -23,6 +23,7 @@ function fail() {
             fail=true
             ;;
     esac
+    echo "*** Overall CEPH status not optimal.  Check the health status including 'dmesg' for individual hosts to work out device at fault"
 }
 
 cd /usr/local/bin/nagios
@@ -33,6 +34,7 @@ hostname=$( hostname )
 
 for pool in $pools ; do
     ./check_ceph_df -W 90 -C 95 -p $pool
+    ! rados list-inconsistent-pg $pool | jq -r '.[]' | grep .
 done
 ./check_ceph_health
 # a and b, but they're all on a standby arrangement and some aren't
@@ -42,12 +44,13 @@ for mds in `hostname`-a `hostname`-b ; do # each worker needs to be
                                           # responsible for something?
     success=false
     for fs in $fss ; do
-        if ./check_ceph_mds -n $mds -f $fs ; then
+        if mds_status=$(./check_ceph_mds -n $mds -f $fs) ; then
             success=true
         fi
+        echo "${mds_status/MDS ERROR:/(suppressed) MDS ERROR:}"
     done
     if ! $success ; then
-        echo $mds failed on one of: ./check_ceph_mds -n $mds -f: $fss
+        echo $mds ERROR on all of: ./check_ceph_mds -n $mds -f all of: $fss
         fail=true
     fi
 done
