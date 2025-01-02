@@ -1,15 +1,15 @@
 {% if inventory_hostname != 'fs' %}
+{%   if host_is_desktop | default(false) %}
 /home/tconnors/p -hard,noacl,nodev,nosuid,rw,strictatime,actimeo=600,async fs:/home/tconnors/p
 /home/tconnors/.mp3.low_qual -hard,noacl,nodev,nosuid,rw,strictatime,async fs:/home/tconnors/.mp3.low_qual
 /home/tconnors/background -hard,noacl,nodev,nosuid,rw,strictatime,async fs:/home/tconnors/background
-/home/tconnors/not_backed_up.tank -hard,noacl,nodev,nosuid,rw,strictatime,async fs:/home/tconnors/not_backed_up.tank
-/home/tconnors/oppo -hard,noacl,nodev,nosuid,rw,strictatime,async fs:/home/tconnors/oppo
-/home/tconnors/pixel -hard,noacl,nodev,nosuid,rw,strictatime,async fs:/home/tconnors/pixel
+/home/tconnors/archive -hard,noacl,nodev,nosuid,rw,strictatime,async fs:/home/tconnors/archive
+{%   endif %}
 {# FIXME: make /var/cache/apt/archives symlink for those that can contact fs #}
 /var/cache/apt/archives.nfs -hard,noacl,nodev,nosuid,rw,strictatime,async fs:/var/cache/apt/archives
 {% endif %}
 
-{% if inventory_hostname != 'pi' %}
+{% if (inventory_hostname != 'pi') and (host_is_mgmt | default(false)) %}
 /pi/boot -hard,noacl,nodev,nosuid,rw,strictatime,async pi:/pi/boot
 {% endif %}
 
@@ -30,6 +30,6 @@
 {# FIXME: might need wsize and rsize to not run out memory with mount/umount cycles: https://www.spinics.net/lists/ceph-users/msg60621.html #}
 {% if mount_ceph_clients | default(false) %}
 {%   for mount in ceph_client_mounts %}
-{{ mount.mount }} -fstype=ceph,name={{ mount.name }},mds_namespace={{ mount.mds_namespace }},{{ mount.options }} {{ mount.mons }}:{{ mount.remote_path }}
+{{     mount.mount }} -fstype=ceph,name={{ mount.name }},mds_namespace={{ mount.mds_namespace }},{{ mount.options }} {{ mount.mons }}:{{ mount.remote_path }}
 {%   endfor %}
 {% endif %}

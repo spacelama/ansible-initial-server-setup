@@ -46,17 +46,18 @@
     # ssh pve1 "sudo env ceph fs authorize cephfs-hdd client.cephfs-hdd.template /template rw" > ~/Ansible/files/etc/ceph/ceph.client.cephfs-hdd.template.keyring
     # ssh pve1 "sudo env ceph fs authorize cephfs-hdd client.cephfs-hdd.media /mounts/media rw" > ~/Ansible/files/etc/ceph/ceph.client.cephfs-hdd.media.keyring
     # original creation was done with `add-ceph-mount` before we ansibilised this
-    - { mount: "/home/tconnors/photos",        name: "cephfs-hdd.fs",         mds_namespace: "cephfs-hdd",  options: "nodev,nosuid,rw,strictatime,async", mons: "192.168.1.6,192.168.1.7,192.168.1.8", remote_path: "/mounts/fs/home.tconnors.photos" }
-    - { mount: "/home/tconnors/thesis",        name: "cephfs-hdd.fs",         mds_namespace: "cephfs-hdd",  options: "nodev,nosuid,rw,strictatime,async", mons: "192.168.1.6,192.168.1.7,192.168.1.8", remote_path: "/mounts/fs/home.tconnors.thesis" }
-    - { mount: "/home/tconnors/not_backed_up", name: "cephfs-hdd.fs",         mds_namespace: "cephfs-hdd",  options: "nodev,nosuid,rw,strictatime,async", mons: "192.168.1.6,192.168.1.7,192.168.1.8", remote_path: "/mounts/fs/home.tconnors.not_backed_up" }
+    - { mount: "/home/tconnors/photos",            name: "cephfs-hdd.fs",         mds_namespace: "cephfs-hdd",  options: "nodev,nosuid,rw,strictatime,async", mons: "192.168.1.6,192.168.1.7,192.168.1.8", remote_path: "/mounts/fs/home.tconnors.photos" }
+    - { mount: "/home/tconnors/thesis",            name: "cephfs-hdd.fs",         mds_namespace: "cephfs-hdd",  options: "nodev,nosuid,rw,strictatime,async", mons: "192.168.1.6,192.168.1.7,192.168.1.8", remote_path: "/mounts/fs/home.tconnors.thesis" }
+    - { mount: "/home/tconnors/not_backed_up",     name: "cephfs-hdd.fs",         mds_namespace: "cephfs-hdd",  options: "nodev,nosuid,rw,strictatime,async", mons: "192.168.1.6,192.168.1.7,192.168.1.8", remote_path: "/mounts/fs/home.tconnors.not_backed_up" }
     # want the following to be accessible everywhere, not just ceph clients, so for now needs to remain NFS exported (maybe fs could re-export it?)
     #    - { mount: "/var/cache/apt/archives.nfs",  name: "cephfs-hdd.fs",        mds_namespace: "cephfs-hdd",  options: "nodev,nosuid,rw,strictatime,async", mons: "192.168.1.6,192.168.1.7,192.168.1.8", remote_path: "/mounts/fs/var.cache.apt.archives" }
-    - { mount: "/home/tconnors/public_html",   name: "cephfs-slow.webserver", mds_namespace: "cephfs-slow", options: "nodev,nosuid,rw,strictatime,async", mons: "192.168.1.6,192.168.1.7,192.168.1.8", remote_path: "/mounts/webserver/home.tconnors/public_html" }
-    - { mount: "/home/tconnors/movies",        name: "cephfs-hdd.media",      mds_namespace: "cephfs-hdd",  options: "nodev,nosuid,rw,strictatime,async", mons: "192.168.1.6,192.168.1.7,192.168.1.8", remote_path: "/mounts/media/movies" }
-    - { mount: "/home/tconnors/qBT_dir",       name: "cephfs-hdd.media",      mds_namespace: "cephfs-hdd",  options: "nodev,nosuid,rw,strictatime,async", mons: "192.168.1.6,192.168.1.7,192.168.1.8", remote_path: "/mounts/media/qBT_dir" }
-    - { mount: "/home/tconnors/mp3",           name: "cephfs-slow.media",     mds_namespace: "cephfs-slow", options: "nodev,nosuid,rw,strictatime,async", mons: "192.168.1.6,192.168.1.7,192.168.1.8", remote_path: "/mounts/media/mp3" }
-    - { mount: "/home/angela/media",           name: "cephfs-hdd.media",      mds_namespace: "cephfs-hdd",  options: "nodev,nosuid,rw,strictatime,async", mons: "192.168.1.6,192.168.1.7,192.168.1.8", remote_path: "/mounts/media/angela" }
-    - { mount: "/mnt/pve/cephfs-hdd/template", name: "cephfs-hdd.template",   mds_namespace: "cephfs-hdd",  options: "nodev,nosuid,rw,strictatime,async", mons: "192.168.1.6,192.168.1.7,192.168.1.8", remote_path: "/template" }
+    - { mount: "/home/tconnors/public_html",       name: "cephfs-slow.webserver", mds_namespace: "cephfs-slow", options: "nodev,nosuid,rw,strictatime,async", mons: "192.168.1.6,192.168.1.7,192.168.1.8", remote_path: "/mounts/webserver/home.tconnors/public_html" }
+    - { mount: "/home/tconnors/movies",            name: "cephfs-hdd.media",      mds_namespace: "cephfs-hdd",  options: "nodev,nosuid,rw,strictatime,async", mons: "192.168.1.6,192.168.1.7,192.168.1.8", remote_path: "/mounts/media/movies" }
+    - { mount: "/home/tconnors/qBT_dir",           name: "cephfs-hdd.media",      mds_namespace: "cephfs-hdd",  options: "nodev,nosuid,rw,strictatime,async", mons: "192.168.1.6,192.168.1.7,192.168.1.8", remote_path: "/mounts/media/qBT_dir" }
+    - { mount: "/home/tconnors/mp3",               name: "cephfs-slow.media",     mds_namespace: "cephfs-slow", options: "nodev,nosuid,rw,strictatime,async", mons: "192.168.1.6,192.168.1.7,192.168.1.8", remote_path: "/mounts/media/mp3" }
+    - { mount: "/home/tconnors/.cache/thumbnails", name: "cephfs-slow.media",     mds_namespace: "cephfs-slow", options: "nodev,nosuid,rw,strictatime,async", mons: "192.168.1.6,192.168.1.7,192.168.1.8", remote_path: "/mounts/media/.cache/thumbnails" }
+    - { mount: "/home/angela/media",               name: "cephfs-hdd.media",      mds_namespace: "cephfs-hdd",  options: "nodev,nosuid,rw,strictatime,async", mons: "192.168.1.6,192.168.1.7,192.168.1.8", remote_path: "/mounts/media/angela" }
+    - { mount: "/mnt/pve/cephfs-hdd/template",     name: "cephfs-hdd.template",   mds_namespace: "cephfs-hdd",  options: "nodev,nosuid,rw,strictatime,async", mons: "192.168.1.6,192.168.1.7,192.168.1.8", remote_path: "/template" }
 
   pve_users:
     - "{{ lookup('file', 'main.pve_users.passwd') }}"
