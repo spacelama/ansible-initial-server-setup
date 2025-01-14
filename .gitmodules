@@ -31,4 +31,4 @@
 	url = https://github.com/alphapapa/burly.el
 [submodule "files/homes.desktop/elisp/activities.el"]
 	path = files/homes.desktop/elisp/activities.el
-	url = https://github.com/alphapapa/activities.
+	url = https://github.com/alphapapa/activities.el
