@@ -21,6 +21,7 @@
 [submodule "repos/munin"]
 	path = repos/munin
 	url = git@github.com:spacelama/munin.git
+	branch = tim_dev
 [submodule "repos/munin-contrib"]
 	path = repos/munin-contrib
 	url = git@github.com:spacelama/munin-contrib.git
