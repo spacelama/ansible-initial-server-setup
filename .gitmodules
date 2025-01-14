@@ -1,13 +1,13 @@
 [submodule "files/etc/bash-git-prompt"]
 	path = files/etc/bash-git-prompt/
-	url = https://github.com/spacelama/bash-git-prompt
+	url = git@github.com:spacelama/bash-git-prompt
 	branch = timeout
 [submodule "files/etc/bash-preexec"]
 	path = files/etc/bash-preexec
-	url = https://github.com/rcaloras/bash-preexec
+	url = git@github.com:rcaloras/bash-preexec
 [submodule "files/homes.desktop/elisp/grip-mode"]
 	path = files/homes.desktop/elisp/grip-mode
-	url = https://github.com/spacelama/grip-mode
+	url = git@github.com:spacelama/grip-mode
 [submodule "files/homes.desktop/elisp/undo-tree"]
 	path = files/homes.desktop/elisp/undo-tree
 	url = https://gitlab.com/tsc25/undo-tree.git
@@ -16,7 +16,7 @@
 	url = git@github.com:spacelama/arcstat
 [submodule "repos/ceph-nagios-plugins"]
 	path = repos/ceph-nagios-plugins
-	url = https://github.com/valerytschopp/ceph-nagios-plugins
+	url = git@github.com:valerytschopp/ceph-nagios-plugins
 [submodule "repos/munin"]
 	path = repos/munin
 	url = git@github.com:spacelama/munin.git
@@ -25,10 +25,10 @@
 	url = git@github.com:spacelama/munin-contrib.git
 [submodule "repos/munin-smart-nvme"]
 	path = repos/munin-smart-nvme
-	url = https://github.com/spacelama/munin-smart-nvme
+	url = git@github.com:spacelama/munin-smart-nvme
 [submodule "files/homes.desktop/elisp/burly.el"]
 	path = files/homes.desktop/elisp/burly.el
-	url = https://github.com/alphapapa/burly.el
+	url = git@github.com:alphapapa/burly.el
 [submodule "files/homes.desktop/elisp/activities.el"]
 	path = files/homes.desktop/elisp/activities.el
-	url = https://github.com/alphapapa/activities.el
+	url = git@github.com:alphapapa/activities.el
