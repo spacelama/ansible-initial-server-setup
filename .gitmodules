@@ -16,7 +16,8 @@
 	url = git@github.com:spacelama/arcstat
 [submodule "repos/ceph-nagios-plugins"]
 	path = repos/ceph-nagios-plugins
-	url = git@github.com:valerytschopp/ceph-nagios-plugins
+	url = git@github.com:spacelama/ceph-nagios-plugins
+	branch = python3
 [submodule "repos/munin"]
 	path = repos/munin
 	url = git@github.com:spacelama/munin.git
