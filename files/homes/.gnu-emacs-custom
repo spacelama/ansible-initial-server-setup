@@ -290,6 +290,7 @@
  '(vline-use-timer t)
  '(weechat-color-list
    '(unspecified "#002b36" "#073642" "#990A1B" "#dc322f" "#546E00" "#859900" "#7B6000" "#b58900" "#00629D" "#268bd2" "#93115C" "#d33682" "#00736F" "#2aa198" "#839496" "#657b83"))
+ '(which-function-mode t)
  '(word-wrap t)
  '(xterm-extra-capabilities '(modifyOtherKeys reportBackground)))
 (custom-set-faces
@@ -338,6 +339,7 @@
  '(vline ((t (:background "gray15"))))
  '(vline-visual ((t (:background "gray20"))))
  '(vvb-face ((t (:background "red4"))) t)
+ '(which-func ((t (:foreground "yellow1"))))
  '(widget-field ((((class grayscale color)) (:background "blue"))))
  '(zmacs-region ((t (:background "gray30"))) t))
 ; '(default ((t (:height 98 :foundry "bitstream" :family "Bitstream Vera Sans Mono"))))
