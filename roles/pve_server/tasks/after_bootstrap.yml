@@ -73,7 +73,7 @@
   # https://pve.proxmox.com/wiki/Roadmap#8.0-known-issues
 - name: Install pve prereq and handy packages for pve8
   apt:
-    name: ['systemd-boot', 'systemd-zram-generator' ]
+    name: ['systemd-boot', 'systemd-zram-generator', 'lldpd' ]
     autoremove: no
     state: present
     install_recommends: no
