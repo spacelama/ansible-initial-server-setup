@@ -2,7 +2,8 @@
 # copies a directory to .name, from .source, defaulting to homes/<name> if
 # .source isn't provided
 
-- include_tasks: "{{ playbook_dir }}/roles/common/tasks/calculate_directory_contents.yml"
+- name: Calculate directory contents for user directory install
+  include_tasks: "{{ playbook_dir }}/roles/common/tasks/calculate_directory_contents.yml"
 
 # FIXME: might need to implement "Does {{ ( '~' ~ user ~ '/' ~
 # dir_file_or_template.name ) | dirname }} exist?" style tests that
@@ -13,7 +14,7 @@
 # have any links suffering from this.  Also should not affect new
 # builds.
 
-- name: "Install user directory: ~{{ user }}/{{ dir_file_or_template.name }} from {{ source }}"
+- name: "Install user directory: ~{{ user }}/'{{ dir_file_or_template.name }}' from '{{ source }}'"
   file:
     path: "~{{ user }}/{{ dir_file_or_template.name }}{{ file_recurse.path }}"
     state: directory
@@ -30,7 +31,7 @@
   become_user: "{{ user }}"
 
   # FIXME: should modify install_user_file.yml to take a generic argument that we can use here
-- name: "install user file under directory: ~{{ user }}/{{ dir_file_or_template.name }} from {{ source }}"
+- name: "install user file under directory: ~{{ user }}/'{{ dir_file_or_template.name }}' from '{{ source }}'"
   copy:
     dest: "~{{ user }}/{{ dir_file_or_template.name }}{{ file_recurse.path }}"
     owner: "{{ user }}"
@@ -56,7 +57,7 @@
   become_user: "{{ user }}"
 
   # FIXME: should modify install_user_template.yml to take a generic argument that we can use here (don't forget that in this directory version, we consult ../files/ )
-- name: "install user file per template under directory: ~{{ user }}/{{ dir_file_or_template.name }} from (files/){{ source }}"
+- name: "install user file per template under directory: ~{{ user }}/'{{ dir_file_or_template.name }}' from (files/)'{{ source }}'"
   template:
     dest: "~{{ user }}/{{ dir_file_or_template.name }}{{ file_recurse.path | regex_replace('\\.j2$', '') }}"
     owner: "{{ user }}"
@@ -74,7 +75,7 @@
   become_user: "{{ user }}"
 
   # FIXME: should modify install_user_symlink.yml to take a generic argument that we can use here
-- name: "install user file symlink under directory: ~{{ user }}/{{ dir_file_or_template.name }} from {{ source }}"
+- name: "install user file symlink under directory: ~{{ user }}/'{{ dir_file_or_template.name }}' from '{{ source }}'"
   file:
     dest: "~{{ user }}/{{ dir_file_or_template.name }}{{ file_recurse.path }}"
     owner: "{{ user }}"

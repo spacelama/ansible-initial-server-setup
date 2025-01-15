@@ -7,8 +7,8 @@
 #   become: true
 #   when: file_details.source is defined
 
-- name: find all files but {{ file_details.files_not | default([]) }} from {{ file_details.dir }}
-  find:
+- name: "find all files but '{{ file_details.files_not | default([]) }}' from '{{ file_details.dir }}'"
+  find:  # ignores hidden files so we don't have to worry about globbing .gitignore etc
     paths: "{{ file_details.dir }}"
     file_type: file
     excludes: "{{ file_details.files_not }}"
@@ -16,7 +16,7 @@
   when: file_details.files_not is defined
   become: "{{ file_details.become | default(true) }}"
 
-- name: remove {{ files_to_delete.files | map(attribute='path') }} from {{ file_details.dir }}
+- name: "remove '{{ files_to_delete.files | map(attribute='path') }}' from '{{ file_details.dir }}'"
   file:
     path: "{{ item }}"
     state: absent
@@ -25,7 +25,7 @@
   become: "{{ file_details.become | default(true) }}"
   notify: "{{ file_details.notify | default(omit) }}"
 
-- name: remove {{ file_details.files | default([]) }} from {{ file_details.dir }}
+- name: "remove '{{ file_details.files | default([]) }}' from '{{ file_details.dir }}'"
   file:
     path: "{{ file_details.dir }}/{{ item }}"
     state: absent

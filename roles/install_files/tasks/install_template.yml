@@ -1,7 +1,7 @@
 ---
 # generates a file .name, from template .source.j2
 
-- name: "install file per template: {{ dir_file_or_template.name }} from {{ source }}"
+- name: "install file per template: '{{ dir_file_or_template.name }}' from '{{ source }}'"
   template:
     dest: "{{ dir_file_or_template.name | default(('/' ~ dir_file_or_template) | regex_replace('\\.j2$', '')) }}"
     owner: "{{ dir_file_or_template.user | default('root') }}"

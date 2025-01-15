@@ -2,7 +2,8 @@
 # copies a directory to .name, from .source, defaulting to homes/<name> if
 # .source isn't provided
 
-- include_tasks: "{{ playbook_dir }}/roles/common/tasks/calculate_directory_contents.yml"
+- name: Calculate directory contents for directory install
+  include_tasks: "{{ playbook_dir }}/roles/common/tasks/calculate_directory_contents.yml"
 
 # FIXME: might need to implement "Does {{ ( '~' ~ user ~ '/' ~
 # dir_file_or_template.name ) | dirname }} exist?" style tests that
@@ -13,7 +14,7 @@
 # have any links suffering from this.  Also should not affect new
 # builds.
 
-- name: "Install directory: {{ dir_file_or_template.name }} from {{ source }}"
+- name: "Install directory: '{{ dir_file_or_template.name }}' from '{{ source }}'"
   file:
     path: "{{ dir_file_or_template.name }}{{ file_recurse.path }}"
     state: directory
@@ -30,7 +31,7 @@
   notify: "{{ dir_file_or_template.notify | default(omit) }}"
 
   # FIXME: should modify install_file.yml to take a generic argument that we can use here
-- name: "install file under directory: {{ dir_file_or_template.name }} from {{ source }}"
+- name: "install file under directory: '{{ dir_file_or_template.name }}' from '{{ source }}'"
   copy:
     dest: "{{ dir_file_or_template.name }}{{ file_recurse.path }}"
     owner: "{{ dir_file_or_template.user | default('root') }}"
@@ -54,7 +55,7 @@
   notify: "{{ dir_file_or_template.notify | default(omit) }}"
 
   # FIXME: should modify install_template.yml to take a generic argument that we can use here (don't forget that in this directory version, we consult ../files/ )
-- name: "install file per template under directory: {{ dir_file_or_template.name }} from (files/){{ source }}"
+- name: "install file per template under directory: '{{ dir_file_or_template.name }}' from (files/)'{{ source }}'"
   template:
     dest: "{{ dir_file_or_template.name }}{{ file_recurse.path | regex_replace('\\.j2$', '') }}"
     owner: "{{ dir_file_or_template.user | default('root') }}"
@@ -72,7 +73,7 @@
   notify: "{{ dir_file_or_template.notify | default(omit) }}"
 
   # FIXME: should modify install_symlink.yml to take a generic argument that we can use here
-- name: "install file symlink under directory: {{ dir_file_or_template.name }} from {{ source }}"
+- name: "install file symlink under directory: '{{ dir_file_or_template.name }}' from '{{ source }}'"
   file:
     dest: "{{ dir_file_or_template.name }}{{ file_recurse.path }}"
     owner: "{{ dir_file_or_template.user | default('root') }}"

@@ -12,25 +12,30 @@
   set_fact:
     source: "{{ dir_file_or_template.source | default ( 'homes/' ~ dir_file_or_template.name ) }}"
 
-- include_tasks: install_user_file_lines.yml
+- name: Include install user line in file
+  include_tasks: install_user_file_lines.yml
   when: dir_file_or_template.lines is defined
 
-- include_tasks: install_user_directory.yml
+- name: Include install user directory
+  include_tasks: install_user_directory.yml
   when: ( source is regex(".*/$") ) and
         ( not ( dir_file_or_template.remove | default(false) ) )
 
-- include_tasks: remove_user_directory.yml
+- name: Include remove user directory
+  include_tasks: remove_user_directory.yml
   when: ( source is regex(".*/$") ) and
         ( dir_file_or_template.remove | default(false) )
 
-- include_tasks: install_user_file.yml
+- name: Include install user file
+  include_tasks: install_user_file.yml
   when: ( source is not regex(".*\\.j2$") ) and
         ( source is not regex(".*/$") )
 # unlike install_dir_file_or_template, we resolve the symlink locally
 # in all cases, because half the time they refer back to something on
 # the filesystem of my ansible server
 
-- include_tasks: install_user_template.yml
+- name: Include install user template
+  include_tasks: install_user_template.yml
   when: ( source is regex(".*\\.j2$") )
         # implied can't also be directory
 

@@ -1,7 +1,7 @@
 ---
 # installs a symlink
 
-- name: "install symlink: {{ dir_file_or_template.name }} from {{ source }}"
+- name: "install symlink: '{{ dir_file_or_template.name }}' from '{{ source }}'"
   file:
     dest: "{{ dir_file_or_template.name | default(('/' ~ dir_file_or_template) | dirname) }}"
     owner: "{{ dir_file_or_template.user | default('root') }}"

@@ -2,7 +2,7 @@
 # copies a file to .name, from .source, defaulting to homes/<name> if
 # .source isn't provided
 
-- name: "install file: {{ dir_file_or_template.name }} from {{ source }}"
+- name: "install file: '{{ dir_file_or_template.name }}' from '{{ source }}'"
   copy:
     dest: "{{ dir_file_or_template.name | default(('/' ~ dir_file_or_template) | dirname) }}"
     owner: "{{ dir_file_or_template.user | default('root') }}"

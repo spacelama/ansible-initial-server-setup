@@ -5,9 +5,10 @@
 # <remove_files> and have a file that was previously installed per
 # matching criteria, to now being removed
 
-- include_tasks: "{{ playbook_dir }}/roles/common/tasks/calculate_directory_contents.yml"
+- name: Calculate directory contents for user directory removal
+  include_tasks: "{{ playbook_dir }}/roles/common/tasks/calculate_directory_contents.yml"
 
-- name: "remove user file under directory: ~{{ user }}/{{ dir_file_or_template.name }} based on {{ source }}"
+- name: "remove user file under directory: ~{{ user }}/'{{ dir_file_or_template.name }}' based on '{{ source }}'"
   file:
     path: "~{{ user }}/{{ dir_file_or_template.name }}{{ file_recurse.path }}"
     state: absent

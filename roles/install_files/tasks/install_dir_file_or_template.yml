@@ -12,18 +12,22 @@
   set_fact:
     source: "{{ dir_file_or_template.source | default ( ( 'tree/' ~ dir_file_or_template.name ) if dir_file_or_template.name is defined else dir_file_or_template ) }}"
 
-#- include_tasks: install_file_lines.yml
+#- name: Include install line in file
+#  include_tasks: install_file_lines.yml
 #  when: dir_file_or_template.lines is defined
 
-- include_tasks: install_directory.yml
+- name: Include install directory
+  include_tasks: install_directory.yml
   when: ( source is regex(".*/$") ) and
         ( not ( dir_file_or_template.remove | default(false) ) )
 
-- include_tasks: remove_directory.yml
+- name: Include remove directory
+  include_tasks: remove_directory.yml
   when: ( source is regex(".*/$") ) and
         ( dir_file_or_template.remove | default(false) )
 
-- include_tasks: install_file.yml
+- name: Include install file
+  include_tasks: install_file.yml
   when: ( source is not regex(".*\\.j2$") ) and
         ( source is not regex(".*/$") ) and
         ( not (
@@ -32,11 +36,13 @@
           )
         )
 
-- include_tasks: install_symlink.yml
+- name: Include install symlink
+  include_tasks: install_symlink.yml
   when: ( ( dir_file_or_template.type | default("file")) == "symlink" ) and
         not ( dir_file_or_template.local_follow | default(false) )
 
-- include_tasks: install_template.yml
+- name: Include install template
+  include_tasks: install_template.yml
   when: ( source is regex(".*\\.j2$") )
         # implied can't also be directory
 
