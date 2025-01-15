@@ -308,29 +308,10 @@
 # if need to regenerate pve boot config because of new disks,
 # procedure is here: https://pve.proxmox.com/wiki/Host_Bootloader
 
-- name: install ssh socket directory
+- name: install ssh socket directory (relied on by files/homes/.ssh/config_pve)
   file:
     path: "/root/.ssh/cm_master"
     state: directory
-  become: true
-
-- name: ensure ssh config exists
-  #FIXME: The default in a fresh proxmox deploy is actually "Ciphers aes128-ctr,aes192-ctr,aes256-ctr,aes128-gcm@openssh.com,aes256-gcm@openssh.com,chacha20-poly1305@openssh.com"
-  file:
-    path: /root/.ssh/config
-    state: touch
-    modification_time: preserve
-    access_time: preserve
-  become: true
-
-- name: install ssh config
-  lineinfile:
-    dest: /root/.ssh/config
-    line: "{{ item }}"
-  with_items:
-    - "ControlMaster auto"
-    - "ControlPath ~/.ssh/cm_master/%r@%h:%p"
-    - "ControlPersist yes"
   become: true
 
 - name: "Install guest snippets directory"
