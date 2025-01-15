@@ -29,5 +29,13 @@
     state: present
   become: true
 
+- name: install custom management packages
+  include_tasks: "{{ playbook_dir }}/roles/common/tasks/install_custom_packages.yml"
+  vars:
+    apt_preferences_hold_suffix: "-mgmt"
+    install_packages:
+      # for ansible-core 2.14.16, we need ansible-mitogen >= 0.3.9-1 - debian #1080386
+      - ansible-mitogen_0.3.9-1_all.deb
+
 - name: Make sure all handlers run
   meta: flush_handlers
