@@ -22,7 +22,8 @@ MACAddress={{ mac_addr }}
   instances, and systemd would probably screw up auto-naming on the old r520 too
 #}
 Name={{ interface_name }}
-WakeOnLan=magic
+# We turn off wakeonlan because for the 10gbit cards, power remains on all the time when machine is off, and cooling fan is off, but the device is still drawing 10W from the bus!
+WakeOnLan=off
 
 # while we could go NamePolicy=mac and end up with predictable names
 # "enxAABBCCDDEEFF", when we try to append .vlan, we go over 15
