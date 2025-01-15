@@ -315,8 +315,8 @@
     - name: /
       source: tree.remove/
       remove: true
-    - name: /,
-      source: tree.pve_server/,
+    - name: /
+      source: tree.pve_server/
       when: '{{ host_is_pve_server | default(false) }}'
 
     - { name: /var/spool/cron/crontabs/root, source: var/spool/cron/root.j2,                 mode: "0600", group: "crontab" }
