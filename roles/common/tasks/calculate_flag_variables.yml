@@ -5,7 +5,7 @@
 # we aim to:
 # from flag="key", flag="key=value" or flag={ key: foo, value: blah } if key and/or value are supplied
 #
-# set grub_setflag, grub_setflag_re, grub_key, comment_line,
+# set grub_setflag, grub_setflag_re, grub_key, grub_comment_line,
 # grub_assignment_key, grub_assignment_value, grub_variable,
 # grub_file_ext
 
@@ -15,16 +15,16 @@
 - name: show computed flags
   debug:
     msg:
-      - flag(incoming)        = {{ flag }}
-      - grub_setflag          = {{ grub_setflag    }}
-      - grub_setflag_re       = {{ grub_setflag_re }}
-      - grub_key              = {{ grub_key        }}
-      - comment_line          = {{ comment_line    }}
-      - grub_assignment_key   = {{ grub_assignment_key }}
-      - grub_assignment_value = {{ grub_assignment_value }}
+      - "flag(incoming)        = '{{ flag                  }}'"
+      - "grub_setflag          = '{{ grub_setflag          }}'"
+      - "grub_setflag_re       = '{{ grub_setflag_re       }}'"
+      - "grub_key              = '{{ grub_key              }}'"
+      - "grub_comment_line     = '{{ grub_comment_line     }}'"
+      - "grub_assignment_key   = '{{ grub_assignment_key   }}'"
+      - "grub_assignment_value = '{{ grub_assignment_value }}'"
 
 - name: show second phase computed flags
   debug:
     msg:
-      - grub_variable = {{ grub_variable }}
-      - grub_file_ext = {{ grub_file_ext }}
+      - "grub_variable = '{{ grub_variable }}'"
+      - "grub_file_ext = '{{ grub_file_ext }}'"

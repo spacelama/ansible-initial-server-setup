@@ -9,10 +9,10 @@
 - name: calculate flags
   include_tasks: calculate_flag_variables.yml
 
-- name: "Create flag {{ grub_setflag }} to grub config"
+- name: "Create flag {{ grub_setflag }} to grub config: /etc/default/grub.d/ansible.{{ grub_key }}{{ grub_file_ext }}.cfg"
   copy:
     dest: "/etc/default/grub.d/ansible.{{ grub_key }}{{ grub_file_ext }}.cfg"
-    content: "{{ comment_line }}{{ grub_variable }}=\"${{ grub_variable }} {{ grub_setflag }}\"\n"
+    content: "{{ grub_comment_line }}{{ grub_variable }}=\"${{ grub_variable }} {{ grub_setflag }}\"\n"
   become: true
   notify: "Regenerate boot config"
 

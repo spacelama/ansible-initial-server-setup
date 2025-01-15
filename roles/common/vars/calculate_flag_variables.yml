@@ -46,12 +46,12 @@
     flag
     }}
 
-  # set comment flag if supplied
-  comment_line: >-
-    {{
-    ( '# ' + comment + '\n' ) if comment is defined else
-    ''
-    }}
+  # set comment flag if supplied, with trailing newline (or the empty
+  # string if not).  Can't seem to use ">-" "Block style with block
+  # chomping indicator ">-"" because the "\n" gets interpreted as a
+  # literal "\\n", but it does work if I condense it down to a single line:
+  # https://stackoverflow.com/questions/3790454/how-do-i-break-a-string-in-yaml-over-multiple-lines
+  grub_comment_line: "{{ ( '# ' + flag.comment + '\n' ) if flag.comment is defined and flag.comment != 'not defined' else '' }}"
 
   # set_fact ignores conditional when: (according to "[WARNING]: noop
   # task does not support when conditional")!

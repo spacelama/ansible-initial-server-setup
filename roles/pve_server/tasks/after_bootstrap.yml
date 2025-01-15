@@ -385,23 +385,6 @@
 #   become: true
 #   notify: "Update initramfs config"
 
-- name: "Append modprobe blacklist boot config"
-  include_tasks: "{{ playbook_dir }}/roles/common/tasks/add_boot_flag.yml"
-  loop_control:
-    loop_var: flag
-  with_items:
-    - key: "modprobe.blacklist"
-      value: "{{ modprobe_blacklist }}"
-      comment: "separate out all IOMMU groups, blacklist all the desktop functions we want to passthrough to VM, and override the blacklist from the rescue variable, GRUB_CMDLINE_LINUX"
-  when: modprobe_blacklist is defined
-
-- name: "Remove modprobe blacklist boot config"
-  include_tasks: "{{ playbook_dir }}/roles/common/tasks/remove_boot_flag.yml"
-  loop_control:
-    loop_var: flag
-  with_items: [ 'modprobe.blacklist' ]
-  when: modprobe_blacklist is not defined
-
   # our default pve passes through USB ports via vfio, so you can't
   # use a keyboard in a rescue situation!  Make the boot rescue entry
   # not load vfio and not blacklist the USB modules.  Other rescue
@@ -462,7 +445,7 @@
       vfio_iommu_type1
       vfio_pci
       vfio_virqfd
-      # following for amd video cards in VMs
+      # following for amd video cards in VMs - https://pve.proxmox.com/wiki/PCI_Passthrough
       vendor-reset
       # following modules are blacklisted on the kernel commandline to stop from autoloading, but now that vfio is loaded reserving the appropriate devices, we are free to load them again (nope, have to probe them manually)
       #xhci_pci

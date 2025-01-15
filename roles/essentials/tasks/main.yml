@@ -650,6 +650,24 @@
   notify: "Regenerate boot config"
   when: grub_boot_flags is not defined
 
+- name: "Append modprobe blacklist boot config"
+  include_tasks: "{{ playbook_dir }}/roles/common/tasks/add_boot_flag.yml"
+  loop_control:
+    loop_var: flag
+  with_items:
+    - key: "modprobe.blacklist"
+      value: "{{ modprobe_blacklist }}"
+      # same lazy evaluation bug as calcualte_flag_variables.yml
+      comment: "{{ modprobe_blacklist_comment | default('not defined') }}"
+  when: modprobe_blacklist is defined
+
+- name: "Remove modprobe blacklist boot config"
+  include_tasks: "{{ playbook_dir }}/roles/common/tasks/remove_boot_flag.yml"
+  loop_control:
+    loop_var: flag
+  with_items: [ 'modprobe.blacklist' ]
+  when: modprobe_blacklist is not defined
+
 - name: Ensure sar logs log everything available (comment existing)
   lineinfile:
     dest: /etc/sysstat/sysstat
