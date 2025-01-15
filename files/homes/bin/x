@@ -5,10 +5,19 @@
 # want to provide a file with a space in it, or a literal special
 # character, you have to escape it (eg with printf "%q") yourself.
 
+# xterm might fail, due to for example running out of X11 client handles
+retry() {
+    "$@" && return
+    while : ; do
+          echo "$(date): xterm failed with exit-code: $?.  Retrying in a minute..."
+          sleep 60
+          verboserun "$@" && return
+    done
+}
+
 eval="verboserun"
 noshell=true
 verbose=true
-verboserun=
 while [[ "$1" == --* ]] ; do
     case "$1" in
         --wait)
@@ -18,7 +27,6 @@ while [[ "$1" == --* ]] ; do
         --noverbose)
             shift
             verbose=false
-            verboserun=
             ;;
         --no-eval)
             shift
@@ -60,7 +68,7 @@ while [ $# != 0 ] ; do
 done
 
 if [ "${#cmds[@]}" != 0 ] ; then
-    $verboserun xterm "${args[@]}" -e bash $eval "${cmds[@]}" # ${cmds[*]}
+    retry xterm "${args[@]}" -e bash $eval "${cmds[@]}" # ${cmds[*]}
 else
-    $verboserun xterm "${args[@]}"
+    retry xterm "${args[@]}"
 fi &
