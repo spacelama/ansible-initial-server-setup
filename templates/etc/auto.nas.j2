@@ -9,8 +9,11 @@
 /var/cache/apt/archives.nfs -hard,noacl,nodev,nosuid,rw,strictatime,async fs:/var/cache/apt/archives
 {% endif %}
 
+{% if (inventory_hostname != 'pi') and (inventory_hostname != 'iot') and (host_is_mgmt | default(false)) %}
+/piroot -hard,noacl,nodev,nosuid,rw,strictatime,async iot:/piroot
+{% endif %}
 {% if (inventory_hostname != 'pi') and (host_is_mgmt | default(false)) %}
-/pi/boot -hard,noacl,nodev,nosuid,rw,strictatime,async pi:/pi/boot
+/piroot/boot/firmware -hard,noacl,nodev,nosuid,rw,strictatime,async pi:/boot/firmware
 {% endif %}
 
 {# commented out:
