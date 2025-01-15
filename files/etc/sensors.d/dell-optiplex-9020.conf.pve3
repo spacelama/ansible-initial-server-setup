@@ -1,0 +1,13 @@
+chip "acpitz-acpi-0"
+
+#Run `sudo sensors -s` after adjusting these values
+
+# On 6.8.11, circa 20241220, acpi temp1 and temp2 just read a constant
+# (only noticed when ambient was 34 degrees!):
+#acpitz-acpi-0
+#Adapter: ACPI interface
+#temp1:        +27.8°C
+#temp2:        +29.8°C
+
+ignore temp1
+ignore temp2
