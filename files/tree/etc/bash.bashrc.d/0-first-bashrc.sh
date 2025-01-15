@@ -37,5 +37,3 @@ elif [ -z "$PBS_ENVIRONMENT" ] ; then
     fi
     ( winname "Wait... logged into $HOSTNAME and sourcing startup" & )
 fi
-
-

@@ -24,4 +24,3 @@ if [ -x $HOME/bin/system ] ; then
         . "$extrabashprofile".pre    #needs to be first so incorrect aliases can be unset (before setting them in .bashrc), and we can set $BASH_PROFILE_EXECUTED correctly
     fi
 fi
-

@@ -171,15 +171,15 @@
 ;; fix that.
 (defun revert-buffer-keep-history (&optional IGNORE-AUTO NOCONFIRM PRESERVE-MODES)
   (interactive)
-  
+
   ;; tell Emacs the modtime is fine, so we can edit the buffer
   (clear-visited-file-modtime)
-  
+
   ;; insert the current contents of the file on disk
   (widen)
   (delete-region (point-min) (point-max))
   (insert-file-contents (buffer-file-name))
-  
+
   ;; mark the buffer as not modified
   (not-modified)
   (set-visited-file-modtime))
@@ -214,7 +214,7 @@
 (when (try-require 'power-macros)
   (setq power-macros-file "~/.xemacs/macros.el")
   (or (boundp 'loaded-macros)
-      (progn 
+      (progn
         (defvar loaded-macros t)
         (load power-macros-file)                ; loads the saved macros
         ))
@@ -274,7 +274,7 @@
 (load-library "reposition")
 ;(require 'iswitchb)
 ;;reposition the window better than C-l with C-M-l
-      
+
 ;;iswitch is does a better job with C-x b
 ;(autoload 'iswitchb "iswitchb" "Run iswitchb" t)
 ;(setq read-buffer-function 'iswitchb-read-buffer)
@@ -459,7 +459,7 @@
 (add-hook 'htmlize-after-hook 'font-lock-fontify-buffer)
 ; from custom.el -> '(f90-mode-hook (quote (f90-add-imenu-menu f90-key-settings add-imenu)) t)
 ;(if (eq (console-type) 'x) (x-symbol-initialize))
-;(add-hook 'LaTeX-mode-hook 'x-symbol-mode)   
+;(add-hook 'LaTeX-mode-hook 'x-symbol-mode)
 ;(add-hook 'TeX-mode-hook   'x-symbol-mode)
 
 ;;(try-require 'backup)
@@ -660,14 +660,14 @@ print a message in the minibuffer with the result."
 (defun dos2unix ()
   "Simply convert \\cr\\lf in a buffer into \\n.  Must first get the buffer into a noconv state by using turn-off-eol-detection, then later, switch it back to normal with turn-on-eol-detection."
   (interactive)
-  (save-excursion 
+  (save-excursion
     (goto-char (point-min))
     (while (search-forward "\r" nil t)
       (replace-match ""))))
 
 ;;vice versa
 (defun unix2dos ()
-  "Simply convert \\n in a buffer into \\cr\\lf." 
+  "Simply convert \\n in a buffer into \\cr\\lf."
   (interactive)
   (save-excursion
     (goto-char (point-min))
@@ -809,7 +809,7 @@ print a message in the minibuffer with the result."
 ;; Compilation regexps
 ;; make emacs grok g95 error messages: (can now jump to the right line)
 (eval-after-load "compile"
-  '(setq compilation-error-regexp-alist 
+  '(setq compilation-error-regexp-alist
 	 (cons '("^In file \\(.+\\):\\([0-9]+\\)" 1 2)
 	       compilation-error-regexp-alist)))
 ;; For ifort
@@ -854,7 +854,7 @@ print a message in the minibuffer with the result."
     ;; Rearrange the modeline so that everything is to the left of the
     ;; long list of minor modes, which is relatively unimportant but takes
     ;; up so much room that anything to the right is obliterated.
-    
+
     (setq-default
      modeline-format
      (list
@@ -877,7 +877,7 @@ print a message in the minibuffer with the result."
       'modeline-process
       ")%]----"
       "%-"))
-  
+
   ;; Get rid of modeline information taking up too much space -- in
   ;; particular, minor modes that are always enabled.
   (setq pending-delete-modeline-string "")

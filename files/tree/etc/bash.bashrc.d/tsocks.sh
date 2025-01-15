@@ -21,5 +21,3 @@ function offtsocks() {
 #ontsocks   #done in the X startup files.  Don't necessarily want this when we log in remotely
 
 export TSOCKS_CONF_FILE=$HOME/.tsocks.conf
-
-
