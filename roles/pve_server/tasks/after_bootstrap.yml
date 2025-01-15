@@ -217,7 +217,7 @@
   with_items:
    - ceph_osd
    - ceph_capacity
-#   - ceph-osd-info
+#   - ceph-osd-info  # lot of graphs and questionable value, even when overriding ceph-osd-info internally by specifying subgraphs=False
    - proxmox_vm_count
   notify: restart munin-node
 

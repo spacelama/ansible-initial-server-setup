@@ -216,6 +216,7 @@ fi
 if [ -x /bin/systemctl ] ; then
     systemctl > $data_dir/systemctl
     systemctl list-unit-files > $data_dir/chkconfig_list.systemctl
+    systemctl --failed > $data_dir/systemctl.--failed
 fi
 
 /usr/bin/lsscsi > $data_dir/lsscsi 2>&1 || true
