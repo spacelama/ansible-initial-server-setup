@@ -746,8 +746,8 @@
 
 - name: Synchronize (rsync) and delete files in /etc/bash-git-prompt and /etc/bash-preexec
   ansible.posix.synchronize:
-    src: etc/{{ item }}/
-    dest: /etc/{{ bash-git-prompt }}/
+    src: "etc/{{ item }}/"
+    dest: "/etc/{{ item }}/"
     delete: yes
     recursive: yes
     rsync_opts:
