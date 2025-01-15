@@ -308,12 +308,6 @@
 # if need to regenerate pve boot config because of new disks,
 # procedure is here: https://pve.proxmox.com/wiki/Host_Bootloader
 
-- name: install ssh socket directory (relied on by files/homes/.ssh/config_pve)
-  file:
-    path: "/root/.ssh/cm_master"
-    state: directory
-  become: true
-
 - name: "Install guest snippets directory"
   file:
     path: "/var/lib/vz/snippets/"
