@@ -1,3 +1,6 @@
+# -*- Mode: shell-script -*-
+# shellcheck shell=bash
+
 # https://stackoverflow.com/questions/68768860/how-to-print-all-function-calling-orders-in-a-bash-script
 
 # http://wiki.bash-hackers.org/commands/builtin/caller

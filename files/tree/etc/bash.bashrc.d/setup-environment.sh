@@ -1,3 +1,6 @@
+# -*- Mode: shell-script -*-
+# shellcheck shell=bash
+
 # add all the other bash settings we care about, paths, etc, that
 # would normally have gone in .bash_profile
 function setup_environment() {

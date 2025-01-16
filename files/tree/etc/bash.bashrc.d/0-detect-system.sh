@@ -1,5 +1,5 @@
 # -*- Mode: shell-script -*-
-
+# shellcheck shell=bash
 
 #set -x 
 

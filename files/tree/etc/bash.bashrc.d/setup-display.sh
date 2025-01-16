@@ -1,3 +1,6 @@
+# -*- Mode: shell-script -*-
+# shellcheck shell=bash
+
 function setup_display() {
     if [ -n "$DISPLAY" ] ; then
         # stop trying to store masses of keys in NFS $HOME - just start

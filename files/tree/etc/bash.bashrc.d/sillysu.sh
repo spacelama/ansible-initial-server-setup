@@ -1,3 +1,6 @@
+# -*- Mode: shell-script -*-
+# shellcheck shell=bash
+
 function sillysu() {
     if [ -n "$DISPLAY" ] ; then
         command cp -a $XAUTHORITY /tmp/.$USER.Xauthority.tmp  # this temporary file is pulled in by root's login scripts

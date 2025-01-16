@@ -1,3 +1,6 @@
+# -*- Mode: shell-script -*-
+# shellcheck shell=bash
+
 function ontsocks() {
   #FIXME: if 64 bit apps start being needed, may eventually compile for 64 bit, and then move it into ~/.../sparcv9/ (or /64/), and then remove this hack.  Maybe just need to have both versions, and set $LD_PRELOAD, and it will pick it the correct version in the correct path
   #FIXME: in fact, the whole hack can probably be removed, since solaris can probably deal with the different 32/64 bit paths in $LD_LIBRARY_PATH implicitly too, and just setting LD_PRELOAD to libtsocks without an explicit path

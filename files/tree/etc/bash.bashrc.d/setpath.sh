@@ -1,3 +1,6 @@
+# -*- Mode: shell-script -*-
+# shellcheck shell=bash
+
 # constructs PATH paying attention to not add anything that is not
 # currently quickly accesible over NFS for example
 

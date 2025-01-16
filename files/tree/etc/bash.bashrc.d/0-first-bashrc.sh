@@ -1,3 +1,6 @@
+# -*- Mode: shell-script -*-
+# shellcheck shell=bash
+
 function sh_interactive () {
     case "$-" in
        *i*)

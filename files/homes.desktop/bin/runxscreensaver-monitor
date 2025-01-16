@@ -38,7 +38,7 @@ restart_xscreensaver() {
 
     notify " - Will restart xscreensaver"
     systemctl --user restart runxscreensaver.service
-    echo " *** $@"
+    echo " ***" "$@"
 }
 
 export PATH=$PATH:$HOME/bin

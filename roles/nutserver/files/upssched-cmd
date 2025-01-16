@@ -12,38 +12,46 @@
 
 case $1 in
     upsgone)
-        echo "The UPS has been gone for awhile: $@, $NOTIFYTYPE, $UPSNAME" | mail -s "UPS warning gone, $UPSNAME" tconnors
+        # shellcheck disable=SC2145   # I know how fixed_"$@" behaves and it's correct!
+        echo "The UPS has been gone for a while: ""$@"", $NOTIFYTYPE, $UPSNAME" | mail -s "UPS warning gone, $UPSNAME" tconnors
         ;;
     onbattwarn)
+        # shellcheck disable=SC2145   # I know how fixed_"$@" behaves and it's correct!
         echo "The UPS is currently running on battery power! $@, $NOTIFYTYPE, $UPSNAME" | mail -s "UPS warning on batt, $UPSNAME" tconnors
         #echo "We will shut down" | mail -s "upscched-cmd: UPS temporary workaround to shutdown machine on mains power" tconnors
         # need to run as root, but we're trying to shut down the UPS as well - the web says nut does this automatically
         #/usr/sbin/upsmon -c fsd
         ;;
     online)
+        # shellcheck disable=SC2145   # I know how fixed_"$@" behaves and it's correct!
         echo "The UPS is OK now! $@, $NOTIFYTYPE, $UPSNAME" | mail -s "UPS OK, $UPSNAME" tconnors
         ;;
     fsd)
+        # shellcheck disable=SC2145   # I know how fixed_"$@" behaves and it's correct!
         echo "FSD: $@, $NOTIFYTYPE, $UPSNAME" | mail -s "UPS warning FSD, $UPSNAME" tconnors
         #       echo "We will shut down" | mail -s "upscched-cmd: UPS temporary workaround to shutdown machine on mains power" tconnors
         #       /sbin/shutdown -h +0
         ;;
     lowbatt)
+        # shellcheck disable=SC2145   # I know how fixed_"$@" behaves and it's correct!
         echo "Low battery: $@, $NOTIFYTYPE, $UPSNAME" | mail -s "UPS warning low batt, $UPSNAME" tconnors
         #        echo "We will shut down" | mail -s "upscched-cmd: UPS temporary workaround to shutdown machine on mains power" tconnors
         #        /sbin/shutdown -h +0
         #        /usr/sbin/upsmon -c fsd
         ;;
     shutdown)
+        # shellcheck disable=SC2145   # I know how fixed_"$@" behaves and it's correct!
         echo "Shutdown: $@, $NOTIFYTYPE, $UPSNAME" | mail -s "UPS warning shutting down, $UPSNAME" tconnors
         #        echo "We will shut down" | mail -s "upscched-cmd: UPS temporary workaround to shutdown machine on mains power" tconnors
         #        /sbin/shutdown -h +0
         #        /usr/sbin/upsmon -c fsd
         ;;
     replacebatt)
+        # shellcheck disable=SC2145   # I know how fixed_"$@" behaves and it's correct!
         echo "Replace battery: $@, $NOTIFYTYPE, $UPSNAME" | mail -s "UPS warning replace battery, $UPSNAME" tconnors
         ;;
     *)
+        # shellcheck disable=SC2145   # I know how fixed_"$@" behaves and it's correct!
         echo "Unrecognized command: $@, $NOTIFYTYPE, $UPSNAME" | mail -s "UPS warning, $UPSNAME" tconnors
         ;;
 esac

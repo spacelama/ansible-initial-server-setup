@@ -1,4 +1,5 @@
 # -*- Mode: shell-script -*-
+# shellcheck shell=bash
 
 # User specific environment and startup programs
 

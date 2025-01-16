@@ -66,6 +66,7 @@ echocolour() {
         esac
         shift
     done
+    # shellcheck disable=SC2145   # I know how fixed_"$@" behaves and it's correct!
     log "$@${normal}"
 }
 
@@ -201,7 +202,7 @@ function set_all_current_active_sinks() {
         # echo application_name=$application_name
 
         inputs="$inputs $index"
-    done < <( pactl list sink-inputs | grep -e '^Sink Input' -e 'application.name = ' ) # -e State: -e Flags: 
+    done < <( pactl list sink-inputs | grep -e '^Sink Input' -e 'application.name = ' ) # -e State: -e Flags:
     # FIXME: sink, card, state can be obtained from `pactl list sources short`, flags from `pactl list sinks | grep -i flag`
     # FLAG, STATE from `pactl list sinks | grep -i -e flag -e state`
     # sink-inputs gets name but not state, flags; sinks gets flag, state but not name;

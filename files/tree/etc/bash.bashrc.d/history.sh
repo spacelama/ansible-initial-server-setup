@@ -1,3 +1,6 @@
+# -*- Mode: shell-script -*-
+# shellcheck shell=bash
+
 function exitcleanly() {
     #    exiting=true
     # cancel all traps we set up ourselves to manage prompt and history:

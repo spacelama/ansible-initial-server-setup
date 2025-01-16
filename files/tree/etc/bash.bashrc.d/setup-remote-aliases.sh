@@ -1,3 +1,6 @@
+# -*- Mode: shell-script -*-
+# shellcheck shell=bash
+
 function setup_remote_aliases() {
     alias marvin-jump='background rgb:04/11/33 ; ssh marvin-jump ; background black'
     alias hactar-jump=marvin-jump

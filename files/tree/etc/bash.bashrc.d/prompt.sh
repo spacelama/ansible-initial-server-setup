@@ -1,3 +1,6 @@
+# -*- Mode: shell-script -*-
+# shellcheck shell=bash
+
 # We've long appended our bash history upon a command running, using
 # various methods.  `trap '...' DEBUG` was causing us to have to write
 # lots of code just to make sure the command being tested was a user
@@ -196,7 +199,7 @@ else
         fi
 
         local me="${USER}"@"${SHORTHOST}"
-        if [ $REALHOST != $LONGHOST ] ; then
+        if [ "$REALHOST" != "$LONGHOST" ] ; then
             me="${USER}"@"${REALHOST}"
         fi
         winname  "$EXTRA_TITLE`date +%d/%m-%H:%M:%S` -- $PTS -- $cmd -- ${me}: `chomp --escapechars --right ... $((COLUMNS-60)) ${shortpwd}`" ;
@@ -205,7 +208,7 @@ else
     function setprompt () {
         local shortpwd="${PWD/$HOME/~}"
         local me="${USER}"@"${SHORTHOST}"
-        if [ $REALHOST != $LONGHOST ] ; then
+        if [ "$REALHOST" != "$LONGHOST" ] ; then
             me="${USER}"@"${REALHOST}"
         fi
         local bold="\\[$ESC[7m\\]"

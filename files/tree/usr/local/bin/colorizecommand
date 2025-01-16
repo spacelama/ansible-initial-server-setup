@@ -71,7 +71,7 @@ usage() {
 
 usageerror() {
     if [ "$#" != 0 ] ; then
-        echo "Usage error: $@" 1>&2
+        echo "Usage error:" "$@" 1>&2
         echo "Usage was $ARGS" 1>&2
     fi
     usage 1

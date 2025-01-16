@@ -1,3 +1,6 @@
+# -*- Mode: shell-script -*-
+# shellcheck shell=bash
+
 # some aliases are always loaded regardless of what kind of login session
 alias l='ls -lA'
 
@@ -33,7 +36,9 @@ function setup_aliases() {
     alias p='pstree -ap tconnors'
     alias pavucontrol='DBUS_SESSION_BUS_ADDRESS= pavucontrol'  # https://gitlab.freedesktop.org/pulseaudio/pavucontrol/-/issues/75#note_1467143
     alias bc='bc -l'
+    # shellcheck disable=SC2290   # incorrect interpretation of what the code is successfully doing: setting aliases to the "-" and "+" commands
     alias -- +='pushd .'
+    # shellcheck disable=SC2290   # incorrect interpretation of what the code is successfully doing: setting aliases to the "-" and "+" commands
     alias -- -='popd'
     alias bd='popd'
     alias ..='cd ..'
