@@ -23,4 +23,5 @@ jobs:
         uses: ludeeus/action-shellcheck@master
         with:
           format: gcc
-#          format: diff
+#          format: diff    # you might consider this to get suggestions
+          severity: error
