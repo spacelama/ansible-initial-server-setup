@@ -1,11 +1,24 @@
 #!/bin/ksh
 
+# Simple calculator using `bc` but easily operating with the requested
+# level of precision.
+
 scale=1
 if [ "$1" == --scale ] ; then
     scale="$2"
     shift ; shift
 fi
-op=$( echo -e "scale=8\n$@" | bc )
+
+# during the calculation, `bc` takes the more precise value of either
+# `bc scale=scale`, or whatever scale has been provided as inputs.
+# Whereas we want an output with scale no more precise than that which
+# was provided through --scale (or default 1 to get an integer).  So
+# we first calculate using `bc`, then we scale that back in precision
+# via printf %.$scale.  This doesn't seem to have a negative impact at
+# any unexpected boundaries when rounding numbers (because we're only
+# ever rounding from higher precision back to lower precision)
+
+op=$( { echo "scale=8" ; echo "$@" ; } | bc )
 printf "%0.${scale}f\n" "$op"
 [ "$op" != 0 ]
 
