@@ -9,7 +9,7 @@ on:
       git-ref:
         description: Git Ref (Optional)
         required: false
-  
+
 permissions:
   contents: read
 
@@ -18,8 +18,9 @@ jobs:
     name: ShellCheck
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
       - name: Run ShellCheck
-        uses: ludeeus/action-shellcheck@2.0.0
+        uses: ludeeus/action-shellcheck@master
         with:
           format: gcc
+#          format: diff
