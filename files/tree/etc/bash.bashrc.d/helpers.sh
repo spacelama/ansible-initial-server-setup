@@ -68,7 +68,7 @@ log_to_file() {
 # debugging trace functions
 calling() {
     if [ -n "$BASH_DEBUG" ] ; then
-        echo "Calling: $@"
+        echo "Calling:" "$@"
 #        bt
         print_callers
     fi 1>&2
@@ -76,7 +76,7 @@ calling() {
 
 called() {
     if [ -n "$BASH_DEBUG" ] ; then
-        echo "Returning from: $@"
+        echo "Returning from:" "$@"
 #        bt
         print_callers
     fi 1>&2

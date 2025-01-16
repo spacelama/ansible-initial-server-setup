@@ -211,8 +211,8 @@ else
         if [ "$REALHOST" != "$LONGHOST" ] ; then
             me="${USER}"@"${REALHOST}"
         fi
-        local bold="\\[$ESC[7m\\]"
-        local norm="\\[$ESC[m\\]"
+        local bold="\\[${ESC}[7m\\]"
+        local norm="\\[${ESC}[m\\]"
         local shell=
         [ -z "$SSH_CONNECTION" ] && background black
         #            local git="$(is_on_git && [[ -n $(timeout 1 git branch 2> /dev/null) ]] && echo :)${bold}$(parse_git_branch)${norm}"
@@ -233,7 +233,7 @@ else
 
         #            echo 'setprompt ran?'
         PS1_PREV_EXIT_CODE="\`echo -n '\[$ESC' ; if [ \$retcode = 0 ]; then echo -n '[0;32m'; else echo -n '[0;31m'; fi ; echo -n '\]' ; echo -n \$retcode\`"
-        PS1_PRE="#$PS1_PREV_EXIT_CODE\[$ESC[0m\]"'-\j-\t, \d '$(colorizeprompt)":\\w"
+        PS1_PRE="#$PS1_PREV_EXIT_CODE\[${ESC}[0m\]"'-\j-\t, \d '$(colorizeprompt)":\\w"
         #$git
         PS1_POST=" ($shell"')\n'"${bold}"': \!,\#;'"${norm} "
         GIT_PROMPT_START_USER="$PS1_PRE"

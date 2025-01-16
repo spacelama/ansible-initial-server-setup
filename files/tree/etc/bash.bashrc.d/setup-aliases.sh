@@ -75,9 +75,11 @@ function setup_aliases() {
     function validate_erb { erb -P -x -T '-' $1 | ruby -c ; }
 
     function l-() {
+        # shellcheck disable=SC2145   # incorrect interpretation of what the code is successfully doing: prepending "-" to to only the first of set of args provided
         command ls -lA $enablecolor -"$@"
     }
     function ls-() {
+        # shellcheck disable=SC2145   # incorrect interpretation of what the code is successfully doing: prepending "-" to to only the first of set of args provided
         command ls $enablecolor -"$@"
     }
 

@@ -1,3 +1,6 @@
+# -*- Mode: shell-script -*-
+# shellcheck shell=bash
+
 # unconditionally set PROMPT_COMMAND as an inexpensive way of
 # intercepting the first time a prompt is returned once a shell is
 # opened.  Sourcing this file more than once won't result in that
