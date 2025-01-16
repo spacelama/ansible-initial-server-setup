@@ -12,8 +12,6 @@ function setup_aliases() {
     alias cal3='ncal -3'
     alias read='read -e' # use readline when interactive anyway
     alias which=: ; unalias which   #you can't unalias something that isn't aliased, and only some systems are stupid enough to alias which
-    # can't set LESSOPEN by default always for less, because LESSOPEN stops "F" follow keybinding etc, working, and highlight has size limitations
-    alias lesscolour='LESSOPEN="| highlight --out-format=xterm256 %s" less'
     alias slrn='slrn --kill-log $HOME/News/.kill-log'
     alias ouci=pico   #so sue me
     #    alias pico=nano # ~/bin/pico is a script for emacsclient -nw these days

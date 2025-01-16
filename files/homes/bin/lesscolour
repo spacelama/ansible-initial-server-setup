@@ -1,0 +1,8 @@
+#!/bin/sh
+
+# while it would be nice to set LESSOPEN by default always for `less`,
+# it interferes with the way we use `less` because LESSOPEN stops "F"
+# (follow) keybinding etc from working, and highlight has filesize
+# limitations
+
+LESSOPEN="| highlight --out-format=xterm256 %s" less "$@"
