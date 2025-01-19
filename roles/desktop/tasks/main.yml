@@ -55,9 +55,10 @@
     - { package: zoom, file: patched_ibus_removed_zoom_amd64_6.1.11.deb, freeze: "6.1.11" } # zoom bring in a useless dependency on ibus: https://devforum.zoom.us/t/annoying-ibus-dependency-in-zoom-deb-files/67293/20
     - { package: wmtop, file: wmtop_0.84-7_amd64.deb, freeze: "0.84-7" }  # limit CPU wakeups
     - { package: tsocks, file: tsocks_1.8beta5+ds1-1_amd64.deb, freeze: "1.8beta5+ds1-1" } # debian bug #471112
-    - { package: gbuffy, file: gbuffy_0.2.6-11_amd64.deb, freeze: "0.2.6-11" } # my port of an ancient but useful package
-    - { package: picom, file: picom_11.2-0.1_amd64.deb, freeze: "11.2-0.1" } # backport from unstable, fixes #1053228
-
+    - { package: gbuffy, file: gbuffy_0.2.6-11_amd64.deb } # my port of an ancient but useful package
+    - { package: picom, file: picom_11.2-0.1_amd64.deb } # backport from unstable, fixes #1053228
+    - { package: libproc2-0, file: libproc2-0_4.0.4-6_amd64.deb } # backport from unstable, fixes #1091673
+    - { package: procps, file: procps_4.0.4-6_amd64.deb } # backport from unstable, fixes #1091673
 - name: Install radeon firmware
   apt:
     name: ['firmware-amd-graphics', 'radeontool', 'radeontop', 'firmware-linux-nonfree', 'libgl1-mesa-dri', 'libglx-mesa0', 'mesa-vulkan-drivers', 'xserver-xorg-video-all']

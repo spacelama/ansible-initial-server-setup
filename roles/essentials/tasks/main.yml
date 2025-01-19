@@ -657,7 +657,7 @@
   with_items:
     - key: "modprobe.blacklist"
       value: "{{ modprobe_blacklist }}"
-      # same lazy evaluation bug as calcualte_flag_variables.yml
+      # same lazy evaluation bug as calculate_flag_variables.yml
       comment: "{{ modprobe_blacklist_comment | default('not defined') }}"
   when: modprobe_blacklist is defined
 
