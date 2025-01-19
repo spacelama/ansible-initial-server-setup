@@ -52,8 +52,27 @@
   loop: "{{ install_packages }}"
   become: true
 
+- name: set comma_separated_deb_installs
+  set_fact:
+    comma_separated_deb_installs: >-
+      {% set file_paths = [] -%}
+      {% for item in install_packages -%}
+        {% set _ = file_paths.append("/dev/shm/" ~ ansible_env.USER ~ "/Downloads/" ~ ( item.file | default(item) ) ) -%}
+      {% endfor -%}
+      {{ file_paths | join(',') }}
+
+- name: debug comma_separated_deb_installs
+  debug:
+    msg: "{{ comma_separated_deb_installs }}"
+
 - name: Install archived_package
   apt:
+    # https://github.com/ansible/ansible/issues/77144 - separate
+    # multiple files with a comma!
+    # deb: "{{ comma_separated_deb_installs }}"
+    # Nope, that doesn't work either.  If this play breaks on things
+    # like ansible-mitogen, you just have to remove the existing
+    # packages and reinstall...
     deb: "/dev/shm/{{ ansible_env.USER }}/Downloads/{{ item.file | default(item) }}"
     allow_downgrade: true
   become: true
