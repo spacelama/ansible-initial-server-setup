@@ -9,7 +9,7 @@
 retry() {
     "$@" && return
     while : ; do
-          echo "$(date): xterm failed with exit-code: $?.  Retrying in a minute..."
+          echo "$(date): xterm failed with exit-code: $?.  Retrying in a minute (in the background)..."
           sleep 60
           verboserun "$@" && return
     done
