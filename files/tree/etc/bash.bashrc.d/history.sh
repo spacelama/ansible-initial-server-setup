@@ -56,9 +56,11 @@ function write_history_in_background() {
         # containing "!".  But printf "%q" converts "!"  already as
         # well as all the other characters sed cares about
         PWDENC="$( printf "%q" "${PWD}")"
-        # even though we've escaped slashes alreayd, we're about to
+        # even though we've escaped slashes already, we're about to
         # run it through sed, which will unescape the slashes, sigh
         PWDENC="${PWDENC//\\/\\\\}"
+        # and also lets escape "!" since we're using that as our sed delimiter
+        PWDENC="${PWDENC//!/\\!}"
 
         # we first write out all of $history==$1, if there was any
         # provided (this could still happen at the end of a session if
