@@ -8,6 +8,15 @@
 - name: "Regenerate boot config"
   include_tasks: "{{ playbook_dir }}/roles/common_handlers/handlers/regenerate_boot_config.yml"
 
+- name: restart systemd overrides
+  systemd:
+    name: "{{ item }}"
+    state: restarted
+    daemon_reload: yes
+  become: true
+  with_items: "{{ systemd_overrides }}"
+  ignore_errors: true # for those units that aren't defined on this system
+
 - name: restart cron
   service:
     name: cron

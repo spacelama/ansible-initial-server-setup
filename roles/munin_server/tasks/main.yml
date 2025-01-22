@@ -5,6 +5,34 @@
     dest: /etc/munin/munin-conf.d/local.conf
   become: true
 
+- name: Install munin prereq packages
+  apt:
+    name:
+      - 'rrdcached'
+      - 'acl'
+    autoremove: no
+    state: present
+    install_recommends: no
+  become: true
+
+- name: setup systemd overrides
+  copy:
+    src: "etc/systemd/system/{{ item }}.d/override.conf"
+    dest: "/etc/systemd/system/{{ item }}.d/"
+  with_items:
+    - rrdcached.service
+  become: true
+  notify: restart systemd overrides
+
+- name: Install munin packages
+  apt:
+    name:
+      - 'munin'
+    autoremove: no
+    state: present
+    install_recommends: no
+  become: true
+
 - name: install munin server plugins onto munin server
   copy:
     src: monitoring/munin/{{ item }}
