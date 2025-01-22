@@ -55,6 +55,11 @@
     - { package: zoom, file: patched_ibus_removed_zoom_amd64_6.1.11.deb, freeze: "6.1.11" } # zoom bring in a useless dependency on ibus: https://devforum.zoom.us/t/annoying-ibus-dependency-in-zoom-deb-files/67293/20
     - { package: wmtop, file: wmtop_0.84-7_amd64.deb, freeze: "0.84-7" }  # limit CPU wakeups
     - { package: tsocks, file: tsocks_1.8beta5+ds1-1_amd64.deb, freeze: "1.8beta5+ds1-1" } # debian bug #471112
+    - { package: libglib1.2ldbl, file: libglib1.2ldbl_1.2.10-19_amd64.deb } # needed by gbuffy
+    - { package: libgtk1.2-common, file: libgtk1.2-common_1.2.10-18.1_all.deb } # needed by gbuffy
+    - { package: libgtk1.2, file: libgtk1.2_1.2.10-18.1_amd64.deb } # needed by gbuffy
+    - { package: multiarch-support, file: multiarch-support_2.28-10_amd64.deb } # needed by gbuffy
+    - { package: libssl1.0.0, file: libssl1.0.0_1.0.2k-1~bpo8+1_amd64.deb } # needed by gbuffy
     - { package: gbuffy, file: gbuffy_0.2.6-11_amd64.deb } # my port of an ancient but useful package
     - { package: picom, file: picom_11.2-0.1_amd64.deb } # backport from unstable, fixes #1053228
     - { package: libproc2-0, file: libproc2-0_4.0.4-6_amd64.deb } # backport from unstable, fixes #1091673
