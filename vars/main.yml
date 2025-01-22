@@ -268,10 +268,14 @@
       - name: ./
         source: homes.remove/
         remove: true
-  # files that were in homes/bin/ and homes/bin.Linux-$arch were previously
-  # dumped into /usr/local/bin.  We now dump them into the users bin
-  # dir, so we should delete the redundant copies we put in
-  # /usr/local/bin
+  # files that were in homes/bin/ and homes/bin.Linux-$arch were
+  # previously dumped into /usr/local/bin.  We now dump them into the
+  # users bin dir, so we should delete the redundant copies we put in
+  # /usr/local/bin.  FIXME: We'd like to do the vice-versa for those
+  # things deliberately added to /usr/local/bin to make sure we dont
+  # have stale copies around, but that's a bit of work...
+  # For now, just remember to do:
+  # `cd files/tree/usr/local/bin ; find -type f | while read i ; do l -d ~/bin/$i ; done` and remove those files it finds
   usr_local_bin_files_to_remove:
     - "{{ lookup('fileglob', \"homes/bin/*\", wantlist=True) }}"
     - "{{ lookup('fileglob', \"homes.Linux-{{ arch | default ('x86_64') }}/bin/Linux-{{ arch | default ('x86_64') }}/*\", wantlist=True) }}"
