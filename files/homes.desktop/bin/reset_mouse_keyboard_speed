@@ -2,9 +2,9 @@
 # -*- Mode: shell-script -*-
 #template by ~tconnors/bin/newshscript
 #Fri Jul 13 22:02:40 EST 2012
-# $Revision: 1.6 $ $Date: 2024/10/17 04:10:26 $
-# $Id: reset_mouse_keyboard_speed,v 1.6 2024/10/17 04:10:26 tconnors Exp $
-# $Header: /home/tconnors/cvsroot/bin/reset_mouse_keyboard_speed,v 1.6 2024/10/17 04:10:26 tconnors Exp $
+# $Revision: 1.8 $ $Date: 2025/01/22 00:34:10 $
+# $Id: reset_mouse_keyboard_speed,v 1.8 2025/01/22 00:34:10 tconnors Exp $
+# $Header: /home/tconnors/cvsroot/bin/reset_mouse_keyboard_speed,v 1.8 2025/01/22 00:34:10 tconnors Exp $
 # $RCSfile: reset_mouse_keyboard_speed,v $
 
 keyboard=true
@@ -28,6 +28,8 @@ if ! $mouse ; then
     exit
 fi
 
+shown_list=false
+success=false
 declare -A adj=()
 list_props=
 case $LONGHOST-$SHORTDISPHOST in
@@ -39,9 +41,14 @@ case $LONGHOST-$SHORTDISPHOST in
             dirac|gamow|fermi)
                 #xset m 30/10 10
                 # xinput list: ->
-                for dev in 'HID 046d:c521' 'Logitech MX Master 3' 'Logitech MX Master 3S' ; do
-                    list_props=$( xinput list-props "pointer:$dev" ) ||
+                for dev in 'HID 046d:c521' 'Logitech MX Master 3' 'Logitech MX Master 3 Mouse' 'Logitech MX Master 3S' 'Logitech Wireless Device PID:4082 Mouse' ; do
+                    if ! list_props=$( hiliteStdErr --no-colour-stdout xinput list-props "pointer:$dev" ) ; then
+                        if ! $shown_list ; then
+                            hiliteStdErr  xinput list
+                            shown_list=true
+                        fi
                         continue
+                    fi
                     echo "Found $dev"
                     echo
                     case "$dev" in
@@ -50,9 +57,14 @@ case $LONGHOST-$SHORTDISPHOST in
                                 ["libinput Accel Speed"]="0.01"
                             )
                         ;;
-                        Logitech\ MX\ Master\ 3)
+                        Logitech\ MX\ Master\ 3|Logitech\ MX\ Master\ 3\ Mouse) # Do I need to detect both "Master 3 Mouse" and "Master 3"?  Perhaps there's a bluetooth vs universal reciever difference?
                             adj=(
                                 ["libinput Accel Speed"]="0.7"
+                            )
+                            ;;
+                        Logitech\ Wireless\ Device\ PID:4082\ Mouse) # Same mx Master 3!  No idea why this keeps changing!
+                            adj=(
+                                ["libinput Accel Speed"]="0.3"
                             )
                             ;;
                         HID*)
@@ -68,7 +80,7 @@ case $LONGHOST-$SHORTDISPHOST in
                     for k in "${!adj[@]}" ; do
                         if echo "$list_props" | grep "$k" ; then
                             v="${adj[$k]}"
-                            xinput set-prop "pointer:$dev" "$k" "$v"
+                            xinput set-prop "pointer:$dev" "$k" "$v" && success=true
                             echo " Setting pointer:$dev $k $v"
                             echo -n "    --> "
                             xinput list-props "pointer:$dev" | grep "$k"
@@ -102,3 +114,7 @@ case $LONGHOST-$SHORTDISPHOST in
         xset m 11/3 8
     ;;
 esac
+
+! $success && gxmessage  -geometry +500+500 'Keyboard or mouse failed to set customisations; see reset_mouse_keyboard_speed' &
+
+$success
