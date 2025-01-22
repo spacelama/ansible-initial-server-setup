@@ -60,7 +60,7 @@ case "$virt" in
 
         # http://wiki.debian.org/VirtualBox#Oracle_Virtualbox_third-party_repository
         if [ ! -e /etc/apt/sources.list.d/backports.list ] ; then
-            echo "deb http://ftp.au.debian.org/debian $(lsb_release -cs)-backports main non-free non-free-firmware contrib" > /etc/apt/sources.list.d/backports.list
+            echo "deb http://deb.debian.org/debian $(lsb_release -cs)-backports main non-free non-free-firmware contrib" > /etc/apt/sources.list.d/backports.list
             apt update
         fi
         apt install fasttrack-archive-keyring
