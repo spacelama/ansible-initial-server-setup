@@ -1,4 +1,5 @@
 ---
+  admin_user: tconnors
   mgmt_hosts: "{{ query('inventory_hostnames', 'all') | map('extract', hostvars) | selectattr('host_is_mgmt', 'true') | map(attribute='inventory_hostname') }}"
   # disabled for the time being so we don't need to pull in an up-to-date version of the community.general collection via requirements.yml
   # mgmt_host_ips: "{{ query('community.general.dig', *mgmt_hosts, fail_on_error=true) }}"
@@ -17,7 +18,7 @@
   deb_release: "{{ debian_codename | default('bookworm') }}"
   ceph_repo: reef bookworm no-subscription     # was quincy bullseye main
   smtp_server: smtp.rather.puzzling.org
-  smtp_root_alias: tconnors
+  smtp_root_alias: "{{ admin_user }}"
   smtp_aliases: |2
     backuppc: root
     adsl: root

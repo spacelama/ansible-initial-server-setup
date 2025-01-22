@@ -73,6 +73,12 @@
   when: host_has_radeon | default(false)
   become: true
 
+- name: "allow {{ admin_user }} shell to linger"
+  command:
+    cmd: "loginctl enable-linger {{ admin_user }}"
+    creates: "/var/lib/systemd/linger/{{ admin_user }}"
+  become: true
+
   # https://www.reddit.com/r/linuxadmin/comments/fbfc6w/how_to_wrap_my_firefox_process_in_a_cgroup_to/
   # https://lists.luv.asn.au/pipermail/luv-main/2020-December/011334.html (firejail other suggestion)
 - name: Setup earlyoom for desktops (unset default)
