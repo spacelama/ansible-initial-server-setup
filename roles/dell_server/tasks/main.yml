@@ -67,38 +67,26 @@
     state: absent
   become: true
 
-- name: Download archived .deb files
-  copy:
-    src: "/var/cache/apt/non-delete/{{ item }}"
-    dest: "/home/{{ ansible_env.USER }}/Downloads/{{ item }}"
-  #  when: archived_package_check_deb.rc == 0
-  loop: "{{ srvadmin_depends + srvadmin_depends_bookworm }}"
-
   #install ipmitool>= 1.8.19-6 on debian 12:
   #https://forum.proxmox.com/threads/ipmi-tool-error-after-v8-upgrade.129334/
-- name: Install archived_package on bookworm
-  apt: deb="/home/{{ ansible_env.USER }}/Downloads/{{ item }}"
-  become: true
-  #  when: archived_package_check_deb.rc == 0
-  loop: "{{ srvadmin_depends_bookworm }}"
+- name: install archived dell hardware packages (bookworm)
+  include_tasks: "{{ playbook_dir }}/roles/common/tasks/install_custom_packages.yml"
+  vars:
+    apt_preferences_hold_suffix: "-dell_server-bookworm"
+    install_packages: "{{ srvadmin_depends_bookworm }}"
   when: deb_release == 'bookworm'
 
-- name: Install archived_package
-  apt: deb="/home/{{ ansible_env.USER }}/Downloads/{{ item }}"
-  become: true
-  #  when: archived_package_check_deb.rc == 0
-  loop: "{{ srvadmin_depends }}"
+- name: install archived dell hardware packages (all)
+  include_tasks: "{{ playbook_dir }}/roles/common/tasks/install_custom_packages.yml"
+  vars:
+    apt_preferences_hold_suffix: "-dell_server-all"
+    install_packages: "{{ srvadmin_depends }}"
 
-- name: Download megacli .deb files
-  copy:
-    src: "/home/tconnors/sysadmin/install/megaraid_cli/Linux/megacli_8.07.14-2_all.deb"
-    dest: "/home/{{ ansible_env.USER }}/Downloads/megacli_8.07.14-2_all.deb"
-
-- name: Install megacli .deb files
-  apt: deb="/home/{{ ansible_env.USER }}/Downloads/{{ item }}"
-  become: true
-#  when: archived_package_check_deb.rc == 0
-  with_items:
+- name: install archived dell megacli (all)
+  include_tasks: "{{ playbook_dir }}/roles/common/tasks/install_custom_packages.yml"
+  vars:
+    apt_preferences_hold_suffix: "-dell_server-megacli"
+    install_packages:
     - "megacli_8.07.14-2_all.deb"
 
 - name: Install dell tools

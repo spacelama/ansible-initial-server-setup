@@ -64,6 +64,7 @@
     - { package: picom, file: picom_11.2-0.1_amd64.deb } # backport from unstable, fixes #1053228
     - { package: libproc2-0, file: libproc2-0_4.0.4-6_amd64.deb } # backport from unstable, fixes #1091673
     - { package: procps, file: procps_4.0.4-6_amd64.deb } # backport from unstable, fixes #1091673
+
 - name: Install radeon firmware
   apt:
     name: ['firmware-amd-graphics', 'radeontool', 'radeontop', 'firmware-linux-nonfree', 'libgl1-mesa-dri', 'libglx-mesa0', 'mesa-vulkan-drivers', 'xserver-xorg-video-all']
