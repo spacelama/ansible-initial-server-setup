@@ -248,11 +248,13 @@ function setup_environment() {
     EDITORS="emacs xemacs21 nano pico vi"
     for EDITOR in $EDITORS ; do
         if programexists $EDITOR ; then
+            # for root, limit emacs to normal emacs only, not xemacs
             if [ "$UID" = 0 ] ; then
                 if [[ $EDITOR == xemacs21 ]]; then
                     EDITOR=emacs
                 fi
             fi
+            # when not on local display, use emacs-term in preference to vanilla emacs
             if [[ "$DISPLAY" != :* ]] ; then
                 if [[ $EDITOR == *emacs* ]]; then
 		    if which emacs-term >& /dev/null ; then
@@ -260,11 +262,13 @@ function setup_environment() {
 		    fi
                 fi
             fi
+            # use emacsclienserver in preference to vanilla emacs
             if [ "$EDITOR" = emacs -a "$UID" != 0 ] ; then
 		if which emacsclientserver >& /dev/null ; then
                     EDITOR=emacsclientserver
 		fi
             fi
+            # for root, limit emacs to terminal only, not X11
             if [ "$UID" = 0 ] && [[ "$EDITOR" ==  *emacs* ]] && ! [ $EDITOR = emacs-term ] ; then
                 EDITOR="$EDITOR -nw"
             fi

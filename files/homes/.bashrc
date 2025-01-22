@@ -78,30 +78,34 @@ if [ -z "$NONINTERACT" -a -z "$PBS_ENVIRONMENT" ] ; then
     }
     bashversion
 
-  #want the following to be after bashversion, because it relies on this to set the completion stuff, and want all these calculations to be done after everything else
-    case `system` in
-        ssi.swin.edu.au)
-            extrabashrc=$HOME/.bashrc.SuSE
-        ;;
-        vpac.org)
-            extrabashrc=$HOME/.bashrc.VPAC
-        ;;
-        home)
-            extrabashrc=$HOME/.bashrc.home
-        ;;
-        apac)
-            extrabashrc=$HOME/.bashrc.APAC
-        ;;
-        aaocbn)
-            extrabashrc=$HOME/.bashrc.AAOCBN
-        ;;
-        suphys)
-            extrabashrc=$HOME/.bashrc.suphys
-        ;;
-        bom)
-            extrabashrc=$HOME/.bashrc.BOM
-        ;;
-    esac
+    # want the following to be after bashversion, because it relies on
+    # this to set the completion stuff, and want all these
+    # calculations to be done after everything else
+    if [ -x $HOME/bin/system ] ; then
+        case `$HOME/bin/system` in
+            ssi.swin.edu.au)
+                extrabashrc=$HOME/.bashrc.SuSE
+                ;;
+            vpac.org)
+                extrabashrc=$HOME/.bashrc.VPAC
+                ;;
+            home)
+                extrabashrc=$HOME/.bashrc.home
+                ;;
+            apac)
+                extrabashrc=$HOME/.bashrc.APAC
+                ;;
+            aaocbn)
+                extrabashrc=$HOME/.bashrc.AAOCBN
+                ;;
+            suphys)
+                extrabashrc=$HOME/.bashrc.suphys
+                ;;
+            bom)
+                extrabashrc=$HOME/.bashrc.BOM
+                ;;
+        esac
+    fi
     if [ -n "$extrabashrc" -a -e "$extrabashrc" ] ; then
         . $extrabashrc
     fi

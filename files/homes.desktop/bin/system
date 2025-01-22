@@ -1,0 +1,11 @@
+#!/bin/sh
+# -*- Mode: shell-script -*-
+#template by ~tconnors/bin/newshscript
+#Sat May 31 18:05:35 EST 2003
+
+# We just distribute this file to machines we regard as "home machines",
+# and it might result in the sourcing of additional extra .bashrc files
+# when our standard config is pushed out
+
+echo home
+

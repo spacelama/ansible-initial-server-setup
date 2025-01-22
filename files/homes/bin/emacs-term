@@ -1,3 +1,20 @@
 #!/bin/sh
 
-exec emacsclientserver -nw "$@"
+# use emacs if available, and set -nw in that case
+# (rather than invoke with DISPLAY unset, allowing
+# emacs to then launch things that still use the
+# DISPLAY)
+
+for EDITOR in emacsclientserver emacs nano ; do
+  case "$EDITOR" in
+    *emacs*)
+      args="-nw"
+      ;;
+    *)
+      args=
+      ;;
+  esac
+  if which "$EDITOR" > /dev/null 2>&1 ; then
+    exec emacsclientserver $args "$@"
+  fi
+done
