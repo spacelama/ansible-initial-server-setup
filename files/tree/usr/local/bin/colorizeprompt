@@ -2,21 +2,21 @@
 
 #set -x
 
-CHROOTSHORTHOST=$SHORTHOST
+CHROOTSHORTHOST="$SHORTHOST"
 
 if [ -e /etc/hostname ] ; then
     CHROOTSHORTHOST=`cat /etc/hostname | sed 's/\..*//'`
-#elif [ -e /etc/HOSTNAME ] ; then 
+#elif [ -e /etc/HOSTNAME ] ; then
 #    CHROOTSHORTHOST=`cat /etc/HOSTNAME | sed 's/\..*//'`   #new cluster nodes use dhcp and get the hostname wrong half the time -- since all the boxes I can ever hope to get root on, and hence use chroot, are debian, and debian uses /etc/hostname...
 fi
 
 
-if [ $REALHOST != $LONGHOST ] ; then
-    CHROOTSHORTHOST=$REALHOST
+if [ "$REALHOST" != "$LONGHOST" ] ; then
+    CHROOTSHORTHOST="$REALHOST"
 fi
 
 CHROOT=""
-case $CHROOTSHORTHOST in
+case "$CHROOTSHORTHOST" in
     $SHORTHOST|$SHORTHOST.*)
     ;;
     *)
@@ -24,22 +24,16 @@ case $CHROOTSHORTHOST in
     ;;
 esac
 
-file=$HOME/.bashcolors
-if [ ! -r $file ] ; then
-    file=/etc/bashcolors
-fi
-
-if [ ! -r $file ] ; then
-    echo -n "$USER@$CHROOTSHORTHOST$CHROOT"
-    exit
-fi
-
-cat /etc/bashcolors $HOME/.bashcolors 2>/dev/null | ( 
+{
+    cat /etc/bashcolors $HOME/.bashcolors 2>/dev/null
+    echo "root * dark red dark red"
+    echo "* * bright grey dark blue"
+} | (
     while read user hostname bu cu bh ch bg ; do
         if [ -n "$bg" ] ; then
             bg="--background $bg"
         fi
-        case $CHROOTSHORTHOST in
+        case "$CHROOTSHORTHOST" in
             $hostname)
                 if [[ "$USER" == $user ]] ; then
                     colorize --PS1prompt $bu $cu -n '\u'   #--PS1prompt is to tell colorize to print opening \[ and close \] ; -n is to tell echo to print no newline

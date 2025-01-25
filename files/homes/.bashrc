@@ -64,8 +64,7 @@ if [ -z "$NONINTERACT" -a -z "$PBS_ENVIRONMENT" ] ; then
         hushlogin=".hushlogin.$SHORTHOST"
         cd $HOME
         [ "$SHORTHOST" != pentane ] &&
-            echo "$hushlogin : /etc/motd ; :" |
-                make -f - -q $hushlogin || (
+            [ $hushlogin -nt /etc/motd ] || (
                     touch $hushlogin &&
                     cat /etc/motd &&
                     echo ------------------------------------------------------------

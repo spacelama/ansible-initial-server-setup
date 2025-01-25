@@ -101,7 +101,6 @@ function write_history_in_background() {
 }
 
 function writetohistory() {
-    #FIXME: ideally detect when we're inside emacs TRAMP and do nothing
     #    bt
 
     choosehistoryfile

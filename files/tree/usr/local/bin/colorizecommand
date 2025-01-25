@@ -163,7 +163,7 @@ highlight "$colour" $bright
 # output the header if not asked to run the output directly
 if ! $colourall ; then
     echo "${args[@]}"
-    highlight normal y
+    highlight normal true
 fi
 
 normaloutput
@@ -173,6 +173,6 @@ directoutput
 
 #and reset the colour if we were just colourizing the whole output:
 if $colourall ; then
-    highlight normal y
+    highlight normal true
 fi
 exit $exit
