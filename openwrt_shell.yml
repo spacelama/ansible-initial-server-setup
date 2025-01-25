@@ -8,12 +8,18 @@
   vars:
       ansible_ssh_transfer_method: scp
       ansible_scp_extra_args: -O #https://github.com/gekmihesg/ansible-openwrt/pull/59 https://github.com/gekmihesg/ansible-openwrt/issues/64 https://github.com/ansible/ansible/issues/82239 https://github.com/gekmihesg/ansible-openwrt/pull/67
-      run_uci_config: "{{ run_uci_config | default('no') }}"
+      run_uci_config: "{{ run_uci_config | default('yes') }}"
   vars_files:
     - vars/openwrt.yml
   roles:
     # FIXME: we may get bitten by https://github.com/ansible/ansible/issues/82239 when upgrading Debian Trixie
     # A possible fix is https://github.com/gekmihesg/ansible-openwrt/pull/67
     - gekmihesg.openwrt
-    - install_files
-    - openwrt
+  tasks:
+    - name: Run arbitrary shell command
+      shell: "{{ cmd }}"
+      register: shell_output
+
+    - name: Display shell output
+      debug:
+        var: shell_output.stdout
