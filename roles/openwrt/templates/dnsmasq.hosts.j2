@@ -23,9 +23,14 @@
 
 {#
   And our pve loadbalancer on webserver that forwards onto
-  pve1,pve2,pve3.  We could have also just done it here by assining
+  pve1,pve2,pve3.  We could have also just done it here by assigning
   all three nodes to DNS and sharing SSL certs, but that would be
   suboptimal when there's an outage. See also:
   https://github.com/lae/ansible-role-proxmox/blob/develop/tasks/ssl_config.yml
 #}
-192.168.1.18 pve
+{#
+  Although we actually end up implementing this through CNAMEs in
+  dhcp.reservation so that DNS reverse lookup doesn't return a
+  misleading representation of what 192.168.1.18 actually is...
+#}
+# 192.168.1.18 pve
