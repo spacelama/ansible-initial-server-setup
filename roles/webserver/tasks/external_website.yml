@@ -55,6 +55,9 @@
     - proxy
     - proxy_http
     - proxy_wstunnel
+    # proxy_balancer and lbmethod_byrequests for pve load balancer
+    - proxy_balancer
+    - lbmethod_byrequests
     - rewrite
     - ssl
   become: true
