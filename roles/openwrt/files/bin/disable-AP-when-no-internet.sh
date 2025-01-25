@@ -29,6 +29,13 @@
 # the other AP, which hopefully we've configured to be the non-optimal
 # AP and thus not us, and thus might be able to talk to the gateway.
 #
+# A better mitigation against system vs device failure is to implement
+# two levels of wireless.emergency - one for loss of internet but
+# retention of gateway (disable mode), in which case we keep serving
+# out Asio2.4 as well as our emergency SSIDs, and loss of device to
+# gateway (and thus also internet), in which case we only serve out
+# the emergency SSIDs (isolate mode).
+#
 # Setup: We monitor whether we have internet by if we can ping
 # $upstream1 or $upstream2 (google 8.8.8.8 or cloudflare 1.1.1.1).  If
 # both are down, then the internet must be down.  Our default AP setup
@@ -41,6 +48,8 @@
 
 upstream1=8.8.8.8
 upstream2=1.1.1.1
+
+gw=$( route -n | grep ^0.0.0.0 | awk '{print $2}' )
 
 logfile=/tmp/disable-AP-when-no-internet.log
 pidfile=/tmp/disable-AP-when-no-internet.pid
@@ -61,16 +70,52 @@ enable_ap() {
 
 disable_ap() {
     if ! [ -L /etc/config/wireless ] ; then
-        # we have been running in main wireless mode, so wish to enable our emergency SSID now
+        # we have been running in main wireless mode, so wish to enable our emergency-disable SSID now
         date
 
-        echo "Disabling normal AP mode, going into emergency mode"
+        echo "Disabling normal AP mode, going into emergency-disable mode"
 
         mv /etc/config/wireless /etc/config/wireless.real
-        ln -s /etc/config/wireless.emergency /etc/config/wireless
-        wifi down
-        wifi up
+    elif readlink /etc/config/wireless | grep -q wireless.emergency.isolate ; then
+        # we have been running in emergency-isolate wireless mode, but should go into emergency-disable wireless mode
+        date
+
+        echo "Disabling emergency-isolate AP mode, going into emergency-disable mode"
+
+        rm /etc/config/wireless
+    else
+        # no change
+        return
     fi
+
+    ln -s /etc/config/wireless.emergency.disable /etc/config/wireless
+    wifi down
+    wifi up
+}
+
+isolate_ap() {
+    if ! [ -L /etc/config/wireless ] ; then
+        # we have been running in main wireless mode, so wish to enable our emergency-isolate SSID now
+        date
+
+        echo "Disabling normal AP mode, going into emergency-isolate mode"
+
+        mv /etc/config/wireless /etc/config/wireless.real
+    elif readlink /etc/config/wireless | grep -q wireless.emergency.disable ; then
+        # we have been running in emergency-disable wireless mode, but should go into emergency-isolate wireless mode
+        date
+
+        echo "Disabling emergency-disable AP mode, going into emergency-isolate mode"
+
+        rm /etc/config/wireless
+    else
+        # no change
+        return
+    fi
+
+    ln -s /etc/config/wireless.emergency.isolate /etc/config/wireless
+    wifi down
+    wifi up
 }
 
 rotate_logfile() {
@@ -97,8 +142,10 @@ while : ; do
     date
     if ping -c 1 $upstream1 || ping -c 1 $upstream2 ; then
         enable_ap
-    else
+    elif ping -c 1 $gw ; then
         disable_ap
+    else
+        isolate_ap
     fi
     sleep 60
 done
