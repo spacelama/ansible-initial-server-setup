@@ -258,14 +258,6 @@
       - name: ./   # very me-specific window management stuff, only put on my desktops
         source: homes.desktop/
         when: "{{ host_is_desktop | default(false) }}"
-      - name: .bashrc.d/
-        # don't want this in the automatically copied homes/ because
-        # otherwise it gets installed back onto dirac, our ansible
-        # host, which is symlinked into this repo into the "wrong"
-        # directory, so it ends up getting installed globally where it
-        # has no effect and is just confusing
-        source: homes.custom/.bashrc.d/override-turnkey-prompt.sh
-        when: "{{ host_is_turnkey | default(false) }}"
       - name: ./
         source: homes.remove/
         remove: true
