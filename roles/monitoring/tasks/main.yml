@@ -1,10 +1,29 @@
 ---
-- name: Install node monitoring packages
+  # we need munin-async because some plugins just take a very long
+  # time to answer when something is down, so collecting them
+  # asynchronously helps.  But that currently has its own problems
+- name: Install node monitoring and monitoring acceleration packages
   apt:
-    name: ['munin-node']
+    name: ['munin-node', 'munin-async', 'munin-plugins-extra']
     autoremove: no
     state: present
   become: true
+
+- name: Install monitoring packages (except for containers)
+  apt:
+    name: ['libdata-validate-ip-perl'] # libdata-validate-ip-perl needed for chronyc munin plugin
+    autoremove: no
+    state: present
+  become: true
+  when: not (host_is_container | default(false))
+
+- name: Install monitoring packages for webservers
+  apt:
+    name: ['libwww-perl']
+    autoremove: no
+    state: present
+  become: true
+  when: (host_is_user_web_server | default(false)) or (host_is_ext_web_server | default(false))
 
 - name: intercept spundown disks in hddtemp_smartctl
   ini_file:
@@ -111,16 +130,20 @@
     file_type: link
   register: munin_plugins_to_possibly_delete_hwmon
 
-- name: find extraneous munin checks (wildcard)
+- name: find disk devices
+  find:
+    paths: /dev
+    patterns: [ sda, sdb, sdc, sdd, sde, sdf, sdg, sdh, sdi, sdj, sdk, sdl, sdm, sdn, sdo, sdp, nvme0n1, nvme0n2 ]
+  register: disk_devices
+
+- name: find extraneous munin checks (ntp wildcards and list)
   find:
     paths: /etc/munin/plugins
-    patterns:
-      - ntp_[0-9]*.[0-9]*.[0-9]*.[0-9]*
-      - hddtempd
+    patterns: "{{ remove_munin_plugins }}"
     file_type: link
   register: munin_plugins_to_delete
 
-- name: remove extraneous munin checks (wildcard)
+- name: remove extraneous munin checks (ntp wildcards and list)
   file:
     path: "{{ item.path }}"
     state: absent
@@ -128,7 +151,7 @@
   become: true
   notify: restart munin-node
 
-- name: remove extraneous munin checks (hwmon wildcard)
+- name: remove extraneous munin checks (hwmon wildcard for when no hwmon devices exist)
   file:
     path: "{{ item.path }}"
     state: absent
@@ -137,24 +160,79 @@
   notify: restart munin-node
   when: not hwmon0.stat.exists
 
-- name: remove extraneous munin tests (all)
+- name: remove extraneous munin plugins (virtual machines, containers)
   file:
-    dest: "/etc/munin/plugins/{{ item }}"
+    path: "/etc/munin/plugins/{{ item }}"
     state: absent
   become: true
-  with_items: [ 'ntp_kernel_err', 'ntp_kernel_pll_freq', 'ntp_kernel_pll_off', 'ntp_offset', 'ntp_states', 'squid_requests', 'squid_objectsize', 'squid_cache', 'squid_traffic' ]
-  notify: restart munin-node
-
-- name: remove extraneous munin plugins (virtual machines)
-  file:
-    dest: "/etc/munin/plugins/{{ item }}"
-    state: absent
-  become: true
-  with_items: [ 'hddtemp_smartctl' ]
+  with_items: "{{ physical_machine_munin_plugins }}"
   when: host_is_container | default(false) or host_is_virtual | default(false) or host_is_pi | default(false)
   notify: restart munin-node
 
-- name: install custom numa,zfs,chrony etc munin monitoring plugins from munin-contrib, that take arguments, all hosts
+- name: remove monitoring plugins not used in containers
+  file:
+    path: "/etc/munin/plugins/{{ item }}"
+    state: absent
+  become: true
+  with_items: "{{ non_container_custom_munin_plugins_with_args }}"
+  when: host_is_container | default(false)
+  notify: restart munin-node
+
+- name: remove monitoring plugins not used in containers with params
+  file:
+    path: "/etc/munin/plugins/{{ item.src }}"
+    state: absent
+  become: true
+  with_items: "{{ non_container_munin_plugins_with_args }}"
+  when: host_is_container | default(false)
+  notify: restart munin-node
+
+- name: remove existing munin plugins with params
+  file:
+    path: "/etc/munin/plugins/{{ item.src }}"
+    state: absent
+  become: true
+  with_items: "{{ zfs_munin_plugins_with_args }}"
+  when: not (host_is_zfs | default(false))
+  notify: restart munin-node
+
+- name: remove dell ipmi munin plugins without params
+  file:
+    path: "/etc/munin/plugins/{{ item }}"
+    state: absent
+  become: true
+  with_items: "{{ dell_ipmi_munin_plugins }}"
+  when: not (host_is_dell_server | default(false))
+  notify: restart munin-node
+
+- name: remove custom zfs_* munin monitoring plugins that don't take arguments
+  file:
+    path: "/etc/munin/plugins/{{ item }}"
+    state: absent
+  become: true
+  with_items: "{{ zfs_custom_munin_plugins }}"
+  when: not (host_is_zfs | default(false))
+  notify: restart munin-node
+
+- name: remove custom munin monitoring plugins from munin-contrib, that don't take arguments, for non-containers
+  file:
+    path: "/etc/munin/plugins/{{ item }}"
+    state: absent
+  become: true
+  with_items: "{{ non_container_custom_munin_plugins }}"
+  when: host_is_container | default(false)
+  notify: restart munin-node
+
+- name: remove existing munin plugins without params
+  file:
+    path: "/etc/munin/plugins/{{ item.src }}"
+    state: absent
+  become: true
+  with_items: "{{ non_container_munin_plugins }}"
+  when: host_is_container | default(false)
+  notify: restart munin-node
+
+- name: install custom munin monitoring plugins from munin-contrib, that take arguments, all hosts except containers
   copy:
     src: "monitoring/munin/{{ item }}"
     dest: "/usr/share/munin/plugins/"
@@ -163,16 +241,11 @@
     mode: 0755
     local_follow: true
   become: true
-  with_items:
-    - zfs_usage_
-    - zfsonlinux_stats_
-    - numa_
-    - chrony_
-    - nvme_
-    - tasmota_    # would love to just put our modified plugins that
-                  # are already in upstream, directly into
-                  # /etc/munin/plugins, but these are the ones that
-                  # take arguments, so they need to go somewhere!
+  # would love to just put our modified plugins that are already in
+  # upstream, directly into /etc/munin/plugins, but these are the ones
+  # that take arguments, so they need to go somewhere!
+  with_items: "{{ non_container_custom_munin_plugins_with_args }}"
+  when: not (host_is_container | default(false))
   notify: restart munin-node
 
 - name: install custom nutups2_ etc munin monitoring plugins from munin-contrib, that take arguments, to UPS nut monitoring nodes
@@ -203,38 +276,17 @@
   notify: restart munin-node
   when: host_is_ext_web_server | default(false)
 
-- name: install custom chrony etc munin monitoring plugins from munin-contrib, that don't take arguments, for non-containers
-  copy:
-    src: "monitoring/munin/{{ item }}"
-    dest: "/etc/munin/plugins/"
-    owner: root
-    group: root
-    mode: 0755
-    local_follow: true
+- name: existing apache munin plugins without params
+  file:
+    src: "/usr/share/munin/plugins/{{ item }}"
+    dest: "/etc/munin/plugins/{{ item }}"
+    state: link
   become: true
   with_items:
-    - chrony_sourcestats
-    - chrony_status
-    - chrony
-    - chrony_drift
-    - ntp_thirdparty
-    - raid
-  when: not (host_is_container | default(false))
-  notify: restart munin-node
-
-- name: install custom munin monitoring plugins from eg munin-contrib, that don't take arguments, for all hosts
-  copy:
-    src: "monitoring/munin/{{ item }}"
-    dest: "/etc/munin/plugins/"
-    owner: root
-    group: root
-    mode: 0755
-    local_follow: true
-  become: true
-  with_items:
-    - cpuidle
-    - fail2ban
-    - fail2ban_all_jails
+    - apache_accesses
+    - apache_processes
+    - apache_volume
+  when: (host_is_user_web_server | default(false)) or (host_is_ext_web_server | default(false))
   notify: restart munin-node
 
 - name: install zram munin monitoring plugins from eg munin-contrib, that don't take arguments, for hosts with zram configured
@@ -251,27 +303,48 @@
   notify: restart munin-node
   when: "'systemd-zram-generator' in ansible_facts.packages"
 
+- name: install custom munin monitoring plugins from eg munin-contrib, that don't take arguments, for all hosts
+  copy:
+    src: "monitoring/munin/{{ item }}"
+    dest: "/etc/munin/plugins/"
+    owner: root
+    group: root
+    mode: 0755
+    local_follow: true
+  become: true
+  with_items: "{{ custom_munin_plugins }}"
+  notify: restart munin-node
+
+- name: install custom munin monitoring plugins from munin-contrib, that don't take arguments, for non-containers
+  copy:
+    src: "monitoring/munin/{{ item }}"
+    dest: "/etc/munin/plugins/"
+    owner: root
+    group: root
+    mode: 0755
+    local_follow: true
+  become: true
+  with_items: "{{ non_container_custom_munin_plugins }}"
+  when: not (host_is_container | default(false))
+  notify: restart munin-node
+
 - name: existing munin plugins without params
   file:
     src: "/usr/share/munin/plugins/{{ item }}"
     dest: "/etc/munin/plugins/{{ item }}"
     state: link
   become: true
-  with_items: [ 'df_abs', 'iostat', 'iostat_ios', 'netstat' ]
-  when: not (host_is_container | default(false))
+  with_items: "{{ munin_plugins }}"
   notify: restart munin-node
 
-- name: existing apache munin plugins without params
+- name: existing munin plugins without params (non containers)
   file:
     src: "/usr/share/munin/plugins/{{ item }}"
     dest: "/etc/munin/plugins/{{ item }}"
     state: link
   become: true
-  with_items:
-    - apache_accesses
-    - apache_processes
-    - apache_volume
-  when: (host_is_user_web_server | default(false)) or (host_is_ext_web_server | default(false))
+  with_items: "{{ non_container_munin_plugins }}"
+  when: not (host_is_container | default(false))
   notify: restart munin-node
 
 - name: existing munin plugins without params (physical machines)
@@ -280,17 +353,17 @@
     dest: "/etc/munin/plugins/{{ item }}"
     state: link
   become: true
-  with_items: [ 'hddtemp_smartctl' ]
+  with_items: "{{ physical_machine_munin_plugins }}"
   when: not ( host_is_container | default(false) or host_is_virtual | default(false) or host_is_pi | default(false) )
   notify: restart munin-node
 
-- name: munin ipmi plugins without params
+- name: dell ipmi munin plugins without params
   file:
     src: "/usr/share/munin/plugins/ipmi_"
     dest: "/etc/munin/plugins/{{ item }}"
     state: link
   become: true
-  with_items: [ 'ipmi_temp', 'ipmi_power', 'ipmi_fans', 'ipmi_volts' ]
+  with_items: "{{ dell_ipmi_munin_plugins }}"
   when: host_is_dell_server | default(false)
   notify: restart munin-node
 
@@ -300,12 +373,7 @@
     dest: "/etc/munin/plugins/{{ item.src }}"
     state: link
   become: true
-  with_items:
-    - { src: 'ping_dirac', dest: 'ping_' }
-    - { src: 'ping_fs', dest: 'ping_' }
-    - { src: 'ping_gw', dest: 'ping_' }
-    - { src: 'ping_www.google.com.au', dest: 'ping_' }
-    - { src: 'chrony_ntp.internode.com.au', dest: 'chrony_' }
+  with_items: "{{ non_container_munin_plugins_with_args }}"
   when: not (host_is_container | default(false))
   notify: restart munin-node
 
@@ -318,59 +386,36 @@
     mode: 0755
     local_follow: true
   become: true
-  with_items:
-    - zfs-demand
-    - zfs-general
-    - zfs-hash
-    - zfs-l2
-    - zfs-mru-mfu
-    - zfs-prefetch
-    - zfsarc-l1
-    - zfsarc-l2
-#    - zfs-filesystem-graph
-    - zfs_arcstats
-    - zfs_cache_efficiency
-    - zfs_list
-    - zfsarcstats-counters
-    - zlist
-    - zpool_capacity
-    - zpool_iostat
+  with_items: "{{ zfs_custom_munin_plugins }}"
   when: host_is_zfs | default(false)
   notify: restart munin-node
   ignore_errors: true # munin packages are on fs, which might not be alive
 
-  #FIXME: should work out a way of removing all stale items discovered by previous suggests that are no longer relevant (so wildcard minus current suggests result)
-- name: gather and implement munin suggests
-  include_tasks: munin_suggest_plugin.yml
-  loop_control:
-    loop_var: munin_plugin
-  with_items:
-    - zfs_usage_
-    - numa_
-    - smart_
-    - sensors_
-    - if_
-    - if_err_
-    - nutups_
-    - "{{ ( host_is_munin_server | default(false) ) | ternary( 'tasmota_', omit) }}"
-#    - ipmi_  # wants to set all 4 on all hosts, so define them via a check on host_is_dell_server instead
-
-- name: existing munin plugins with params
+- name: existing zfs munin plugins with params
   file:
     src: "/usr/share/munin/plugins/{{ item.dest }}"
     dest: "/etc/munin/plugins/{{ item.src }}"
     state: link
   become: true
-  with_items:
-    - { src: 'zfsonlinux_stats_efficiency', dest: 'zfsonlinux_stats_' }
-    - { src: 'zfsonlinux_stats_cachehitlist', dest: 'zfsonlinux_stats_' }
-    - { src: 'zfsonlinux_stats_cachehitdtype', dest: 'zfsonlinux_stats_' }
-    - { src: 'zfsonlinux_stats_dmuprefetch', dest: 'zfsonlinux_stats_' }
-    - { src: 'zfsonlinux_stats_utilization', dest: 'zfsonlinux_stats_' }
-    - { src: 'zfsonlinux_stats_l2utilization', dest: 'zfsonlinux_stats_' }
-    - { src: 'zfsonlinux_stats_l2efficiency', dest: 'zfsonlinux_stats_' }
+  with_items: "{{ zfs_munin_plugins_with_args }}"
   when: host_is_zfs | default(false)
   notify: restart munin-node
+
+  # FIXME: should work out a way of removing all stale items
+  # discovered by previous suggests that are no longer relevant (so
+  # wildcard minus current suggests result)
+- name: gather and implement munin suggests, all hosts
+  include_tasks: munin_suggest_plugin.yml
+  loop_control:
+    loop_var: munin_plugin
+  with_items: "{{ munin_suggests }}"
+
+- name: gather and implement munin suggests, all hosts except containers
+  include_tasks: munin_suggest_plugin.yml
+  loop_control:
+    loop_var: munin_plugin
+  with_items: "{{ non_container_munin_suggests }}"
+  when: not (host_is_container | default(false))
 
 - name: optional extra existing munin plugins with params
   file:
@@ -382,16 +427,14 @@
   notify: restart munin-node
 
 # these smart_ links are in addition to those handled by
-# munin_suggest_plugin.yml, which appears to ignore devices that are
-# sent through to VMs (where we still have to run the smart queries
-# from).  Nope - it's ignoring SAS devices, because it can't parse the
-# smartctl output of them.  That just leaves nvme devices, for which
+# munin_suggest_plugin.yml, which ignore SAS devices, because it by
+# default can't parse the smartctl output of them (but we work around,
+# but suggest still doesn't detect them), and nvme devices, for which
 # we have a translator configured in the monitoring role (but again,
-# is not detected in the `suggests` phase.
+# is not detected in the `suggests` phase).
 - name: ensure all special munin links are in place for /dev files
   include_tasks: munin_dev.yml
-#  with_items: { sda, sdb, sdc, sdd, sde, sdf, sdg, sdh, sdi, sdj, sdk, sdl, sdm, sdn, nvme0n1 }
-  with_items: { nvme0n1, nvme0n2 }
+  with_items: "{{ disk_devices.files }}"
 
 - name: Ensure apt_all doesn't trigger every 5 minutes
   lineinfile:
@@ -402,32 +445,6 @@
     line: '0 */3 \1'
   become: true
   notify: restart cron
-
-  # we need munin-async because some plugins just take a very long
-  # time to answer when something is down, so collecting them
-  # asynchronously helps.  But that currently has its own problems
-- name: Install monitoring acceleration packages
-  apt:
-    name: ['munin-async']
-    autoremove: no
-    state: present
-  become: true
-
-- name: Install monitoring packages for webservers
-  apt:
-    name: ['libwww-perl']
-    autoremove: no
-    state: present
-  become: true
-  when: (host_is_user_web_server | default(false)) or (host_is_ext_web_server | default(false))
-
-- name: Install monitoring packages (except for containers)
-  apt:
-    name: ['libdata-validate-ip-perl'] # libdata-validate-ip-perl needed for chronyc munin plugin
-    autoremove: no
-    state: present
-  become: true
-  when: not (host_is_container | default(false))
 
 - name: create ssh directory for munin-async
   file:

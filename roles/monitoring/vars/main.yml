@@ -1,0 +1,114 @@
+---
+  remove_munin_plugins:
+    - ntp_[0-9]*.[0-9]*.[0-9]*.[0-9]*
+    - hddtempd
+    - ntp_kernel_err
+    - ntp_kernel_pll_freq
+    - ntp_kernel_pll_off
+    - ntp_offset
+    - ntp_states
+    - squid_requests
+    - squid_objectsize
+    - squid_cache
+    - squid_traffic
+    - "{{ (host_is_zfs | default(false) ) | ternary( omit, 'zfs*_*') }}"
+    - "{{ (host_is_container | default(false) ) | ternary( 'numa_*', omit ) }}"
+    - "{{ (host_is_container | default(false) ) | ternary( 'smart_*', omit ) }}"
+    - "{{ (host_is_container | default(false) ) | ternary( 'sensors_*', omit ) }}"
+    - "{{ (host_is_container | default(false) ) | ternary( 'nutups_*', omit ) }}"
+    - "{{ (host_is_dell | default(false) ) | ternary( omit, 'ipmi_' ) }}"
+
+  # would love to just put our modified plugins that
+  # are already in upstream, directly into
+  # /etc/munin/plugins, but these are the ones that
+  # take arguments, so they need to go somewhere!
+  non_container_custom_munin_plugins_with_args:
+    - zfs_usage_
+    - zfsonlinux_stats_
+    - numa_
+    - chrony_
+    - nvme_
+    - tasmota_
+
+  physical_machine_munin_plugins:
+    - hddtemp_smartctl
+
+  dell_ipmi_munin_plugins:
+    - ipmi_temp
+    - ipmi_power
+    - ipmi_fans
+    - ipmi_volts
+
+  zfs_custom_munin_plugins:
+    - zfs-demand
+    - zfs-general
+    - zfs-hash
+    - zfs-l2
+    - zfs-mru-mfu
+    - zfs-prefetch
+    - zfsarc-l1
+    - zfsarc-l2
+#    - zfs-filesystem-graph
+    - zfs_arcstats
+    - zfs_cache_efficiency
+    - zfs_list
+    - zfsarcstats-counters
+    - zlist
+    - zpool_capacity
+    - zpool_iostat
+
+  # we don't run suggests on zfsonlinux every time
+  zfs_munin_plugins_with_args:
+    - { src: 'zfsonlinux_stats_efficiency', dest: 'zfsonlinux_stats_' }
+    - { src: 'zfsonlinux_stats_cachehitlist', dest: 'zfsonlinux_stats_' }
+    - { src: 'zfsonlinux_stats_cachehitdtype', dest: 'zfsonlinux_stats_' }
+    - { src: 'zfsonlinux_stats_dmuprefetch', dest: 'zfsonlinux_stats_' }
+    - { src: 'zfsonlinux_stats_utilization', dest: 'zfsonlinux_stats_' }
+    - { src: 'zfsonlinux_stats_l2utilization', dest: 'zfsonlinux_stats_' }
+    - { src: 'zfsonlinux_stats_l2efficiency', dest: 'zfsonlinux_stats_' }
+
+  non_container_custom_munin_plugins:
+    - chrony_sourcestats
+    - chrony_status
+    - chrony
+    - chrony_drift
+    - ntp_thirdparty
+    - raid
+
+  non_container_munin_plugins: []
+    #FIXME: dunno here or all hosts: - iostat
+    #FIXME: dunno here or all hosts: - iostat_ios
+    #FIXME: dunno here or all hosts: - netstat
+
+  non_container_munin_plugins_with_args:
+    - { src: 'ping_dirac', dest: 'ping_' }
+    - { src: 'ping_fs', dest: 'ping_' }
+    - { src: 'ping_gw', dest: 'ping_' }
+    - { src: 'ping_www.google.com.au', dest: 'ping_' }
+    - { src: 'chrony_ntp.internode.com.au', dest: 'chrony_' }
+
+  non_container_munin_suggests:
+    - zfs_usage_
+    # we don't run suggests on zfsonlinux every time
+    - numa_
+    - smart_
+    - sensors_
+    - nutups_
+#    - ipmi_  # wants to set all 4 on all hosts, so define them via a check on host_is_dell_server instead
+
+  custom_munin_plugins:
+    - cpuidle
+    - fail2ban
+    - fail2ban_all_jails
+
+  munin_plugins:
+    - df_abs
+    - iostat
+    - iostat_ios
+    - netstat
+
+  munin_suggests:
+    - if_
+    - if_err_
+    - "{{ ( host_is_munin_server | default(false) ) | ternary( 'tasmota_', omit) }}"
+
