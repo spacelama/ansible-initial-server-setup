@@ -125,22 +125,23 @@
 - name: find possibly extraneous munin checks (hwmon wildcard)
   find:
     paths: /etc/munin/plugins
+    file_type: any
     patterns:
       - sensors_*
-    file_type: link
   register: munin_plugins_to_possibly_delete_hwmon
 
 - name: find disk devices
   find:
     paths: /dev
+    file_type: any
     patterns: [ sda, sdb, sdc, sdd, sde, sdf, sdg, sdh, sdi, sdj, sdk, sdl, sdm, sdn, sdo, sdp, nvme0n1, nvme0n2 ]
   register: disk_devices
 
 - name: find extraneous munin checks (ntp wildcards and list)
   find:
     paths: /etc/munin/plugins
+    file_type: any
     patterns: "{{ remove_munin_plugins }}"
-    file_type: link
   register: munin_plugins_to_delete
 
 - name: remove extraneous munin checks (ntp wildcards and list)
@@ -160,22 +161,22 @@
   notify: restart munin-node
   when: not hwmon0.stat.exists
 
-- name: remove extraneous munin plugins (virtual machines, containers)
+- name: remove extraneous munin plugins without params (pi or non virtual nor container; ie, physical machines including pi)
   file:
     path: "/etc/munin/plugins/{{ item }}"
     state: absent
   become: true
-  with_items: "{{ physical_machine_munin_plugins }}"
-  when: host_is_container | default(false) or host_is_virtual | default(false) or host_is_pi | default(false)
+  with_items: "{{ pi_or_non_virtual_nor_container_munin_plugins }}"
+  when: not (host_is_pi | default(false) or not ( host_is_container | default(false) or host_is_virtual | default(false) ) )
   notify: restart munin-node
 
-- name: remove monitoring plugins not used in containers
+- name: remove extraneous munin plugins without params (non virtual nor container nor pi; ie, physical machines but not including pi)
   file:
     path: "/etc/munin/plugins/{{ item }}"
     state: absent
   become: true
-  with_items: "{{ non_container_custom_munin_plugins_with_args }}"
-  when: host_is_container | default(false)
+  with_items: "{{ non_virtual_nor_container_nor_pi_munin_plugins }}"
+  when: host_is_container | default(false) or host_is_virtual | default(false) or host_is_pi | default(false)
   notify: restart munin-node
 
 - name: remove monitoring plugins not used in containers with params
@@ -223,9 +224,9 @@
   when: host_is_container | default(false)
   notify: restart munin-node
 
-- name: remove existing munin plugins without params
+- name: remove existing munin plugins without params (non containers)
   file:
-    path: "/etc/munin/plugins/{{ item.src }}"
+    path: "/etc/munin/plugins/{{ item }}"
     state: absent
   become: true
   with_items: "{{ non_container_munin_plugins }}"
@@ -337,7 +338,7 @@
   with_items: "{{ munin_plugins }}"
   notify: restart munin-node
 
-- name: existing munin plugins without params (non containers)
+- name: install existing munin plugins without params (non containers)
   file:
     src: "/usr/share/munin/plugins/{{ item }}"
     dest: "/etc/munin/plugins/{{ item }}"
@@ -347,13 +348,23 @@
   when: not (host_is_container | default(false))
   notify: restart munin-node
 
-- name: existing munin plugins without params (physical machines)
+- name: enable existing munin plugins without params (pi or non virtual nor container; ie, physical machines including pi)
   file:
     src: "/usr/share/munin/plugins/{{ item }}"
     dest: "/etc/munin/plugins/{{ item }}"
     state: link
   become: true
-  with_items: "{{ physical_machine_munin_plugins }}"
+  with_items: "{{ pi_or_non_virtual_nor_container_munin_plugins }}"
+  when: host_is_pi | default(false) or not ( host_is_container | default(false) or host_is_virtual | default(false) )
+  notify: restart munin-node
+
+- name: enable existing munin plugins without params (non virtual nor container nor pi; ie, physical machines but not including pi)
+  file:
+    src: "/usr/share/munin/plugins/{{ item }}"
+    dest: "/etc/munin/plugins/{{ item }}"
+    state: link
+  become: true
+  with_items: "{{ non_virtual_nor_container_nor_pi_munin_plugins }}"
   when: not ( host_is_container | default(false) or host_is_virtual | default(false) or host_is_pi | default(false) )
   notify: restart munin-node
 

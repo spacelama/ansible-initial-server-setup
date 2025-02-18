@@ -11,14 +11,20 @@
     - squid_objectsize
     - squid_cache
     - squid_traffic
-    - "{{ (host_is_zfs | default(false) ) | ternary( omit, 'zfs*_*') }}"
-    - "{{ (host_is_container | default(false) ) | ternary( 'numa_*', omit ) }}"
-    - "{{ (host_is_container | default(false) ) | ternary( 'smart_*', omit ) }}"
-    - "{{ (host_is_container | default(false) ) | ternary( 'sensors_*', omit ) }}"
-    - "{{ (host_is_container | default(false) ) | ternary( 'nutups_*', omit ) }}"
-    - "{{ (host_is_dell | default(false) ) | ternary( omit, 'ipmi_' ) }}"
+    - ping_gamow
+    - ping_maxwell
+    - "{{ (host_is_zfs        | default(false) ) | ternary( omit, 'zfs*_*') }}"
+    - "{{ (host_is_container  | default(false) ) | ternary( 'numa_*', omit ) }}"
+    - "{{ (host_is_container  | default(false) ) | ternary( 'chrony_*', omit ) }}"
+    - "{{ (host_is_container  | default(false) ) | ternary( 'nvme_*', omit ) }}"
+    - "{{ (host_is_container  | default(false) ) | ternary( 'smart_*', omit ) }}"
+    - "{{ (host_is_container  | default(false) ) | ternary( 'sensors_*', omit ) }}"
+    - "{{ (host_is_container  | default(false) ) | ternary( 'nutups_*', omit ) }}"
+    - "{{ (host_is_dell       | default(false) ) | ternary( omit, 'ipmi_' ) }}"
+    - "{{ (host_is_pve_server | default(false) ) | ternary( omit, 'raid' ) }}"
 
-  # would love to just put our modified plugins that
+  # From munin git repos and copied across to the machine.
+  # Would love to just put our modified plugins that
   # are already in upstream, directly into
   # /etc/munin/plugins, but these are the ones that
   # take arguments, so they need to go somewhere!
@@ -30,7 +36,11 @@
     - nvme_
     - tasmota_
 
-  physical_machine_munin_plugins:
+  pi_or_non_virtual_nor_container_munin_plugins:
+    - cpuspeed
+
+  non_virtual_nor_container_nor_pi_munin_plugins:
+    - acpi
     - hddtemp_smartctl
 
   dell_ipmi_munin_plugins:
@@ -39,6 +49,7 @@
     - ipmi_fans
     - ipmi_volts
 
+  # From munin git repos and copied across to the machine:
   zfs_custom_munin_plugins:
     - zfs-demand
     - zfs-general
@@ -57,7 +68,7 @@
     - zpool_capacity
     - zpool_iostat
 
-  # we don't run suggests on zfsonlinux every time
+  # We don't run suggests on zfsonlinux every time
   zfs_munin_plugins_with_args:
     - { src: 'zfsonlinux_stats_efficiency', dest: 'zfsonlinux_stats_' }
     - { src: 'zfsonlinux_stats_cachehitlist', dest: 'zfsonlinux_stats_' }
@@ -67,18 +78,24 @@
     - { src: 'zfsonlinux_stats_l2utilization', dest: 'zfsonlinux_stats_' }
     - { src: 'zfsonlinux_stats_l2efficiency', dest: 'zfsonlinux_stats_' }
 
+  # From munin git repos and copied across to the machine:
   non_container_custom_munin_plugins:
-    - chrony_sourcestats
+    - cpuidle            # actually the stats of the host (although of course you might care to correlate performance problems against host resources)
+    - chrony_sourcestats # clock is locked to host
     - chrony_status
     - chrony
     - chrony_drift
     - ntp_thirdparty
-    - raid
 
-  non_container_munin_plugins: []
-    #FIXME: dunno here or all hosts: - iostat
-    #FIXME: dunno here or all hosts: - iostat_ios
-    #FIXME: dunno here or all hosts: - netstat
+  non_container_munin_plugins:
+    - diskstats
+    - interrupts
+    - irqstats
+    - load      # host
+    - processes # host
+    - swap # seems to be measuring host values
+    - iostat
+    - iostat_ios
 
   non_container_munin_plugins_with_args:
     - { src: 'ping_dirac', dest: 'ping_' }
@@ -96,15 +113,15 @@
     - nutups_
 #    - ipmi_  # wants to set all 4 on all hosts, so define them via a check on host_is_dell_server instead
 
+  # From munin git repos and copied across to the machine:
   custom_munin_plugins:
-    - cpuidle
     - fail2ban
     - fail2ban_all_jails
 
   munin_plugins:
     - df_abs
-    - iostat
-    - iostat_ios
+    - df
+    - df_inode
     - netstat
 
   munin_suggests:
