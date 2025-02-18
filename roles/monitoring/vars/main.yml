@@ -79,8 +79,10 @@
     - { src: 'zfsonlinux_stats_l2efficiency', dest: 'zfsonlinux_stats_' }
 
   # From munin git repos and copied across to the machine:
-  non_container_custom_munin_plugins:
+  non_virtual_non_container_custom_munin_plugins:
     - cpuidle            # actually the stats of the host (although of course you might care to correlate performance problems against host resources)
+
+  non_container_custom_munin_plugins:
     - chrony_sourcestats # clock is locked to host
     - chrony_status
     - chrony

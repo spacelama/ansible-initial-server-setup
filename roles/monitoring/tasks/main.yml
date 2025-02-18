@@ -215,6 +215,15 @@
   when: not (host_is_zfs | default(false))
   notify: restart munin-node
 
+- name: remove custom munin monitoring plugins from munin-contrib, that don't take arguments, for non-virtual nor containers
+  file:
+    path: "/etc/munin/plugins/{{ item }}"
+    state: absent
+  become: true
+  with_items: "{{ non_virtual_non_container_custom_munin_plugins }}"
+  when: host_is_container | default(false) or host_is_virtual | default(false)
+  notify: restart munin-node
+
 - name: remove custom munin monitoring plugins from munin-contrib, that don't take arguments, for non-containers
   file:
     path: "/etc/munin/plugins/{{ item }}"
@@ -314,6 +323,19 @@
     local_follow: true
   become: true
   with_items: "{{ custom_munin_plugins }}"
+  notify: restart munin-node
+
+- name: install custom munin monitoring plugins from munin-contrib, that don't take arguments, for non-virtual nor containers
+  copy:
+    src: "monitoring/munin/{{ item }}"
+    dest: "/etc/munin/plugins/"
+    owner: root
+    group: root
+    mode: 0755
+    local_follow: true
+  become: true
+  with_items: "{{ non_virtual_non_container_custom_munin_plugins }}"
+  when: not (host_is_container | default(false) or host_is_virtual | default(false) )
   notify: restart munin-node
 
 - name: install custom munin monitoring plugins from munin-contrib, that don't take arguments, for non-containers
