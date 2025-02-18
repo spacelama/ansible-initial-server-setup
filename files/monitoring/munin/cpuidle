@@ -9,6 +9,10 @@ cpuidle - Munin plugin to monitor usage of CPU idle states
 Linux systems with the C<cpuidle> framework enabled.  Requires a
 Multigraph-capable master (1.4 and later).
 
+Sourced originally from:
+https://raw.githubusercontent.com/ligne/munin-plugins-ligne/master/node.d.linux/cpuidle
+
+
 =head1 CONFIGURATION
 
 None required.  There are no tunable parameters at this time.
