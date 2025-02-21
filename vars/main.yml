@@ -255,6 +255,8 @@
       - name: ./    # install all of files/homes/ into such users ~/
       - name: ./
         source: homes.Linux-{{ arch | default ('x86_64') }}/
+      - name: ./
+        source: homes.{{ deb_release }}/
       - name: ./   # very me-specific window management stuff, only put on my desktops
         source: homes.desktop/
         when: "{{ host_is_desktop | default(false) }}"
