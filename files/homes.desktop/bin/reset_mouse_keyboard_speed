@@ -64,7 +64,7 @@ case $LONGHOST-$SHORTDISPHOST in
                             ;;
                         Logitech\ Wireless\ Device\ PID:4082\ Mouse) # Same mx Master 3!  No idea why this keeps changing!
                             adj=(
-                                ["libinput Accel Speed"]="0.3"
+                                ["libinput Accel Speed"]="0.5"
                             )
                             ;;
                         HID*)
