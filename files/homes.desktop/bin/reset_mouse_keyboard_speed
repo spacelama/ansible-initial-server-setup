@@ -10,6 +10,85 @@
 keyboard=true
 mouse=true
 
+detect_external_mice() {
+    mice=$( xinput list | grep pointer | grep -v -E '(Virtual core pointer|XTEST pointer|Touchscreen|DELL087F:00 04F3:3082)' )
+    echo "mice=$mice"
+    number_mice=$( echo "$mice" | grep . | wc -l )
+    echo number_mice=$number_mice
+
+    if [ $number_mice = 0 ] ; then
+        return 1
+    fi
+}
+
+
+configure_mouse_settings() {
+    case $SHORTHOST in
+        dirac|gamow|fermi)
+            if ! detect_external_mice ; then
+                gxmessage -timeout 2 -geometry +500+500 'No mice to be configured?' &
+                success=true  #nothing to fail, I guess...
+                return
+            fi
+
+            #xset m 30/10 10
+            # xinput list: ->
+            for dev in 'HID 046d:c521' 'Logitech MX Master 3' 'Logitech MX Master 3 Mouse' 'Logitech MX Master 3S' 'Logitech Wireless Device PID:4082 Mouse' ; do
+                if ! list_props=$( hiliteStdErr --no-colour-stdout xinput list-props "pointer:$dev" ) ; then
+                    if ! $shown_list ; then
+                        hiliteStdErr  xinput list
+                        shown_list=true
+                    fi
+                    continue
+                fi
+                echo "Found $dev"
+                echo
+                case "$dev" in
+                    Logitech\ MX\ Master\ 3S)
+                        adj=(
+                            ["libinput Accel Speed"]="0.01"
+                        )
+                        ;;
+                    Logitech\ MX\ Master\ 3|Logitech\ MX\ Master\ 3\ Mouse) # Do I need to detect both "Master 3 Mouse" and "Master 3"?  Perhaps there's a bluetooth vs universal reciever difference?
+                        adj=(
+                            ["libinput Accel Speed"]="0.7"
+                        )
+                        ;;
+                    Logitech\ Wireless\ Device\ PID:4082\ Mouse) # Same mx Master 3!  No idea why this keeps changing!
+                        adj=(
+                            ["libinput Accel Speed"]="0.5"
+                        )
+                        ;;
+                    HID*)
+                        adj=(
+                            ["libinput Accel Speed"]="0.9"
+                        )
+                        ;;
+                    *)
+                        echo "Forgot dev match? $dev"
+                        break
+                        ;;
+                esac
+                for k in "${!adj[@]}" ; do
+                    if echo "$list_props" | grep "$k" ; then
+                        v="${adj[$k]}"
+                        xinput set-prop "pointer:$dev" "$k" "$v" && success=true
+                        echo " Setting pointer:$dev $k $v"
+                        echo -n "    --> "
+                        xinput list-props "pointer:$dev" | grep "$k"
+                    fi
+                done
+            done
+            ;;
+        scuzzie|dirac-laptop|maxwell)
+            xset m 13/10 1
+            ;;
+        *)
+            xset m 8/3
+            ;;
+    esac
+}
+
 case "$1" in
     --keyboard)
         mouse=false
@@ -35,84 +114,27 @@ list_props=
 case $LONGHOST-$SHORTDISPHOST in
     bohr*-galileo)
         xset m 8/3
-    ;;
+        ;;
     scuzzie*-*|dirac*-*|gamow*-*|maxwell*-*|bohr*-*|hubble*-*|penrose*-*|curie*-*|fermi*-*)
-        case $SHORTHOST in
-            dirac|gamow|fermi)
-                #xset m 30/10 10
-                # xinput list: ->
-                for dev in 'HID 046d:c521' 'Logitech MX Master 3' 'Logitech MX Master 3 Mouse' 'Logitech MX Master 3S' 'Logitech Wireless Device PID:4082 Mouse' ; do
-                    if ! list_props=$( hiliteStdErr --no-colour-stdout xinput list-props "pointer:$dev" ) ; then
-                        if ! $shown_list ; then
-                            hiliteStdErr  xinput list
-                            shown_list=true
-                        fi
-                        continue
-                    fi
-                    echo "Found $dev"
-                    echo
-                    case "$dev" in
-                        Logitech\ MX\ Master\ 3S)
-                            adj=(
-                                ["libinput Accel Speed"]="0.01"
-                            )
-                        ;;
-                        Logitech\ MX\ Master\ 3|Logitech\ MX\ Master\ 3\ Mouse) # Do I need to detect both "Master 3 Mouse" and "Master 3"?  Perhaps there's a bluetooth vs universal reciever difference?
-                            adj=(
-                                ["libinput Accel Speed"]="0.7"
-                            )
-                            ;;
-                        Logitech\ Wireless\ Device\ PID:4082\ Mouse) # Same mx Master 3!  No idea why this keeps changing!
-                            adj=(
-                                ["libinput Accel Speed"]="0.5"
-                            )
-                            ;;
-                        HID*)
-                            adj=(
-                                ["libinput Accel Speed"]="0.9"
-                            )
-                            ;;
-                        *)
-                            echo "Forgot dev match? $dev"
-                            break
-                            ;;
-                    esac
-                    for k in "${!adj[@]}" ; do
-                        if echo "$list_props" | grep "$k" ; then
-                            v="${adj[$k]}"
-                            xinput set-prop "pointer:$dev" "$k" "$v" && success=true
-                            echo " Setting pointer:$dev $k $v"
-                            echo -n "    --> "
-                            xinput list-props "pointer:$dev" | grep "$k"
-                        fi
-                    done
-                done
-                ;;
-            scuzzie|dirac-laptop|maxwell)
-                xset m 13/10 1
-                ;;
-            *)
-                xset m 8/3
-                ;;
-        esac
-    ;;
+        configure_mouse_settings
+        ;;
     *.ltu.edu.au-*)
         #xset m 4/3 10
         :
-    ;;
+        ;;
     *.swin.edu.au-*)
         case $LONGHOST in
             oxygen*.swin.edu.au|polonium*.swin.edu.au)
                 xset m 10/3 2000
-            ;;
+                ;;
             *)
                 xset m 4/3
-            ;;
+                ;;
         esac
-    ;;
+        ;;
     *)
         xset m 11/3 8
-    ;;
+        ;;
 esac
 
 ! $success && gxmessage  -geometry +500+500 'Keyboard or mouse failed to set customisations; see reset_mouse_keyboard_speed' &
