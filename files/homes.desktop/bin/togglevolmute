@@ -1,0 +1,10 @@
+#!/bin/sh
+
+PATH=$PATH:/usr/local/bin
+export PATH
+
+if muted ; then
+    exec unmute
+else
+    exec mute
+fi

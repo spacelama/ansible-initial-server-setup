@@ -1,0 +1,79 @@
+#!/bin/bash
+# -*- Mode: shell-script -*-
+#template by ~tconnors/bin/newshscript
+#Sun Dec  7 17:01:40 EST 2003
+# $Revision: 1.13 $ $Date: 2024/11/18 09:59:19 $
+# $Id: mastvoldown,v 1.13 2024/11/18 09:59:19 tconnors Exp $
+# $Header: /home/tconnors/cvsroot/bin/mastvoldown,v 1.13 2024/11/18 09:59:19 tconnors Exp $
+# $RCSfile: mastvoldown,v $
+
+# This program changes volume of line, pcm and cd
+
+detect_vol() {
+    sound=$( amixer -D default -M get Master )
+    vol=$( echo "$sound" |
+               grep -Pio '(\d+)%' |
+               sed 's/%//' |
+               head -n 1
+       )
+    mute=false
+    echo "$sound" | grep -q "\[off\]" && mute=true && vol=0
+}
+
+usageerror() {
+    if [ $# != 0 ] ; then
+        echo "Usage error: $@" 1>&2
+    fi
+    echo "Usage: $0 [--small|-s] [--large|-l]+" 1>&2
+    exit 1
+}
+
+parseinput() {
+    step=$default_step
+    while [ $# -gt 0 ] ; do
+        arg="$1"
+        shift
+        case "$arg" in
+            --large|-l)
+                if [ "$step" = $default_step ] ; then
+                    step=5
+                else
+                    step=$((step + 5))
+                fi
+            ;;
+            --small|-s)
+                step=1
+            ;;
+            -*)
+                usageerror "Unknown option \"$arg\""
+            ;;
+            *)
+                usageerror "No non-option arguments allowed"
+            ;;
+        esac
+    done
+}
+
+detect_vol
+
+if [ $vol -gt 15 ] ; then
+    default_step=3
+else
+    default_step=5
+fi
+
+parseinput "$@"
+
+PATH=$PATH:/usr/local/bin
+export PATH
+
+unmute
+
+lock=/tmp/vol.lock
+lockfile -0 -r 1 $lock || exit
+trap "rm -f $lock ; exit 1" INT HUP TERM QUIT
+
+amixer set Master $step%- unmute   # acts on the default soundcard as decided by paswitch
+
+rm -f $lock
+

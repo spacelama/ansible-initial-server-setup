@@ -1,0 +1,6 @@
+#!/bin/sh
+
+if muted ; then
+    amixer set Master unmute
+    rm /tmp/muted
+fi

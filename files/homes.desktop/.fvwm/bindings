@@ -138,10 +138,10 @@ Key F6		A	M	Resize
 #Key Tab A M WindowList "Prev Raise-and-FlipFocus"
 #Key Tab		A	M	CirculateUp
 #Key Tab		A	SM	CirculateDown
-Key Prior             A       MS     Exec exec amixer set Master 1%+ unmute
-Key Next              A       MS     Exec exec amixer set Master 1%- unmute
-Key Prior             A       MCS    Exec exec amixer set Master 10%+ unmute
-Key Next              A       MCS    Exec exec amixer set Master 10%- unmute
+Key Prior             A       MS     Exec exec mastvolup   --small          # acts on the default soundcard as decided by paswitch
+Key Next              A       MS     Exec exec mastvoldown --small          # acts on the default soundcard as decided by paswitch
+Key Prior             A       MCS    Exec exec mastvolup   --large --large  # acts on the default soundcard as decided by paswitch
+Key Next              A       MCS    Exec exec mastvoldown --large --large  # acts on the default soundcard as decided by paswitch
 Key F12               A       M      Exec exec togglevolmute
 Key F12               A       MS     Exec exec sleepmute
 #Key F10               A       M      Exec exec newxclock
@@ -151,7 +151,8 @@ Key F9                A       M      Exec exec musicpause
 Key F9                A       SMC    Exec exec musicstop --endofcurrenttrack
 #Key F9                A       MS     Exec exec ssh scuzzie musicpause
 Key F9                A       MCS     Exec exec paswitch --all
-Key F9                A       MS     Exec exec paswitch
+Key F9                A       C     Exec exec paswitch
+#Key F9                A       MS     Exec exec paswitch
 Key F9                A       CS     Exec exec valveamptoggle
 Key F10                A       CS     Exec exec valveamptoggle --onlyvalve
 Key F8                A       M      Exec exec xcalib -i -a
@@ -175,19 +176,19 @@ Key XF86Eject         A       A      Exec exec umount /cdrom   #vostro laptop: h
 
 #following in hotkeys.conf (which has a nice OSD)
 Key XF86AudioMute             A       A       Exec exec togglevolmute
-Key XF86AudioLowerVolume      A       A       Exec exec amixer set Master 5%- unmute
-Key XF86AudioRaiseVolume      A       A       Exec exec amixer set Master 5%+ unmute
-Key XF86AudioLowerVolume      A       S       Exec exec amixer set Master 1%- unmute
-Key XF86AudioRaiseVolume      A       S       Exec exec amixer set Master 1%+ unmute
+Key XF86AudioLowerVolume      A       A       Exec exec mastvoldown         # acts on the default soundcard as decided by paswitch
+Key XF86AudioRaiseVolume      A       A       Exec exec mastvolup           # acts on the default soundcard as decided by paswitch
+Key XF86AudioLowerVolume      A       S       Exec exec mastvoldown --small # acts on the default soundcard as decided by paswitch
+Key XF86AudioRaiseVolume      A       S       Exec exec mastvolup   --small # acts on the default soundcard as decided by paswitch
 # and some easier ones on my normal keyboard where the volume buttons
 # need a hard-to-press FN button to be pressed as well.  Currently,
 # C-F10, C-F11 and C-F12 have no important bindings in any programs I
 # use
 Key F12             A       C       Exec exec togglevolmute
-Key F10             A       C       Exec exec amixer set Master 5%- unmute
-Key F11             A       C       Exec exec amixer set Master 5%+ unmute
-#Key F10             A       S5      Exec exec amixer set Master 1%- unmute
-#Key F11             A       S5      Exec exec amixer set Master 1%+ unmute
+Key F10             A       C       Exec exec mastvoldown                   # acts on the default soundcard as decided by paswitch
+Key F11             A       C       Exec exec mastvolup                     # acts on the default soundcard as decided by paswitch
+#Key F10             A       S5      Exec exec mastvoldown --small          # acts on the default soundcard as decided by paswitch
+#Key F11             A       S5      Exec exec mastvolup   --small          # acts on the default soundcard as decided by paswitch
 
 
 #following in /usr/openwin/lib/speckeysd.map, restarting speckeysd
@@ -217,6 +218,7 @@ Key XF86Search        A       A       Exec exec xterm
 #Key XF86Back          A       S       Exec exec tv-radio-setchannel off
 #Key XF86Forward       A       S       Exec exec tv-radio-setchannel radio
 
+# PrintScreen - screengrab
 Key Print             A       CS       Exec exec window-dump
 
 Key Escape            A       C        Function RollUnrollDropTerm

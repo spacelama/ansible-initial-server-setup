@@ -1,0 +1,5 @@
+#!/bin/sh
+
+#[ -e /tmp/muted ]
+
+amixer get Master mute | grep -q -F '[off]'
