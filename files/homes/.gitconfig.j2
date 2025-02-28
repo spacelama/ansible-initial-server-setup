@@ -48,8 +48,9 @@
         renamelimit = 20
 	algorithm = histogram
 	colorMoved = dimmed-zebra
-	colorMovedWS = allow-indentation-change
 	# might want to avoid whitespace change (--ignore-space-change), since whitespace is syntactic in stupid languages like python
+	colorMovedWS = allow-indentation-change
+	mnemonicPrefix = true
 
 [diff "gzip"]
         binary = true
@@ -76,12 +77,23 @@
 [branch]
 # https://www.atlassian.com/git/tutorials/syncing/git-pull
 	autosetuprebase = always
+	sort = -committerdate
 
 [push]
 	default = simple
+	autoSetupRemote = true
+	followTags = true
 # newer git may require:
 [pull]
 	rebase = true
+
+# I don't think this will delete local branches that have been
+# modified with extra commits when a remote branch has been removed?
+# Should probably test...
+[fetch]
+	prune = true
+	pruneTags = true
+	all = true
 
 [alias]
 # http://idnotfound.wordpress.com/2009/05/09/word-by-word-diffs-in-git/
@@ -127,6 +139,24 @@
     echo \"git log --topo-order -u -L $2,${3:-$2}:\\\"$FILE\\\" $4 \";   \
     git log -w -b -p --ignore-blank-lines --topo-order -u -L $2,${3:-$2}:\"$FILE\" $4;\
 ' --"
+
+# https://blog.gitbutler.com/how-git-core-devs-configure-git/
+[rebase]
+	autosquash = true
+
+[commit]
+	verbose = true
+
+[grep]
+	patternType = perl
+
+# meh, this isn't so fun on things like untracked files in `git status`
+#[column]
+#	ui = auto
+
+[tag]
+	sort = version:refname
+
 
 [init]
 	defaultBranch = main
