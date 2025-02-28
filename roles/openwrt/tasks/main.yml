@@ -116,7 +116,7 @@
 
 - name: install full packages
   opkg:
-    name: luci-mod-dashboard,lldpd,luci-app-lldpd,tcpdump,strace,lsof,usbutils,ethtool,mii-tool,psmisc,procps-ng-ps,procps-ng-watch,procps-ng-vmstat,iftop,htop,btop,less,diffutils,perl,perlbase-tie,perlbase-getopt,ip-tiny,coreutils-stat # perlbase-tie for munin sensors_, perlbase-getopt for colordiff, ip-tiny so we get at least `ip -c a` instead of busybox version, but other alternative we haven't needed yet is ip-full, coreutils-stat for stat for our shell script's use
+    name: luci-mod-dashboard,lldpd,luci-app-lldpd,tcpdump,strace,lsof,usbutils,ethtool,mii-tool,psmisc,procps-ng-ps,procps-ng-watch,procps-ng-vmstat,procps-ng-top,iftop,htop,btop,less,diffutils,perl,perlbase-tie,perlbase-getopt,ip-tiny,coreutils-stat # perlbase-tie for munin sensors_, perlbase-getopt for colordiff, ip-tiny so we get at least `ip -c a` instead of busybox version, but other alternative we haven't needed yet is ip-full, coreutils-stat for stat for our shell script's use
     state: present
   when: openwrt_heavy_installation | default(true)
 
