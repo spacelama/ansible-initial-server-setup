@@ -38,7 +38,7 @@ excludes=( # these are anchored at ^ and $:
     "/var/lib/jellyfin-transcodes"
     "/jellyfin"                          # jellyfin mounted from fs:.../movies
     "/mp3"                               # jellyfin/mp3 mounted from fs:.../mp3
-#    "/.cache/thumbnails"                 # jellyfin/mp3 mounted from fs:.../mp3
+    "/.*/.cache/thumbnails"              # noise we don't need to back up
     "/home/angela/media"
     "/angela"
 )

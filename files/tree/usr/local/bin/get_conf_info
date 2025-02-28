@@ -215,7 +215,14 @@ fi
 #chkconfig --list > $data_dir/chkconfig_list 2>&1
 if [ -x /bin/systemctl ] ; then
     systemctl > $data_dir/systemctl
-    systemctl list-unit-files > $data_dir/chkconfig_list.systemctl
+    for i in 1 2 3 ; do
+        systemctl list-unit-files > $data_dir/chkconfig_list.systemctl 2>&1 &&
+            break   #likes to timeout on pi.  Works most of the time
+                    #when invoked from cron outside of this script.
+                    #Seems there's a hard-coded unreasonable timeout
+                    #in systemd:
+                    #https://github.com/systemd/systemd/issues/4985
+    done
     systemctl --failed > $data_dir/systemctl.--failed
 fi
 

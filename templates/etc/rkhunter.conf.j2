@@ -707,6 +707,7 @@ ALLOWHIDDENDIR=/dev/.lxc
 ALLOWHIDDENFILE=/etc/.serial.conf.old
 ALLOWHIDDENFILE=/dev/.mdadm.map
 ALLOWHIDDENFILE=/dev/.tmp-block-*:*
+ALLOWHIDDENFILE=/dev/shm/.org.chromium.Chromium.*
 ALLOWHIDDENFILE=/etc/.etckeeper
 ALLOWHIDDENFILE=/etc/.gitignore
 ALLOWHIDDENFILE=/usr/share/man/man5/.containerignore.5.gz
@@ -764,6 +765,7 @@ ALLOWPROCLISTEN=/sbin/dhclient3
 #ALLOWPROMISCIF=eth0
 ALLOWPROMISCIF=tap100i0
 ALLOWPROMISCIF=tap100i1
+ALLOWPROMISCIF=tap100i2
 ALLOWPROMISCIF=tap103i0
 ALLOWPROMISCIF=tap104i0
 ALLOWPROMISCIF=tap105i0
@@ -813,6 +815,7 @@ ALLOWDEVFILE=/dev/.lxc/proc/cmdline
 {% if ( host_is_pve_server | default(false) ) %}
 ALLOWDEVFILE=/dev/shm/qb-*/*
 ALLOWDEVFILE=/dev/shm/qb-*
+ALLOWDEVFILE=/dev/shm/lldpad.state
 {% endif %}
 {% if ( inventory_hostname == 'zm' ) %}
 ALLOWDEVFILE=/dev/shm/zm.mmap.*
@@ -835,6 +838,7 @@ ALLOWIPCPROC=/usr/sbin/apache2
 ALLOWIPCPROC=/usr/bin/gthumb
 ALLOWIPCPROC=/usr/bin/python
 ALLOWIPCPROC=/usr/bin/python3
+ALLOWIPCPROC=/home/tconnors/sysadmin/code/pqiv/pqiv
 ALLOWIPCPROC=/usr/bin/python3.* # pretty broad, but it's either that or increase the limit to above 4MB, because /usr/bin/blueman-applet is always running on desktops
 ALLOWIPCPROC=/usr/bin/emacs-lucid
 ALLOWIPCPROC=/usr/bin/dunst
