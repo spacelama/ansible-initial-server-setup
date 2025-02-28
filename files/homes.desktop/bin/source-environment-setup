@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/usr/bin/env -S echo "This should not be run directly - try using the following command: \nsource"
 
 # idea is to be sourced by the X environment so that we can decide how
 # to portably set up our requisite environment variables no matter

@@ -1,5 +1,9 @@
 #!/bin/bash
 
+# spawned by ~/.xsession which is responsible for setting up our
+# display and our window manager.  We're responsible for starting up
+# programs we want starting on boot
+
 echo `date`: Starting startmaindisplay.sh on $DISPLAY
 #sometimes fvwm will die, when this happens, hopefully it will be
 #respawned. But we don't want to do all the initialisation again, so
@@ -173,7 +177,7 @@ case $LONGHOST-$SHORTDISPHOST in
         if [ $SHORTHOST = scuzzie -o $SHORTHOST = dirac -o $SHORTHOST = gamow -o $SHORTHOST = maxwell -o $SHORTHOST = fs -o $SHORTHOST = fermi ] ; then
             if [ $SHORTHOST = scuzzie ] ; then
                 killall i8kbuttons
-                i8kbuttons  -u  "mastvolup" -d "mastvoldown" -m "togglevolmute" -r 100 -v &
+                i8kbuttons -u "mastvolup" -d "mastvoldown" -m "togglevolmute" -r 100 -v &
                 if [ $HORSIZE -gt 1024 ] ; then
                     procmeter3 -geometry +$(($HORSIZE-104))+$(($VERTSIZE-465)) &
                 else
