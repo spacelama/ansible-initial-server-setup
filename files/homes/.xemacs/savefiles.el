@@ -8,7 +8,9 @@
       desktop-save                t
       desktop-files-not-to-save   "^$" ;reload tramp paths
       desktop-load-locked-desktop nil
-      desktop-auto-save-timeout   30)
+      desktop-auto-save-timeout   30
+      desktop-restore-eager       10   ;don't load more than these buffers at startup - lazy load the rest
+)
 
 ;;If already making use of a desktop (through xemacs -f desktop-read), save it when buffers are updated.
 (defun save-desktop ()
