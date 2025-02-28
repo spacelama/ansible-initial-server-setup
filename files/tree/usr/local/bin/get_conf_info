@@ -247,6 +247,10 @@ done > $data_dir/lspci_mmu 2>&1
 if [ -x /usr/sbin/dmidecode ] ; then
     dmidecode >> $data_dir/dmidecode 2>&1 || true
 fi
+if [ -x /usr/bin/lsusb ] ; then
+    lsusb > $data_dir/lsusb || true # can fail if no USB devices?
+    lsusb -t > $data_dir/lsusb-t || true
+fi
 #backup /boot/grub/menu.lst $data_dir/grub
 if ! [ -e /tmp/dmesg.boot ] ; then
     dmesg > /tmp/dmesg.boot 2>&1
