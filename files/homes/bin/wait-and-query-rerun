@@ -17,11 +17,13 @@ while : ; do
         echo "purging STDIN: $purge"
     done
     if [ $exit = 0 ] ; then
-        echo "Press enter..."
+        echo "$( colorize bright green $( date ) ): $( colorize bright green Success 0 ): Press enter to exit..."
         read
         exit
     else
-        echo -e "Failed:\n$*\nType 'OK' or ctrl-D to exit, or anything else to retry"
+        echo "$( colorize bright green $( date ) ): $( colorize bright red Failed $exit ): $( colorize bright magenta $PWD )"
+        echo "$( colorize bright yellow "$( printf " %q" "$@")" )"
+        echo "Type 'OK' or ctrl-D to exit, or anything else to retry"
         read a || exit 1
         if [ "$a" = OK ] ; then
             exit 0

@@ -1,17 +1,25 @@
 #!/bin/bash
 
-# x takes a shell snippet, with shell characters allowed, and runs it.
-# It can either be in a single arg or in a bunch of args. But if you
-# want to provide a file with a space in it, or a literal special
-# character, you have to escape it (eg with printf "%q") yourself.
+# x takes a shell snippet, and runs it (with shell characters allowed
+# if you say --shell, however if you want to provide a file with a
+# space in it, or a literal special character, you have to escape it
+# (eg with printf "%q") yourself).  It can either be in a single arg
+# or in a bunch of args.
 
-# xterm might fail, due to for example running out of X11 client handles
+
+# xterm might fail, due to for example running out of X11 client
+# handles - keep retrying until it succeeds (this might just endlessly
+# retry if you supply bogus arguments to xterm, however, in which case
+# at least you get the PID printed out so you can kill it manually)
 retry() {
     "$@" && return
+    return_code=$?
+    this_pid=$BASHPID
     while : ; do
-          echo "$(date): xterm failed with exit-code: $?.  Retrying in a minute (in the background)..."
-          sleep 60
-          verboserun "$@" && return
+        echo "$(colorize bright green $( date ) ): $( colorize bright red $this_pid ): $( colorize bright yellow "$( printf "%q " "$@")" ) $( colorize bright red Failed $return_code ).  Retrying in a minute (in the background)..."
+        sleep 60
+        verboserun "$@" && return
+        return_code=$?
     done
 }
 
@@ -20,6 +28,10 @@ noshell=true
 verbose=true
 while [[ "$1" == --* ]] ; do
     case "$1" in
+        --help)
+            echo "Usage: x [--help] [--wait] [--noverbose] [--no-eval] [--shell] <prog> [<args>]" 1>&2
+            exit 1
+            ;;
         --wait)
             shift
             eval='wait-and-query-rerun'
@@ -60,15 +72,15 @@ done
 cmds=()
 while [ $# != 0 ] ; do
     cmd="$1"
-#    if $noshell ; then
-#        cmd="$( printf "%q" "$cmd" )"
-#    fi
+    #    if $noshell ; then
+    #        cmd="$( printf "%q" "$cmd" )"
+    #    fi
     cmds+=("$cmd")
     shift
 done
 
 if [ "${#cmds[@]}" != 0 ] ; then
-    retry xterm "${args[@]}" -e bash $eval "${cmds[@]}" # ${cmds[*]}
+    retry xterm -T "x: $PWD ${cmds[*]}" "${args[@]}" -e bash $eval "${cmds[@]}" # ${cmds[*]}
 else
     retry xterm "${args[@]}"
 fi &
