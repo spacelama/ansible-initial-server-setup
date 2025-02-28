@@ -343,6 +343,10 @@ esac
 
 #xterm -geometry 200x200+0+0
 
+echo `date`: Restarting any auto-spawning processes that rely on a started Xsession on $DISPLAY
+
+killall gbuffy
+
 echo `date`: Finishing startmaindisplay.sh on $DISPLAY
 
 exit 0
