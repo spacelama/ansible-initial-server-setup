@@ -141,7 +141,7 @@
     dest: /etc/lvm/lvm.conf
     backrefs: yes
     regexp: '^(.*global_filter=.*, "r\|ANSIBLE_RULES_AFTER\|").*\]'
-    line: '\1, "r|/dev/disk/by-id/scsi-(35000cca26ad20e04|35000cca2735316e8|35000c500cbde71c3)|", "r|/dev/disk/by-id/ata-WUH(WUH721816ALE6L4_2CH6JXTJ|WUH721816ALE6L4_2CH83RBJ)|"]'
+    line: '\1, "r|/dev/disk/by-id/scsi-(35000cca26ad20e04|35000cca2735316e8|35000c500cbde71c3)*|", "r|/dev/disk/by-id/ata-WUH(721816ALE6L4_2CH6JXTJ|721816ALE6L4_2CH83RBJ)*|"]'
     state: present
   become: true
 
