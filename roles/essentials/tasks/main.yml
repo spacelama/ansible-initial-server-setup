@@ -121,12 +121,10 @@
 
 - name: Install essential packages that might not be available (all)
   apt:
-    name: ['plocate']
+    name: "{{[ 'plocate' if (deb_release != 'buster') else 'mlocate' ]}}"
     autoremove: no
     state: present
   become: true
-  ignore_errors: true # plocate isn't available on buster, which still
-                      # makes up a couple of our VMs
 
 # caching name server etc per https://wiki.debian.org/NetworkConfiguration
 - name: setup systemd-resolved for caching nameserver
