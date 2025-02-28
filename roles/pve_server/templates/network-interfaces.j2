@@ -20,33 +20,13 @@ iface lo inet loopback
   eth0 can safely become eno1 or en1 again in pve 8, but we still have pve 7
   instances, and systemd would probably screw up auto-naming on the old r520 too
 #}
-{% if (inventory_hostname == 'pve-backup') %}
-{#
-  pve-backup doesn't have VLANs configured on its network
-#}
-auto eth0
-iface eth0 inet static
-	address 192.168.1.9/24
-	gateway 192.168.1.254
-
+{% if network_interfaces is defined %}
+{{ network_interfaces }}
 {% else %}
-iface enge0 inet manual
-{{ enge0_interface_addendum ~ '\n' if ( enge0_interface_addendum is defined ) else '' }}
-iface enxg0 inet manual
-{{ enxg0_interface_addendum ~ '\n' if ( enxg0_interface_addendum is defined ) else '' }}
-iface enxg1 inet manual
-{{ enxg1_interface_addendum ~ '\n' if ( enxg1_interface_addendum is defined ) else '' }}
-{#
-  dell poweredge machines with many network interfaces
-#}
-{% if (host_is_dell_server | default(false)) %}
-iface eno2 inet manual
-
-iface eno3 inet manual
-
-iface eno4 inet manual
-
-{% endif %}
+{% for key,value in network_interface_defs.items() %}
+iface {{ key }} inet manual
+{{ network_interface_addendum[key] ~ '\n' if ( network_interface_addendum[key] is defined ) else '' }}
+{% endfor %}
 {#
 # machines with guest configured vlans can be attached to vmbr0.  If
 # we go with enx$mac as a name, we end up with interface.vlan names
@@ -59,11 +39,20 @@ iface eno4 inet manual
 #}
 auto vmbr0
 iface vmbr0 inet manual
-	bridge-ports enxg0 enxg1 enge0
+{#
+# Do we need to worry about ordering for MAC address, priority etc?
+#}
+	bridge-ports {{ network_interface_defs | join(' ') }}
 	bridge-stp off
 	bridge-fd 0
 	bridge-vlan-aware yes
-	bridge-vids 2-4094
+{#
+# let's not pass through all VLANs because of limited VLAN offloading
+# on X710 (could also say offload-rx-vlan-filter off):
+# https://forum.proxmox.com/threads/error-i40e_aq_rc_enospc-forcing-overflow-promiscuous-on-pf.62875/
+# https://bugzilla.proxmox.com/show_bug.cgi?id=2569
+#}
+	bridge-vids 1 5 10 30 40 70
 #All VLANs trunked
 
 {#
