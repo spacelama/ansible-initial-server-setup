@@ -1,30 +1,30 @@
 ---
-- name: copy fan-speed-control
+- name: copy poweredge-fand
   copy:
-    src: /home/tconnors/code/R710-Fan-Control/fan-speed-control.pl
-    dest: /usr/local/bin/fan-speed-control.pl
+    src: /home/tconnors/code/R710-Fan-Control/poweredge-fand.pl
+    dest: /usr/local/bin/poweredge-fand.pl
     owner: root
     group: root
     mode: 0755
   become: true
-  notify: enable and restart fan-speed-control
+  notify: enable and restart poweredge-fand
 
-- name: install fan-speed-control systemd target
+- name: install poweredge-fand systemd target
   copy:
-    src: /home/tconnors/code/R710-Fan-Control/fan-speed-control.service
-    dest: /etc/systemd/system/fan-speed-control.service
+    src: /home/tconnors/code/R710-Fan-Control/poweredge-fand.service
+    dest: /etc/systemd/system/poweredge-fand.service
     owner: root
     group: root
     mode: 0644
   become: true
-  notify: enable and restart fan-speed-control
+  notify: enable and restart poweredge-fand
 
-- name: enable fan-speed-control systemd target
+- name: enable poweredge-fand systemd target
   # systemd rather than service because we're explicitly installing our own systemd units
   systemd:
-    name: fan-speed-control
-    enabled: "{{ fan_speed_control_is_enabled | default('yes') }}"
-    state: "{{ 'started' if (fan_speed_control_is_enabled | default('yes')) else omit }}"
+    name: poweredge-fand
+    enabled: "{{ poweredge_fand_is_enabled | default('yes') }}"
+    state: "{{ 'started' if (poweredge_fand_is_enabled | default('yes')) else omit }}"
   become: true
   ignore_errors: true  # fails when not in systemd, or still in the
                        # installation environment, etc
@@ -39,12 +39,12 @@
 # https://docs.ansible.com/ansible/latest/collections/ansible/builtin/apt_repository_module.html
 - name: Add dell openmanage repo
   block:
-    - name: dell repo |no apt key
+    - name: dell repo | no apt key
       ansible.builtin.get_url:
         url: https://linux.dell.com/repo/pgp_pubkeys/0x1285491434D8786F.asc
         dest: /etc/apt/keyrings/linux.dell.com.0x1285491434D8786F.asc
 
-    - name: somerepo | apt source
+    - name: dell repo | apt source
       copy: # should be apt_repository, but https://github.com/ansible/ansible/issues/58386 https://github.com/ansible/ansible/issues/61420 closed WONTFIX
         content: "deb [arch=amd64 signed-by=/etc/apt/keyrings/linux.dell.com.0x1285491434D8786F.asc] https://linux.dell.com/repo/community/openmanage/{{ dell_omsa_version }} main\n"
         dest: "/etc/apt/sources.list.d/linux.dell.com.sources.list"
