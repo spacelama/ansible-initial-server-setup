@@ -1,7 +1,7 @@
 ---
 - name: copy poweredge-fand
   copy:
-    src: /home/tconnors/code/R710-Fan-Control/poweredge-fand.pl
+    src: R710-Fan-Control/poweredge-fand.pl
     dest: /usr/local/bin/poweredge-fand.pl
     owner: root
     group: root
@@ -11,7 +11,7 @@
 
 - name: install poweredge-fand systemd target
   copy:
-    src: /home/tconnors/code/R710-Fan-Control/poweredge-fand.service
+    src: R710-Fan-Control/poweredge-fand.service
     dest: /etc/systemd/system/poweredge-fand.service
     owner: root
     group: root

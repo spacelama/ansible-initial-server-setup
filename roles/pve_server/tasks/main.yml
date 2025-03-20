@@ -71,7 +71,7 @@
 
 - name: copy pve-nag-buster/install.sh to pve
   copy:
-    src: /home/tconnors/code/proxmox/pve-nag-buster/install.sh
+    src: pve-nag-buster/install.sh
     dest: "/home/{{ ansible_env.USER }}/Downloads/pve-nag-buster-install.sh"
     mode: 0755
   register: pve_nag_buster_changed

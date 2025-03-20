@@ -34,3 +34,9 @@
 [submodule "files/homes.desktop/elisp/activities.el"]
 	path = files/homes.desktop/elisp/activities.el
 	url = git@github.com:alphapapa/activities.el
+[submodule "repos/R710-Fan-Control"]
+	path = repos/R710-Fan-Control
+	url = git@github.com:spacelama/R710-Fan-Control.git
+[submodule "repos/pve-nag-buster"]
+	path = repos/pve-nag-buster
+	url = git@github.com:foundObjects/pve-nag-buster.git
