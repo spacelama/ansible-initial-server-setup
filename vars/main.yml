@@ -49,8 +49,9 @@
     # original creation was done with `add-ceph-mount` before we ansibilised this
     - { mount: "/home/tconnors/photos",            name: "cephfs-hdd.fs",         mds_namespace: "cephfs-hdd",  options: "nodev,nosuid,rw,strictatime,async", mons: "192.168.1.6,192.168.1.7,192.168.1.8", remote_path: "/mounts/fs/home.tconnors.photos" }
     - { mount: "/home/tconnors/thesis",            name: "cephfs-hdd.fs",         mds_namespace: "cephfs-hdd",  options: "nodev,nosuid,rw,strictatime,async", mons: "192.168.1.6,192.168.1.7,192.168.1.8", remote_path: "/mounts/fs/home.tconnors.thesis" }
-    - { mount: "/home/tconnors/not_backed_up",     name: "cephfs-hdd.fs",         mds_namespace: "cephfs-hdd",  options: "nodev,nosuid,rw,strictatime,async", mons: "192.168.1.6,192.168.1.7,192.168.1.8", remote_path: "/mounts/fs/home.tconnors.not_backed_up" }
-    # want the following to be accessible everywhere, not just ceph clients, so for now needs to remain NFS exported (maybe fs could re-export it?)
+    - { mount: "/home/tconnors/not_backed_up.hdd", name: "cephfs-hdd.fs",         mds_namespace: "cephfs-hdd",  options: "nodev,nosuid,rw,strictatime,async", mons: "192.168.1.6,192.168.1.7,192.168.1.8", remote_path: "/mounts/fs/home.tconnors.not_backed_up" }
+    - { mount: "/home/tconnors/not_backed_up.ssd", name: "cephfs-slow.fs",        mds_namespace: "cephfs-slow", options: "nodev,nosuid,rw,strictatime,async", mons: "192.168.1.6,192.168.1.7,192.168.1.8", remote_path: "/mounts/fs/home.tconnors.not_backed_up" }
+    # want the following to be accessible everywhere, not just ceph clients, so for now needs to remain NFS exported (maybe fs could re-export it, taking special care of automount dependencies?)
     #    - { mount: "/var/cache/apt/archives.nfs",  name: "cephfs-hdd.fs",        mds_namespace: "cephfs-hdd",  options: "nodev,nosuid,rw,strictatime,async", mons: "192.168.1.6,192.168.1.7,192.168.1.8", remote_path: "/mounts/fs/var.cache.apt.archives" }
     - { mount: "/home/tconnors/public_html",       name: "cephfs-slow.webserver", mds_namespace: "cephfs-slow", options: "nodev,nosuid,rw,strictatime,async", mons: "192.168.1.6,192.168.1.7,192.168.1.8", remote_path: "/mounts/webserver/home.tconnors/public_html" }
     - { mount: "/home/tconnors/movies",            name: "cephfs-hdd.media",      mds_namespace: "cephfs-hdd",  options: "nodev,nosuid,rw,strictatime,async", mons: "192.168.1.6,192.168.1.7,192.168.1.8", remote_path: "/mounts/media/movies" }
@@ -322,6 +323,7 @@
     - { name: /etc/modprobe.d/ansible-custom.conf, source: etc/modprobe.d/ansible-custom.conf.j2 }
 
     - { source: etc/ceph/ceph.client.cephfs-hdd.fs.keyring,         name: /etc/ceph/, mode: "0600", when: '{{ mount_ceph_clients is defined }}' }
+    - { source: etc/ceph/ceph.client.cephfs-slow.fs.keyring,        name: /etc/ceph/, mode: "0600", when: '{{ mount_ceph_clients is defined }}' }
     - { source: etc/ceph/ceph.client.cephfs-slow.webserver.keyring, name: /etc/ceph/, mode: "0600", when: '{{ mount_ceph_clients is defined }}' }
     - { source: etc/ceph/ceph.client.cephfs-hdd.media.keyring,      name: /etc/ceph/, mode: "0600", when: '{{ mount_ceph_clients is defined }}' }
     - { source: etc/ceph/ceph.client.cephfs-hdd.template.keyring,   name: /etc/ceph/, mode: "0600", when: '{{ mount_ceph_clients is defined }}' }
