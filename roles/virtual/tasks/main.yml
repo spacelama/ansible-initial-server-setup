@@ -17,12 +17,10 @@
 #    state: absent
 #  become: true
 
-- name: ensure SMR drives have a longer timeout
-  copy:
-     content: "ACTION==\"add\", SUBSYSTEM==\"block\",  ENV{ID_SERIAL_SHORT}==\"ST8000*\", RUN+=\"/bin/sh -c 'echo 60 > /sys/block/%k/device/timeout'\"\n"
-     # find string with `udevadm test /sys/class/block/sdf`
-     # also tells you whether it appended RUN appropriately
+- name: VMs don't have SMR drives directly attached to them anymore
+  file:
      dest: /etc/udev/rules.d/90-SMR-drive-timeout.rules
+     state: absent
   become: true
 
 - name: Configure chrony for VMs
