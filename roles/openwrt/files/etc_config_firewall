@@ -1,0 +1,563 @@
+
+config defaults
+	option input 'ACCEPT'
+	option output 'ACCEPT'
+	option forward 'REJECT'
+	option drop_invalid '1'
+	option synflood_protect '1'
+
+config zone
+	option input 'ACCEPT'
+	option output 'ACCEPT'
+	option forward 'ACCEPT'
+	option network 'LAN1'
+	option name 'lan'
+
+config zone
+	option name 'GUESTLAN'
+	option input 'ACCEPT'
+	option network 'LANGUEST3'
+	option output 'ACCEPT'
+	option forward 'ACCEPT'
+	option log '1'
+
+config zone
+	option name 'WINDOWSLAN'
+	option input 'ACCEPT'
+	option forward 'ACCEPT'
+	option network 'LANWINDOWS7'
+	option output 'ACCEPT'
+
+config zone
+	option log '1'
+	option name 'IOTLAN'
+	option input 'ACCEPT'
+	option output 'ACCEPT'
+	option forward 'ACCEPT'
+	option network 'LANIOT4'
+
+config zone
+	option name 'wan'
+	option input 'REJECT'
+	option output 'ACCEPT'
+	option forward 'REJECT'
+	option masq '1'
+	option mtu_fix '1'
+	option network 'wan6 wan'
+
+config forwarding
+	option dest 'wan'
+	option src 'lan'
+
+config forwarding
+	option dest 'wan'
+	option src 'GUESTLAN'
+
+config forwarding
+	option dest 'GUESTLAN'
+	option src 'lan'
+
+config forwarding
+	option dest 'IOTLAN'
+	option src 'lan'
+
+config forwarding
+	option dest 'wan'
+	option src 'WINDOWSLAN'
+
+config forwarding
+	option dest 'IOTLAN'
+	option src 'WINDOWSLAN'
+
+config forwarding
+	option dest 'WINDOWSLAN'
+	option src 'lan'
+
+config forwarding
+	option dest 'wan'
+	option src 'IOTLAN'
+
+config rule
+	option name 'Allow-DHCP-Renew'
+	option src 'wan'
+	option proto 'udp'
+	option dest_port '68'
+	option target 'ACCEPT'
+	option family 'ipv4'
+
+config rule
+	option name 'Allow-Ping'
+	option src 'wan'
+	option proto 'icmp'
+	option icmp_type 'echo-request'
+	option family 'ipv4'
+	option target 'ACCEPT'
+
+config rule
+	option name 'Allow-IGMP'
+	option src 'wan'
+	option proto 'igmp'
+	option family 'ipv4'
+	option target 'ACCEPT'
+
+config rule
+	option name 'Allow-DHCPv6'
+	option src 'wan'
+	option proto 'udp'
+	option src_ip 'fc00::/6'
+	option dest_ip 'fc00::/6'
+	option dest_port '546'
+	option family 'ipv6'
+	option target 'ACCEPT'
+
+config rule
+	option name 'Allow-MLD'
+	option src 'wan'
+	option proto 'icmp'
+	option src_ip 'fe80::/10'
+	list icmp_type '130/0'
+	list icmp_type '131/0'
+	list icmp_type '132/0'
+	list icmp_type '143/0'
+	option family 'ipv6'
+	option target 'ACCEPT'
+
+config rule
+	option name 'Allow-ICMPv6-Input'
+	option src 'wan'
+	option proto 'icmp'
+	list icmp_type 'echo-request'
+	list icmp_type 'echo-reply'
+	list icmp_type 'destination-unreachable'
+	list icmp_type 'packet-too-big'
+	list icmp_type 'time-exceeded'
+	list icmp_type 'bad-header'
+	list icmp_type 'unknown-header-type'
+	list icmp_type 'router-solicitation'
+	list icmp_type 'neighbour-solicitation'
+	list icmp_type 'router-advertisement'
+	list icmp_type 'neighbour-advertisement'
+	option limit '1000/sec'
+	option family 'ipv6'
+	option target 'ACCEPT'
+
+config rule
+	option name 'Allow-ICMPv6-Forward'
+	option src 'wan'
+	option dest '*'
+	option proto 'icmp'
+	list icmp_type 'echo-request'
+	list icmp_type 'echo-reply'
+	list icmp_type 'destination-unreachable'
+	list icmp_type 'packet-too-big'
+	list icmp_type 'time-exceeded'
+	list icmp_type 'bad-header'
+	list icmp_type 'unknown-header-type'
+	option limit '1000/sec'
+	option family 'ipv6'
+	option target 'ACCEPT'
+
+config rule
+	option src 'lan'
+	option dest 'wan'
+	option target 'DROP'
+	option name 'Drop IOT devices that have been stuck on main LAN (eg 192.168.1.127 broadlink)'
+	list src_mac 'BC:D0:74:43:8D:03'
+	list proto 'all'
+	option enabled '0'
+
+config rule
+	option src 'IOTLAN'
+	option dest 'wan'
+	option proto 'all'
+	option target 'DROP'
+	option name 'Drop IOT devices that are not trusted for external usage (eg 192.168.4.126 panasonic-tv, onti switch 1)'
+	list src_mac '24:EC:99:7B:F5:59'
+	list src_mac '8C:1F:64:9A:C8:EC'
+
+config rule
+	option src 'IOTLAN'
+	option proto 'all'
+	option target 'DROP'
+	option name 'Drop pixel watch that binds to wrong network (IOT)'
+	list src_mac '26:48:A7:DD:10:FA'
+	list src_mac 'FE:C1:C1:C5:30:E7'
+
+config rule
+	option src 'GUESTLAN'
+	option proto 'all'
+	option target 'DROP'
+	option name 'Drop pixel watch that binds to wrong network (GUEST)'
+	list src_mac '26:48:A7:DD:10:FA'
+	list src_mac 'FE:C1:C1:C5:30:E7'
+
+config rule
+	option src 'WINDOWSLAN'
+	option proto 'all'
+	option target 'DROP'
+	option name 'Drop pixel watch that binds to wrong network (WINDOWS)'
+	list src_mac '26:48:A7:DD:10:FA'
+	list src_mac 'FE:C1:C1:C5:30:E7'
+
+config rule
+	option name 'Allow-IPSec-ESP'
+	option src 'wan'
+	option proto 'esp'
+	option target 'ACCEPT'
+	option dest 'lan'
+
+config rule
+	option name 'Allow-ISAKMP'
+	option src 'wan'
+	option dest_port '500'
+	option proto 'udp'
+	option target 'ACCEPT'
+	option dest 'lan'
+
+config include
+	option path '/etc/firewall.user'
+
+config redirect
+	option dest_port '80'
+	option src 'WINDOWSLAN'
+	option name 'http.webserver.windows'
+	option src_dport '80'
+	option target 'DNAT'
+	option dest_ip '192.168.1.18'
+	list proto 'tcp'
+	option dest 'lan'
+	option src_dip '122.199.47.107'
+
+config redirect
+	option dest_port '443'
+	option src 'WINDOWSLAN'
+	option name 'https.webserver.windows'
+	option src_dport '443'
+	option target 'DNAT'
+	option dest_ip '192.168.1.18'
+	list proto 'tcp'
+	option dest 'lan'
+	option src_dip '122.199.47.107'
+
+config redirect
+	option dest_port '80'
+	option src 'wan'
+	option name 'http.webserver.wan'
+	option src_dport '80'
+	option target 'DNAT'
+	option dest_ip '192.168.1.18'
+	list proto 'tcp'
+	option dest 'lan'
+
+config redirect
+	option dest_port '443'
+	option src 'wan'
+	option name 'https.webserver.wan'
+	option src_dport '443'
+	option target 'DNAT'
+	option dest_ip '192.168.1.18'
+	list proto 'tcp'
+	option dest 'lan'
+
+config redirect
+	option dest_port '22'
+	option src 'wan'
+	option name 'ssh.dirac'
+	option src_dport '2228'
+	option target 'DNAT'
+	option dest_ip '192.168.1.17'
+	list proto 'tcp'
+	option dest 'lan'
+
+config redirect
+	option dest_port '22'
+	option src 'wan'
+	option name 'ssh.iot'
+	option src_dport '2229'
+	option target 'DNAT'
+	option dest_ip '192.168.1.3'
+	list proto 'tcp'
+	option dest 'lan'
+
+config redirect
+	option src 'wan'
+	option name 'ssh.gamow'
+	option src_dport '2230'
+	option target 'DNAT'
+	list proto 'tcp'
+	option dest_port '22'
+	option dest_ip '192.168.1.20'
+	option dest 'lan'
+
+config redirect
+	option dest_port '22'
+	option src 'wan'
+	option target 'DNAT'
+	list proto 'tcp'
+	option dest 'lan'
+	option name 'ssh.fermi'
+	option src_dport '2236'
+	option dest_ip '192.168.1.36'
+
+config redirect
+	option dest_port '22'
+	option src 'wan'
+	option name 'ssh.fs'
+	option src_dport '2234'
+	option target 'DNAT'
+	option dest_ip '192.168.1.2'
+	list proto 'tcp'
+	option dest 'lan'
+
+config redirect
+	option target 'DNAT'
+	option src 'wan'
+	option src_dport '50251'
+	option dest_ip '192.168.1.17'
+	option dest_port '50251'
+	list proto 'tcp'
+	list proto 'udp'
+	option name 'qbittorrent.dirac'
+	option dest 'lan'
+
+config redirect
+	option target 'DNAT'
+	option name 'smtp.mail'
+	list proto 'tcp'
+	option src 'wan'
+	option src_dport '25'
+	option dest 'lan'
+	option dest_ip '192.168.1.4'
+	option dest_port '25'
+	option enabled '0'
+
+config rule
+	option target 'ACCEPT'
+	option src 'WINDOWSLAN'
+	option name 'chromecast-5353'
+	option dest '*'
+	option dest_port '5353'
+	list proto 'tcp'
+	list proto 'udp'
+
+config rule
+	option target 'ACCEPT'
+	option name 'chromecast-1900'
+	option src 'WINDOWSLAN'
+	option dest '*'
+	option dest_port '1900'
+	list proto 'tcp'
+	list proto 'udp'
+
+config rule
+	option target 'ACCEPT'
+	option src 'WINDOWSLAN'
+	option dest '*'
+	option name 'chromecast-5556-5558'
+	option dest_port '5556-5558'
+	list proto 'tcp'
+	list proto 'udp'
+
+config rule
+	option target 'ACCEPT'
+	option src 'WINDOWSLAN'
+	option dest '*'
+	option name 'chromecast-1338'
+	option dest_port '1338'
+	list proto 'tcp'
+	list proto 'udp'
+
+config rule
+	option target 'ACCEPT'
+	option src 'WINDOWSLAN'
+	option dest '*'
+	option name 'chromecast-multi'
+	option dest_ip '224.0.0.0/4'
+	list proto 'tcp'
+	list proto 'udp'
+
+config rule
+	option dest_port '80'
+	option target 'ACCEPT'
+	list proto 'tcp'
+	option src 'WINDOWSLAN'
+	option name 'internal.windows-to-http'
+	option dest '*'
+
+config rule
+	option dest_port '443'
+	option target 'ACCEPT'
+	list proto 'tcp'
+	option src 'WINDOWSLAN'
+	option name 'internal.windows-to-https'
+	option dest '*'
+
+config rule
+	option dest_port '80'
+	option target 'ACCEPT'
+	list proto 'tcp'
+	option src 'IOTLAN'
+	option name 'internal.iot-to-http'
+	option dest '*'
+
+config rule
+	option dest_port '443'
+	option target 'ACCEPT'
+	list proto 'tcp'
+	option src 'IOTLAN'
+	option name 'internal.iot-to-https'
+	option dest '*'
+
+config rule
+	option dest_port '137'
+	option src 'WINDOWSLAN'
+	option name 'samba.137'
+	option dest 'lan'
+	list dest_ip '192.168.1.2'
+	option target 'ACCEPT'
+	list proto 'udp'
+
+config rule
+	option dest_port '138'
+	option src 'WINDOWSLAN'
+	option name 'samba.138'
+	option dest 'lan'
+	list dest_ip '192.168.1.2'
+	option target 'ACCEPT'
+	list proto 'udp'
+
+config rule
+	option dest_port '139'
+	option src 'WINDOWSLAN'
+	option name 'samba.139'
+	option dest 'lan'
+	list dest_ip '192.168.1.2'
+	option target 'ACCEPT'
+	list proto 'tcp'
+
+config rule
+	option dest_port '445'
+	option src 'WINDOWSLAN'
+	option name 'samba.445'
+	option dest 'lan'
+	list dest_ip '192.168.1.2'
+	option target 'ACCEPT'
+	list proto 'tcp'
+
+config rule
+	option src '*'
+	option name 'tmpblock'
+	option dest '*'
+	option target 'DROP'
+	list src_mac '14:CC:20:84:88:99'
+	option enabled '0'
+
+config redirect
+	option dest 'lan'
+	option target 'DNAT'
+	option name 'hassio-wireguard'
+	list proto 'udp'
+	option src 'wan'
+	option src_dport '51820'
+	option dest_ip '192.168.1.90'
+
+config rule
+	option src 'GUESTLAN'
+	option dest_port '53'
+	option name 'block 53.GUEST'
+	option dest '*'
+	option target 'REJECT'
+
+config rule
+	option name 'block 53.IOT'
+	option src 'IOTLAN'
+	option dest_port '53'
+	option dest '*'
+	option target 'REJECT'
+
+config rule
+	option name 'block 53.WINDOWS'
+	option src 'WINDOWSLAN'
+	option dest_port '53'
+	option dest '*'
+	option target 'REJECT'
+
+config rule
+	option name 'block 53.LAN'
+	option src 'lan'
+	option dest '*'
+	option dest_port '53'
+	option target 'REJECT'
+	option enabled '0'
+
+config redirect
+	option dest 'lan'
+	option target 'DNAT'
+	option name 'fs-wireguard'
+	list proto 'udp'
+	option src 'wan'
+	option src_dport '51821'
+	option dest_ip '192.168.1.2'
+
+config zone
+	option name 'MGMT'
+	option input 'REJECT'
+	option output 'ACCEPT'
+	list network 'MGMT'
+	option forward 'REJECT'
+
+config forwarding
+	option src 'lan'
+	option dest 'MGMT'
+
+config forwarding
+	option src 'MGMT'
+	option dest 'wan'
+
+config redirect
+	option dest 'lan'
+	option target 'DNAT'
+	option name 'copy ecowitt to homeassistant'
+	option src 'lan'
+	option src_ip '192.168.1.99'
+	option src_dport '8000'
+	option dest_ip '192.168.1.90'
+	option dest_port '4199'
+	option enabled '0'
+
+config rule
+	option name 'Barrier KVM'
+	option src 'IOTLAN'
+	option dest 'lan'
+	list dest_ip '192.168.1.17'
+	option dest_port '24800'
+	option target 'ACCEPT'
+	list src_ip '192.168.4.39'
+
+config rule
+	option name 'SMTP'
+	list proto 'tcp'
+	list dest_ip '192.168.1.15'
+	option dest_port '25'
+	option target 'ACCEPT'
+	option src 'WINDOWSLAN'
+	option dest 'lan'
+
+config rule
+	option name 'SMTPS'
+	list proto 'tcp'
+	option src 'WINDOWSLAN'
+	option dest 'lan'
+	list dest_ip '192.168.1.15'
+	option dest_port '465'
+	option target 'ACCEPT'
+
+config rule
+	option name 'syslog'
+	list proto 'tcp'
+	list dest_ip '192.168.1.204'
+	option dest_port '514'
+	option target 'ACCEPT'
+	option src 'WINDOWSLAN'
+	option dest 'lan'
+
