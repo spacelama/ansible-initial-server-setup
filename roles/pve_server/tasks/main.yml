@@ -136,12 +136,13 @@
   become: true
 
   # https://forum.proxmox.com/threads/disk-prevent-from-spinning-down-because-of-pvestatd.53237/
+  # Also, by default in proxmox, the host detects all the ceph devices we're serving out instead of suppressing them (seems we're not the only one: https://forum.proxmox.com/threads/lvm-conf-filter-for-when-we-use-rbd-in-the-hypervisor-and-lvm-inside-virtual-machines.131992/ )
 - name: disks presented through to other VMs blacklisted from local lvm
   lineinfile:
     dest: /etc/lvm/lvm.conf
     backrefs: yes
     regexp: '^(.*global_filter=.*, "r\|ANSIBLE_RULES_AFTER\|").*\]'
-    line: '\1, "r|/dev/disk/by-id/scsi-(35000cca26ad20e04|35000cca2735316e8|35000c500cbde71c3)*|", "r|/dev/disk/by-id/ata-WUH(721816ALE6L4_2CH6JXTJ|721816ALE6L4_2CH83RBJ)*|"]'
+    line: '\1, "r|/dev/rbd.*|", "r|/dev/disk/by-id/scsi-(35000cca26ad20e04|35000cca2735316e8|35000c500cbde71c3).*|", "r|/dev/disk/by-id/ata-WUH(721816ALE6L4_2CH6JXTJ|721816ALE6L4_2CH83RBJ).*|"]'
     state: present
   become: true
 
