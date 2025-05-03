@@ -1,12 +1,48 @@
 #!/bin/bash
 
+function failure_tone() {
+    beepfreq -f 500 -d 0.1 -v 0.02 > /dev/null &
+}
+
+function winname() {
+    echo -ne '\033]2;'"$1"'\007' 1>&2
+}
+
+function calculate_text_display() {
+    for i in "$@" ; do
+        printf ' %q' "$i"
+    done
+}
+
+function calculate_window_display() {
+    printf '`%s' "$1"
+    shift
+    for i in "$@" ; do
+        printf ' %q' "$i"
+    done
+    printf '` (%q)' "$dir"
+}
+
 verbose=false
 if [ "$1" = --verbose ] ; then
     shift
     verbose=true
 fi
 
+dir="$(pwd)"
+PTS=`readlink /dev/fd/0` ; PTS="${PTS#/dev/}"
+
 while : ; do
+    window_title="$( calculate_window_display "$@" )"
+    text_title="$(   calculate_text_display   "$@" )"
+    winname "x ($PTS): running: $window_title"
+    if $verbose ; then
+        echo ">$text_title"
+    fi
+    echo "$( date ): running"
+    colorize -n bright cyan "$text_title"
+    echo -n " in "
+    colorize bright magenta "$( printf "%q\n" "$dir" )"
     if $verbose ; then
         verboserun "$@"
     else
@@ -17,10 +53,18 @@ while : ; do
         echo "purging STDIN: $purge"
     done
     if [ $exit = 0 ] ; then
+        winname "x ($PTS): finished: $window_title"
+        echo "$( date ): finished"
+        colorize -n bright cyan "$text_title"
+        echo -n " in "
+        colorize bright magenta "$( printf "%q\n" "$dir" )"
         echo "$( colorize bright green $( date ) ): $( colorize bright green Success 0 ): Press enter to exit..."
         read
         exit
     else
+        echo "$( date ): $dir:$text_title failed..."
+        failure_tone
+        winname "x ($PTS): failed: $window_title"
         echo "$( colorize bright green $( date ) ): $( colorize bright red Failed $exit ): $( colorize bright magenta $PWD )"
         echo "$( colorize bright yellow "$( printf " %q" "$@")" )"
         echo "Type 'OK' or ctrl-D to exit, or anything else to retry"
