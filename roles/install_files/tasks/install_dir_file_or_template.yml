@@ -29,6 +29,7 @@
 - name: Include install file
   include_tasks: install_file.yml
   when: ( source is not regex(".*\\.j2$") ) and
+        ( source is not regex(".*\\.patch") ) and
         ( source is not regex(".*/$") ) and
         ( not (
           ( ( dir_file_or_template.type | default("file")) == "symlink" ) and
@@ -46,3 +47,7 @@
   when: ( source is regex(".*\\.j2$") )
         # implied can't also be directory
 
+- name: Include install patch
+  include_tasks: install_patch.yml
+  when: ( source is regex(".*\\.patch$") )
+        # implied can't also be directory

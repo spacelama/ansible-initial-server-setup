@@ -1,0 +1,9 @@
+---
+# generates a file .name, from patch .source.patch
+
+- name: "install patch per diff: '{{ dir_file_or_template.name }}' from '{{ source }}'"
+  patch:
+    dest: "{{ dir_file_or_template.name | default(('/' ~ dir_file_or_template) | regex_replace('\\.patch$', '')) }}"
+    src: "{{ source }}"
+  become: "{{ dir_file_or_template.become | default(true) }}"
+  notify: "{{ dir_file_or_template.notify | default(omit) }}"

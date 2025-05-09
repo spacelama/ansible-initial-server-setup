@@ -1,0 +1,78 @@
+--- BackupPC.debian	2023-01-15 21:24:36.000000000 +1100
++++ BackupPC	2025-05-07 02:12:00.000000000 +1000
+@@ -66,7 +66,7 @@
+ use Carp;
+ use version;
+ use Digest::MD5;
+-use POSIX qw(setsid);
++use POSIX qw(setsid dup2);
+ 
+ ###########################################################################
+ # Handle command line options
+@@ -2011,14 +2011,41 @@
+     }
+ }
+ 
+-#
+-# Open the log file and point STDOUT and STDERR there too
++######################################################################
++# Modification fromdebian backuppc 4.4.0-8 20250507 tconnors to not
++# hold the master LOG file open perpetually - only open to append when
++# writing each line
++
++# Open the log file and point STDOUT and STDERR there too - but
++# lazily.  We fork a child, and they open the file for append only
++# when there's a line ready to be written.
+ #
+ sub LogFileOpen
+ {
+     mkpath($LogDir, 0, 0777) if ( !-d $LogDir );
+-    open(LOG, ">>$LogDir/LOG")
+-      || die("Can't create LOG file $LogDir/LOG");
++
++    pipe(my $reader, my $writer) or die "pipe failed: $!";
++
++    my $pid = fork();
++    die "fork failed: $!" unless defined $pid;
++
++    if ($pid == 0) {
++        # Child
++        close $writer; # Child reads
++        open(STDIN, "<&", $reader) or die "dup stdin failed: $!";
++        close $reader;
++
++        # Replace this with your custom log processor function
++        run_log_handler();
++
++        exit 0;
++    }
++
++    # Parent
++    close $reader; # Parent writes
++    open(LOG, ">&", $writer) or die "dup log failed: $!";
++    close $writer; # LOG has it now
++
+     close(STDOUT);
+     close(STDERR);
+     open(STDOUT, ">&LOG");
+@@ -2028,6 +2055,20 @@
+     select(STDOUT); $| = 1;
+ }
+ 
++# the log file child handler
++sub run_log_handler {
++    # Example: Just dump everything from STDIN to a file or process it
++    while (<STDIN>) {
++        open(LOG, ">>$LogDir/LOG")
++          || die("Can't create LOG file $LogDir/LOG");
++        print LOG "$_";
++        close(LOG) || die("Can't close LOG file $LogDir/LOG");
++    }
++}
++
++######################################################################
++
++
+ #
+ # Initialize the unix-domain and internet-domain sockets that
+ # we listen to for client connections (from the CGI script and

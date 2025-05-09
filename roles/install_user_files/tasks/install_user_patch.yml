@@ -1,0 +1,9 @@
+---
+# generates a file .name, from patch .source.patch
+
+- name: "install user patch per diff: ~{{ user }}/'{{ dir_file_or_template.name }}' from '{{ source }}'"
+  template:
+    dest: "~{{ user }}/{{ dir_file_or_template.name }}"
+    src: "{{ source }}"
+  become: true
+  become_user: "{{ user }}"
