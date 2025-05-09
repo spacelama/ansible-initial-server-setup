@@ -65,3 +65,6 @@
                                # installed if we're in check_mode, so
                                # we don't want to fail restarting
                                # something that isn't installed
+
+- name: Make sure all handlers run
+  meta: flush_handlers

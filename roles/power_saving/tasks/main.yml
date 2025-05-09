@@ -9,3 +9,6 @@
   ignore_errors: true  # fails when not in systemd, or still in the
                        # installation environment, etc
   when: "inventory_hostname == 'pve3'"
+
+- name: Make sure all handlers run
+  meta: flush_handlers

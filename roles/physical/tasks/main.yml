@@ -29,3 +29,6 @@
       drivetemp
   become: true
   notify: "Update initramfs config"
+
+- name: Make sure all handlers run
+  meta: flush_handlers

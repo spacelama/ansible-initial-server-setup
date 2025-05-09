@@ -146,3 +146,6 @@
     dest: /usr/local/bin/megaclisas-status
     mode: 0755
   become: true
+
+- name: Make sure all handlers run
+  meta: flush_handlers

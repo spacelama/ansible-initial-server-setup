@@ -106,3 +106,6 @@
 # si in vmstat, despite having 9GB of free RAM
 
 #FIXME: at some point, guest required amdgpu.dc=0 on the kernel commandline.
+
+- name: Make sure all handlers run
+  meta: flush_handlers

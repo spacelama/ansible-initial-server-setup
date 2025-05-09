@@ -161,3 +161,6 @@
   when: not (in_bootstrap | default(false))
 
 # FIXME: install QemuServer hook to call the guest hook
+
+- name: Make sure all handlers run
+  meta: flush_handlers

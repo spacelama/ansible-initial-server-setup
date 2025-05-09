@@ -31,3 +31,6 @@
       makestep 1 -1
   become: true
   notify: restart chrony
+
+- name: Make sure all handlers run
+  meta: flush_handlers

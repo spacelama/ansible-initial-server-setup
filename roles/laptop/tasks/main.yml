@@ -140,3 +140,5 @@
     state: started
   become: true
 
+- name: Make sure all handlers run
+  meta: flush_handlers
