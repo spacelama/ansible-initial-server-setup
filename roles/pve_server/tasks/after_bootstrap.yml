@@ -51,15 +51,6 @@
     install_recommends: no
   become: true
 
-- name: determine if vendor-reset dkms module already exists
-  command: /usr/sbin/dkms status -m vendor-reset -k {{ ansible_kernel }}
-  register: vendor_reset_dkms
-  changed_when: false
-
-- debug:
-    msg: "dkms status vendor-reset: {{ vendor_reset_dkms.stdout }}"
-  when: vendor_reset_dkms.stdout is defined
-
   # disabled because we actually need the old kernels on pve1 for when we want to be able to lvcreate: https://forum.proxmox.com/threads/lvm-lvcreate-getting-stuck-in-pve8-kernel-on-some-jbod-controller-ssd-intel-dc-s3500-combinations.134649/
 # - name: Purge old kernels in bookworm
 #   apt:
@@ -80,46 +71,71 @@
   become: true
   when: deb_release == 'bookworm'
 
-- name: Ensures ~ansible/Downloads/vendor-reset-{{ dkms_vendor_reset_git_commitid }} dir exists
+- name: Install vendor-reset
+  block:
+    - name: determine if vendor-reset dkms module already exists
+      command: /usr/sbin/dkms status -m vendor-reset -k {{ ansible_kernel }}
+      register: vendor_reset_dkms
+      changed_when: false
+
+    - debug:
+        msg: "dkms status vendor-reset: {{ vendor_reset_dkms.stdout }}"
+      when: vendor_reset_dkms.stdout is defined
+
+    - name: Ensures ~ansible/Downloads/vendor-reset-{{ dkms_vendor_reset_git_commitid }} dir exists
+      file:
+        path: "/home/{{ ansible_env.USER }}/Downloads/vendor-reset-{{ dkms_vendor_reset_git_commitid }}"
+        state: directory
+
+    - name: copy AMD graphics vendor-reset to pve
+      unarchive:
+        src: /home/tconnors/code/vendor-reset-{{ dkms_vendor_reset_git_commitid }}.tar
+        dest: "/home/{{ ansible_env.USER }}/Downloads/vendor-reset-{{ dkms_vendor_reset_git_commitid }}"
+        extra_opts:
+        - --transform
+        - s/^vendor-reset//
+      register: vendor_reset_changed
+      # want to rethink this, but in check_mode, we can't hope to unpack
+      # the archive when the user doesn't yet exist
+      when: not ansible_check_mode and not ( "installed" in vendor_reset_dkms.stdout )
+
+    - name: work around bug in dkms where it can't install something that didn't build last time, even with --force supplied
+    #  command: bash -c 'cd Downloads/vendor-reset-{{ dkms_vendor_reset_git_commitid }} ; dkms install .'
+      command: dkms remove vendor-reset/0.1.1
+      args:
+        chdir: /home/{{ ansible_env.USER }}/Downloads/vendor-reset-{{ dkms_vendor_reset_git_commitid }}
+      become: true
+      # want to rethink this, but in check_mode, we can't hope to unpack
+      # the archive when the archive isn't yet unpacked
+      when: not ansible_check_mode and ( not ( "installed" in vendor_reset_dkms.stdout ) or vendor_reset_changed.changed )
+      ignore_errors: true  # fails when not in systemd, or still in the
+                           # installation environment, etc
+
+    - name: install AMD graphics vendor-reset to pve
+    #  command: bash -c 'cd Downloads/vendor-reset-{{ dkms_vendor_reset_git_commitid }} ; dkms install .'
+      command: dkms install .
+      args:
+        chdir: /home/{{ ansible_env.USER }}/Downloads/vendor-reset-{{ dkms_vendor_reset_git_commitid }}
+      become: true
+      # want to rethink this, but in check_mode, we can't hope to unpack
+      # the archive when the archive isn't yet unpacked
+      when: not ansible_check_mode and ( not ( "installed" in vendor_reset_dkms.stdout ) or vendor_reset_changed.changed )
+      ignore_errors: true  # fails when not in systemd, or still in the
+                           # installation environment, etc
+
+    - name: set vendor_reset_modules fact
+      set_fact:
+        vendor_reset_modules: |2
+          # following for amd video cards in VMs - https://pve.proxmox.com/wiki/PCI_Passthrough
+          vendor-reset
+  when: host_needs_amd_vendor_reset | default(false)
+
+- name: Remove vendor-reset
   file:
-    path: "/home/{{ ansible_env.USER }}/Downloads/vendor-reset-{{ dkms_vendor_reset_git_commitid }}"
-    state: directory
-
-- name: copy AMD graphics vendor-reset to pve
-  unarchive:
-    src: /home/tconnors/code/vendor-reset-{{ dkms_vendor_reset_git_commitid }}.tar
-    dest: "/home/{{ ansible_env.USER }}/Downloads/vendor-reset-{{ dkms_vendor_reset_git_commitid }}"
-    extra_opts:
-    - --transform
-    - s/^vendor-reset//
-  register: vendor_reset_changed
-  # want to rethink this, but in check_mode, we can't hope to unpack
-  # the archive when the user doesn't yet exist
-  when: not ansible_check_mode and not ( "installed" in vendor_reset_dkms.stdout )
-
-- name: work around bug in dkms where it can't install something that didn't build last time, even with --force supplied
-#  command: bash -c 'cd Downloads/vendor-reset-{{ dkms_vendor_reset_git_commitid }} ; dkms install .'
-  command: dkms remove vendor-reset/0.1.1
-  args:
-    chdir: /home/{{ ansible_env.USER }}/Downloads/vendor-reset-{{ dkms_vendor_reset_git_commitid }}
+    path: "/var/lib/dkms/vendor-reset"
+    state: absent
   become: true
-  # want to rethink this, but in check_mode, we can't hope to unpack
-  # the archive when the archive isn't yet unpacked
-  when: not ansible_check_mode and ( not ( "installed" in vendor_reset_dkms.stdout ) or vendor_reset_changed.changed )
-  ignore_errors: true  # fails when not in systemd, or still in the
-                       # installation environment, etc
-
-- name: install AMD graphics vendor-reset to pve
-#  command: bash -c 'cd Downloads/vendor-reset-{{ dkms_vendor_reset_git_commitid }} ; dkms install .'
-  command: dkms install .
-  args:
-    chdir: /home/{{ ansible_env.USER }}/Downloads/vendor-reset-{{ dkms_vendor_reset_git_commitid }}
-  become: true
-  # want to rethink this, but in check_mode, we can't hope to unpack
-  # the archive when the archive isn't yet unpacked
-  when: not ansible_check_mode and ( not ( "installed" in vendor_reset_dkms.stdout ) or vendor_reset_changed.changed )
-  ignore_errors: true  # fails when not in systemd, or still in the
-                       # installation environment, etc
+  when: not (host_needs_amd_vendor_reset | default(false))
 
 - name: Install virtual host tools
   apt:
@@ -421,11 +437,10 @@
       vfio_iommu_type1
       vfio_pci
       vfio_virqfd
-      # following for amd video cards in VMs - https://pve.proxmox.com/wiki/PCI_Passthrough
-      vendor-reset
       # following modules are blacklisted on the kernel commandline to stop from autoloading, but now that vfio is loaded reserving the appropriate devices, we are free to load them again (nope, have to probe them manually)
       #xhci_pci
       #xhci_hcd
+      {{ vendor_reset_modules | default('') }}
   become: true
   notify: "Update initramfs config"
 
