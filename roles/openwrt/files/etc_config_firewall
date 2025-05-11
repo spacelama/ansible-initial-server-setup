@@ -334,7 +334,7 @@ config redirect
 config rule
 	option target 'ACCEPT'
 	option src 'WINDOWSLAN'
-	option name 'chromecast-5353'
+	option name 'windows-to-chromecast-5353'
 	option dest '*'
 	option dest_port '5353'
 	list proto 'tcp'
@@ -342,7 +342,7 @@ config rule
 
 config rule
 	option target 'ACCEPT'
-	option name 'chromecast-1900'
+	option name 'windows-to-chromecast-1900'
 	option src 'WINDOWSLAN'
 	option dest '*'
 	option dest_port '1900'
@@ -353,7 +353,7 @@ config rule
 	option target 'ACCEPT'
 	option src 'WINDOWSLAN'
 	option dest '*'
-	option name 'chromecast-5556-5558'
+	option name 'windows-to-chromecast-5556-5558'
 	option dest_port '5556-5558'
 	list proto 'tcp'
 	list proto 'udp'
@@ -362,7 +362,7 @@ config rule
 	option target 'ACCEPT'
 	option src 'WINDOWSLAN'
 	option dest '*'
-	option name 'chromecast-1338'
+	option name 'windows-to-chromecast-1338'
 	option dest_port '1338'
 	list proto 'tcp'
 	list proto 'udp'
@@ -371,7 +371,52 @@ config rule
 	option target 'ACCEPT'
 	option src 'WINDOWSLAN'
 	option dest '*'
-	option name 'chromecast-multi'
+	option name 'windows-to-chromecast-multi'
+	option dest_ip '224.0.0.0/4'
+	list proto 'tcp'
+	list proto 'udp'
+
+config rule
+	option target 'ACCEPT'
+	option src 'IOTLAN'
+	option name 'iot-to-chromecast-5353'
+	option dest '*'
+	option dest_port '5353'
+	list proto 'tcp'
+	list proto 'udp'
+
+config rule
+	option target 'ACCEPT'
+	option name 'iot-to-chromecast-1900'
+	option src 'IOTLAN'
+	option dest '*'
+	option dest_port '1900'
+	list proto 'tcp'
+	list proto 'udp'
+
+config rule
+	option target 'ACCEPT'
+	option src 'IOTLAN'
+	option dest '*'
+	option name 'iot-to-chromecast-5556-5558'
+	option dest_port '5556-5558'
+	list proto 'tcp'
+	list proto 'udp'
+
+config rule
+	option target 'ACCEPT'
+	option src 'IOTLAN'
+	option dest '*'
+	option name 'iot-to-chromecast-1338'
+	option dest_port '1338'
+	list proto 'tcp'
+	list proto 'udp'
+
+config rule
+	option target 'ACCEPT'
+	option src 'IOTLAN'
+	option dest '*'
+	option name 'iot-to-chromecast-multi'
 	option dest_ip '224.0.0.0/4'
 	list proto 'tcp'
 	list proto 'udp'
