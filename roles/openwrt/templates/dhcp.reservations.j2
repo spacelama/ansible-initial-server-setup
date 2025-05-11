@@ -8,6 +8,7 @@ config cname
 	option cname 'www.rather.puzzling.org'
 	option target 'rather.puzzling.org'
 
+{# Whilst these are now in external DNS, we still need to present them internally because we're authoritative DNS for rather.puzzling.org internally, plus resilience in face of external outage #}
 config cname
 	option cname 'pve'
 	option target 'webserver.rather.puzzling.org'
@@ -374,6 +375,12 @@ config host
 	option name 'syslog'
 	option dns '1'
 	option ip '192.168.1.204'
+
+config host
+	option mac 'BC:24:11:18:E9:9C'
+	option name 'syslog-4'
+	option dns '1'
+	option ip '192.168.4.204'
 
 config host
 	option mac 'CC:50:E3:68:28:B9'
