@@ -9,8 +9,10 @@
 
 # This program checks to make sure there is sanity to the current time
 
+allowed_threshold=3600  # seconds
+EMAIL=root
+
 hostname=$( hostname -f )
-EMAIL=tim.w.connors@gmail.com
 PATH=$PATH:/usr/local/bin:/usr/sbin:/sbin
 
 error() {
@@ -24,7 +26,7 @@ fi
 
 read a b ip stratum e f last current_offset measured_offset err <<< "$offset_line"
 
-if (( $(bc -l <<< "$last > 1800") )) ; then
+if (( $(bc -l <<< "$last > $allowed_threshold") )) ; then
     error "Time hasn't been measured in too long: $last seconds" "$hostname time error"
 fi
 
