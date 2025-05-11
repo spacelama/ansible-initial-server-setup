@@ -218,6 +218,16 @@ function setup_environment() {
     # instead, run gedit under gtk3-nocsd
     # export GTK_CSD=0
 
+    # shitty file dialogs in eg firefox
+    # https://www.reddit.com/r/linux/comments/54ocjq/why_cant_applications_call_on_the_desktop_ui_to/d83tsax/
+    # https://wiki.archlinux.org/title/Environment_variables#Examples
+    export XDG_CURRENT_DESKTOP=XFCE:LXDE:LXQt:MATE:KDE:GNOME
+    export XDG_SESSION_DESKTOP=XFCE
+    export DE=generic
+    export DESKTOP_SESSION=fvwm
+    export WINDOW_MANAGER=fvwm
+    export QT_QPA_PLATFORMTHEME=kde/gtk3
+
     export PAGER=less
 
     BROWSER=choosebrowser

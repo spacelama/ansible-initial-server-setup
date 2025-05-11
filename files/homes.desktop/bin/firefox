@@ -29,7 +29,7 @@ unset LD_LIBRARY_PATH    # my own libraries seem to upset mozilla on aatpc2,cent
 
 function backupfile() {
 	file=$1
-	for i in 19 18 17 16 15 14 13 12 11 10 9 8 7 6 5 4 3 2 1 0 ; do 
+	for i in 19 18 17 16 15 14 13 12 11 10 9 8 7 6 5 4 3 2 1 0 ; do
 		j=`expr $i + 1`
 		[ -e $1.$i.gz ] && mv $1.$i.gz $1.$j.gz
 	done
@@ -37,10 +37,10 @@ function backupfile() {
 	[ -e $1 ] && cp -pa $1 $1.0 && gzip $1.0
 }
 
-( 
+(
     lock=$HOME/.firefox.lock
     lockfile -0 -r 1 -l 128 $lock || exit 1
-    for dir in ~/.mozilla/firefox/*/ ; do 
+    for dir in ~/.mozilla/firefox/*/ ; do
     (
         cd "$dir" || exit 1
         backupfile prefs.js
@@ -48,12 +48,21 @@ function backupfile() {
     done
     rm -f $lock
     wait
-) 
+)
+
 
 #export MOZSTART=T
 #export LD_ASSUME_KERNEL=2.2.5    #Hack to make JVM work properly
 #ulimit -s 2000                   #Or you could limit the stack size http://bugzilla.mozilla.org/show_bug.cgi?id=84093
 
+# per comment in ~/.config/xdg-desktop-portal/portals.conf, perhaps we need to:
+export GTK_USE_PORTAL=1  ; # but, on 20241229, a save dialog is already seeming to behave as we desire (nope, load image, ctrl-l, start typing /tmp/...) (I can't remember what the default dialog looks like now, but I'm unable to trigger the autocompletion behaviour on some quick tests such as ~/Desktop/, so maybe ~/.config/xdg-desktop-portal/portals.conf has already taken effect?  In which case, we need to put that in ansible...
+
+#FIXME: menus disappear when mouse-offing them in focus-follows-mouse
+#WMs.  Try setting:
+export XDG_SESSION_DESKTOP=fvwm
+# twm
+# https://forums.freebsd.org/threads/firefox-strange-behaviour-after-upgrade.88730/
 os=`uname -s`
 
 if [ -x /usr/bin/eatmydata ] ; then
