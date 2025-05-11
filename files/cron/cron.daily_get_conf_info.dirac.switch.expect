@@ -13,28 +13,28 @@ proc slurp {file} {
 }
 
 ## Access CLI
-set loginUser "admin"
 set enablePassword [string trim [ slurp /usr/local/etc/get_conf_info.switch.pass ] ]
 set mgmtServerAddress "switch"
+set serverPrompt "TL-SG3216"
 
 ## Expect Parameters
 set timeout 20
 set successMsg "Status: Success"
 set failureMsg "Status: Failure"
 
-spawn ssh -l $loginUser $mgmtServerAddress
+spawn ssh $mgmtServerAddress
 expect_after eof {exit 0}
 
 set timeout 10
 
 ##interact with SSH
 ##expect "yes/no" {send "yes\r"}
-expect "TL-SG3216>" {send "enable\r"}
+expect "$serverPrompt>" {send "enable\r"}
 expect "Password:" {send "$enablePassword\r"}
 puts "\n## Starting Gather Script... ##\n"
 set timeout 20
 
-expect "TL-SG3216#"
+expect "$serverPrompt#"
 for {set i 0} {$i < $argc} {incr i 1} {
 #   set chan [open "[lindex $argv $i]" w]
    puts "\n## Parsing arg $i: [lindex $argv $i]"
@@ -45,7 +45,7 @@ for {set i 0} {$i < $argc} {incr i 1} {
    set log_filename [regsub -all {/} $log_filename {_}]
    log_file -noappend "$log_filename"
    while { 1 } {
-      expect "TL-SG3216#" {
+      expect "$serverPrompt#" {
          log_file
          break
       } "Press any key to continue (Q to quit)" {

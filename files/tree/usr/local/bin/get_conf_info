@@ -1,6 +1,20 @@
 #!/bin/bash
 
-# for invocation from /etc/cron.daily
+# for invocation from /etc/cron.daily - grabs a snapshot of all sorts
+# of dynamic system configuration that you might decide are important
+# to restore in some sort of disaster recovery event.  swap, raid,
+# lvm, zfs, network config, docker images, etc.
+
+# General idea is there should be no output on stdout/stderr from any
+# of the commands, and no command should exit with non-zero exit code,
+# in normal operation.  This is not a monitoring script, some of the
+# commands take some time to run so you probably only want to be
+# running it once a day rather than continuously, and you might deploy
+# it on hundreds of boxes (but you also want to know when we've
+# configured a command with the wrong commandline options, so don't
+# redirect stderr to the state file unless the command routinely
+# outputs to stderr, and don't ignore errors with ` || true` unless
+# the command exits non-0 routinely.
 
 exec < /dev/null
 
@@ -97,15 +111,24 @@ parted -l > $data_dir/parted 2>&1 || true
 
 [ -e /dev/disk/by-id/ ] && ls -lA /dev/disk/by-id/ > $data_dir/dev.disk.by-id
 fdisk -l > $data_dir/fdisk 2>&1
+
 cat /etc/mtab > $data_dir/mtab
 df -kT > $data_dir/df 2>&1 || true
 df -Ti > $data_dir/df-i 2>&1 || true
+
 for lvm in {vg,lv,pv}{display,scan} ; do
     $lvm -v > $data_dir/$lvm 2>&1 || true
 done
 # but override lvdisplay above:
 lvdisplay -am > $data_dir/lvdisplay 2>&1 || true
-lsblk -D > $data_dir/lsblk 2>&1 || true
+
+# -D -f -t -M mix and matched:
+lsblk -o \
+      KNAME,MOUNTPOINTS,NAME,GROUP,TYPE,MAJ:MIN,LOG-SEC,MIN-IO,PHY-SEC,OPT-IO,FSAVAIL,FSUSE%,SIZE,LABEL,FSTYPE,FSVER,ROTA,SCHED,SUBSYSTEMS,HCTL,MODEL,PARTTYPENAME,UUID,HOTPLUG,ALIGNMENT,DISC-ALN,DISC-GRAN,DISC-MAX,DISC-ZERO,RQ-SIZE,RA,WSAME \
+      -M    > $data_dir/lsblk   2>&1 || lsblk -D -f -t > $data_dir/lsblk   2>&1 || true
+lsblk -O -M > $data_dir/lsblk-O 2>&1 || lsblk -O       > $data_dir/lsblk-O 2>&1 || true
+
+backup --noerr /proc/mdstat $data_dir/mdstat
 
 lvs -o+seg_all > $data_dir/lvs 2>&1 || true
 pvs --segments -o+pvseg_all > $data_dir/pvs 2>&1 || true
@@ -115,7 +138,7 @@ lvs -a -o +devices > $data_dir/lvs.devices 2>&1 || true
 lvs --segments -a -o +lv_size,devices > $data_dir/lvs.sizes 2>&1 || true
 pvs -o pv_name,pv_size,seg_size,vg_name,lv_name,lv_size,seg_pe_ranges > $data_dir/pvs.sizes 2>&1 || true
 
-mailq > $data_dir/mailq 2>&1
+/usr/bin/lsscsi > $data_dir/lsscsi 2>&1 || true
 
 if grep -q ^zfs /proc/modules ; then
     # FIXME: we're going to spin up disks doing this; it'd be nice to time it for when they're already spinning
@@ -167,6 +190,8 @@ ip addr show > $data_dir/ipaddr 2>&1
     ip route list table local
 ) > $data_dir/route
 
+mailq > $data_dir/mailq 2>&1
+
 # current state of ethernet bonding:
 if [ -e /sys/class/net/bonding_masters ] ; then
     for bond in `cat  /sys/class/net/bonding_masters` ; do
@@ -186,6 +211,8 @@ for iface in `ip link | egrep "state UP" | awk '{print $2}'| egrep -v -e lo -e b
     fi
     ethtool "$iface" > $data_dir/ethtool."$iface" 2>&1 || true
     ethtool -k "$iface" > $data_dir/ethtool-k."$iface" 2>&1 || true
+
+    # FIXME: perhaps we can make use of lldpd/lldpad
     # do all LLDP/CDP scans in paralell on this host since they take
     # up to 2 minutes.  Wait for them at the end
     #        timeout 120 tcpdump -v -s 1500 -c 1 -i "$iface" '(ether[12:2]=0x88cc or ether[20:2]=0x2000)' 2>&1 | grep -E "(System Name|Subtype Interface Name|0x0000:  0080)" > $data_dir/cdp"$inbond"."$iface" &
@@ -209,12 +236,15 @@ fi
 # FIXME: other raid controller status?
 # MegaCli64 AdpGetProp ... https://www.alteeve.com/w/MegaCli64_Cheat_Sheet
 
-# Other
+# Installation
 #backup /root/anaconda-ks.cfg $data_dir/anaconda-ks.cfg
+
+# Processes
 #ls -la /usr/local > $data_dir/usr_local_list
 #chkconfig --list > $data_dir/chkconfig_list 2>&1
+
 if [ -x /bin/systemctl ] ; then
-    systemctl > $data_dir/systemctl
+    systemctl -a > $data_dir/systemctl
     for i in 1 2 3 ; do
         systemctl list-unit-files > $data_dir/chkconfig_list.systemctl 2>&1 &&
             break   #likes to timeout on pi.  Works most of the time
@@ -226,7 +256,22 @@ if [ -x /bin/systemctl ] ; then
     systemctl --failed > $data_dir/systemctl.--failed
 fi
 
-/usr/bin/lsscsi > $data_dir/lsscsi 2>&1 || true
+ps axfu > $data_dir/ps.axfu
+
+if [ -x /usr/bin/docker ] ; then
+    docker image ls > $data_dir/docker.image.ls
+    docker image ls -a > $data_dir/docker.image.ls-a
+    docker container ls > $data_dir/docker.container.ls
+    docker container ls -a > $data_dir/docker.container.ls-a
+    docker ps > $data_dir/docker.ps
+    docker ps -a > $data_dir/docker.ps-a
+    # docker image prune
+    # docker container prune
+fi
+
+if [ -x /usr/bin/snap ] ; then
+    snap list > $data_dir/snap.list 2>&1
+fi
 
 # Kernel and boot
 
@@ -263,29 +308,23 @@ backup /proc/cmdline $data_dir/cmdline
 
 journalctl -b -p err | grep -v 'Journal begins' | ccze -m ansi > $data_dir/journal-errors
 
-if [ -x /usr/bin/docker ] ; then
-    docker image ls > $data_dir/docker.image.ls
-    docker image ls -a > $data_dir/docker.image.ls-a
-    docker container ls > $data_dir/docker.container.ls
-    docker container ls -a > $data_dir/docker.container.ls-a
-    docker ps > $data_dir/docker.ps
-    docker ps -a > $data_dir/docker.ps-a
-    # docker image prune
-    # docker container prune
-fi
-
+# Vendor
 # copy the /etc/pve fuse filesystem that's built by proxmox based on
 # its database, so we can recover from barebones if necessary
 if [ -d /etc/pve ] ; then
     cp -pra /etc/pve $data_dir/pve
 
     if grep -q ceph /proc/mounts ; then
+        ceph balancer status > $data_dir/ceph.balancer.status
+        ceph config dump > $data_dir/ceph.config.dump
+
         ceph osd lspools | awk '{print $2}' | while read pool ; do
             rbd du -p $pool > $data_dir/ceph.du.rbd.pool.$pool
         done
         rados df > $data_dir/ceph.df.rados
         ceph osd pool ls detail > $data_dir/ceph.ls.osd.pool # grep full
         ceph osd df > $data_dir/ceph.df.osd
+        ceph osd df tree > $data_dir/ceph.df.osd.tree
         ceph df detail > $data_dir/ceph.df.detail
 
         ceph osd lspools | while read num pool ; do
@@ -307,6 +346,19 @@ if [ -d /etc/pve ] ; then
         done
         ceph osd lspools | awk '{print $2}' | while read pool ; do
             ceph osd pool get $pool all > $data_dir/ceph.pool.$pool.conf
+        done
+
+        # let's also look at some PVE ceph tools:
+        pveceph pool ls > $data_dir/pveceph.pool.ls
+        for osd in /var/lib/ceph/osd/* ; do
+            osd=${osd#*/ceph-}
+            pveceph osd details $osd > $data_dir/pveceph.osd.details.$osd 2>&1 || true
+            # verbose currently same as --output-format json-pretty
+            pveceph osd details $osd --output-format json-pretty > $data_dir/pveceph.osd.details.$osd.verbose.json 2>&1 || true
+        done
+        for pool in $( pveceph pool ls --output-format json | jq -r .[].pool_name ) ; do
+            pveceph pool get $pool > $data_dir/pveceph.pool.get.$pool 2>&1
+            pveceph pool get $pool --output-format json-pretty > $data_dir/pveceph.pool.get.$pool.json 2>&1
         done
     fi
 fi
