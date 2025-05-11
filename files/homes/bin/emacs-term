@@ -15,6 +15,6 @@ for EDITOR in emacsclientserver emacs nano ; do
       ;;
   esac
   if which "$EDITOR" > /dev/null 2>&1 ; then
-    exec emacsclientserver $args "$@"
+    exec $EDITOR $args "$@"
   fi
 done
