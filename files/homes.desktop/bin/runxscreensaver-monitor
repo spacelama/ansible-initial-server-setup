@@ -37,6 +37,7 @@ restart_xscreensaver() {
     notify "Found logfile line indicating we need to trigger restart of screensaver"
 
     notify " - Will restart xscreensaver"
+    systemctl --user reset-failed runxscreensaver.service # manual resets count towards the StartLimitIntervalSec start-limit-hit failure-prohibit-start logic, so reset the reset (since we don't want to explicitly remove the default failure-start-loop logic, but also not contribute to it going over the limit)
     systemctl --user restart runxscreensaver.service
     echo " ***" "$@"
 }

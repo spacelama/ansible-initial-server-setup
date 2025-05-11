@@ -344,8 +344,7 @@ esac
 #xterm -geometry 200x200+0+0
 
 echo `date`: Restarting any auto-spawning processes that rely on a started Xsession on $DISPLAY
-
-killall gbuffy
+killall gbuffy runxscreensaver runxscreensaver-monitor  # volume-detect doesn't need the local display - it just uses notify-send
 
 echo `date`: Finishing startmaindisplay.sh on $DISPLAY
 
