@@ -96,6 +96,15 @@
         regexp: '^#*enable-reflector='
         line: 'enable-reflector=yes'
         insertafter: '^#enable-relfector='
+
+    # https://www.reddit.com/r/openwrt/comments/wdkp8t/new_to_openwrt_active_connections_constantly/
+    # monitor /proc/net/nf_conntrack
+    # Bump RAM up on the VM to 512MB too
+    - name: Ensure netfilter connection tracking suffices
+      lineinfile:
+        dest: /etc/sysctl.conf
+        regexp: '^net.netfilter.nf_conntrack_max='
+        line: 'net.netfilter.nf_conntrack_max=65535'
   when: openwrt_router_packages | default(false)
 
   # https://openwrt.org/docs/guide-user/network/wifi/usteer talks
