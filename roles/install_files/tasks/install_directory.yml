@@ -2,6 +2,24 @@
 # copies a directory to .name, from .source, defaulting to homes/<name> if
 # .source isn't provided
 
+#- name: stat the source root directory
+#  delegate_to: localhost
+#  stat:
+#    path: "{{ source }}"
+#  register: source_stat
+
+- name: "Create directory entry '{{ dir_file_or_template.name }}' from '{{ source }}'"
+  file:
+    path: "{{ dir_file_or_template.name }}"
+    state: directory
+    owner: "{{ dir_file_or_template.user | default(omit) }}"  # too hard to get owner and group from stat
+    group: "{{ dir_file_or_template.group | default(omit) }}"
+    # AND existing mode in source tree with 0777 to make sure no
+    # setuid or setgid bits are set in the filesystem
+    mode: "{{ dir_file_or_template.mode | default(omit) }}" # too hard | default(source_stat.mode | bitwise_and_oct('0777')) }}"
+  become: "{{ dir_file_or_template.become | default(true) }}"
+  notify: "{{ dir_file_or_template.notify | default(omit) }}"
+
 - name: Calculate directory contents for directory install
   include_tasks: "{{ playbook_dir }}/roles/common/tasks/calculate_directory_contents.yml"
 
