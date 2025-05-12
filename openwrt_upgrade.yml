@@ -24,7 +24,7 @@
         - name: wait for reboot
           wait_for_connection:
             timeout: 300
-            delay: 60
+            delay: 60 # wait 60 seconds minimum to make sure it has started to go down
 
         - name: "import normal maintenance vars and run maintenance cycle (with 'run_uci_config=yes')"
           include_vars: vars/openwrt.yml
@@ -42,6 +42,6 @@
         - name: wait for final reboot
           wait_for_connection:
             timeout: 300
-            delay: 60
+            delay: 60 # wait 60 seconds minimum to make sure it has started to go down
       when: firmware_image is defined
       any_errors_fatal: true
