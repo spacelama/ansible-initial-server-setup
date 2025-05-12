@@ -221,8 +221,12 @@ function setup_environment() {
     # shitty file dialogs in eg firefox
     # https://www.reddit.com/r/linux/comments/54ocjq/why_cant_applications_call_on_the_desktop_ui_to/d83tsax/
     # https://wiki.archlinux.org/title/Environment_variables#Examples
-    export XDG_CURRENT_DESKTOP=XFCE:LXDE:LXQt:MATE:KDE:GNOME
-    export XDG_SESSION_DESKTOP=XFCE
+    # XDG_SESSION_DESKTOP=twm (maybe fvwm?) will also help menus
+    # disappearing when you mouse-off them in focus-follows-mouse WMs:
+    # https://forums.freebsd.org/threads/firefox-strange-behaviour-after-upgrade.88730
+    # export XDG_CURRENT_DESKTOP=XFCE:LXDE:LXQt:MATE:KDE:GNOME
+    unset XDG_CURRENT_DESKTOP # seems any setting at all breaks some drop-down menus in firefox, such as LuCI in OpenWRT
+    export XDG_SESSION_DESKTOP=fvwm # XFCE, twm (fvwm might stop bookmarks submenu's invoking: https://forums.freebsd.org/threads/firefox-strange-behaviour-after-upgrade.88730/ but on the other hand, we've been using it for a few weeks already via direct setting in ~/bin/firefox ; consider also widget.gtk.grab-pointer = 1 (default 2))
     export DE=generic
     export DESKTOP_SESSION=fvwm
     export WINDOW_MANAGER=fvwm

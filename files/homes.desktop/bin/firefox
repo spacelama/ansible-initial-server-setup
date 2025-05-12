@@ -55,14 +55,16 @@ function backupfile() {
 #export LD_ASSUME_KERNEL=2.2.5    #Hack to make JVM work properly
 #ulimit -s 2000                   #Or you could limit the stack size http://bugzilla.mozilla.org/show_bug.cgi?id=84093
 
-# per comment in ~/.config/xdg-desktop-portal/portals.conf, perhaps we need to:
-export GTK_USE_PORTAL=1  ; # but, on 20241229, a save dialog is already seeming to behave as we desire (nope, load image, ctrl-l, start typing /tmp/...) (I can't remember what the default dialog looks like now, but I'm unable to trigger the autocompletion behaviour on some quick tests such as ~/Desktop/, so maybe ~/.config/xdg-desktop-portal/portals.conf has already taken effect?  In which case, we need to put that in ansible...
+# per comment in ~/.config/xdg-desktop-portal/portals.conf, to get rid
+# of the stupid gtk filechooser, we tell firefox to use the version
+# provided by portal for snap/flatpak etc, and then override it!
+export GTK_USE_PORTAL=1
 
-#FIXME: menus disappear when mouse-offing them in focus-follows-mouse
-#WMs.  Try setting:
-export XDG_SESSION_DESKTOP=fvwm
-# twm
-# https://forums.freebsd.org/threads/firefox-strange-behaviour-after-upgrade.88730/
+# temporary workaround until next reboot, since menus disappear when mouse-offing them in focus-follows-mouse with XDG_CURRENT_DESKTOP set:
+unset XDG_CURRENT_DESKTOP
+# tests to see what is valid (none were):
+# export XDG_CURRENT_DESKTOP=X-Generic # KDE # LXDE # LXQt # MATE # Cinnamon
+
 os=`uname -s`
 
 if [ -x /usr/bin/eatmydata ] ; then
