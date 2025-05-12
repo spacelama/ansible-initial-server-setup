@@ -212,6 +212,28 @@ quickly install packages, update files, etc) unless told otherwise:
 
 `$ ansible-playbook openwrt_maintenance.yml --diff --extra-vars "run_uci_config=yes"`
 
+We can also issue firmware patches, and then run the configuration
+update step again (which assumes run_uci_config=yes):
+
+`$ ansible-playbook openwrt_upgrade.yml --diff`
+
+Firmware files are assumed to be kept under
+roles/openwrt/files/firmware/, which in my case contains symlinks back
+to where I keep the firmware images.  Update `firmware_image` in
+hosts.yml and run this playbook whenever you want to issue an upgrade.
+It will run across all devices in your inventory unless you --limit
+them, so long as they have firmware_image set.  If unset for a
+particular device, that device never gets patched by this playbook.
+
+Keep in mind this playbook is much more likely to fail than the
+openwrt_maintenance one, because who knows what assumptions we make or
+your configuration makes that will break in each update (be careful of
+migrations to DSA switches, as always), so keep firm backups (or be
+prepared to run the playbook multiple times until you get it right).
+But in this play, devices are serialised so you never have more than
+one device out at a time, and failure halts the play so shouldn't
+extend beyond more than one device if not --limited.
+
 There's also a playbook just to run single shell commands from the commandline:
 
 `$ ansible-playbook openwrt_shell.yml -e "cmd='id'"`

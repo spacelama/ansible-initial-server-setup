@@ -1,0 +1,47 @@
+---
+# https://stackoverflow.com/questions/18195142/safely-limiting-ansible-playbooks-to-a-single-machine
+- hosts: "{{ target | default('openwrt') }}"
+#  strategy: free
+  strategy: linear
+  serial: 1
+  gather_facts: no
+  remote_user: "{{ remote_user | default('rootsh') }}" # so keeps working even fresh after upgrade, but not on a brand-new installation - supply '-e remote_user=root' for a new installation
+  vars:
+    ansible_ssh_transfer_method: scp
+    ansible_scp_extra_args: -O #https://github.com/gekmihesg/ansible-openwrt/pull/59 https://github.com/gekmihesg/ansible-openwrt/issues/64 https://github.com/ansible/ansible/issues/82239 https://github.com/gekmihesg/ansible-openwrt/pull/67
+    run_uci_config: yes
+  roles:
+    - role: gekmihesg.openwrt
+  tasks:
+    - name: update firmware on {{ openwrt_user_host }}
+      block:
+        - name: copy openwrt image
+          command: "{{ openwrt_scp }} roles/openwrt/files/firmware/{{ firmware_image }} {{ openwrt_user_host|quote }}:/tmp/sysupgrade.bin"
+          delegate_to: localhost
+        - name: start sysupgrade
+          nohup:
+            command: sysupgrade -q /tmp/sysupgrade.bin
+        - name: wait for reboot
+          wait_for_connection:
+            timeout: 300
+            delay: 60
+
+        - name: "import normal maintenance vars and run maintenance cycle (with 'run_uci_config=yes')"
+          include_vars: vars/openwrt.yml
+        - include_role:
+            name: gekmihesg.openwrt
+            tasks_from: packages
+        - include_role:
+            name: install_files
+        - include_role:
+            name: openwrt
+
+        - name: final after configuration reboot
+          command: reboot
+
+        - name: wait for final reboot
+          wait_for_connection:
+            timeout: 300
+            delay: 60
+      when: firmware_image is defined
+      any_errors_fatal: true
