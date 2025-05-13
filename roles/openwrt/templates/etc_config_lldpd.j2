@@ -1,21 +1,24 @@
-config lldpd config
-	option enable_cdp 1
-	option enable_fdp 1
-	option enable_sonmp 1
-	option enable_edp 1
 
+config lldpd 'config'
+	option enable_cdp '1'
+	option enable_fdp '1'
+	option enable_sonmp '1'
+	option enable_edp '1'
+	option lldp_class '4'
+	option lldp_location 'address country EU'
+	option enabled '1'
+	option lldp_capability_advertisements '1'
+	option lldp_mgmt_addr_advertisements '1'
+	option lldp_tx_interval '30'
+	option lldp_tx_hold '4'
+	option readonly_mode '0'
+	option lldp_portidsubtype 'macaddress'
+	option lldp_agenttype 'nearest-bridge'
+	option cdp_version 'cdpv1v2'
+	list interface 'br-LAN1'
+	list interface 'br-LANGUEST3'
+	list interface 'br-LANIOT4'
+	list interface 'br-LANWINDOWS7'
+	list interface 'br-MGMT'
+	list interface 'eth0'
 
-	option lldp_class 4
-	# lldp_policy only needed for lldp_class 2-3
-	# option lldp_policy 'application streaming-video unknown'
-	option lldp_location "address country EU"
-
-	# if empty, the distribution description is sent
-	#option lldp_description "OpenWrt System"
-	#option lldp_hostname "Modified Hostname"
-
-	#option lldp_mgmt_ip "!192.168.1.1"
-
-	# interfaces to listen on
-	list interface "loopback"
-	list interface "lan"
