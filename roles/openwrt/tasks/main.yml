@@ -105,7 +105,7 @@
         dest: /etc/sysctl.conf
         regexp: '^net.netfilter.nf_conntrack_max='
         line: 'net.netfilter.nf_conntrack_max=65535'
-  when: openwrt_router_packages | default(false)
+  when: type == "router"
 
   # https://openwrt.org/docs/guide-user/network/wifi/usteer talks
   # about needing wpad full (wpad-wolfssl or wpad-openssl), but we
