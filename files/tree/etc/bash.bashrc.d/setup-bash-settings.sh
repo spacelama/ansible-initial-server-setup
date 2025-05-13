@@ -8,7 +8,7 @@ setup_bash_settings() {
     #    echo I hate `date +"%A"`s.
     #    GLOBIGNORE='.*'   # man bash shows that . and .. are ignored with this set, but dotfiles have to be explicitly included since dotglob is then turned off (FIXME: but then .* can't be globbed explicitly - want something that .* excudes . and .., but "*" doesn't include .*
     set -o noclobber
-    set -b #notify as soon as a program gets a signal
+    set -b                 #job control: notify as soon as a program gets a signal
     shopt -s checkwinsize  #when a program exits, and control is returned to the shell, we want it to check the window size again
     shopt -s checkhash     #checks hash for existance so that still works if files moved
 

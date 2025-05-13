@@ -2,6 +2,9 @@ function exitcleanly() {
     #    exiting=true
     # cancel all traps we set up ourselves to manage prompt and history:
     trap - 0 HUP
+    if [ -n "$EXTRA_PROMPT_CLOSE" ] && type -t $EXTRA_PROMPT_CLOSE 1>/dev/null ; then
+        $EXTRA_PROMPT_CLOSE
+    fi
     writetohistory "@$HOSTNAME CLOSE"
     exit $code
 }
@@ -108,8 +111,8 @@ function writetohistory() {
     if HISTTIMEFORMAT= history 2 | sed 's/^[ 0-9]*//' | uniq -d | grep -q . ; then
         # duplicated history
         lasthist=$( history 1 | awk '{print $1}' )
-        log_to_file append 022 /tmp/hist.$USER.dup "DEBUG: we found a duplicated history line - we will try to delete lasthist=$lasthist"
-        history 10 | hiliteStdErr cat 1>&2 >> /tmp/hist.$USER.dup
+        # log_to_file append 022 /tmp/hist.$USER.dup "DEBUG: we found a duplicated history line - we will try to delete lasthist=$lasthist"
+        # history 10 | hiliteStdErr cat 1>&2 >> /tmp/hist.$USER.dup
         history -d $lasthist
     fi
     history -a /dev/null   # clear the history since the append is done in a subshell

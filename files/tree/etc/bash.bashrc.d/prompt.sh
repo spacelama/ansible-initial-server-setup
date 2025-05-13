@@ -57,6 +57,9 @@ function preexec_hook() {
     #            generatetitle "$BASH_COMMAND" # doesn't expand out sleep $i etc, so might as well use the full snippet:
     generatetitle "$1"
     writetohistory
+    if [ -n "$EXTRA_PROMPT_PRE" ] && type -t $EXTRA_PROMPT_PRE 1>/dev/null ; then
+        $EXTRA_PROMPT_PRE
+    fi
     CMD_START_SECONDS=$SECONDS
 }
 
@@ -71,6 +74,13 @@ function handleprompt () {
     # previous command, which might have been a `cd` triggering a new
     # history file to be set, before the prompt returns.  Do it now.
     choosehistoryfile
+
+    if [ -n "$EXTRA_PROMPT_SOURCE" ] && [ -e "$EXTRA_PROMPT_SOURCE" ] ; then
+        . "$EXTRA_PROMPT_SOURCE"
+    fi
+    if [ -n "$EXTRA_PROMPT_POST" ] && type -t $EXTRA_PROMPT_POST 1>/dev/null ; then
+        $EXTRA_PROMPT_POST
+    fi
 
     setprompt
     return $retcode
