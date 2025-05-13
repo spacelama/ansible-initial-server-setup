@@ -38,3 +38,12 @@
     state: restarted
   throttle: 1
 
+- name: restart usteer
+  service:
+    name: usteer
+    state: restarted
+
+- name: restart lldpd
+  service:
+    name: lldpd
+    state: restarted
