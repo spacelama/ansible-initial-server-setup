@@ -13,6 +13,9 @@
   roles:
     # FIXME: we may get bitten by https://github.com/ansible/ansible/issues/82239 when upgrading Debian Trixie
     # A possible fix is https://github.com/gekmihesg/ansible-openwrt/pull/67
-    - gekmihesg.openwrt
-    - install_files
-    - openwrt
+    - role: gekmihesg.openwrt
+      tags: [always]
+    - role: install_files
+      tags: [install_files]
+    - role: openwrt
+      tags: [openwrt_config]

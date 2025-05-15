@@ -212,6 +212,11 @@ quickly install packages, update files, etc) unless told otherwise:
 
 `$ ansible-playbook openwrt_maintenance.yml --diff --extra-vars "run_uci_config=yes"`
 
+Conversely, if you're just changing UCI config params, then shortcut
+the package installation and file sync with:
+
+`$ ansible-playbook openwrt_maintenance.yml --diff --extra-vars "run_uci_config=yes" --extra-vars "run_packages_config=no" --tags openwrt_config`
+
 We can also issue firmware patches, and then run the configuration
 update step again (which assumes run_uci_config=yes):
 
