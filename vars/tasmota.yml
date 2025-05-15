@@ -32,9 +32,9 @@
   no_syslog_setting: []
 
   # this always gets marked as Changed, so don't run it by default
-  psk_setting_enabled: "{{ setpsk | default(false) | ternary(psk_setting, no_psk_setting) }}"
+  psk_setting_enabled: "{{ setpsk | default(false) | bool | ternary(psk_setting, no_psk_setting) }}"
   # this always gets marked as Changed, so don't run it by default
-  syslog_setting_enabled: "{{ setsyslog | default(false) | ternary(syslog_setting, no_syslog_setting) }}"
+  syslog_setting_enabled: "{{ setsyslog | default(false) | bool | ternary(syslog_setting, no_syslog_setting) }}"
 
   compulsory_tasmota_commands:
     - command: LogHost
