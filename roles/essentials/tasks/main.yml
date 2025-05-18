@@ -536,8 +536,6 @@
   copy:
     src: "{{ item }}"
     dest: "{{ item | regex_replace('.*get_conf_info.' + hostname | default(inventory_hostname), '/usr/local/bin/get_conf_info') }}"
-    owner: root
-    group: root
     mode: 0755
   become: true
   with_fileglob:

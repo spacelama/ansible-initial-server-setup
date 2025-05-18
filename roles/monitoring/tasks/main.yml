@@ -60,9 +60,9 @@
       user root
 
       # to parse both SAS, NVME, and not spin a disk up (it is not
-      # sufficient to simply set ignorestandby to get munin plugin to
-      # supply smartctl -n standby, because that still spins up many
-      # of our drives):
+      # sufficient to simply ensure ignorestandby isn't set to get
+      # munin plugin to supply smartctl -n standby, because that still
+      # spins up many of our drives):
       [smart_*]
       user root
       env.smartpath /usr/local/bin/smart-intercept-spindown

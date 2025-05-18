@@ -156,7 +156,7 @@ fi
 
 for i in /dev/sd? ; do
     dev="${i#/dev/}"
-    smartctl -a "$i" > $data_dir/smartctl-a.$dev 2>&1 || true
+    /usr/local/bin/smart-intercept-spindown -a "$i" > $data_dir/smartctl-a.$dev 2>&1 || true
 done
 
 backup /proc/mounts $data_dir/mounts

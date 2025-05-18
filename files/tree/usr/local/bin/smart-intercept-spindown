@@ -1,9 +1,14 @@
 #!/bin/bash
 
-# detect whether a disk is spun down with sdparm commands, and don't
-# spin it up if it is.  While we're here, we might as well try
-# transform SAS smartctl output into something we can parse too, so we
-# can at least get temperatures for hddtemp_smartctl's use
+# detect whether a disk is spun down with sdparm commands (for those
+# disks where smartctl `smartctl --nocheck=standby` and `hdparm -C`
+# actually spins up the disk!), and don't invoke smartctl if it is.
+# Otherwise, we also supply --nocheck=standby,0 for those disks on Dell
+# Perc controllers that sdparm reports as not spundown, but which
+# smartctl --nocheck=standby can correctly detect.  While we're here,
+# we might as well try transform SAS smartctl output into something we
+# can parse too, so we can at least get temperatures for
+# hddtemp_smartctl's use
 
 final_arg="${@: -1}"
 
@@ -12,7 +17,7 @@ convert_sas() {
     read_data=false
     device_model=
     device_product=
-    exit_code=0
+    local exit_code=0
     while read line ; do
         case "$read_initial,$read_data,$line" in
             true,false,*DATA\ SECTION*)
@@ -83,20 +88,40 @@ convert_sas() {
     return $exit_code
 }
 
-sdparm --command=sense "$final_arg" 2>/dev/null | grep Standby && exit
+if [ "1" = --version ] ; then
+    # allow munin smart_ check to test for support of --nocheck=standby to ensure it doesnt' then run hdparm
+    exec smartctl "$@"
+fi
 
-smart_output=$( smartctl "$@" )
+if sdparm --command=sense "$final_arg" 2>/dev/null | grep Standby; then
+    # exit code success rather than code 2 like smartctl by default
+    # Could do similar output with hdparm -C, but smartctl
+    # --nocheck=standby,0 correctly detects that
+    exit
+fi
+
+smart_output=$( smartctl --nocheck=standby,0 "$@" )
+exit_code=$?
 
 case "$smart_output" in
     *Transport*protocol:*SAS*)
         convert_sas "$smart_output"
+        convert_exit=$?
+
+        # FIXME: should work out a proper exit code precedence rule
+        if (( $convert_exit > $exit_code )) ; then
+            exit $convert_exit
+        fi
+        exit $exit_code
         ;;
     *NVMe*Version*)
         # to transform smartctl nvme output to more resemble
         # traditional output so existing munin plugins can monitor it
-        /usr/local/bin/smartctlnvme "$@"
+        exec /usr/local/bin/smartctlnvme "$@"
         ;;
     *)
         echo "$smart_output"
         ;;
 esac
+
+exit $exit_code
