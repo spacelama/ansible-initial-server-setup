@@ -1,0 +1,99 @@
+#!/bin/bash
+
+# ensures munin is logging disks currently attached to the system,
+# properly resolving /dev/disk/by-id names, and restarts munin-node,
+# munin-async if necessary
+
+
+# prints only the first line where first column $1 matches
+print_first() {
+    awk '!_[$1]++'
+}
+
+# print out the list of symlink destinations and their sources, for
+# /dev/disk/by-id/* links that aren't lvm- or md- devices, aren't
+# partitions, and prefer non wwn-* "friendly names" over wwn-* names
+# (but use the latter if that's the only thing that resolves)
+disk_id_mappings() {
+    # In containers, we desire to remove old smart_ links that might
+    # have appeared in munin, hence running this script is still
+    # useful, but no point creating new ones!
+    [ -d /dev/disk/by-id ] || return
+
+    common_print_resolved_dev_disk_args=(-type l -not -name 'lvm-*' -not -name 'md-*' \( \( -lname '*/sd*' -a -not -lname '*/sd*[0-9]' \) -o \( -lname '*/nvme*' -a -not -lname '*/nvme*p[0-9]' \) \) -printf '%l %f\n')
+    (
+        find /dev/disk/by-id -not -name 'wwn-0x5*' "${common_print_resolved_dev_disk_args[@]}" | sort
+        find /dev/disk/by-id      -name 'wwn-0x5*' "${common_print_resolved_dev_disk_args[@]}" | sort
+    ) | sed 's/.*\///' | print_first
+}
+
+find_existing_smart_checks() {
+    shopt -s nullglob
+
+    ls smart_*
+}
+
+generate_current_devicenames() {
+    while read dev id ; do
+        echo "$id"
+    done < <( disk_id_mappings ) |
+        # sort by id
+        sort
+}
+
+verify_smart_capable() {
+    while read dev ; do
+        /usr/local/bin/smart-intercept-spindown -a "/dev/disk/by-id/$dev" > /dev/null
+        smartctl_exitcode=$?
+
+        case $smartctl_exitcode in
+            1|2|3)
+                # device not smart-capable (smart-intercept-spindown
+                # already converts spundown code 2 to code 0)
+                :
+                ;;
+            *)
+                echo "$dev"
+                ;;
+        esac
+    done
+}
+
+cd  /etc/munin/plugins/ || exit 1
+
+# existing checks
+existing_smart_checks=$( find_existing_smart_checks )
+# generate complete list of new checks
+current_device_checks=$( generate_current_devicenames | verify_smart_capable | sed 's/^/smart_/' )
+
+# for all items in first list but not second, to delete
+delete_smart_checks_str=$( comm -23 <( echo "$existing_smart_checks" ) <( echo "$current_device_checks" ) )
+
+# for all items in second list not first, to make
+create_smart_checks_str=$( comm -13 <( echo "$existing_smart_checks" ) <( echo "$current_device_checks" ) )
+
+declare -a delete_smart_checks
+declare -a create_smart_checks
+
+[ -n "$delete_smart_checks_str" ] && readarray -t delete_smart_checks <<< "$delete_smart_checks_str"
+[ -n "$create_smart_checks_str" ] && readarray -t create_smart_checks <<< "$create_smart_checks_str"
+
+# echo Deleting:
+# echo "$delete_smart_checks_str"
+# echo
+# echo Creating:
+# echo "$create_smart_checks_str"
+
+made_change=false
+for check in "${delete_smart_checks[@]}" ; do
+    rm "$check" && made_change=true
+done
+
+for check in "${create_smart_checks[@]}" ; do
+    ln -s /usr/share/munin/plugins/smart_ "$check" && made_change=true
+done
+
+if $made_change ; then
+    systemctl restart munin-node
+    systemctl restart munin-async
+fi

@@ -17,7 +17,6 @@
     - "{{ (host_is_container  | default(false) ) | ternary( 'numa_*', omit ) }}"
     - "{{ (host_is_container  | default(false) ) | ternary( 'chrony_*', omit ) }}"
     - "{{ (host_is_container  | default(false) ) | ternary( 'nvme_*', omit ) }}"
-    - "{{ (host_is_container  | default(false) ) | ternary( 'smart_*', omit ) }}"
     - "{{ (host_is_container  | default(false) ) | ternary( 'sensors_*', omit ) }}"
     - "{{ (host_is_container  | default(false) ) | ternary( 'nutups_*', omit ) }}"
     - "{{ (host_is_dell       | default(false) ) | ternary( omit, 'ipmi_' ) }}"
@@ -110,7 +109,7 @@
     - zfs_usage_
     # we don't run suggests on zfsonlinux every time
     - numa_
-    - smart_
+    # we create smart_ links pointing to expanded /dev/disk/by-id names via a daily cronjob, so disabled here: smart_
     - sensors_
     - nutups_
 #    - ipmi_  # wants to set all 4 on all hosts, so define them via a check on host_is_dell_server instead

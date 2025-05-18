@@ -130,13 +130,6 @@
       - sensors_*
   register: munin_plugins_to_possibly_delete_hwmon
 
-- name: find disk devices
-  find:
-    paths: /dev
-    file_type: any
-    patterns: [ sda, sdb, sdc, sdd, sde, sdf, sdg, sdh, sdi, sdj, sdk, sdl, sdm, sdn, sdo, sdp, nvme0n1, nvme0n2 ]
-  register: disk_devices
-
 - name: find extraneous munin checks (ntp wildcards and list)
   find:
     paths: /etc/munin/plugins
@@ -458,16 +451,6 @@
   become: true
   with_items: "{{ munin_plugin_links | default([]) }}"
   notify: restart munin-node
-
-# these smart_ links are in addition to those handled by
-# munin_suggest_plugin.yml, which ignore SAS devices, because it by
-# default can't parse the smartctl output of them (but we work around,
-# but suggest still doesn't detect them), and nvme devices, for which
-# we have a translator configured in the monitoring role (but again,
-# is not detected in the `suggests` phase).
-- name: ensure all special munin links are in place for /dev files
-  include_tasks: munin_dev.yml
-  with_items: "{{ disk_devices.files }}"
 
 - name: Ensure apt_all doesn't trigger every 5 minutes
   lineinfile:
