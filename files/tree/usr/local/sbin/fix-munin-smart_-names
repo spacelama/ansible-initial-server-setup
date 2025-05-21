@@ -30,7 +30,9 @@ disk_id_mappings() {
 find_existing_smart_checks() {
     shopt -s nullglob
 
-    ls smart_*
+    for file in smart_* ; do
+        echo "$file"
+    done
 }
 
 generate_current_devicenames() {
@@ -47,9 +49,12 @@ verify_smart_capable() {
         smartctl_exitcode=$?
 
         case $smartctl_exitcode in
-            1|2|3)
+            1|2|3|4|5|6|7)
                 # device not smart-capable (smart-intercept-spindown
-                # already converts spundown code 2 to code 0)
+                # already converts spundown code 2 to code 0; qemu
+                # disks get exit code 4, smart documents bits 0-2 as
+                # invocation or smart support problems as opposed to
+                # SMART tests failed
                 :
                 ;;
             *)
