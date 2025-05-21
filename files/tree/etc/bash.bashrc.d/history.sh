@@ -16,8 +16,12 @@ function readfromhistory() {
     history -r
 }
 
-# based on whether BASH_FULL_HISTFILE has been set by direnv, adjust
-# BASH_FULLHIST and make sure it's loaded
+# Implement per-directory bash history file:
+# If you set BASH_FULL_HISTFILE for a subdir, and then cd to somewhere
+# under that dir, direnv changes the value of BASH_FULL_HISTFILE, and
+# our job is to detect this change after the `cd` was executed, and
+# make sure this new history file is loaded, before the prompt
+# returns.
 function choosehistoryfile() {
     local BASH_FULLHIST="${BASH_FULL_HISTFILE:-$HOME/.bash_fullhistory}"
     if [ "$BASH_FULL_HISTFILE_LAST" != "$BASH_FULLHIST" ] ; then

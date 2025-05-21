@@ -1,16 +1,24 @@
 # -*- Mode: shell-script -*-
 # shellcheck shell=bash
 
-# We've long appended our bash history upon a command running, using
-# various methods.  `trap '...' DEBUG` was causing us to have to write
-# lots of code just to make sure the command being tested was a user
-# command and not some poor shell command, and pay careful attention
-# to make sure it didn't slow down the shell too much.  Another probel
-# with `trap '...' DEBUG` method of writing .bash_fullhistory is that
-# if a command doesn't actually run (eg, #blah), then it doesn't get
-# echoed yet to the history file.  Problem with PROMPT_COMMAND by
-# itself is that it doesn't write to the history until the command
-# returns.  Like
+# We long ago overrode default bash behaviour of only writing the
+# history file when a shell exits in a controlled fashion, instead
+# choosing to attempt to append the history the moment a command has
+# been entered, using various methods (we also do away with any
+# BASH_HISTSIZE etc for the stored file -- any rotation of that file
+# is left to the user to do manually.  I've got 1.6million lines in my
+# history file, and it doesn't affect shell loading time.  We only
+# read the last 32k of them when starting a new shell).
+#
+# But there's a few ways to do this. `trap '...'  DEBUG` was causing
+# us to have to write lots of code just to make sure the command being
+# tested was a user command and not some poor shell command, and pay
+# careful attention to make sure it didn't slow down the shell too
+# much.  Another problem with `trap '...'  DEBUG` method of writing
+# .bash_fullhistory is that if a command doesn't actually run (eg,
+# #blah), then it doesn't get echoed yet to the history file.  Problem
+# with PROMPT_COMMAND by itself is that it doesn't write to the
+# history until the command returns.  Like
 # https://superuser.com/questions/175799/does-bash-have-a-hook-that-is-run-before-executing-a-command
 # We were using $PS0 for a while, via signal handlers per
 # https://github.com/rcaloras/bash-preexec/issues/28 but that causes
@@ -73,9 +81,14 @@ function handleprompt () {
         statusbeep $retcode 1$SECONDS 1$CMD_START_SECONDS
     fi
 
-    # we need to make sure the right history file is loaded, after the
-    # previous command, which might have been a `cd` triggering a new
-    # history file to be set, before the prompt returns.  Do it now.
+    # Implement per-directory bash history file:
+    # We have a mechanism to load/save different history files per
+    # subdirectory that you're in, eg by using `direnv`, to set
+    # BASH_FULL_HISTFILE.  If you set it for a subdir, and then
+    # navigate to somewhere under that dir, direnv changes the value
+    # of BASH_FULL_HISTFILE, and our job is to detect this change
+    # after `cd` was run, and make sure this new history file is
+    # loaded, before the prompt returns.
     choosehistoryfile
 
     if [ -n "$EXTRA_PROMPT_SOURCE" ] && [ -e "$EXTRA_PROMPT_SOURCE" ] ; then
