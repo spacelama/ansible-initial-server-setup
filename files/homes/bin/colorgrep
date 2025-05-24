@@ -3,9 +3,9 @@
 #template by ~tconnors/bin/newplscript
 #Tue Aug 31 20:09:38 EST 2004
 
-# $Revision: 1.22 $ $Date: 2025/05/24 09:45:32 $
-# $Id: colorgrep,v 1.22 2025/05/24 09:45:32 tconnors Exp $
-# $Header: /home/tconnors/cvsroot/bin/colorgrep,v 1.22 2025/05/24 09:45:32 tconnors Exp $
+# $Revision: 1.24 $ $Date: 2025/05/24 10:19:46 $
+# $Id: colorgrep,v 1.24 2025/05/24 10:19:46 tconnors Exp $
+# $Header: /home/tconnors/cvsroot/bin/colorgrep,v 1.24 2025/05/24 10:19:46 tconnors Exp $
 # $RCSfile: colorgrep,v $
 
 # This program colourises lines that have a matched RE in them
@@ -32,12 +32,12 @@ sub usageerror(;$) {
 
 sub usage(;$) {
   my ($exit)=(@_);
-  print STDERR "Usage: $0 [--exact-match|-X] [--exact-wholeline-match|-x] [--ignore-case|-i] [--partial|-p] [--invert-match|-v] [--ignore-lines-no-match (implies --partial)|-N] (-e <re1> -e <re2>... | <re>) <files>\n";
+  print STDERR "Usage: $0 [--exact-match|-X] [--exact-wholeline-match|-x] [--ignore-case|-i] [--partial|-p (WARNING: causing confusion in overlapping -e RE args)] [--invert-match|-v] [--ignore-lines-no-match (implies --partial)|-N] (-e <re1> -e <re2>... | <re>) <files>\n";
   $exit=defined($exit) ? $exit : 0;
   exit $exit;
 }
 
-my ($exact_match,$exact_wholeline_match,$re,$highlight_fullline,$invert_match,$ignore_case,$ignore_lines_no_match,$colour);
+my ($exact_match,$exact_wholeline_match,$highlight_fullline,$invert_match,$ignore_case,$ignore_lines_no_match,$colour);
 
 my (@REs);
 
@@ -65,17 +65,22 @@ sub parseinput() {
     last;
   }
   defined($_) && unshift @ARGV, $_;
-  if (@REs) {
-    $re = "(" . join("|", @REs) . ")";
-  } else {
-    if (!defined ($re=shift(@ARGV))) {
+  if (!@REs) {
+    my $re=shift(@ARGV);
+    if (!defined $re) {
       usageerror("no RE supplied");
     }
+    @REs=($re);
   }
 #  if (!@ARGV) {
 #    usageerror("No files supplied");
 #  }
 }
+
+#if ((@REs > 1) && !$highlight_fullline) {
+#  print STDERR, "WARNING: Can't supply multiple -e and --partial\n";
+#  $highlight_fullline=1;
+#}
 
 #########################
 
@@ -125,48 +130,57 @@ while (defined ($line=<>)) {
   # grep='colorgrep -p -N'), we might as well cater for that
   # possibility.
   my $prepend = $many_files ? "$file: " : "";
-  my $exact_matchindex=index($line,$re);
-  chomp(my $chomped_line=$line);
-  if ((
-       (!$exact_match && !$exact_wholeline_match &&
-        ($line =~ /$re/ || ($ignore_case && $line =~ /$re/i))) ||
-       ($exact_match        && ($exact_matchindex != -1)) ||
-       ($exact_wholeline_match && ($chomped_line eq $re))
-      )
-      # if inverting the match and not printing non matching lines,
-      # then the above test needs to fail for us to pass through to
-      # the printing case, hence XOR:
-      ^
-      ($ignore_lines_no_match && $invert_match)
-     ) {
-    $exit=0;
-    if ($exact_match || $exact_wholeline_match) {
-      if ($highlight_fullline) {
-        $line = "$match$line$normal";
+  my $found_match_this_line=0;
+  foreach my $re (@REs) {
+    my $exact_matchindex=index($line,$re);
+    chomp(my $chomped_line=$line);
+    if ((
+         (!$exact_match && !$exact_wholeline_match &&
+          ($line =~ /$re/ || ($ignore_case && $line =~ /$re/i))) ||
+         ($exact_match        && ($exact_matchindex != -1)) ||
+         ($exact_wholeline_match && ($chomped_line eq $re))
+        )
+        # if inverting the match and not printing non matching lines,
+        # then the above test needs to fail for us to pass through to
+        # the printing case, hence XOR:
+        ^
+        ($ignore_lines_no_match && $invert_match)
+       ) {
+      $exit=0;
+      $found_match_this_line=1;
+      if ($exact_match || $exact_wholeline_match) {
+        if ($highlight_fullline) {
+          $line = "$match$line$normal";
+        } else {
+          my $preline = substr $line,0,$exact_matchindex;
+          my $postline = substr $line,$exact_matchindex+length($re);
+          $line = "$preline$match$re$normal$postline";
+        }
+      } elsif ($highlight_fullline) {
+        if ($ignore_case) {
+          $line =~ s/(.*$re.*)/$match$1$normal/i;
+        } else {
+          $line =~ s/(.*$re.*)/$match$1$normal/;
+        }
       } else {
-        my $preline = substr $line,0,$exact_matchindex;
-        my $postline = substr $line,$exact_matchindex+length($re);
-        $line = "$preline$match$re$normal$postline";
+        if ($ignore_case) {
+          $line =~ s/($re)/$match$1$normal/gi;
+        } else {
+          $line =~ s/($re)/$match$1$normal/g;
+        }
       }
-    } elsif ($highlight_fullline) {
-      if ($ignore_case) {
-        $line =~ s/(.*$re.*)/$match$1$normal/i;
-      } else {
-        $line =~ s/(.*$re.*)/$match$1$normal/;
-      }
-    } else {
-      if ($ignore_case) {
-        $line =~ s/($re)/$match$1$normal/gi;
-      } else {
-        $line =~ s/($re)/$match$1$normal/g;
-      }
+      # And now, if we did fall through above (there was not a match, or
+      # there was a match, and we are both inverted, and only printing
+      # out matches (non matches, since inverted)), then we only print
+      # out if we are printing non-matches (default case)
     }
-    print "$prepend$line";
-    # And now, if we did fall through above (there was not a match, or
-    # there was a match, and we are both inverted, and only printing
-    # out matches (non matches, since inverted)), then we only print
-    # out if we are printing non-matches (default case)
-  } elsif (!$ignore_lines_no_match) {
+#    if ($found_match_this_line) {
+#      print "$prepend$line";
+#      last;
+#    }
+  }
+  if ($found_match_this_line ||
+      (!$ignore_lines_no_match && !$found_match_this_line)) {
     print "$prepend$line";
   }
 } continue {
