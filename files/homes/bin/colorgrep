@@ -3,9 +3,9 @@
 #template by ~tconnors/bin/newplscript
 #Tue Aug 31 20:09:38 EST 2004
 
-# $Revision: 1.17 $ $Date: 2022/12/02 02:00:58 $
-# $Id: colorgrep,v 1.17 2022/12/02 02:00:58 tconnors Exp $
-# $Header: /home/tconnors/cvsroot/bin/colorgrep,v 1.17 2022/12/02 02:00:58 tconnors Exp $
+# $Revision: 1.19 $ $Date: 2025/05/24 06:20:58 $
+# $Id: colorgrep,v 1.19 2025/05/24 06:20:58 tconnors Exp $
+# $Header: /home/tconnors/cvsroot/bin/colorgrep,v 1.19 2025/05/24 06:20:58 tconnors Exp $
 # $RCSfile: colorgrep,v $
 
 # This program colourises lines that have a matched RE in them
@@ -37,12 +37,12 @@ sub usage(;$) {
   exit $exit;
 }
 
-my ($exactmatch,$re,$fullline,$invertmatch,$nocase,$ignorelinesnomatch,$colour);
+my ($exactmatch,$re,$highlightfullline,$invertmatch,$nocase,$ignorelinesnomatch,$colour);
 
 my (@REs);
 
 sub parseinput() {
-  $fullline=1;
+  $highlightfullline=1;
   $invertmatch=0;
   $nocase=0;
   $ignorelinesnomatch=0;
@@ -51,9 +51,9 @@ sub parseinput() {
 
   while (defined($_= shift (@ARGV))) {
     /^--exact-match$|^-X$/ && do { $exactmatch=1 ; 1; } ||
-    /^--ignore-lines-no-match$|^-N$/ && do { $ignorelinesnomatch=1 ; $fullline=0 ; 1; } ||
+    /^--ignore-lines-no-match$|^-N$/ && do { $ignorelinesnomatch=1 ; $highlightfullline=0 ; 1; } ||
     /^--ignore-case$|^-i$/ && do { $nocase=1 ; 1; } ||
-    /^--partial$|^-p$/ && do { $fullline=0 ; 1; } ||
+    /^--partial$|^-p$/ && do { $highlightfullline=0 ; 1; } ||
     /^--invert-match$|^-v$/ && do { $invertmatch=1 ; 1; } ||
     /^--colour$|^-c$/ && do { $colour=shift(@ARGV) ; 1; } ||
     /^-e$/ && do { push @REs, shift(@ARGV) ; 1; } ||
@@ -122,13 +122,20 @@ while (defined ($line=<>)) {
   #to use this as a replacement for normal grep (alias grep='colorgrep
   #-p -N'), we might as well cater for that possibility.
   my $prepend = $manyfiles ? "$file: " : "";
+  my $exactmatchindex=index($line,$re);
   if (((!$exactmatch && ($line =~ /$re/ || ($nocase && $line =~ /$re/i))) ||
-       ($exactmatch && (index($line,$re) != -1)))
+       ($exactmatch && ($exactmatchindex != -1)))
       ^ ($ignorelinesnomatch && $invertmatch)) {
     $exit=0;
     if ($exactmatch) {
-      $line = "$match$line$normal";
-    } elsif ($fullline) {
+      if ($highlightfullline) {
+        $line = "$match$line$normal";
+      } else {
+        my $preline = substr $line,0,$exactmatchindex;
+        my $postline = substr $line,$exactmatchindex+length($re);
+        $line = "$preline$match$re$normal$postline";
+      }
+    } elsif ($highlightfullline) {
       if ($nocase) {
         $line =~ s/(.*$re.*)/$match$1$normal/i;
       } else {
