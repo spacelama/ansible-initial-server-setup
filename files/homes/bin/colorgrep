@@ -3,9 +3,9 @@
 #template by ~tconnors/bin/newplscript
 #Tue Aug 31 20:09:38 EST 2004
 
-# $Revision: 1.19 $ $Date: 2025/05/24 06:20:58 $
-# $Id: colorgrep,v 1.19 2025/05/24 06:20:58 tconnors Exp $
-# $Header: /home/tconnors/cvsroot/bin/colorgrep,v 1.19 2025/05/24 06:20:58 tconnors Exp $
+# $Revision: 1.20 $ $Date: 2025/05/24 09:35:46 $
+# $Id: colorgrep,v 1.20 2025/05/24 09:35:46 tconnors Exp $
+# $Header: /home/tconnors/cvsroot/bin/colorgrep,v 1.20 2025/05/24 09:35:46 tconnors Exp $
 # $RCSfile: colorgrep,v $
 
 # This program colourises lines that have a matched RE in them
@@ -32,12 +32,12 @@ sub usageerror(;$) {
 
 sub usage(;$) {
   my ($exit)=(@_);
-  print STDERR "Usage: $0 [--exact-match|-X] [--ignore-case|-i] [--partial|-p] [--invert-match|-v] [--ignore-lines-no-match (implies --partial)|-N] (-e <re1> -e <re2>... | <re>) <files>\n";
+  print STDERR "Usage: $0 [--exact-match|-X] [--exact-wholeline-match|-x] [--ignore-case|-i] [--partial|-p] [--invert-match|-v] [--ignore-lines-no-match (implies --partial)|-N] (-e <re1> -e <re2>... | <re>) <files>\n";
   $exit=defined($exit) ? $exit : 0;
   exit $exit;
 }
 
-my ($exactmatch,$re,$highlightfullline,$invertmatch,$nocase,$ignorelinesnomatch,$colour);
+my ($exactmatch,$exactwholelinematch,$re,$highlightfullline,$invertmatch,$nocase,$ignorelinesnomatch,$colour);
 
 my (@REs);
 
@@ -51,6 +51,7 @@ sub parseinput() {
 
   while (defined($_= shift (@ARGV))) {
     /^--exact-match$|^-X$/ && do { $exactmatch=1 ; 1; } ||
+    /^--exact-wholeline-match$|^-x$/ && do { $exactwholelinematch=1 ; 1; } ||
     /^--ignore-lines-no-match$|^-N$/ && do { $ignorelinesnomatch=1 ; $highlightfullline=0 ; 1; } ||
     /^--ignore-case$|^-i$/ && do { $nocase=1 ; 1; } ||
     /^--partial$|^-p$/ && do { $highlightfullline=0 ; 1; } ||
@@ -103,9 +104,9 @@ parseinput();
 my $match=$colour{$colour};
 my $normal=$colour{OFF};
 my $line;
-if ($invertmatch) {   #grep -v: a bit of a hack, but seems to
-                      #work. When you're printing out every line
-                      #anyway, is a invertmatch switch really needed?
+if ($invertmatch) {   # grep -v: a bit of a hack, but seems to
+                      # work. When you're printing out every line
+                      # anyway, is a invertmatch switch really needed?
   ($match,$normal)=($normal, $match);
   print "$normal";
 }
@@ -113,21 +114,32 @@ my $exit=1;
 my $manyfiles = (@ARGV > 1);
 my $file=$ARGV[0];
 while (defined ($line=<>)) {
-  #if line first tests for the RE and then a case sensitive version of
-  #the RE, if appropriate. Then theres that special condition that if
-  #we are both inverting the match, and only printing out lines that
-  #actually match (like grep -v normally works), in which case we
-  #negate the above. This latter condition is not really necessary for
-  #a colorgrep, since it makes colorgrep redundant, but if people want
-  #to use this as a replacement for normal grep (alias grep='colorgrep
-  #-p -N'), we might as well cater for that possibility.
+  # if line first tests for the RE and then a case sensitive version
+  # of the RE, if appropriate. Then theres that special condition that
+  # if we are both inverting the match, and only printing out lines
+  # that actually match (like grep -v normally works), in which case
+  # we negate the above. This latter condition is not really necessary
+  # for a colorgrep, since it makes colorgrep redundant, but if people
+  # want to use this as a replacement for normal grep (alias
+  # grep='colorgrep -p -N'), we might as well cater for that
+  # possibility.
   my $prepend = $manyfiles ? "$file: " : "";
   my $exactmatchindex=index($line,$re);
-  if (((!$exactmatch && ($line =~ /$re/ || ($nocase && $line =~ /$re/i))) ||
-       ($exactmatch && ($exactmatchindex != -1)))
-      ^ ($ignorelinesnomatch && $invertmatch)) {
+  chomp(my $chompedline=$line);
+  if ((
+       (!$exactmatch && !$exactwholelinematch &&
+        ($line =~ /$re/ || ($nocase && $line =~ /$re/i))) ||
+       ($exactmatch          && ($exactmatchindex != -1)) ||
+       ($exactwholelinematch && ($chompedline eq $re))
+      )
+      # if inverting the match and not printing non matching lines,
+      # then the above test needs to fail for us to pass through to
+      # the printing case, hence XOR:
+      ^
+      ($ignorelinesnomatch && $invertmatch)
+     ) {
     $exit=0;
-    if ($exactmatch) {
+    if ($exactmatch || $exactwholelinematch) {
       if ($highlightfullline) {
         $line = "$match$line$normal";
       } else {
@@ -149,16 +161,16 @@ while (defined ($line=<>)) {
       }
     }
     print "$prepend$line";
-    #And now, if we did fall through above (there was not a match, or
-    #there was a match, and we are both inverted, and only printing
-    #out matches (non matches, since inverted)), then we only print
-    #out if we are printing non-matches (default case)
+    # And now, if we did fall through above (there was not a match, or
+    # there was a match, and we are both inverted, and only printing
+    # out matches (non matches, since inverted)), then we only print
+    # out if we are printing non-matches (default case)
   } elsif (!$ignorelinesnomatch) {
     print "$prepend$line";
   }
 } continue {
-  if (eof) {    #reset line numbering, and find out what file we are now
-              #dealing with -- see man perlfunc, eof
+  if (eof) {  # reset line numbering, and find out what file we are now
+              # dealing with -- see man perlfunc, eof
     close ARGV;
     $file=$ARGV[0];
   }
