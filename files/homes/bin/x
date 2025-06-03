@@ -16,7 +16,8 @@ retry() {
     return_code=$?
     this_pid=$BASHPID
     while : ; do
-        echo "$(colorize bright green $( date ) ): $( colorize bright red $this_pid ): $( colorize bright yellow "$( printf "%q " "$@")" ) $( colorize bright red Failed $return_code ).  Retrying in a minute (in the background)..."
+        echo "$(colorize bright green $( date ) ): $( colorize bright red $this_pid ): $( colorize bright yellow "$( printf "%q " "$@")" ) $( colorize bright red Failed $return_code ).  Retrying in a minute (in the background)...  kill with:"
+        echo "  kill $this_pid"
         sleep 60
         verboserun "$@" && return
         return_code=$?
@@ -29,7 +30,7 @@ verbose=true
 while [[ "$1" == --* ]] ; do
     case "$1" in
         --help)
-            echo "Usage: x [--help] [--wait] [--noverbose] [--no-eval] [--shell] <prog> [<args>]" 1>&2
+            echo "Usage: x [--help] [--wait] [--noverbose] [--no-eval] [--shell] [--] [-other-xterm-flags...] [--] <prog> [<args>]" 1>&2
             exit 1
             ;;
         --wait)
@@ -64,7 +65,16 @@ if [ $eval == wait-and-query-rerun ] ; then
 fi
 
 args=()
-while [[ "$1" == -* ]] ; do
+reading_between_dashes=false
+if [ "$1" = -- ] ; then
+    reading_between_dashes=true
+    shift
+fi
+while $reading_between_dashes || [[ "$1" == -* ]] ; do
+    if [ "$1" == -- ] ; then
+        shift
+        break
+    fi
     args+=("$1")
     shift
 done
@@ -80,7 +90,7 @@ while [ $# != 0 ] ; do
 done
 
 if [ "${#cmds[@]}" != 0 ] ; then
-    retry xterm -T "x: $PWD ${cmds[*]}" "${args[@]}" -e bash $eval "${cmds[@]}" # ${cmds[*]}
+    retry xterm "${args[@]}" -T "x: $PWD ${cmds[*]}" -e bash $eval "${cmds[@]}" # ${cmds[*]}
 else
     retry xterm "${args[@]}"
 fi &
