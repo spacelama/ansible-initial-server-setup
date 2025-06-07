@@ -6,11 +6,3 @@ source /etc/network/interfaces.d/*
 # The loopback network interface
 auto lo
 iface lo inet loopback
-{% if host_is_container | default(false) %}
-{# LXC containers under proxmox automatically insert this at container
-boot anyway, so we might as well not remove it every time #}
-
-auto eth0
-iface eth0 inet dhcp
-
-{% endif %}

@@ -137,8 +137,8 @@
     become: true
 
   - name: install blank /etc/network/interfaces
-    template:
-      src: etc/network/interfaces.network-manager.j2
+    copy:
+      src: etc/network/interfaces.network-manager
       dest: /etc/network/interfaces
     become: true
     notify: restart network-manager
@@ -234,8 +234,18 @@
   when: (deb_release != 'buster') and
         (host_is_using_systemd_resolver | default(false))
 
-# dnsmasq as a caching name server per https://wiki.debian.org/dnsmasq#Local_Caching_using_NetworkManager
+# dnsmasq as a caching name server per
+# https://wiki.debian.org/dnsmasq#Local_Caching_using_NetworkManager
+# for full machihnes, and https://wiki.debian.org/dnsmasq for
+# containers (which tells dhcp to inject 127.0.0.1 into the first line
+# of /etc/resolv.conf, which takes advantage of dnsmasq reading
+# /etc/resolv.conf by default and ignoring 127.0.0.1, but answering
+# all clients who connect to us because libc default is talk to first
+# entry first)
 - name: setup dnsmasq for caching nameserver
+  when: (deb_release != 'buster') and
+        (not (host_is_pve_server | default(false))) and
+        (not (host_is_not_using_dnsmasq_cache | default(false)))
   block:
   - name: Install dnsmasq
     apt:
@@ -244,39 +254,70 @@
       state: present
     become: true
 
-  - name: install blank /etc/network/interfaces
-    template:
-      src: etc/network/interfaces.network-manager.j2
-      dest: /etc/network/interfaces
-    become: true
-    notify: restart network-manager
+  - name: Configure NetworkManager
+    when: (not (host_is_container | default(false))) and
+          (not (host_is_not_using_network_manager | default(false)))
+    block:
+    - name: install blank /etc/network/interfaces
+      copy:
+        src: etc/network/interfaces.network-manager
+        dest: /etc/network/interfaces
+      become: true
+      notify: restart network-manager
 
-  - name: Install network-manager
-    apt:
-      name: ['network-manager']
-      autoremove: no
-      state: present
-      install_recommends: false
-    become: true
-    notify: restart network-manager
+    - name: Install network-manager
+      apt:
+        name: ['network-manager']
+        autoremove: no
+        state: present
+        install_recommends: false
+      become: true
+      notify: restart network-manager
 
-  - name: ensure dnsmasq doesn't enable itself (should be controlled through NetworkManager)
-    service:
-      name: dnsmasq
-      state: stopped
-      enabled: no
-    become: true
-    notify: restart network-manager
-    # FIXME: except maybe nfsroot machines such as pi
+    - name: ensure dnsmasq doesn't enable itself (should be controlled through NetworkManager)
+      service:
+        name: dnsmasq
+        state: stopped
+        enabled: no
+      become: true
+      notify: restart network-manager
 
-  - name: ensure NetworkManager uses dnsmasq
-    ini_file:
-      path: /etc/NetworkManager/NetworkManager.conf
-      section: main
-      option: dns
-      value: dnsmasq
-    become: true
-    notify: restart network-manager
+    - name: ensure NetworkManager uses dnsmasq
+      ini_file:
+        path: /etc/NetworkManager/NetworkManager.conf
+        section: main
+        option: dns
+        value: dnsmasq
+      become: true
+      notify: restart network-manager
+
+  - name: Configure dnsmasq for operation separate of NetworkManager
+    when: (host_is_container | default(false)) or
+          (host_is_not_using_network_manager | default(false))
+    block:
+    - name: Enable dnsmasq
+      service:
+        name: dnsmasq
+        state: started
+        enabled: yes
+      become: true
+
+      # If we couldn't rely on dnsmasq behaviour of ignoring 127.0.0.1
+      # and libc otherwise talking to first entry, then we'd have to
+      # create /etc/.pve-ignore.resolv.conf in all containers and
+      # hardcode /etc/resolv.conf to talk to our caching server, and
+      # hardcode our caching server to use DNS addresses that would
+      # otherwise normally be provided by DHCP
+    - name: Configure dhclient for local DNS consumption
+      blockinfile:
+        path: /etc/dhcp/dhclient.conf
+        marker: "# {mark} ANSIBLE MANAGED BLOCK"
+        backup: yes
+        insertafter: '(?m)request [^;]*;' # multiline search
+        block: |2
+          prepend domain-name-servers 127.0.0.1;
+          listen-address=127.0.0.1;
+      become: true
 
   - name: Purge systemd-resolved
     apt:
@@ -287,9 +328,6 @@
     become: true
     notify: restart network-manager
 
-  when: (deb_release != 'buster') and
-        (not (host_is_pve_server | default(false))) and
-        (not (host_is_not_using_dnsmasq_cache | default(false)))
 
 #- fail:
 #    msg: done

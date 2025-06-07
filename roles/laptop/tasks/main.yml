@@ -93,12 +93,6 @@
 #    - { section: "device", key: "wifi.backend", value: "iwd" }
     - { section: "device", key: "wifi.backend", value: "wpa_supplicant" }
 
-- name: reset /etc/network/interfaces back to vanilla
-  copy:
-    dest: /etc/network/interfaces
-    content: "# This file describes the network interfaces available on your system\n# and how to activate them. For more information, see interfaces(5).\n\nsource /etc/network/interfaces.d/*\n\n# The loopback network interface\nauto lo\niface lo inet loopback\n"
-  become: true
-
 - name: disable wpa_supplicant
   service:
     name: wpa_supplicant

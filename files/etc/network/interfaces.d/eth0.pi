@@ -1,0 +1,9 @@
+#
+# We're NFS booting pi, so we have an IP already.  But let's get our
+# ideas of DNS etc from DHCP normally.  Hopefully We've arranged DHCP
+# to simply give us back the static address we had anyway, and we'll
+# simply end up fixing /etc/resolv.conf only
+#
+
+auto eth0:0
+iface eth0:0 inet dhcp
