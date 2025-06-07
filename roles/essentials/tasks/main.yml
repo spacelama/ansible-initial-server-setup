@@ -1,5 +1,8 @@
 ---
 - name: Configure tzdata
+  always:
+    - name: Make sure all handlers run
+      meta: flush_handlers
   block:
     - name: Configure timezone country
       debconf:
@@ -18,11 +21,9 @@
         vtype: select
       become: true
       notify: Reconfigure tzdata
-  always:
-    - name: Make sure all handlers run
-      meta: flush_handlers
 
-  # ideally want to disable other fs level forms of trim because TRIM
+  # ideally want to disable other fs level forms of trim/discard
+  # (such as discard mount option) because TRIM
   # is a non-queued SCSI command.  Keep lvm though because want
   # immediate response to something done manually, rarely
   # WARNING: on ZFS you also need to set org.debian:periodic-trim on each zpool!
@@ -128,6 +129,8 @@
 
 # caching name server etc per https://wiki.debian.org/NetworkConfiguration
 - name: setup systemd-resolved for caching nameserver
+  when: (deb_release != 'buster') and
+        (host_is_using_systemd_resolver | default(false))
   block:
   - name: Install systemd-resolved
     apt:
@@ -231,9 +234,6 @@
     become: true
     notify: restart systemd-resolved
 
-  when: (deb_release != 'buster') and
-        (host_is_using_systemd_resolver | default(false))
-
 # dnsmasq as a caching name server per
 # https://wiki.debian.org/dnsmasq#Local_Caching_using_NetworkManager
 # for full machihnes, and https://wiki.debian.org/dnsmasq for
@@ -328,11 +328,13 @@
     become: true
     notify: restart network-manager
 
-
 #- fail:
 #    msg: done
 
 - name: Configure locales
+  always:
+    - name: Make sure all handlers run
+      meta: flush_handlers
   block:
     - name: List of locales
       debconf:
@@ -351,9 +353,6 @@
         vtype: select
       become: true
       notify: Reconfigure locales
-  always:
-    - name: Make sure all handlers run
-      meta: flush_handlers
 
 - name: Install essential packages (not container)
   apt:
