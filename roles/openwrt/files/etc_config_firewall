@@ -182,6 +182,8 @@ config rule
 	option name 'Drop pixel watch that binds to wrong network (IOT)'
 	list src_mac '26:48:A7:DD:10:FA'
 	list src_mac 'FE:C1:C1:C5:30:E7'
+	list src_mac 'F2:18:24:D9:C9:33'
+	list src_mac '1E:5D:0C:91:28:50'
 
 config rule
 	option src 'GUESTLAN'
@@ -190,6 +192,8 @@ config rule
 	option name 'Drop pixel watch that binds to wrong network (GUEST)'
 	list src_mac '26:48:A7:DD:10:FA'
 	list src_mac 'FE:C1:C1:C5:30:E7'
+	list src_mac 'F2:18:24:D9:C9:33'
+	list src_mac '1E:5D:0C:91:28:50'
 
 config rule
 	option src 'WINDOWSLAN'
@@ -198,6 +202,8 @@ config rule
 	option name 'Drop pixel watch that binds to wrong network (WINDOWS)'
 	list src_mac '26:48:A7:DD:10:FA'
 	list src_mac 'FE:C1:C1:C5:30:E7'
+	list src_mac 'F2:18:24:D9:C9:33'
+	list src_mac '1E:5D:0C:91:28:50'
 
 config rule
 	option name 'Allow-IPSec-ESP'
