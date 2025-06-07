@@ -122,6 +122,25 @@ $if Bash
 # Add a binding to refresh the line, which is unbound
 "\C-xr": redraw-current-line
 
+#### these might need to be wrapped around a version test.  Might need bash version 5
+
+# I actually like the new default behaviour of copy-paste from X
+# selection requiring a separate manual newline to accept the input,
+# but if you wanted to turn it off, this is the setting:
+
+# set enable-bracketed-paste off
+
+# Alternatively, you can turn it off temporarily:
+# > bind 'set enable-bracketed-paste 0'
+
+set blink-matching-paren on
+set colored-completion-prefix on
+set colored-stats on
+#set active-region-start-color <ansi-escape-colours>
+#set enable-active-region on
+set mark-modified-lines on
+####
+
 $endif
 
 

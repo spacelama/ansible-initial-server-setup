@@ -32,7 +32,7 @@ sub usageerror(;$) {
 
 sub usage(;$) {
   my ($exit)=(@_);
-  print STDERR "Usage: $0 [--exact-match|-X] [--exact-wholeline-match|-x] [--ignore-case|-i] [--partial|-p (WARNING: causing confusion in overlapping -e RE args)] [--invert-match|-v] [--ignore-lines-no-match (implies --partial)|-N] (-e <re1> -e <re2>... | <re>) <files>\n";
+  print STDERR "Usage: $0 [--colour <colour>] [--exact-match|-X] [--exact-wholeline-match|-x] [--ignore-case|-i] [--partial|-p (WARNING: causing confusion in overlapping -e RE args)] [--invert-match|-v] [--ignore-lines-no-match (implies --partial)|-N] (-e <re1> -e <re2>... | <re>) <files>\n";
   $exit=defined($exit) ? $exit : 0;
   exit $exit;
 }

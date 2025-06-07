@@ -7,6 +7,8 @@
 #set -vx ;
 #echo .bashrc
 
+# echo "$(date): '$DISPLAY' '$SSH_CONNECTION' '$SSH_CLIENT':" "$@" >> /tmp/.bashrc.log
+
 #echo 5 1>&2
 if [ -n "$BASHRC_EXECUTED" -o -n "$NOBASHRCEXEC" ] ; then
    return

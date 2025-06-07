@@ -11,6 +11,13 @@
 set -eu
 set -o pipefail
 
+ignore_ups=false
+
+if [ "$1" = --ignore-ups ] ; then
+    ignore_ups=true
+    shift
+fi
+
 remote_host="$1"
 remote_idrac="$2"
 power_switch="$3"
@@ -73,7 +80,7 @@ wait_for_machine_up() {
 
     echo "$(date) Waiting for $remote_host ssh response"
     for i in `seq 1 15` ; do
-        if timeout -k 1 10 ssh root@$remote_host true ; then
+        if timeout -k 1 10 ssh root@$remote_host echo ssh succeeded... ; then
             # finally sleep another 20 seconds to make sure zpool disks are
             # spun up, services are running etc
             if ! [ -t 0 ] ; then
@@ -88,7 +95,7 @@ wait_for_machine_up() {
     false
 }
 
-turn_on_ups
+turn_on_ups || $ignore_ups
 wait_for_idrac
 power_on_machine || [ -t 0 ] # failure if machine was already on,
                              # unless we're running interactively, in

@@ -5,7 +5,7 @@
 
 # My solution to Bug#1009864
 
-blacklist=(firefox-esr)
+blacklist=(firefox-esr chromium)
 
 log_in=/tmp/xscreensaver.$DISPLAY.log
 log_out=/tmp/xscreensaver-monitor.$DISPLAY.log

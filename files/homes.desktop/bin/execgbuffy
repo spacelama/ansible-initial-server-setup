@@ -38,6 +38,11 @@ case $SHORTHOST in
         XOFFSETS=(-467)
         YOFFSETS=(-123)
         ;;
+    fermi)
+        repeat=0
+        XOFFSETS=(-467)
+        YOFFSETS=(-123)
+        ;;
     *)
         echo "Hmm, what host are we on?"
         exit 1

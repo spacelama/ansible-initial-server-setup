@@ -14,6 +14,6 @@ PATH=$PATH:/sbin
 # But we probably don't have route -n there anyway...
 
 # filter in routes with default destination, then filter out those with gateway that isn't just "0(.0.0.0)"
-iface=`route -n | grep '^0.0.0.0  *[1-9]' | sed 's/.* //'`
+iface=`route -n | grep '^0.0.0.0  *[1-9]' | sort -k 5 | head -n 1 | sed 's/.* //'`
 ifconfig "$iface" < /dev/null 2>/dev/null | sed -n 's/^[ 	]*inet \([^ ]*\) .*cast.*/\1/p' | head -n 1 | sed 's/^addr://'
 

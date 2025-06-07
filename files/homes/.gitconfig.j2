@@ -1,3 +1,7 @@
+# get the current git config with:
+# old: git config --list
+# new: git config list
+
 # https://jvns.ca/blog/2024/02/16/popular-git-config-options/
 [user]
 	name = Tim Connors
@@ -52,9 +56,16 @@
 	colorMovedWS = allow-indentation-change
 	mnemonicPrefix = true
 
+# helpers defined in .gitattributes
 [diff "gzip"]
         binary = true
 	textconv = /bin/zcat
+[diff "pdf"]
+	binary = true
+	textconv = /bin/pdftotext - - <
+[diff "ps"]
+	binary = true
+	textconv = ps2ascii
 
 [delta]
 	navigate = true    # use n and N to move between diff sections
@@ -69,6 +80,7 @@
 {% endif %}
 
 [core]
+	attributesFile = ~/.gitattributes
 	editor = e
 	pager = less -F -X
 	# FIXME: work out how to use pager without causing myself more problems
