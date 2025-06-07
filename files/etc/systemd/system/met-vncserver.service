@@ -5,7 +5,7 @@ After=network.target
 [Service]
 Type=simple
 Restart=always
-ExecStart=tigervncserver -localhost no :0 -geometry 656x416 -fg
+ExecStart=tigervncserver -UseBlacklist no -localhost no :0 -geometry 656x416 -fg
 User=tconnors
 Group=tconnors
 WorkingDirectory=/home/tconnors
