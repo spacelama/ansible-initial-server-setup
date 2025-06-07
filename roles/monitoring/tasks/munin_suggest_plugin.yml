@@ -4,8 +4,9 @@
   register: suggests
   check_mode: no # even in --check, we want this command to output
                  # sensible output so we can parse it
-  shell: "munin-run --servicedir /usr/share/munin/plugins {{ munin_plugin }} suggest 2>/dev/null || true"
+  shell: "munin-run --servicedir /usr/share/munin/plugins {{ munin_plugin }} suggest 2>/dev/null"
   changed_when: false
+  failed_when: false
 
 #- name: debug
 #  debug:
@@ -16,4 +17,4 @@
   loop_control:
     loop_var: suggest_item
   with_items: "{{ suggests.stdout_lines }}"
-    
+

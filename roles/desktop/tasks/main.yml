@@ -36,8 +36,11 @@
     purge: yes
   become: true
 
-- name: Kill stale xdk-desktop-portal-gtk processes
-  command: "killall xdk-desktop-portal-gtk"
+- name: Kill stale xdg-desktop-portal-gtk processes
+  command: "killall xdg-desktop-portal-gtk"
+  register: killall_status
+  changed_when: killall_status.rc == 0
+  failed_when: false
 
 - name: install preferred backported/non-backported packages
   apt:
