@@ -1,0 +1,15 @@
+/var/log/remote/*.log {
+        missingok
+        daily
+        create 0644 root adm
+        rotate 14
+        compress
+        # delaycompress not because we can't support it,
+        # but it's annoying to have to zgrep all the time
+        delaycompress
+        notifempty
+#        postrotate
+#            mkdir -p /var/log/remote/archived
+#            mv /var/log/remote/*.gz /var/log/remote/archived
+#        endscript
+}

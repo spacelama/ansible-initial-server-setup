@@ -41,6 +41,11 @@
     daemon_reload: yes
   when: "'munin-async' in ansible_facts.packages | default([])"
 
+- name: restart rsyslog
+  service:
+    name: rsyslog
+    state: restarted
+
 - name: restart nut server
   service:
     name: nut-server

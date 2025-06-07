@@ -349,13 +349,16 @@
     - { name: /etc/cron.daily/check-cmos-battery,  source: cron/cron.daily_check-cmos-battery,    mode: "0755", when: "{{ host_is_physical | default(false) }}" }
     - { name: /etc/chrony/,  source: etc/chrony/,            notify: "restart chrony" }
 
+    - { source: etc/logrotate.d/apache2,       name: /etc/logrotate.d/, when_pkg_installed: "apache2"                  }
     - { source: etc/logrotate.d/sleep-browser, name: /etc/logrotate.d/, when: "{{ host_is_desktop | default(false) }}" }
-    - { source: etc/logrotate.d/apache2,       name: /etc/logrotate.d/, when_pkg_installed: "apache2"            }
-    - { source: etc/logrotate.d/iot,           name: /etc/logrotate.d/, when: "{{ host_is_syslog | default(false) }}"  }
+    - { source: etc/logrotate.d/iot,           name: /etc/logrotate.d/, when: "{{ host_is_syslog  | default(false) }}" }
+    - { source: etc/logrotate.d/remote,        name: /etc/logrotate.d/, when: "{{ host_is_syslog  | default(false) }}" }
 
-    - { source: etc/rsyslog.d/remote.conf,           name: /etc/rsyslog.d/, when: "{{ not (host_is_syslog | default(false)) }}" }
-    - { source: etc/rsyslog.d/syslog-collector.conf, name: /etc/rsyslog.d/, when: "{{ host_is_syslog | default(false) }}"     }
-    - { source: etc/rsyslog.d/iot.conf,              name: /etc/rsyslog.d/, when: "{{ host_is_syslog | default(false) }}"     }
+    - { source: usr/local/sbin/syslog-rdns-writer.sh,  name: /usr/local/sbin/, notify: "restart rsyslog", when: "{{ host_is_syslog | default(false) }}"       }
+    - { source: etc/rsyslog.d/z-syslog-collector.conf, name: /etc/rsyslog.d/,  notify: "restart rsyslog", when: "{{ host_is_syslog | default(false) }}"       }
+    - { source: etc/rsyslog.d/dawn-openwrt.conf,       name: /etc/rsyslog.d/,  notify: "restart rsyslog", when: "{{ host_is_syslog | default(false) }}"       }
+    - { source: etc/rsyslog.d/iot.conf,                name: /etc/rsyslog.d/,  notify: "restart rsyslog", when: "{{ host_is_syslog | default(false) }}"       }
+    - { source: etc/rsyslog.d/remote.conf,             name: /etc/rsyslog.d/,  notify: "restart rsyslog", when: "{{ not (host_is_syslog | default(false)) }}" }
 
   remove_files:
     - { files_not: "{{ bashrc_files | flatten | map('basename') }}", dir: /etc/bash.bashrc.d/ } # FIXME: should carefully consider those containers that actually provided files in that directory, but I think the main concern is actually /etc/skel/.bashrc.d/ and by extension ~/.bashrc.d/  We're not yet overriding that, so should be fine for now...
