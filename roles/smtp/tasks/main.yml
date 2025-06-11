@@ -244,3 +244,9 @@
 
 - name: Make sure all handlers run
   meta: flush_handlers
+
+- name: setup DKIM
+  when: host_is_smtp_relay | default(false)
+#  include_tasks: dkim.yml  # doesn't work with become
+  import_tasks: "{{ role_path }}/tasks/dkim.yml"
+  become: true

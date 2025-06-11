@@ -26,6 +26,14 @@
 
     root: tconnors
   smtp_mail_name: rather.puzzling.org
+  dkim_admin_email: tconnors@rather.puzzling.org
+  # if admin_email variable is present, will be used as default for dkim_admin_email
+  dkim_selector: mail
+  dkim_domains:
+    - rather.puzzling.org
+    #    - timconnors.org
+  dkim_same_key: false
+
   dovecot_insecure_logfile_creation: true
   smtp_crontab:
     user: tconnors
