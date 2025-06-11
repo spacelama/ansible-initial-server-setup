@@ -40,3 +40,6 @@
 [submodule "repos/pve-nag-buster"]
 	path = repos/pve-nag-buster
 	url = git@github.com:foundObjects/pve-nag-buster.git
+[submodule "repos/ansible-dkim"]
+	path = repos/ansible-dkim
+	url = git@github.com:spacelama/ansible-dkim.git

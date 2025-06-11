@@ -10,12 +10,12 @@
 #  become: true
 
 - include_role:
-    name: sunfoxcz.dkim
+    name: ansible-dkim
 
 - name: Make sure all handlers run
   meta: flush_handlers
 
 - debug:
-    msg: "copy /etc/opendkim/keys/{{ dkim_domains }}/{{ dkim_selector }}.txt variable to your DNS, then test with: echo This is a test mailing | mail -s \"test $(date)\" -r {{ dkim_admin_email }} check-auth2@verifier.port25.com"
+    msg: "copy /etc/opendkim/keys/{{ dkim_domains[0] }}/{{ dkim_selector }}.txt variable to your DNS, then test with: echo This is a test mailing | mail -s \"test $(date)\" -r {{ dkim_admin_email }} check-auth2@verifier.port25.com"
 
 #WARNING: https://wiki.debian.org/opendkim: Postfix does not pass internally-generated messages such as bounce messages to opendkim, so by default bounces are not DKIM-signed. This can be a problem if you also use a strict DMARC policy, because it may cause your unsigned bounce messages themselves to get rejected. The internal_mail_filter_classes parameter can be used to pass bounces through the milters as well

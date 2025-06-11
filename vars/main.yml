@@ -33,6 +33,7 @@
     - rather.puzzling.org
     #    - timconnors.org
   dkim_same_key: false
+  dkim_conf_override: Nameservers 127.0.0.1
 
   dovecot_insecure_logfile_creation: true
   smtp_crontab:
