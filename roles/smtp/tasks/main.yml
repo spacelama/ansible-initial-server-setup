@@ -43,97 +43,93 @@
   become: true
   when: host_is_smtp_relay | default(false)
 
-- name: Install dovecot when mda is configured (only tested when mda is also smtp)
-  apt:
-    name: ['dovecot-imapd', 'fetchmail', 'psmisc' ] # psmisc for killall for our fetchmail helper
-    autoremove: no
-    state: present
-  become: true
+- name: configure MDA packages
   when: host_is_mda | default(false)
+  block:
+  - name: Install dovecot when mda is configured (only tested when mda is also smtp)
+    apt:
+      name: ['dovecot-imapd', 'fetchmail', 'psmisc' ] # psmisc for killall for our fetchmail helper
+      autoremove: no
+      state: present
+    become: true
 
-- name: install mariadb-server for roundcube
-  apt:
-    name: mariadb-server
-    autoremove: no
-    state: present
-  become: true
-  when: host_is_mda | default(false)
+  - name: install mariadb-server for roundcube
+    apt:
+      name: mariadb-server
+      autoremove: no
+      state: present
+    become: true
 
-- name: install roundcube
-  apt:
-    name: ['roundcube-plugins', 'roundcube']
-    autoremove: no
-    state: present
-  become: true
-  when: host_is_mda | default(false)
+  - name: install roundcube
+    apt:
+      name: ['roundcube-plugins', 'roundcube']
+      autoremove: no
+      state: present
+    become: true
 
-- name: configure apache for roundcube
-  lineinfile:
-    line: Alias /roundcube /var/lib/roundcube/public_html
-    dest: /etc/apache2/conf-available/roundcube.conf
-  become: true
-  notify: restart apache2
-  when: host_is_mda | default(false)
+  - name: configure apache for roundcube
+    lineinfile:
+      line: Alias /roundcube /var/lib/roundcube/public_html
+      dest: /etc/apache2/conf-available/roundcube.conf
+    become: true
+    notify: restart apache2
 
-- name: configure username, pass in roundcube (comment out existing entries)
-  lineinfile:
-    dest: /etc/roundcube/config.inc.php
-    regexp: "^{{ item }}"
-    line: '// \1'
-    backrefs: true
-  with_items:
-    - "$config['smtp_pass'] = '%p';"
-    - "$config['smtp_user'] = '%u';"
-  become: true
-  notify: restart apache2
-  when: host_is_mda | default(false)
+  - name: configure username, pass in roundcube (comment out existing entries)
+    lineinfile:
+      dest: /etc/roundcube/config.inc.php
+      regexp: "^{{ item }}"
+      line: '// \1'
+      backrefs: true
+    with_items:
+      - "$config['smtp_pass'] = '%p';"
+      - "$config['smtp_user'] = '%u';"
+    become: true
+    notify: restart apache2
 
-- name: configure username, pass in roundcube (add our entries)
-  # FIXME: (some roundcube authentication help obtained here:   https://github.com/roundcube/roundcubemail/issues/7011 )
-  lineinfile:
-    dest: /etc/roundcube/config.inc.php
-    line: "{{ item }}"
-  with_items:
-    - "$config['smtp_pass'] = '';"
-    - "$config['smtp_user'] = '';"
-  become: true
-  notify: restart apache2
-  when: host_is_mda | default(false)
+  - name: configure username, pass in roundcube (add our entries)
+    # FIXME: (some roundcube authentication help obtained here:   https://github.com/roundcube/roundcubemail/issues/7011 )
+    lineinfile:
+      dest: /etc/roundcube/config.inc.php
+      line: "{{ item }}"
+    with_items:
+      - "$config['smtp_pass'] = '';"
+      - "$config['smtp_user'] = '';"
+    become: true
+    notify: restart apache2
 
-  # "touch" file if not exist: https://stackoverflow.com/questions/28347717/how-to-create-an-empty-file-with-ansible
-  # https://dev.to/icy1900/ansible-create-empty-file-if-it-does-not-exist-1fof
-- name: Ensure (insecure) logfile for imap-via-ssh is writable if set
-  file:
-    path: /var/log/imap.log
-    state: touch
-    mode: 0666
-    modification_time: preserve
-    access_time: preserve
-  become: true
-  when: (host_is_mda | default(false)) and (dovecot_insecure_logfile_creation | default(false))
+    # "touch" file if not exist: https://stackoverflow.com/questions/28347717/how-to-create-an-empty-file-with-ansible
+    # https://dev.to/icy1900/ansible-create-empty-file-if-it-does-not-exist-1fof
+  - name: Ensure (insecure) logfile for imap-via-ssh is writable if set
+    file:
+      path: /var/log/imap.log
+      state: touch
+      mode: 0666
+      modification_time: preserve
+      access_time: preserve
+    become: true
+    when: dovecot_insecure_logfile_creation | default(false)
 
-- name: Rotate imap-via-ssh logfile
-  copy:
-    src: etc/logrotate.d/dovecot-custom
-    dest: /etc/logrotate.d/dovecot-custom
-  become: true
-  when: (host_is_mda | default(false)) and (dovecot_insecure_logfile_creation | default(false))
+  - name: Rotate imap-via-ssh logfile
+    copy:
+      src: etc/logrotate.d/dovecot-custom
+      dest: /etc/logrotate.d/dovecot-custom
+    become: true
+    when: dovecot_insecure_logfile_creation | default(false)
 
-- name: Install dovecot/mail.conf
-  copy:
-    src: etc/dovecot/10-mail.conf
-    dest: /etc/dovecot/conf.d/10-mail.conf
-  become: true
-  when: host_is_mda | default(false)
-  notify: restart dovecot
+  - name: Install dovecot/mail.conf
+    copy:
+      src: etc/dovecot/10-mail.conf
+      dest: /etc/dovecot/conf.d/10-mail.conf
+    become: true
+    when: host_is_mda | default(false)
+    notify: restart dovecot
 
-- name: Install mail packages
+- name: Install mail packages on all satellites as well
   apt:
     name: ['postfix' ]
     autoremove: no
     state: present
   become: true
-#  when: not (host_is_smtp_relay | default(false))
 
 - name: debconf Configure postfix first time
   include_tasks: postfix-debconf.yml
@@ -158,81 +154,80 @@
 - name: Make sure all handlers run
   meta: flush_handlers
 
-- name: remove conflicting smtpd_tls_security_level from postfix/main.cf
-  lineinfile:
-    dest: "/etc/postfix/main.cf"
-    regexp: "^smtp_tls_security_level=may"
-    line: "#smtp_tls_security_level=may # disabled by ANSIBLE"
-  become: true
-  notify: restart postfix
+- name: configure SMTP relay packages
   when: host_is_smtp_relay | default(false)
+  block:
+  - name: remove conflicting smtpd_tls_security_level from postfix/main.cf
+    lineinfile:
+      dest: "/etc/postfix/main.cf"
+      regexp: "^smtp_tls_security_level=may"
+      line: "#smtp_tls_security_level=may # disabled by ANSIBLE"
+    become: true
+    notify: restart postfix
 
-- name: add submission ports to postfix master
-  lineinfile:
-    dest: "/etc/postfix/master.cf"
-    regexp: "^#?({{ item }}.*)"
-    backrefs: true
-    line: '\1'
-  with_items:
-    # uncomment lines that start with these:
-    - "127.0.0.1:submission"
-    - "127.0.0.1:submissions"
-  become: true
-  notify: restart postfix
-  when: host_is_smtp_relay | default(false)
+  - name: add submission ports to postfix master
+    lineinfile:
+      dest: "/etc/postfix/master.cf"
+      regexp: "^#?({{ item }}.*)"
+      backrefs: true
+      line: '\1'
+    with_items:
+      # uncomment lines that start with these:
+      - "127.0.0.1:submission"
+      - "127.0.0.1:submissions"
+    become: true
+    notify: restart postfix
 
-# - name: populate the virtual user table
-#   copy:
-#     dest: /etc/postfix/virtual
-# #    content: "root {{ smtp_send_all_local_mail_to }}\n@{{ smtp_mail_name }} {{ smtp_send_all_local_mail_to }}\n"
-#     content: "root {{ smtp_root_mail_to }}\n"
-#   become: true
-#   notify: postmap /etc/postfix/virtual
-#   when: host_is_smtp_relay | default(false)
+  # - name: populate the virtual user table
+  #   copy:
+  #     dest: /etc/postfix/virtual
+  # #    content: "root {{ smtp_send_all_local_mail_to }}\n@{{ smtp_mail_name }} {{ smtp_send_all_local_mail_to }}\n"
+  #     content: "root {{ smtp_root_mail_to }}\n"
+  #   become: true
+  #   notify: postmap /etc/postfix/virtual
 
-- name: Ensure gmail configuration used in postfix/main.cf
-  blockinfile:
-    path: "/etc/postfix/main.cf"
-    marker: "# {mark} ANSIBLE MANAGED BLOCK"
-    backup: yes
-    block: |
-      # Enable SASL authentication
-      smtp_sasl_auth_enable = yes
-      # Disallow methods that allow anonymous authentication
-      smtp_sasl_security_options = noanonymous
-      # Location of sasl_passwd
-      smtp_sasl_password_maps = hash:/etc/postfix/sasl/sasl_passwd
-      # Enable STARTTLS encryption
-      smtp_tls_security_level = encrypt
-      # Location of CA certificates
-      smtp_tls_CAfile = /etc/ssl/certs/ca-certificates.crt
+  - name: Ensure gmail configuration used in postfix/main.cf
+    blockinfile:
+      path: "/etc/postfix/main.cf"
+      marker: "# {mark} ANSIBLE MANAGED BLOCK"
+      backup: yes
+      block: |
+        # Enable SASL authentication
+        smtp_sasl_auth_enable = yes
+        # Disallow methods that allow anonymous authentication
+        smtp_sasl_security_options = noanonymous
+        # Location of sasl_passwd
+        smtp_sasl_password_maps = hash:/etc/postfix/sasl/sasl_passwd
+        # Enable STARTTLS encryption
+        smtp_tls_security_level = encrypt
+        # Location of CA certificates
+        smtp_tls_CAfile = /etc/ssl/certs/ca-certificates.crt
 
-      # And to enable our virtual map to send all incoming mail onwards
-      # virtual_alias_maps    = hash:/etc/postfix/virtual
+        # And to enable our virtual map to send all incoming mail onwards
+        # virtual_alias_maps    = hash:/etc/postfix/virtual
 
-      #smtp_generic_maps     = hash:/etc/postfix/generic
-      masquerade_domains    = $mydomain
-      # would expose root user, but can't because we need them to remain
-      # deliverable despite Exchange.
-      # Headers still contain enough information to identify machine sender, and
-      # we do preserve header recipient (below), so cron output will still be useful:
-      # masquerade_exceptions = root
-      masquerade_exceptions =
+        #smtp_generic_maps     = hash:/etc/postfix/generic
+        masquerade_domains    = $mydomain
+        # would expose root user, but can't because we need them to remain
+        # deliverable despite Exchange.
+        # Headers still contain enough information to identify machine sender, and
+        # we do preserve header recipient (below), so cron output will still be useful:
+        # masquerade_exceptions = root
+        masquerade_exceptions =
 
-      # default rhel6:
-      # #masquerade_classes    = envelope_sender, header_sender, header_recipient
+        # default rhel6:
+        # #masquerade_classes    = envelope_sender, header_sender, header_recipient
 
-      # # from prior tested rhel6/postfix/main.cf and also that which worked on suse 11/12:
-      # #----
-      # # masquerade_classes = envelope_sender, envelope_recipient, header_sender, header_recipient
-      # masquerade_classes = envelope_sender, envelope_recipient, header_sender
-      # #----
+        # # from prior tested rhel6/postfix/main.cf and also that which worked on suse 11/12:
+        # #----
+        # # masquerade_classes = envelope_sender, envelope_recipient, header_sender, header_recipient
+        # masquerade_classes = envelope_sender, envelope_recipient, header_sender
+        # #----
 
-      masquerade_classes = envelope_sender, header_sender, envelope_recipient, header_recipient
+        masquerade_classes = envelope_sender, header_sender, envelope_recipient, header_recipient
 
-  become: true
-  notify: restart postfix
-  when: host_is_smtp_relay | default(false)
+    become: true
+    notify: restart postfix
 
 - name: Make sure all handlers run
   meta: flush_handlers
