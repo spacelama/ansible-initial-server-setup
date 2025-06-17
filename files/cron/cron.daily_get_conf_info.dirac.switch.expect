@@ -12,30 +12,82 @@ proc slurp {file} {
     return $ret
 }
 
+proc lshift listVar {
+    upvar 1 $listVar l
+    set r [lindex $l 0]
+    set l [lreplace $l [set l 0] 0]
+    return $r
+}
+
 ## Access CLI
-set enablePassword [string trim [ slurp /usr/local/etc/get_conf_info.switch.pass ] ]
-set mgmtServerAddress "switch"
-set serverPrompt "TL-SG3216"
+set switchAddress [lshift argv]
+set switchPrompt [lshift argv]
+
+puts "switchAddress = $switchAddress"
+puts "switchPrompt = $switchPrompt"
+
+if {[file exists /usr/local/etc/get_conf_info.$switchAddress.ssh-pass]} {
+   set sshPassword [string trim [ slurp "/usr/local/etc/get_conf_info.$switchAddress.ssh-pass" ] ]
+#   puts "Got ssh password: $sshPassword"
+}
+if {[file exists /usr/local/etc/get_conf_info.$switchAddress.enable-pass]} {
+   set enablePassword [string trim [ slurp "/usr/local/etc/get_conf_info.$switchAddress.enable-pass" ] ]
+#   puts "Got enable password: $enablePassword"
+}
+
 
 ## Expect Parameters
 set timeout 20
+set match_max 10000
+
 set successMsg "Status: Success"
 set failureMsg "Status: Failure"
 
-spawn ssh $mgmtServerAddress
+spawn ssh $switchAddress
 expect_after eof {exit 0}
 
 set timeout 10
 
+puts "\n## Starting ssh... ##\n"
 ##interact with SSH
-##expect "yes/no" {send "yes\r"}
-expect "$serverPrompt>" {send "enable\r"}
-expect "Password:" {send "$enablePassword\r"}
+while { 1 } {
+   expect "yes/no" {
+      puts "accepting yes/no prompt for keys"
+      send "yes\r"
+   } "$switchAddress's password:" {
+      puts "sending ssh password"
+      send "$sshPassword\r"
+   } "$switchPrompt>" {
+      puts "Enabling Config"
+      send "enable\r"
+   } "Password:" {
+      puts "Sending enable password"
+      send "$enablePassword\r"
+   } "Error password" {
+      puts "Error enable password"
+      abort
+   } "$switchPrompt#" {
+      puts "exiting login loop"
+      break
+#   } -re . {
+#      puts "\nUnexpected prompt - found: '$expect_out(buffer)'\n"
+#      abort
+   }
+}
+
+# Might be able to get around the pager by using "terminal datadump"
+# or "terminal length 1536" or "terminal length 0", otherwise just
+# ignore the error that gives back:
+#
+#  ( we're also sending "\r" just to print the prompt again after
+#    having exited the previous loop )
+send "terminal length 0\r"
+
 puts "\n## Starting Gather Script... ##\n"
 set timeout 20
 
-expect "$serverPrompt#"
-for {set i 0} {$i < $argc} {incr i 1} {
+expect "$switchPrompt#"
+for {set i 0} {$i < [llength $argv]} {incr i 1} {
 #   set chan [open "[lindex $argv $i]" w]
    puts "\n## Parsing arg $i: [lindex $argv $i]"
    send "[lindex $argv $i]\r"
@@ -45,10 +97,10 @@ for {set i 0} {$i < $argc} {incr i 1} {
    set log_filename [regsub -all {/} $log_filename {_}]
    log_file -noappend "$log_filename"
    while { 1 } {
-      expect "$serverPrompt#" {
+      expect "$switchPrompt#" {
          log_file
          break
-      } "Press any key to continue (Q to quit)" {
+      } -re "Press any key to continue .Q to quit.|--More--" {
          send " "
 #         expect "\r"
 #      } "\r" {

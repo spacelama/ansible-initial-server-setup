@@ -5,49 +5,92 @@
 
 # creates "switch" directory in current directory and writes there
 
+fix_file_formatting() {
+    for i in * ; do
+        orig_cmd="${i//_/ }"
+
+        dos2unix "$i" 2>/dev/null
+
+        sed 's/\r//g' "$i" |
+            sed 's/Press any key to continue (Q to quit).                                      //' |
+            sed 's/--More--//' |
+            grep -v "^$orig_cmd$" |      # first line is the command we ran
+            head -n -"$1" > "$i.munged"     # last 3 lines might be two blanks and the prompt
+        mv "$i.munged" "$i"
+    done
+}
+
 set -u
 exit=0
 hostname=`hostname`
 trap 'echo "ERROR: $hostname:$0: $LINENO: $BASH_COMMAND"; exit=1' ERR
 
-mkdir -p switch
-cd switch || exit 1
+(
+    mkdir -p switch
+    cd switch || exit 1
 
-# only cable-diag from 1-14 rather than 16 because web UI doesn't let
-# you do 15 and 16, and this seems to result in a port failure every
-# few days.  Actually removing altogether because still occasionally
-# crashing entire switch:
-# "show cable-diagnostics interface gigabitEthernet 1/0/"{1,2,3,4,5,6,7,8,9,10,11,12,13,14}
-# only need 20 seconds when not grabbing cable diagnostics, not 300 seconds
-timeout -k 1 20 get_conf_info.switch.expect "show running-config" "show system-time" "show system-info" "show vlan" "show mac address-table all" "show interface status" "show interface switchport" "copy startup-config tftp ip 192.168.1.17 filename switch-startup-config" > /dev/null
+    # only cable-diag from 1-14 rather than 16 because web UI doesn't let
+    # you do 15 and 16, and this seems to result in a port failure every
+    # few days.  Actually removing altogether because still occasionally
+    # crashing entire switch:
+    # "show cable-diagnostics interface gigabitEthernet 1/0/"{1,2,3,4,5,6,7,8,9,10,11,12,13,14}
+    # only need 20 seconds when not grabbing cable diagnostics, not 300 seconds
+    timeout -k 1 20 get_conf_info.switch.expect switch TL-SG3216 "show running-config" "show system-time" "show system-info" "show vlan" "show mac address-table all" "show interface status" "show interface switchport" "copy startup-config tftp ip 192.168.1.17 filename switch-startup-config" > /dev/null
 
-if find "/var/lib/tftpboot/switch-startup-config.cfg" -mmin -1 | grep -q . ; then
-    # switch-startup-config.cfg was last thing to be dumped.  If it
-    # exists back on our tftp server and was updated in the last
-    # minute, then that demonstrates the entire expect script ran
-    # through to completion.
+    if find "/var/lib/tftpboot/switch-startup-config.cfg" -mmin -1 | grep -q . ; then
+        # switch-startup-config.cfg was last thing to be dumped.  If it
+        # exists back on our tftp server and was updated in the last
+        # minute, then that demonstrates the entire expect script ran
+        # through to completion.
 
-    cp "/var/lib/tftpboot/switch-startup-config.cfg" "show_startup-config"
+        cp "/var/lib/tftpboot/switch-startup-config.cfg" "show_startup-config"
+        for dummy in 1 2 3 ; do
+            echo >> "show_startup-config"
+        done
 
-    dos2unix "show_startup-config" 2>/dev/null
-
-    # FIXME: should probably run the `dos2unix ; sed 's/Press any key to continue...` on all output files
-    sed 's/\r//g' "show_running-config" |
-        sed 's/Press any key to continue (Q to quit).                                      //' |
-        grep -v 'show running-config' |
-        head -n -3 > "show_running-config.munged"
-    mv "show_running-config.munged" "show_running-config"
-
-    if ! diff=$(diff --unified=1 "show_startup-config" "show_running-config" ) ; then
-        echo "$diff" | mail -s "switch difference: run-config and save-config" root
+        # the artefact from the fact that we passed "copy startup-config tftp ip ..." as one of the args to the expect script
+        rm copy_startup-config_tftp_ip_192.168.1.17_filename_switch-startup-config
+    else
+        echo "ERROR: /var/lib/tftpboot/switch-startup-config.cfg not updated"
+        exit 1
     fi
+)
 
-    # the artefact from the fact that we passed "copy startup-config tftp ip ..." as one of the args to the expect script
-    rm copy_startup-config_tftp_ip_192.168.1.17_filename_switch-startup-config
-else
-    echo "ERROR: /var/lib/tftpboot/switch-startup-config.cfg not updated"
-    exit=1
-fi
+for onti in onti1 ; do
+    mkdir -p $onti
+    (
+        cd $onti || exit 1
 
+        timeout -k 1 20 get_conf_info.switch.expect $onti Switch "show running-config" "show startup-config" "show arp" "show vlan" "show clock" "show cpu monitor" "show cpu usage" "show cpu utilization" "show cpu-rx protocol all" "show ip traffic" "show interface ethernet status" "show interface ethernet counter rate" "show interface" "show ip route" "show mac-address-table" "show mac-address-table static" "show switchport interface" "show collision-mac-address-table" "show flash" "show loopback-detection" "show memory usage" "show ntp status" "show ntp session" "show lldp" "show lldp neighbours brief" "show lldp neighbors interface ethernet 1/0/"{1,2,3,4,5,6,7,8} "show spanning-tree" "show transceiver" "show transceiver detail" "show version" > /dev/null
+        # "show tech-support"
+
+        if find "show_version" -mmin -1 | grep -q . ; then
+            : # all good
+        else
+            echo "ERROR: $onti: 'show version' did not get to run"
+            exit 1
+        fi
+    )
+done
+
+
+for dev in switch onti1 ; do
+    (
+        cd $dev
+        case "$dev" in
+            switch)
+                tail_lines=3
+                ;;
+            *)
+                tail_lines=1
+                ;;
+        esac
+        fix_file_formatting $tail_lines
+
+        if ! diff=$(diff --unified=1 "show_startup-config" "show_running-config" ) ; then
+            echo "$diff" | mail -s "switch $dev difference: run-config and save-config" root
+        fi
+    )
+done
 
 exit $exit
