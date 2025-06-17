@@ -93,11 +93,14 @@ exit=0
 
 trap 'echo "ERROR: $hostname:$0: $LINENO: $BASH_COMMAND"; exit=1' ERR
 
-data_dir_dest=/var/log/conf_dump
+data_dir_dir=/var/log
+data_dir_base=conf_dump
+data_dir_dest="$data_dir_dir/$data_dir_base"
 data_dir="$data_dir_dest.tmp"
 rm -rf "$data_dir"   #.tmp
 mkdir "$data_dir"    #.tmp
-chown tconnors "$data_dir" # things like monitor_iot.worker write into it as myself
+chown root:tconnors "$data_dir" # things like monitor_iot.worker write into it as myself
+chmod g+w,+t "$data_dir"        # but I can only delete my own things
 
 hostname=`hostname`
 date=`date`
@@ -364,16 +367,14 @@ if [ -d /etc/pve ] ; then
 fi
 
 if [ -x /usr/local/bin/get_conf_info.local ] ; then
-    /usr/local/bin/get_conf_info.local $data_dir $data_dir_dest
+    /usr/local/bin/get_conf_info.local "$data_dir" "$data_dir_dest"
 fi
 
 # Now, move all of the log files almost atomically to their final destination
-if [ -d $data_dir_dest ] ; then
-    mv $data_dir_dest $data_dir_dest.trash
+if [ -d "$data_dir_dest" ] ; then
+    rm -rf "$data_dir_dir/yesterday.$data_dir_base"
+    mv "$data_dir_dest" "$data_dir_dir/yesterday.$data_dir_base"  # yesterday.conf_dump and not conf_dump.yesterday, because I'm tab completing to /var/log/conf_dump all the time
 fi
-mv $data_dir $data_dir_dest
-if [ -d $data_dir_dest.trash ] ; then
-    rm -rf $data_dir_dest.trash
-fi
+mv "$data_dir" "$data_dir_dest"
 
 exit $exit
