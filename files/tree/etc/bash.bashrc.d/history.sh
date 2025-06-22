@@ -77,8 +77,11 @@ function write_history_in_background() {
                 if [ -n "$history" ] ; then
                     echo "$history"
                 fi
-                echo "#"$(date +%s)
-                #                    echo "#######################"  # doesn't seem to be necessary in 2023 anymore - don't end up with history composed of dates anymore
+                echo "#$(date +%s)"
+                # a convenience so that manual parsing via `grep -A1`
+                # will kinda work for users so long as they don't
+                # expect it to return multiline stuff:
+                echo "#$(date +%s) #################################"
             else
                 echo "$history"
             fi |
@@ -104,6 +107,15 @@ function write_history_in_background() {
     ) & )
 }
 
+function is_last_history_duplicate() {
+    last_and_second_last_history=$( HISTTIMEFORMAT= history 2 | sed '1s/^[0-9]* *//' )
+    last_history_with_history_num=$( HISTTIMEFORMAT= history 1 )
+    last_history=$( echo "$last_history_with_history_num" | sed '1s/^[0-9]* *//' )
+    [ "$last_and_second_last_history" = "$last_history
+$last_history_with_history_num" ]
+}
+
+
 function writetohistory() {
     #    bt
 
@@ -116,8 +128,7 @@ function writetohistory() {
         return
     fi
     write_history_in_background "$history" "$1" "$USER" "$PWD" "$BASH_FULLHIST" "$PTS"
-    if HISTTIMEFORMAT= history 2 | sed 's/^[ 0-9]*//' | uniq -d | grep -q . ; then
-        # duplicated history
+    if is_last_history_duplicate ; then
         lasthist=$( history 1 | awk '{print $1}' )
         # log_to_file append 022 /tmp/hist.$USER.dup "DEBUG: we found a duplicated history line - we will try to delete lasthist=$lasthist"
         # history 10 | hiliteStdErr cat 1>&2 >> /tmp/hist.$USER.dup
@@ -133,7 +144,9 @@ function setup_bash_history_file() {
         #        echo reading history
         HISTSIZE2=$((HISTSIZE*2)) # only an approximation since we
                                   # have multiline history
-        tail -n $HISTSIZE2 "$BASH_FULLHIST" | log_to_file create 022 /tmp/hist.$USER.$$
+        tail -n $HISTSIZE2 "$BASH_FULLHIST" |
+            sed -n '/^#[0-9][0-9][0-9][0-9][0-9][0-9][0-9][0-9][0-9][0-9]\>/,$p' | # make sure history starts with a datestamp so any subsequent multiline entries are correctly interpreted as multiline
+            log_to_file create 022 /tmp/hist.$USER.$$
         history -r /tmp/hist.$USER.$$
         command rm -f /tmp/hist.$USER.$$
 
