@@ -141,6 +141,9 @@ parseinput() {
     colour=$1
     shift
 
+    run_cmd="$1"
+    shift
+
     #assign all uneaten params to an array
     for arg in "$@" ; do
         escaped_arg="$( printf "%q" "$arg" )"
@@ -162,12 +165,22 @@ highlight "$colour" $bright
 
 # output the header if not asked to run the output directly
 if ! $colourall ; then
-    echo "${args[@]}"
-    highlight normal true
+    # strip leading pathnames off command
+    echo -n "${run_cmd##/*/}"
+
+    if [ "${#args[@]}" != 0 ] ; then
+        # then display the splice of the rest of the args
+        echo -n "" "${args[@]}"
+    fi
+    highlight normal   # change the colour back before finishing the
+                       # line, amongst other reasons to make sure
+                       # formatting including background is back to
+                       # normal before the new line is created
+    echo
 fi
 
 normaloutput
-eval "${args[@]}"
+eval "$run_cmd" "${args[@]}"
 exit=$?
 directoutput
 

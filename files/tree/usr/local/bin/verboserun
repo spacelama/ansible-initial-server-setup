@@ -24,9 +24,12 @@ while [[ "$1" == --* ]] ; do
     esac
 done
 
-parent=$( ps --no-header -o cmd -p "$PPID" )
-
 if $verbose ; then
+    parent=$( ps --no-header -o cmd -p "$PPID" |
+                  sed -E 's!^/.*/!!' ) # /bin/bash -> bash (maybe get rid
+                                       # of this entirely if matches
+                                       # bash, ksh, sh?)
+
     colorize --stderr -n bright yellow "$parent: "
 fi
 
