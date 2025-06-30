@@ -337,9 +337,97 @@ config redirect
 	option dest_port '25'
 	option enabled '0'
 
+{#
+# https://forum.openwrt.org/t/chromecast-across-two-subnets/10583/10
+#}
+{#
+# We do not need LAN -> Windows rules, because LAN can talk to all networks
+#
+#config rule
+#	option name 'lan-to-chromecast-5353'
+#	option target 'ACCEPT'
+#	option src 'lan'
+#	option dest '*'
+#	option dest_ip '192.168.7.5'
+#	option dest_port '5353'
+#	list proto 'tcp'
+#	list proto 'udp'
+#
+#config rule
+#	option name 'lan-to-chromecast-1900'
+#	option target 'ACCEPT'
+#	option src 'lan'
+#	option dest '*'
+#	option dest_ip '192.168.7.5'
+#	option dest_port '1900'
+#	list proto 'tcp'
+#	list proto 'udp'
+#
+#config rule
+#	option name 'lan-to-chromecast-8008-8009'
+#	option target 'ACCEPT'
+#	option src 'lan'
+#	option dest '*'
+#	option dest_ip '192.168.7.5'
+#	option dest_port '8008-8009'
+#	list proto 'tcp'
+#
+#config rule
+#	option name 'lan-to-chromecast-10001'
+#	option target 'ACCEPT'
+#	option src 'lan'
+#	option dest '*'
+#	option dest_ip '192.168.7.5'
+#	option dest_port '10001'
+#	list proto 'tcp'
+#
+#config rule
+#	option name 'lan-to-chromecast-5556-5558'
+#	option target 'ACCEPT'
+#	option src 'lan'
+#	option dest '*'
+#	option dest_ip '192.168.7.5'
+#	option dest_port '5556-5558'
+#	list proto 'tcp'
+#	list proto 'udp'
+#
+#config rule
+#	option name 'lan-to-chromecast-1338'
+#	option target 'ACCEPT'
+#	option src 'lan'
+#	option dest '*'
+#	option dest_ip '192.168.7.5'
+#	option dest_port '1338'
+#	list proto 'tcp'
+#	list proto 'udp'
+#
+#config rule
+#	option name 'lan-to-chromecast-multi'
+#	option target 'ACCEPT'
+#	option src 'lan'
+#	option dest '*'
+#	option dest_ip '224.0.0.0/4'
+#	list proto 'tcp'
+#	list proto 'udp'
+#}
+{#
+# But we do need to allow windows to contact everyone on the net who
+# it might need to contact via callbacks
+#}
 config rule
-	option name 'windows-to-chromecast-5353'
+	option name 'chromecast-to-5353'
 	option src 'WINDOWSLAN'
+{#
+
+  Not a very useful firewall for chromecast, but since the packets
+  have to travel to the avahi reflector on gateway, and then be
+  re-emitted by it, all source IPs will come from it, so we have to
+  whitelist itself
+
+#}
+	list src_ip '192.168.7.5'
+{#	list src_ip '192.168.7.203' # for testing #}
+	list src_ip '192.168.7.254'
 	list proto 'tcp'
 	list proto 'udp'
 	option target 'ACCEPT'
@@ -347,17 +435,43 @@ config rule
 	option dest_port '5353'
 
 config rule
-	option name 'windows-to-chromecast-1900'
+	option name 'chromecast-to-1900'
 	option src 'WINDOWSLAN'
+	list src_ip '192.168.7.5'
+{#	list src_ip '192.168.7.203' # for testing #}
+	list src_ip '192.168.7.254'
 	list proto 'tcp'
 	list proto 'udp'
 	option target 'ACCEPT'
 	option dest '*'
 	option dest_port '1900'
 
+{#  Incoming rules not relevant for network of the chromecast
+#config rule
+#	option name '...-to-chromecast-8008-8009'
+#	option target 'ACCEPT'
+#	option src 'lan'
+#	option dest '*'
+#	option dest_ip '192.168.7.5'
+#	option dest_port '8008-8009'
+#	list proto 'tcp'
+#
+#config rule
+#	option name '...-to-chromecast-10001'
+#	option target 'ACCEPT'
+#	option src 'IOTLAN'
+#	option dest '*'
+#	option dest_ip '192.168.7.5'
+#	option dest_port '10001'
+#	list proto 'tcp'
+#
+#}
 config rule
-	option name 'windows-to-chromecast-5556-5558'
+	option name 'chromecast-to-5556-5558'
 	option src 'WINDOWSLAN'
+	list src_ip '192.168.7.5'
+{#	list src_ip '192.168.7.203' # for testing #}
+	list src_ip '192.168.7.254'
 	list proto 'tcp'
 	list proto 'udp'
 	option target 'ACCEPT'
@@ -365,8 +479,11 @@ config rule
 	option dest_port '5556-5558'
 
 config rule
-	option name 'windows-to-chromecast-1338'
+	option name 'chromecast-to-1338'
 	option src 'WINDOWSLAN'
+	list src_ip '192.168.7.5'
+{#	list src_ip '192.168.7.203' # for testing #}
+	list src_ip '192.168.7.254'
 	list proto 'tcp'
 	list proto 'udp'
 	option target 'ACCEPT'
@@ -374,65 +491,141 @@ config rule
 	option dest_port '1338'
 
 config rule
-	option name 'windows-to-chromecast-multi'
+	option name 'chromecast-to-multi'
 	option src 'WINDOWSLAN'
+	list src_ip '192.168.7.5'
+{#	list src_ip '192.168.7.203' # for testing #}
+	list src_ip '192.168.7.254'
 	list proto 'tcp'
 	list proto 'udp'
 	option target 'ACCEPT'
 	option dest '*'
 	option dest_ip '224.0.0.0/4'
+{#
+# Then whatever IOT->chromecast rules are needed
+# (it will need whatever is needed to initiate the connection,
+# but the callbacks on 5353 etc will not be needed)
+#}
+{#
+#config rule
+#	option name 'iot-to-chromecast-5353'
+#	option target 'ACCEPT'
+#	option src 'IOTLAN'
+#	option dest '*'
+#	option dest_ip '192.168.7.5'
+#	option dest_port '5353'
+#	list proto 'tcp'
+#	list proto 'udp'
+#
+#config rule
+#	option name 'iot-to-chromecast-1900'
+#	option target 'ACCEPT'
+#	option src 'IOTLAN'
+#	option dest '*'
+#	option dest_ip '192.168.7.5'
+#	option dest_port '1900'
+#	list proto 'tcp'
+#	list proto 'udp'
+#}
 
 config rule
-	option name 'iot-to-chromecast-5353'
+	option name 'iot-to-chromecast-8008-8009'
 	option src 'IOTLAN'
 	list proto 'tcp'
-	list proto 'udp'
 	option target 'ACCEPT'
 	option dest '*'
-	option dest_port '5353'
+	option dest_ip '192.168.7.5'
+	option dest_port '8008-8009'
 
 config rule
-	option name 'iot-to-chromecast-1900'
+	option name 'iot-to-chromecast-10001'
 	option src 'IOTLAN'
 	list proto 'tcp'
-	list proto 'udp'
 	option target 'ACCEPT'
 	option dest '*'
-	option dest_port '1900'
+	option dest_ip '192.168.7.5'
+	option dest_port '10001'
 
-config rule
-	option name 'iot-to-chromecast-5556-5558'
-	option src 'IOTLAN'
-	list proto 'tcp'
-	list proto 'udp'
-	option target 'ACCEPT'
-	option dest '*'
-	option dest_port '5556-5558'
+{#
+#config rule
+#	option name 'iot-to-chromecast-5556-5558'
+#	option target 'ACCEPT'
+#	option src 'IOTLAN'
+#	option dest '*'
+#	option dest_ip '192.168.7.5'
+#	option dest_port '5556-5558'
+#	list proto 'tcp'
+#	list proto 'udp'
+#
+#config rule
+#	option name 'iot-to-chromecast-1338'
+#	option target 'ACCEPT'
+#	option src 'IOTLAN'
+#	option dest '*'
+#	option dest_ip '192.168.7.5'
+#	option dest_port '1338'
+#	list proto 'tcp'
+#	list proto 'udp'
+#
+#config rule
+#	option name 'iot-to-chromecast-multi'
+#	option target 'ACCEPT'
+#	option src 'IOTLAN'
+#	option dest '*'
+#	option dest_ip '224.0.0.0/4'
+#	list proto 'tcp'
+#	list proto 'udp'
+#}
+{#
+# Finally, these sort of guys?
+# But wait, there's more! Because Chromecast blasts with a TTL of 1, it’ll die when it crosses a subnet. To get around this, I had a custom IPTABLES rule to keep that TTL up:
+# iptables -A PREROUTING -t mangle -p udp —dport 1900 -j TTL-inc 1
+# I also have a handful of other iptables rules that replicate those above:
+# iptables -A INPUT -t filter -i br-lan -p udp —sport 5353 -J ACCEPT
+#}
+{#
+# There's also advice like this:
+# https://community.home-assistant.io/t/chromecast-media-devices-showing-unavailable-in-home-assistant/321814/2
+# https://blog.g3rt.nl/allow-google-chromecast-host-firewall-iptables.html#comment_thread
+export CHROMECAST_IP=10.1.2.3 # Adjust to the Chromecast IP in your local network
+iptables -A INPUT -s ${CHROMECAST_IP}/32 -p udp -m multiport --sports 32768:61000 -m multiport --dports 32768:61000 -m comment --comment "Allow Chromecast UDP data (inbound)" -j ACCEPT
+iptables -A OUTPUT -d ${CHROMECAST_IP}/32 -p udp -m multiport --sports 32768:61000 -m multiport --dports 32768:61000 -m comment --comment "Allow Chromecast UDP data (outbound)" -j ACCEPT
+iptables -A OUTPUT -d ${CHROMECAST_IP}/32 -p tcp -m multiport --dports 8008:8009 -m comment --comment "Allow Chromecast TCP data (outbound)" -j ACCEPT
+iptables -A OUTPUT -d 239.255.255.250/32 -p udp --dport 1900 -m comment --comment "Allow Chromecast SSDP" -j ACCEPT
 
-config rule
-	option name 'iot-to-chromecast-1338'
-	option src 'IOTLAN'
-	list proto 'tcp'
-	list proto 'udp'
-	option target 'ACCEPT'
-	option dest '*'
-	option dest_port '1338'
+#
 
-config rule
-	option name 'iot-to-chromecast-multi'
-	option src 'IOTLAN'
-	list proto 'tcp'
-	list proto 'udp'
-	option target 'ACCEPT'
-	option dest '*'
-	option dest_ip '224.0.0.0/4'
+Allow high UDP ports both incoming and outgoing.
+"High ports" are the local ports usually ranging 32768-61000 on most Linux systems.
 
+Allow both TCP ports 8008 and 8009 outbound to the Chromecast device.
+I've noticed most reference only use 8008, but that did not do it for me and saw outbound connection to port 8009 being blocked.
+
+Allow the special SSDP packets outbound (which is UDP traffic to the multicast IP 239.255.255.250, destination port 1900).
+As far as I understand, a Chromecast app should send information over SSDP if it wants to discover the Chromecasts in the network. The Chromecast should then reply to the source IP it was given.
+
+#}
 config rule
 	option name 'internal.windows-to-http'
 	option src 'WINDOWSLAN'
 	list proto 'tcp'
 	option target 'ACCEPT'
 	option dest '*'
+	list dest_ip '192.168.1.6'
+	list dest_ip '192.168.1.7'
+	list dest_ip '192.168.1.8'
+	list dest_ip '192.168.1.11'
+	list dest_ip '192.168.1.12'
+	list dest_ip '192.168.1.18'
+	list dest_ip '192.168.1.61'
+	list dest_ip '192.168.1.90'
+	list dest_ip '192.168.4.1'
+	list dest_ip '192.168.1.254'
+	list dest_ip '192.168.1.252'
+	list dest_ip '192.168.1.251'
+	list dest_ip '192.168.1.250'
+	list dest_ip '192.168.1.244'
+	list dest_ip '192.168.1.243'
 	option dest_port '80'
 
 config rule
@@ -441,6 +634,21 @@ config rule
 	list proto 'tcp'
 	option target 'ACCEPT'
 	option dest '*'
+	list dest_ip '192.168.1.6'
+	list dest_ip '192.168.1.7'
+	list dest_ip '192.168.1.8'
+	list dest_ip '192.168.1.11'
+	list dest_ip '192.168.1.12'
+	list dest_ip '192.168.1.18'
+	list dest_ip '192.168.1.61'
+	list dest_ip '192.168.1.90'
+	list dest_ip '192.168.4.1'
+	list dest_ip '192.168.1.254'
+	list dest_ip '192.168.1.252'
+	list dest_ip '192.168.1.251'
+	list dest_ip '192.168.1.250'
+	list dest_ip '192.168.1.244'
+	list dest_ip '192.168.1.243'
 	option dest_port '443'
 
 config rule
@@ -449,6 +657,7 @@ config rule
 	list proto 'tcp'
 	option target 'ACCEPT'
 	option dest '*'
+	list dest_ip '192.168.1.18'
 	option dest_port '80'
 
 config rule
@@ -457,6 +666,7 @@ config rule
 	list proto 'tcp'
 	option target 'ACCEPT'
 	option dest '*'
+	list dest_ip '192.168.1.18'
 	option dest_port '443'
 
 config rule
