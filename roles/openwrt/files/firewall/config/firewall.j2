@@ -338,6 +338,35 @@ config redirect
 	option enabled '0'
 
 {#
+
+  The setup below allows me to cast from my phone and desktop, or a
+  laptop attached to any of the LAN1, IOT4 and WINDOWS7 VLANs, via
+  mkchromecast to the lounge TV.
+
+  It is not minimal, and can be much reduced via
+  https://forum.netgate.com/topic/142258/chromecast-audio-video-between-vlans
+
+  Some ports do not appear necessary - I added 10001, because I saw it
+  open on the chromecast, not because I needed it.  9000 is also
+  listening, but I did not open it.  224.0.0.0/4 should be much locked
+  down per above (5353 is not working because of the rules below, it
+  is only working because we have already allowed 224.0.0.0/4 wide
+  open, but I am wanting to experiment with cam-rear and cam-garage
+  too (not that I need to, but it has been causing problems lately).
+
+  udprelay may be needed too, per
+  https://redmine.pfsense.org/issues/10818
+  https://forum.netgate.com/topic/155698/how-can-i-get-this-udp-relay-package-for-casting-across-vlans
+  ? (udp-broadcast-relay-redux in openwrt?)
+
+  As one of those URLs states, google keep updating the firmware,
+  which is essentially just an undocumented chrome browser in a
+  blockbox, so individual networks might need ad-hoc changes to add a
+  new side channel they've added.
+
+#}
+
+{#
 # https://forum.openwrt.org/t/chromecast-across-two-subnets/10583/10
 #}
 {#
@@ -370,6 +399,15 @@ config redirect
 #	option dest '*'
 #	option dest_ip '192.168.7.5'
 #	option dest_port '8008-8009'
+#	list proto 'tcp'
+#
+#config rule
+#	option name 'lan-to-chromecast-9000'
+#	option target 'ACCEPT'
+#	option src 'lan'
+#	option dest '*'
+#	option dest_ip '192.168.7.5'
+#	option dest_port '9000'
 #	list proto 'tcp'
 #
 #config rule
@@ -446,20 +484,29 @@ config rule
 	option dest '*'
 	option dest_port '1900'
 
-{#  Incoming rules not relevant for network of the chromecast
+{#  Incoming rules not relevant for the same network of the chromecast
 #config rule
-#	option name '...-to-chromecast-8008-8009'
+#	option name 'windows-to-chromecast-8008-8009'
 #	option target 'ACCEPT'
-#	option src 'lan'
+#	option src 'WINDOWSLAN'
 #	option dest '*'
 #	option dest_ip '192.168.7.5'
 #	option dest_port '8008-8009'
 #	list proto 'tcp'
 #
 #config rule
-#	option name '...-to-chromecast-10001'
+#	option name 'windows-to-chromecast-9000'
 #	option target 'ACCEPT'
-#	option src 'IOTLAN'
+#	option src 'WINDOWSLAN'
+#	option dest '*'
+#	option dest_ip '192.168.7.5'
+#	option dest_port '9000'
+#	list proto 'tcp'
+#
+#config rule
+#	option name 'windows-to-chromecast-10001'
+#	option target 'ACCEPT'
+#	option src 'WINDOWSLAN'
 #	option dest '*'
 #	option dest_ip '192.168.7.5'
 #	option dest_port '10001'
@@ -491,11 +538,11 @@ config rule
 	option dest_port '1338'
 
 config rule
-	option name 'chromecast-to-multi'
+	option name 'windows-to-multi'
 	option src 'WINDOWSLAN'
-	list src_ip '192.168.7.5'
+{#	list src_ip '192.168.7.5' #}
 {#	list src_ip '192.168.7.203' # for testing #}
-	list src_ip '192.168.7.254'
+{#	list src_ip '192.168.7.254' #}
 	list proto 'tcp'
 	list proto 'udp'
 	option target 'ACCEPT'
@@ -538,6 +585,15 @@ config rule
 	option dest_port '8008-8009'
 
 config rule
+	option name 'iot-to-chromecast-9000'
+	option src 'IOTLAN'
+	list proto 'tcp'
+	option target 'ACCEPT'
+	option dest '*'
+	option dest_ip '192.168.7.5'
+	option dest_port '9000'
+
+config rule
 	option name 'iot-to-chromecast-10001'
 	option src 'IOTLAN'
 	list proto 'tcp'
@@ -567,15 +623,16 @@ config rule
 #	list proto 'tcp'
 #	list proto 'udp'
 #
-#config rule
-#	option name 'iot-to-chromecast-multi'
-#	option target 'ACCEPT'
-#	option src 'IOTLAN'
-#	option dest '*'
-#	option dest_ip '224.0.0.0/4'
-#	list proto 'tcp'
-#	list proto 'udp'
 #}
+config rule
+	option name 'iot-to-multi'
+	option src 'IOTLAN'
+	list proto 'tcp'
+	list proto 'udp'
+	option target 'ACCEPT'
+	option dest '*'
+	option dest_ip '224.0.0.0/4'
+
 {#
 # Finally, these sort of guys?
 # But wait, there's more! Because Chromecast blasts with a TTL of 1, it’ll die when it crosses a subnet. To get around this, I had a custom IPTABLES rule to keep that TTL up:
