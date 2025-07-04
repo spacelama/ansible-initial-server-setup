@@ -202,6 +202,9 @@ function setup_environment() {
     # #877582 -  https://unix.stackexchange.com/questions/258679/why-is-ls-suddenly-wrapping-items-with-spaces-in-single-quotes
     export QUOTING_STYLE=literal
 
+    export PROMPT_USER_ANSI=$'\[\e[1;36m\]'
+    export ANSI_RESET=$'\e[0m'
+
     #export GREP_OPTIONS='--color=auto'
     #export LS_OPTIONS #no such thing, cant remove the aliases
 
