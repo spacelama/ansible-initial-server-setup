@@ -67,6 +67,7 @@ function preexec_hook() {
     #            generatetitle "$BASH_COMMAND" # doesn't expand out sleep $i etc, so might as well use the full snippet:
     generatetitle "$1"
     writetohistory
+    echo -n "$ANSI_RESET"
     if [ -n "$EXTRA_PROMPT_PRE" ] && type -t $EXTRA_PROMPT_PRE 1>/dev/null ; then
         $EXTRA_PROMPT_PRE
     fi
@@ -181,14 +182,15 @@ if [ "$SMALLPROMPT" = yes ] ; then
                       # set, giving us a chance to affect jobs just
                       # backgrounded
         if [ "$PWD" != "$HOME" ] ; then
-            PS1=$(
+            PS1="$(
                 colorize --PS1prompt bright red -n '$?-'
                 colorize --PS1prompt bright green -n '\W'
                 colorize --PS1prompt bright red -n ':\t: '
-               )
+               )"
         else
-            PS1=$(colorize --PS1prompt bright red -n '$?-\t: ')
+            PS1="$(colorize --PS1prompt bright red -n '$?-\t: ')"
         fi
+        PS1="$PS1$PROMPT_USER_ANSI"
         tmpSMALLPROMPT="$SMALLPROMPT"
         tmpSMALLPROMPTCOLOUR="$SMALLPROMPTCOLOUR"
         unset SMALLPROMPT ; unset SMALLPROMPTCOLOUR ; SMALLPROMPT="$tmpSMALLPROMPT" ; SMALLPROMPTCOLOUR="$tmpSMALLPROMPTCOLOUR"
@@ -250,7 +252,7 @@ else
         PS1_POST=" ($shell"')\n'"${bold}"': \!,\#;'"${norm} "
         GIT_PROMPT_START_USER="$PS1_PRE"
         GIT_PROMPT_START_ROOT="$GIT_PROMPT_START_USER"
-        GIT_PROMPT_END_USER="$PS1_POST"
+        GIT_PROMPT_END_USER="$PS1_POST$PROMPT_USER_ANSI"
         GIT_PROMPT_END_ROOT="$GIT_PROMPT_END_USER"
         GIT_PROMPT_LAST_COMMAND_STATE=0  # just a dummy we don't care about
         [ -z "$IGNORE_GIT_PROMPT" ] && setGitPrompt  # from ~/bash-git-prompt/
