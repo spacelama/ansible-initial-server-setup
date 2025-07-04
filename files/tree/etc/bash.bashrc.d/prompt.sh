@@ -28,10 +28,9 @@
 # already optimised this (and will fix it when bash 5.3 comes out)
 
 function setup_preexec_hook() {
-    if [ -z "$NONINTERACT" ] ; then
+    if [ -z "$NONINTERACT" ] && [ -n "$PS1" ] ; then
         local prior_PROMPT_COMMAND="$PROMPT_COMMAND"
         unset PROMPT_COMMAND
-
 
         preexec_functions+=(preexec_hook)
         precmd_functions+=("$prior_PROMPT_COMMAND")
