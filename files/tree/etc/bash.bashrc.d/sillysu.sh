@@ -26,11 +26,10 @@ function sillysu() {
             unset BASH_PROFILE_EXECUTED PROFILE_EXECUTED BASHRC_EXECUTED http_proxy HTTP_PROXY ftp_proxy WWW_http_GATEWAY no_proxy
             # command - quote
             # no need to make COMMAND an array - bash will merge it anyway
-            COMMAND=
-	    while (( $# > 0 )); do
-		arg=$(printf "%q" "$1")
+            COMMAND="$1" ; shift
+	    for arg in "$@"; do
+		arg=$(printf "%q" "$arg")
 		COMMAND="${COMMAND} ${arg}"
-		shift
 	    done
 
             sudo env PUSER=$USER bash --login -c "${COMMAND}"
