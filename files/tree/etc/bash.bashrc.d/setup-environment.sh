@@ -1,6 +1,46 @@
 # -*- Mode: shell-script -*-
 # shellcheck shell=bash
 
+function warn_profile_path_not_allowlisted() {
+    echo "Caution: '$*' hasn't been allowlisted or blocked from setup_profile_files()" 1>&2
+}
+function blocking_of_sourcing() {
+    echo "WARNING: '$*' has been blocked from setup_profile_files()" 1>&2
+}
+
+function setup_profile_files() {
+    declare -A etc_profile_allowlist=(
+        [apps-bin-path]=true
+        [bash_completion]=true
+        [flatpak]=true
+        [gawk]=true
+        #[gnome-session_gnomerc]=blocking_of_sourcing
+        #[gnome-session_gnomerc]=false
+        [gnome-session_gnomerc]=true
+        [vte-2.91]=true
+    )
+
+    local i=
+    for i in /etc/profile.d/*.sh ; do
+        if [ -e "$i" ] ; then
+            local file_base="${i#/etc/profile.d/}"
+            file_base="${file_base%.sh}"
+
+            allowlisted="${etc_profile_allowlist[$file_base]:-warn_profile_path_not_allowlisted}"
+
+            if $allowlisted "$i" ; then
+                # echo sourcing "$i" 1>&2
+                #local e_b=$( env )
+                . "$i"
+                #local e_a=$( env )
+                #colordiff -ub <( echo "$e_b" ) <( echo "$e_a") || echo "env: modified by $i"
+#            else
+#                echo blocking of sourcing of "$i" 1>&2
+            fi
+        fi
+    done
+}
+
 # add all the other bash settings we care about, paths, etc, that
 # would normally have gone in .bash_profile
 function setup_environment() {
@@ -35,16 +75,9 @@ function setup_environment() {
 
 #    echo OS=$OS 1>&2
 
-    if [ -z "$NONINTERACT" ] ; then
-        setup_bash_settings
-        setup_aliases
-        setup_remote_aliases
-        #        setup_cmd
-    fi
-
-    if [ -z "$NONINTERACT" -a -f /etc/bash_completion -a -z "$BASH_COMPLETION" ]; then
-        [ -e /etc/profile.d/bash_completion.sh ] && . /etc/profile.d/bash_completion.sh
-    fi
+#    if [ -z "$NONINTERACT" -a -f /etc/bash_completion -a -z "$BASH_COMPLETION" ]; then
+#        [ -e /etc/profile.d/bash_completion.sh ] && . /etc/profile.d/bash_completion.sh
+#    fi
 
 #    case "$SYSTEM" in
 #        Darwin*)
@@ -75,6 +108,15 @@ function setup_environment() {
         export LD_PRELOAD=$LD_PRELOAD_SAVE
     fi
 
+    if [ -z "$NONINTERACT" ] && [ -n "$PS1" ] ; then
+        # set -xv
+        setup_bash_settings
+        setup_aliases
+        setup_remote_aliases
+        setup_profile_files
+        # set +xv
+        #        setup_cmd
+    fi
 
     if [ "$OS" != SunOS  ] ; then
         #  if [ -e /etc/redhat-release ] ; then  #I wonder if rucking fedhat will ever fix their buggy shite?
