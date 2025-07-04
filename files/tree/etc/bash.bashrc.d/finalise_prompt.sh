@@ -16,7 +16,7 @@
 # PROMPT_COMMAND but not actually initialise, so we eval the now
 # modified PROMPT_COMMAND again, which actually runs the bash-preexec
 # prompt hooks properly this time.
-[ -z "$NONINTERACT" ] && PROMPT_COMMAND='handleprompt_initialise ; eval "$PROMPT_COMMAND"'
+[ -z "$NONINTERACT" ] && [ -n "$PS1" ] && PROMPT_COMMAND='handleprompt_initialise ; eval "$PROMPT_COMMAND"'
 
 # handleprompt_initialise is called as the last thing after invoking
 # all shell login bashrc etc functions, before displaying the prompt,
@@ -35,10 +35,13 @@ function handleprompt_initialise() {
     # bash-preexec to get our actual prompt handler
     unset PROMPT_COMMAND
 
-    setup_environment
-    finalise_prompt
-    finalise_login
-    writetohistory "@$HOSTNAME OPEN"
+#    if [ -z "$NO_BASHRC" ] ; then
+    if [ -z "$NO_BASHRC" -a -n "$PS1" ] ; then
+        setup_environment
+        finalise_prompt
+        finalise_login
+        writetohistory "@$HOSTNAME OPEN"
+    fi
 }
 
 function finalise_login() {
@@ -51,7 +54,7 @@ if [ "$SMALLPROMPT" = yes ] ; then
     }
 else
     function finalise_prompt() {
-        if [ -z "$NONINTERACT" ] ; then
+        if [ -z "$NONINTERACT" ] && [ -n "$PS1" ] ; then
             if [ -z "$GIT_PROMPT_HAS_RUN" ] ; then
                 ESC=`echo -ne '\033'`
                 if [ -e /etc/bash-git-prompt/gitprompt.sh ] ; then

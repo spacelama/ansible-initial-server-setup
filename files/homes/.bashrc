@@ -60,7 +60,7 @@ if [ -f  ~/.bash_profile -a -z "$BASH_PROFILE_EXECUTED" ] ; then
 fi
 #echo 8 1>&2
 
-if [ -z "$NONINTERACT" -a -z "$PBS_ENVIRONMENT" ] ; then
+if [ -z "$NONINTERACT" -a -n "$PS1" -a -z "$PBS_ENVIRONMENT" ] ; then
     (
         # only display /etc/motd once per change
         hushlogin=".hushlogin.$SHORTHOST"
