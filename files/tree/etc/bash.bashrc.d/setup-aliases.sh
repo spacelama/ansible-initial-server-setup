@@ -50,6 +50,8 @@ function setup_aliases() {
     alias crontab='crontab -i'
     alias ecrontab='crontab -e'
     alias info=pinfo
+    alias perlfunc='perldoc -f'
+    alias bashfunc='help'
     alias c='yes "" | head -n28'
 
     #https://stackoverflow.com/questions/15292391/is-it-possible-to-perform-a-grep-search-in-all-the-branches-of-a-git-project
@@ -91,6 +93,12 @@ function setup_aliases() {
         else
             pushd "$@"
         fi > /dev/null
+    }
+    function cdrun() {
+        (
+            cd "$1" ; shift
+            eval "$@"
+        )
     }
     function fg() {
         if [ x"$*" != x ] ; then
