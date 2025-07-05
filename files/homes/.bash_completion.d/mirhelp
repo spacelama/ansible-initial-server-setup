@@ -1,0 +1,10 @@
+# -*- Mode: shell-script -*-
+_mirhelp()
+{
+        local cur
+
+        cur=${COMP_WORDS[COMP_CWORD]}
+
+        COMPREPLY=( $( compgen -W '$( command ls $MIRPDOC | sed "s!^.*/!! ; s!\\.doc!!" )' -- $cur ) )
+}
+complete -F _mirhelp mirhelp

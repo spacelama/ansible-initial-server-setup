@@ -1,0 +1,5 @@
+# -*- Mode: shell-script -*-
+
+# FIXME: be nice to allow directories too...
+
+complete -f -X '!*.@(Z|gz|tgz|Gz|dz|bz2)' gunzip zcmp zdiff zcat zegrep zfgrep zgrep zless zmore

@@ -1,0 +1,18 @@
+# -*- Mode: shell-script -*-
+
+_procs()
+{
+	COMPREPLY=( $( compgen -W '$( command ps axo comm | sed 1d )' -- $cur ) )
+}
+
+_ps()
+{
+        local cur
+
+        COMPREPLY=()
+        cur=${COMP_WORDS[COMP_CWORD]}
+
+        # return list of available PIDs
+        _pids
+}
+complete -F _ps ps
