@@ -13,7 +13,8 @@ function exitcleanly() {
 }
 
 function readfromhistory() {
-    history -r
+    # used to do `history -r`, but we've replaced bash's inbuilt history file handling
+    setup_bash_history_file
 }
 
 # Implement per-directory bash history file:
