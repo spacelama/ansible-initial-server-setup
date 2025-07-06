@@ -1,6 +1,0 @@
-# -*- Mode: shell-script -*-
-
-#shopt -u hostcomplete && echo yup && _xfunc ssh _ssh && echo nup && complete -F _ssh fsh
-
-. /usr/share/bash-completion/completions/ssh
-complete -F _ssh fsh

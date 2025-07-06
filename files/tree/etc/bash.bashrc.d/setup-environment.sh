@@ -114,7 +114,6 @@ function setup_environment() {
         setup_aliases
         setup_remote_aliases
         setup_profile_files
-        setup_home_bash_completion
         # set +xv
         #        setup_cmd
     fi

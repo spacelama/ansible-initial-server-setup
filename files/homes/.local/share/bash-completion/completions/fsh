@@ -1,0 +1,8 @@
+# -*- Mode: shell-script -*-
+
+_ssh_stub() {
+    . /usr/share/bash-completion/completions/ssh
+    _ssh "$@"
+}
+
+shopt -u hostcomplete && complete -F _ssh_stub fsh
