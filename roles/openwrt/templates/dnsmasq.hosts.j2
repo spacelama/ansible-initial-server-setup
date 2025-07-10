@@ -1,3 +1,11 @@
+{#
+
+  This file is for static definitions of resources if you have not
+  defined an IP in DHCP reservations because that does not make sense,
+  or to set CNAMES to non-DHCP managed resources (eg load balancers)
+
+#}
+
 192.168.4.1   onti1
 192.168.1.249 switch
 192.168.1.254 gateway
@@ -13,25 +21,50 @@
 192.168.1.245 ap1
 192.168.1.244 ap2
 {#
-  pve entries are to ensure reverse DNS is correct (even though
-  that IP is already defined in DHCP reservations, for the sake of
-  DHCP MAC mappings; since these hosts don't request DHCP, they don't
-  show up in DNS reverse mappings)
-#}
-192.168.1.6 pve2
-192.168.1.7 pve3
-192.168.1.8 pve1
 
+  A previous example has since been moved to just being a straight
+  CNAME to our already existing webserver:
+
+  pve entries are to ensure reverse DNS is correct (even though that
+  IP is already defined in DHCP reservations, for the sake of DHCP MAC
+  mappings; since these hosts do not request DHCP, they do not show up
+  in DNS reverse mappings)
+
+  192.168.1.6 pve2
+  192.168.1.7 pve3
+  192.168.1.8 pve1
+
+#}
 {#
+
+  Likewise, before we moved our internal split-DNS entry for our
+  webserver being just the internal webserver rather than the external
+  IP, we used this:
+
+  Allow all internal network traffic (regardless of VLAN - the
+  firewall allows ingress onto that machine port 80/443) think that
+  rather.puzzling.org is directly our internal machine, so we can get
+  accurate source address logging instead of logging all such requests
+  come from our gateway.  But then we need an internal DNS alias with
+  `webserver` in front of `rather.puzzling.org` even though it is
+  already set that way through the DHCP reservations, otherwise the
+  webserver host itself thinks its FQDN is rather.puzzling.org
+
+  Have moved this to dhcp reservations like pve below...
+
+  192.168.1.18 webserver.rather.puzzling.org webserver rather.puzzling.org
+#}
+{#
+
   And our pve loadbalancer on webserver that forwards onto
   pve1,pve2,pve3.  We could have also just done it here by assigning
   all three nodes to DNS and sharing SSL certs, but that would be
   suboptimal when there's an outage. See also:
   https://github.com/lae/ansible-role-proxmox/blob/develop/tasks/ssl_config.yml
-#}
-{#
+
   Although we actually end up implementing this through CNAMEs in
   dhcp.reservation so that DNS reverse lookup doesn't return a
   misleading representation of what 192.168.1.18 actually is...
+
+  192.168.1.18 pve
 #}
-# 192.168.1.18 pve
