@@ -167,7 +167,7 @@ config rule
 	option enabled '0'
 
 config rule
-	option name 'Drop IOT devices that are not trusted for external usage (eg 192.168.4.126 panasonic-tv, onti switch 1)'
+	option name 'Drop IOT devices that are not trusted for external usage (eg 192.168.4.126 panasonic-tv, onti1 switches)'
 	option src 'IOTLAN'
 	list src_mac '24:EC:99:7B:F5:59'
 	list src_mac '8C:1F:64:9A:C8:EC'
@@ -220,31 +220,17 @@ config rule
 	option dest 'lan'
 	option dest_port '500'
 
-config include
-	option path '/etc/firewall.user'
-
-config redirect
-	option name 'http.webserver.windows'
-	option src 'WINDOWSLAN'
-	option src_dport '80'
-	option src_dip '122.199.47.107'
-	list proto 'tcp'
-	option target 'DNAT'
-	option dest 'lan'
-	option dest_ip '192.168.1.18'
-	option dest_port '80'
-
-config redirect
-	option name 'https.webserver.windows'
-	option src 'WINDOWSLAN'
-	option src_dport '443'
-	option src_dip '122.199.47.107'
-	list proto 'tcp'
-	option target 'DNAT'
-	option dest 'lan'
-	option dest_ip '192.168.1.18'
-	option dest_port '443'
-
+{#
+# https://openwrt.org/docs/guide-user/firewall/firewall_configuration#includes_2203_and_later_with_fw4
+# position choices: {ruleset,table,chain}-{pre,post}
+# chain: `fw4 print | grep chain`
+#
+#config include
+#	option	type		'nftables'
+#	option	path		'/etc/firewall.user.chain:input-wan-pre.nft'
+#	option	position	'chain-pre'
+#	option	chain		'input_wan'
+#}
 config redirect
 	option name 'http.webserver.wan'
 	option src 'wan'

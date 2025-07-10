@@ -167,22 +167,13 @@
 - name: setup dhcp reservations
   copy:
     dest: /etc/config/dhcp
-    content: "{{ lookup('template', 'dhcp.head.{{ type }}.j2')}}\n\n{{lookup('template', 'dhcp.reservations.j2') }}\n"
+    content: "# ANSIBLE template dhcp.head.{{ type }}.j2\n{{ lookup('template', 'dhcp.head.{{ type }}.j2')}}\n\n# ANSIBLE template dhcp.reservations.j2\n{{lookup('template', 'dhcp.reservations.j2') }}\n"
   notify: restart dnsmasq
 
-- name: get public IP address
-  command: get_public_ip_address
-  register: public_ip_address
-  delegate_to: localhost
-  run_once: true
-  check_mode: no
-  changed_when: false
-
-- name: make sure a basic /etc/dnsmasq.tmphosts file exists so can be managed by monitor_iot.worker
-  copy:
+- name: No need for /etc/dnsmasq.tmphosts anymore
+  file:
     dest: /etc/dnsmasq.tmphosts
-    content: "{{ public_ip_address.stdout }} {{ domain }}\n"
-  notify: restart dnsmasq
+    state: absent
 
 - name: setup dnsmasq hosts
   template:
