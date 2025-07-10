@@ -62,7 +62,14 @@ config cname
 	option target 'debian-bookworm-lxc-test1.rather.puzzling.org'
 
 {#
+
   And now just standard host DHCP reservations
+
+#}
+{#
+
+  Laptops, workstations, phones and watches
+
 #}
 config host
 	option ip '192.168.1.123'
@@ -85,6 +92,13 @@ config host
 	option name 'maxwell'
 	option dns '1'
 
+{#
+#config host
+#	option ip '192.168.1.18'
+#	option mac '70:54:d2:90:a2:52'
+#	option name 'pauli'
+#	option dns '1'
+#}
 config host
 	option ip '192.168.1.36'
 	option mac '74:40:bb:d4:48:07'
@@ -104,34 +118,46 @@ config host
 	option dns '1'
 
 config host
+	option ip '192.168.1.117'
+	option mac '0a:8b:d6:fc:43:c1'
+	option name 'dirac-new'
+	option dns '1'
+
+config host
 	option ip '192.168.1.19'
 	option mac 'bc:24:11:d2:40:c5'
 	option name 'work'
 	option dns '1'
 
 config host
-	option name 'zte'
+	option ip '192.168.4.39'
+	option mac 'F8:9E:94:B7:C9:51'
+	option name 'ntt'
 	option dns '1'
-	option mac 'B0:C1:9E:10:B2:79'
-	option ip '192.168.1.106'
 
 config host
+	option ip '192.168.1.106'
+	option mac 'B0:C1:9E:10:B2:79'
+	option name 'zte'
+	option dns '1'
+
+config host
+	option ip '192.168.7.33'
 	option mac '18:D0:C5:DF:EC:EF'
 	option name 'oppo'
 	option dns '1'
-	option ip '192.168.7.33'
 
 config host
+	option ip '192.168.1.32'
 	option mac 'AC:3E:B1:01:91:23'
 	option name 'pixel'
 	option dns '1'
-	option ip '192.168.1.32'
 
 config host
+	option ip '192.168.1.31'
 	option mac '26:48:A7:DD:10:FA FE:C1:C1:C5:30:E7 F2:18:24:D9:C9:33 1E:5D:0C:91:28:50'
 	option name 'watch'
 	option dns '1'
-	option ip '192.168.1.31'
 
 config host
 	option ip '192.168.1.34'
@@ -140,9 +166,79 @@ config host
 	option dns '1'
 
 config host
+	option ip '192.168.1.35'
+	option mac '2c:59:8a:60:80:e8'
+	option name 'nexus'
+	option dns '1'
+
+{#
+
+  Converged hypervisors
+
+#}
+config host
+	option ip '192.168.1.5'
+	option mac 'f0:1f:af:d9:75:20'
+	option name 'pve-ceph-network-placeholder'
+	option dns '1'
+
+config host
+	option ip '192.168.1.8'
+	option mac '18:66:da:e7:83:74'
+	option name 'pve1'
+	option dns '1'
+
+config host
+	option ip '192.168.1.6'
+	option mac '04:42:1a:2d:76:29'
+	option name 'pve2'
+	option dns '1'
+
+config host
+	option ip '192.168.1.7'
+	option mac '98:90:96:cb:dc:89'
+	option name 'pve3'
+	option dns '1'
+
+config host
+	option ip '192.168.1.9'
+	option mac '44:a8:42:03:69:d0'
+	option name 'pve-backup'
+	option dns '1'
+
+config host
+	option ip '192.168.1.10'
+	option mac 'f0:1f:af:d9:75:22'
+	option name 'idrac-r520'
+	option dns '1'
+
+config host
+	option ip '192.168.1.11'
+	option mac '18:66:da:62:ce:a3'
+	option name 'idrac-r730xd'
+	option dns '1'
+
+config host
+	option ip '192.168.1.12'
+	option mac '44:A8:42:15:1F:4B'
+	option name 'idrac-r730xd2'
+	option dns '1'
+
+{#
+
+  Services
+
+#}
+config host
 	option ip '192.168.1.2'
 	option mac '00:14:fd:16:21:e4'
 	option name 'fs'
+	option dns '1'
+
+config host
+	option ip '192.168.1.102'
+	option mac 'ea:0d:d5:6e:9c:eb'
+	option name 'fs-new'
 	option dns '1'
 
 config host
@@ -176,11 +272,59 @@ config host
 	option dns '1'
 
 config host
+	option ip '192.168.1.90'
+	option mac '0e:0a:a4:5e:6c:7b'
+	option name 'homeassistant'
+	option dns '1'
+
+config host
+	option ip '192.168.1.91'
+	option mac '06:de:ad:b9:7b:f4'
+	option name 'hass-debian'
+	option dns '1'
+
+config host
+	option ip '192.168.1.201'
+	option mac 'D6:ED:7A:5B:80:73'
+	option name 'zm'
+	option dns '1'
+
+config host
+	option ip '192.168.1.202'
+	option mac '22:46:AA:EB:A5:91'
+	option name 'zm12'
+	option dns '1'
+
+config host
+	option ip '192.168.7.203'
+	option mac '76:FF:0B:38:8D:F8'
+	option name 'jellyfin'
+	option dns '1'
+
+config host
+	option ip '192.168.1.204'
+	option mac 'EA:0D:29:A1:EE:D1'
+	option name 'syslog'
+	option dns '1'
+
+config host
+	option ip '192.168.4.204'
+	option mac 'BC:24:11:18:E9:9C'
+	option name 'syslog-4'
+	option dns '1'
+{#      actually defined statically in proxmox to ease DHCP client configuration, but left here as documentation #}
+
+config host
 	option ip '192.168.4.35'
 	option mac '62:4B:A4:18:99:E2'
 	option name 'debian-bookworm-lxc-test1'
 	option dns '1'
 
+{#
+
+  Mostly trusted (and legacy) IoT devices
+
+#}
 {# Will become the kitchen light #}
 config host
 	option ip '192.168.1.52'
@@ -198,6 +342,180 @@ config host
 	option ip '192.168.1.58'
 	option mac '84:f3:eb:59:e6:ae'
 	option name 'ledstrip'
+	option dns '1'
+
+config host
+	option ip '192.168.1.60'
+	option mac '98:CD:AC:23:5D:8E'
+	option name 'pvebackup-power'
+	option dns '1'
+
+config host
+	option ip '192.168.1.61'
+	option mac 'c4:4f:33:a6:84:95'
+	option name 'ac-power'
+	option dns '1'
+
+config host
+	option ip '192.168.1.62'
+	option mac '80:7d:3a:6b:87:c4'
+	option name 'loungeroomlights-power'
+	option dns '1'
+
+config host
+	option ip '192.168.1.63'
+	option mac 'cc:50:e3:02:7c:de'
+	option name 'bedroomlights-power'
+	option dns '1'
+
+config host
+	option ip '192.168.1.64'
+	option mac 'CC:50:E3:68:28:B9'
+	option name 'patiolights-power'
+	option dns '1'
+
+config host
+	option ip '192.168.1.65'
+	option mac '40:f5:20:f0:a8:ee'
+	option name 'studio-power'
+	option dns '1'
+
+config host
+	option ip '192.168.1.66'
+	option mac '4c:eb:d6:02:78:cd'
+	option name 'garagelights-power'
+	option dns '1'
+
+config host
+	option ip '192.168.1.67'
+	option mac 'a4:cf:12:b7:93:df'
+	option name 'heatedseat-power'
+	option dns '1'
+
+config host
+	option ip '192.168.1.68'
+	option mac 'C4:4F:33:87:A1:F7'
+	option name 'beerfridges-power'
+	option dns '1'
+
+config host
+	option ip '192.168.1.69'
+	option mac '4c:eb:d6:d7:81:83'
+	option name 'brewfridge-power'
+	option dns '1'
+
+config host
+	option ip '192.168.1.70'
+	option mac 'CC:50:E3:68:52:1E'
+	option name 'laundrylights-power'
+	option dns '1'
+
+config host
+	option ip '192.168.1.71'
+	option mac 'C4:DD:57:07:EE:55'
+	option name 'christmaslights-power'
+	option dns '1'
+
+config host
+	option ip '192.168.1.72'
+	option mac 'CC:50:E3:68:51:CD'
+	option name 'studio-power2'
+	option dns '1'
+
+config host
+	option ip '192.168.1.73'
+	option mac '50:02:91:1A:2E:69'
+	option name 'aquaheater-power'
+	option dns '1'
+
+config host
+	option ip '192.168.1.74'
+	option mac '50:02:91:11:CA:7E'
+	option name 'measure-power'
+	option dns '1'
+
+config host
+	option ip '192.168.1.75'
+	option mac '4c:eb:d6:02:78:df'
+	option name 'panasonic-power'
+	option dns '1'
+
+config host
+	option ip '192.168.1.76'
+	option mac '50:02:91:1A:2E:E5'
+	option name 'aquapump-power'
+	option dns '1'
+
+config host
+	option ip '192.168.1.77'
+	option mac 'c4:4f:33:a8:eb:9b'
+	option name 'washingmachine-power'
+	option dns '1'
+
+config host
+	option ip '192.168.1.78'
+	option mac 'E0:98:06:C6:D9:00'
+	option name 'chromecast-lounge-power'
+	option dns '1'
+
+config host
+	option ip '192.168.1.79'
+	option mac 'cc:50:e3:68:4d:fc'
+	option name 'angela-power'
+	option dns '1'
+
+config host
+	option ip '192.168.1.80'
+	option mac '34:ab:95:a7:89:2a'
+	option name 'electricblanket-power'
+	option dns '1'
+
+config host
+	option ip '192.168.1.81'
+	option mac 'e0:98:06:f1:86:10'
+	option name 'loungefrontlight-power'
+	option dns '1'
+
+config host
+	option ip '192.168.1.82'
+	option mac '84:e3:42:e4:f1:1e'
+	option name 'study-power'
+	option dns '1'
+
+config host
+	option ip '192.168.1.83'
+	option mac '3c:61:05:14:ba:d0'
+	option name 'airmon1'
+	option dns '1'
+
+config host
+	option ip '192.168.1.84'
+	option mac '84:f3:eb:59:e5:cf'
+	option name 'batterymon1'
+	option dns '1'
+
+config host
+	option ip '192.168.1.85'
+	option mac '68:c6:3a:9e:e3:c4'
+	option name 'fanstudy1'
+	option dns '1'
+
+config host
+	option ip '192.168.1.86'
+	option mac '34:ab:95:a7:88:3e'
+	option name 'ad-hoc-power-1'
+	option dns '1'
+
+config host
+	option ip '192.168.1.89'
+	option mac '60:01:94:c7:fd:3c'
+	option name 'fishtank-temperature'
+	option dns '1'
+
+config host
+	option ip '192.168.1.93'
+	option mac '24:0a:c4:59:e1:70'
+	option name 'fridge1'
 	option dns '1'
 
 config host
@@ -225,73 +543,6 @@ config host
 	option dns '1'
 
 config host
-	option ip '192.168.1.10'
-	option mac 'f0:1f:af:d9:75:22'
-	option name 'idrac-r520'
-	option dns '1'
-
-config host
-	option ip '192.168.1.11'
-	option mac '18:66:da:62:ce:a3'
-	option name 'idrac-r730xd'
-	option dns '1'
-
-config host
-	option ip '192.168.1.12'
-	option mac '44:A8:42:15:1F:4B'
-	option name 'idrac-r730xd2'
-	option dns '1'
-{#
-#config host
-#	option ip '192.168.1.18'
-#	option mac '70:54:d2:90:a2:52'
-#	option name 'pauli'
-#	option dns '1'
-#}
-
-config host
-	option ip '192.168.1.61'
-	option mac 'c4:4f:33:a6:84:95'
-	option name 'ac-power'
-	option dns '1'
-
-config host
-	option ip '192.168.1.62'
-	option mac '80:7d:3a:6b:87:c4'
-	option name 'loungeroomlights-power'
-	option dns '1'
-
-config host
-	option mac '98:CD:AC:23:5D:8E'
-	option ip '192.168.1.60'
-	option name 'pvebackup-power'
-	option dns '1'
-
-config host
-	option ip '192.168.1.63'
-	option mac 'cc:50:e3:02:7c:de'
-	option name 'bedroomlights-power'
-	option dns '1'
-
-config host
-	option ip '192.168.1.66'
-	option mac '4c:eb:d6:02:78:cd'
-	option name 'garagelights-power'
-	option dns '1'
-
-config host
-	option ip '192.168.1.67'
-	option mac 'a4:cf:12:b7:93:df'
-	option name 'heatedseat-power'
-	option dns '1'
-
-config host
-	option ip '192.168.1.65'
-	option mac '40:f5:20:f0:a8:ee'
-	option name 'studio-power'
-	option dns '1'
-
-config host
 	option ip '192.168.1.98'
 	option mac '2c:f4:32:4e:38:11'
 	option name 'pantech'
@@ -301,6 +552,65 @@ config host
 	option ip '192.168.1.99'
 	option mac 'dc:4f:22:59:30:40'
 	option name 'ecowitt'
+	option dns '1'
+
+{#
+
+  Less trusted IoT
+
+#}
+config host
+	option ip '192.168.4.10'
+	option mac '4C:B0:08:3F:B5:A5 A0:9D:C1:E2:FB:B6'
+	option name 'cam-garage'
+	option dns '1'
+
+config host
+	option ip '192.168.4.11'
+	option mac '4C:B0:08:66:80:50 A0:9D:C1:DD:F4:16'
+	option name 'cam-rear'
+	option dns '1'
+
+config host
+{#	bedroom fan #}
+	option ip '192.168.4.60'
+	option mac '50:8a:06:34:cc:1a'
+	option name 'fan-1'
+	option dns '1'
+
+config host
+{#	study fluro #}
+	option ip '192.168.4.61'
+	option mac '70:03:9F:D2:62:1F'
+	option name 'study-fluro-1'
+	option dns '1'
+
+config host
+{#	side kitchen light #}
+	option ip '192.168.4.62'
+	option mac 'CC:8C:BF:99:9A:21'
+	option name 'side-kitchen-light'
+	option dns '1'
+
+config host
+{#	under fishtank living room light #}
+	option ip '192.168.4.63'
+	option mac 'CC:8C:BF:99:94:1D'
+	option name 'living-room-light-1'
+	option dns '1'
+
+config host
+{#	coffee grinder #}
+	option ip '192.168.4.64'
+	option mac '1C:90:FF:1A:78:2B'
+	option name 'coffee-grinder'
+	option dns '1'
+
+config host
+{#	blahblah #}
+	option ip '192.168.4.65'
+	option mac 'd8:d6:68:f3:3f:10'
+	option name 'ad-hoc-light-1'
 	option dns '1'
 
 config host
@@ -327,6 +637,17 @@ config host
 	option name 'fishtank-rm4'
 	option dns '1'
 
+{#
+
+  Windows machines and common unmediated house services
+
+#}
+config host
+	option ip '192.168.7.5'
+	option mac 'f8:0f:f9:4b:a4:a9'
+	option name 'chromecast-lounge'
+	option dns '1'
+
 config host
 	option ip '192.168.7.102'
 	option mac '74:38:b7:27:19:04'
@@ -346,308 +667,20 @@ config host
 	option dns '1'
 
 config host
-	option ip '192.168.1.117'
-	option mac '0a:8b:d6:fc:43:c1'
-	option name 'dirac-new'
-	option dns '1'
-
-config host
-	option mac 'f8:0f:f9:4b:a4:a9'
-	option name 'chromecast-lounge'
-	option dns '1'
-	option ip '192.168.7.5'
-
-config host
-	option ip '192.168.1.102'
-	option mac 'ea:0d:d5:6e:9c:eb'
-	option name 'fs-new'
-	option dns '1'
-
-config host
-	option ip '192.168.1.35'
-	option mac '2c:59:8a:60:80:e8'
-	option name 'nexus'
-	option dns '1'
-
-config host
-	option ip '192.168.1.5'
-	option mac 'f0:1f:af:d9:75:20'
-	option name 'pve0'
-	option dns '1'
-
-config host
-	option ip '192.168.1.8'
-	option mac '18:66:da:e7:83:74'
-	option name 'pve1'
-	option dns '1'
-
-config host
-	option ip '192.168.1.6'
-	option mac '04:42:1a:2d:76:29'
-	option name 'pve2'
-	option dns '1'
-
-config host
-	option ip '192.168.1.7'
-	option mac '98:90:96:cb:dc:89'
-	option name 'pve3'
-	option dns '1'
-
-config host
-	option ip '192.168.1.9'
-	option mac '44:a8:42:03:69:d0'
-	option name 'pve-backup'
-	option dns '1'
-
-config host
-	option mac 'D6:ED:7A:5B:80:73'
-	option name 'zm'
-	option dns '1'
-	option ip '192.168.1.201'
-
-config host
-	option mac '22:46:AA:EB:A5:91'
-	option name 'zm12'
-	option dns '1'
-	option ip '192.168.1.202'
-
-config host
-	option mac '76:FF:0B:38:8D:F8'
-	option name 'jellyfin'
-	option dns '1'
-	option ip '192.168.7.203'
-
-config host
-	option mac 'EA:0D:29:A1:EE:D1'
-	option name 'syslog'
-	option dns '1'
-	option ip '192.168.1.204'
-
-config host
-	option mac 'BC:24:11:18:E9:9C'
-	option name 'syslog-4'
-	option dns '1'
-	option ip '192.168.4.204'
-{#      actually defined statically in proxmox to ease DHCP client configuration, but left here as documentation #}
-
-config host
-	option mac 'CC:50:E3:68:28:B9'
-	option name 'patiolights-power'
-	option dns '1'
-	option ip '192.168.1.64'
-
-config host
-	option mac 'CC:50:E3:68:52:1E'
-	option name 'laundrylights-power'
-	option dns '1'
-	option ip '192.168.1.70'
-
-config host
-	option mac 'C4:DD:57:07:EE:55'
-	option name 'christmaslights-power'
-	option dns '1'
-	option ip '192.168.1.71'
-
-config host
-	option mac 'CC:50:E3:68:51:CD'
-	option name 'studio-power2'
-	option dns '1'
-	option ip '192.168.1.72'
-
-config host
-	option mac 'C4:4F:33:87:A1:F7'
-	option name 'beerfridges-power'
-	option dns '1'
-	option ip '192.168.1.68'
-
-config host
-	option mac '4c:eb:d6:d7:81:83'
-	option name 'brewfridge-power'
-	option dns '1'
-	option ip '192.168.1.69'
-
-config host
-	option mac '50:02:91:1A:2E:69'
-	option name 'aquaheater-power'
-	option dns '1'
-	option ip '192.168.1.73'
-
-config host
-	option mac '50:02:91:1A:2E:E5'
-	option name 'aquapump-power'
-	option dns '1'
-	option ip '192.168.1.76'
-
-config host
-	option mac '50:02:91:11:CA:7E'
-	option name 'measure-power'
-	option dns '1'
-	option ip '192.168.1.74'
-
-config host
-	option mac '34:ab:95:a7:88:3e'
-	option name 'ad-hoc-power'
-	option dns '1'
-	option ip '192.168.1.86'
-
-config host
-	option ip '192.168.1.79'
-	option mac 'cc:50:e3:68:4d:fc'
-	option name 'angela-power'
-	option dns '1'
-
-config host
-	option ip '192.168.1.80'
-	option mac '34:ab:95:a7:89:2a'
-	option name 'electricblanket-power'
-	option dns '1'
-
-config host
-	option ip '192.168.1.81'
-	option mac 'e0:98:06:f1:86:10'
-	option name 'loungefrontlight-power'
-	option dns '1'
-
-config host
-	option ip '192.168.1.82'
-	option mac '84:e3:42:e4:f1:1e'
-	option name 'study-power'
-	option dns '1'
-
-config host
-	option mac 'c4:4f:33:a8:eb:9b'
-	option name 'washingmachine-power'
-	option dns '1'
-	option ip '192.168.1.77'
-
-config host
-	option ip '192.168.1.78'
-	option mac 'E0:98:06:C6:D9:00'
-	option name 'chromecast-lounge-power'
-	option dns '1'
-
-config host
-	option ip '192.168.1.75'
-	option mac '4c:eb:d6:02:78:df'
-	option name 'panasonic-power'
-	option dns '1'
-
-config host
-	option ip '192.168.1.83'
-	option mac '3c:61:05:14:ba:d0'
-	option name 'airmon1'
-	option dns '1'
-
-config host
-	option ip '192.168.1.84'
-	option mac '84:f3:eb:59:e5:cf'
-	option name 'batterymon1'
-	option dns '1'
-
-config host
-	option ip '192.168.1.93'
-	option mac '24:0a:c4:59:e1:70'
-	option name 'fridge1'
-	option dns '1'
-
-config host
-	option mac '60:01:94:c7:fd:3c'
-	option name 'fishtank-temperature'
-	option dns '1'
-	option ip '192.168.1.89'
-
-config host
-	option mac '68:c6:3a:9e:e3:c4'
-	option name 'fanstudy1'
-	option dns '1'
-	option ip '192.168.1.85'
-
-config host
-{#	bedroom fan #}
-	option mac '50:8a:06:34:cc:1a'
-	option name 'fan-1'
-	option dns '1'
-	option ip '192.168.4.60'
-
-config host
-{#	study fluro #}
-	option mac '70:03:9F:D2:62:1F'
-	option name 'study-fluro-1'
-	option dns '1'
-	option ip '192.168.4.61'
-
-config host
-{#	side kitchen light #}
-	option mac 'CC:8C:BF:99:9A:21'
-	option name 'side-kitchen-light'
-	option dns '1'
-	option ip '192.168.4.62'
-
-config host
-{#	under fishtank living room light #}
-	option mac 'CC:8C:BF:99:94:1D'
-	option name 'living-room-light-1'
-	option dns '1'
-	option ip '192.168.4.63'
-
-config host
-{#	coffee grinder #}
-	option mac '1C:90:FF:1A:78:2B'
-	option name 'coffee-grinder'
-	option dns '1'
-	option ip '192.168.4.64'
-
-config host
-{#	blahblah #}
-	option mac 'd8:d6:68:f3:3f:10'
-	option name 'blahblah-light-1'
-	option dns '1'
-	option ip '192.168.4.65'
-
-config host
+	option ip '192.168.7.174'
 	option mac '56:0f:c8:9f:b2:a4'
 	option name 'AngelaHssiPhone'
 	option dns '1'
-	option ip '192.168.7.174'
 
 config host
+	option ip '192.168.7.177'
 	option mac 'f8:ef:5d:cf:3a:e2'
 	option name 'angela-moto'
 	option dns '1'
-	option ip '192.168.7.177'
 
 config host
+	option ip '192.168.7.206'
 	option mac '9c:30:5b:59:dd:c5'
 	option name 'DESKTOP-JASCATN'
 	option dns '1'
-	option ip '192.168.7.206'
 
-config host
-	option mac '0e:0a:a4:5e:6c:7b'
-	option name 'homeassistant'
-	option dns '1'
-	option ip '192.168.1.90'
-
-config host
-	option mac '06:de:ad:b9:7b:f4'
-	option name 'hass-debian'
-	option dns '1'
-	option ip '192.168.1.91'
-
-config host
-	option mac '4C:B0:08:3F:B5:A5 A0:9D:C1:E2:FB:B6'
-	option name 'cam-garage'
-	option dns '1'
-	option ip '192.168.4.10'
-
-config host
-	option mac '4C:B0:08:66:80:50 A0:9D:C1:DD:F4:16'
-	option name 'cam-rear'
-	option dns '1'
-	option ip '192.168.4.11'
-
-config host
-	option mac 'F8:9E:94:B7:C9:51'
-	option name 'ntt'
-	option dns '1'
-	option ip '192.168.4.39'
