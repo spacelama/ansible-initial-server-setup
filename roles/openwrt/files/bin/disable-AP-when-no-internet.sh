@@ -54,12 +54,22 @@ gw=$( route -n | grep ^0.0.0.0 | awk '{print $2}' )
 logfile=/tmp/disable-AP-when-no-internet.log
 pidfile=/tmp/disable-AP-when-no-internet.pid
 
+log() {
+    if [ $# != 0 ] ; then
+        echo "disable-AP-when-no-internet.sh:" "$@"
+    else
+        sed 's/^/disable-AP-when-no-internet.sh: /'
+    fi | tee >( logger) | while read -r log ; do
+        sed "s/^/$( date ): /"
+    done
+}
+
 enable_ap() {
     if [ -L /etc/config/wireless ] ; then
         # we had previously disabled the main wireless and implemented our emergency SSID
         date
 
-        echo "Enabling normal AP mode"
+        log "Enabling normal AP mode"
 
         rm /etc/config/wireless
         mv /etc/config/wireless.real /etc/config/wireless
@@ -73,14 +83,14 @@ disable_ap() {
         # we have been running in main wireless mode, so wish to enable our emergency-disable SSID now
         date
 
-        echo "Disabling normal AP mode, going into emergency-disable mode"
+        log "Disabling normal AP mode, going into emergency-disable mode"
 
         mv /etc/config/wireless /etc/config/wireless.real
     elif readlink /etc/config/wireless | grep -q wireless.emergency.isolate ; then
         # we have been running in emergency-isolate wireless mode, but should go into emergency-disable wireless mode
         date
 
-        echo "Disabling emergency-isolate AP mode, going into emergency-disable mode"
+        log "Disabling emergency-isolate AP mode, going into emergency-disable mode"
 
         rm /etc/config/wireless
     else
@@ -98,14 +108,14 @@ isolate_ap() {
         # we have been running in main wireless mode, so wish to enable our emergency-isolate SSID now
         date
 
-        echo "Disabling normal AP mode, going into emergency-isolate mode"
+        log "Disabling normal AP mode, going into emergency-isolate mode"
 
         mv /etc/config/wireless /etc/config/wireless.real
     elif readlink /etc/config/wireless | grep -q wireless.emergency.disable ; then
         # we have been running in emergency-disable wireless mode, but should go into emergency-isolate wireless mode
         date
 
-        echo "Disabling emergency-disable AP mode, going into emergency-isolate mode"
+        log "Disabling emergency-disable AP mode, going into emergency-isolate mode"
 
         rm /etc/config/wireless
     else
@@ -121,7 +131,7 @@ isolate_ap() {
 rotate_logfile() {
     if [ -e "$logfile" ] ; then
         if [ $( stat -c %s "$logfile" ) -gt 10240 ] ; then
-            echo "Rotating logfile: $logfile -> $logfile.0"
+            log "Rotating logfile: $logfile -> $logfile.0"
             mv "$logfile" "$logfile.0"
         else
             echo
@@ -132,20 +142,34 @@ rotate_logfile() {
 
 if [ -e $pidfile ] ; then
     pid=$( cat $pidfile )
-    echo "Restarting disable-AP-when-no-internet: $pid"
+    log "Restarting disable-AP-when-no-internet: $pid"
+    ps fup $pid | log
     kill $pid
 fi
-echo $$ > $pidfile
 
-while : ; do
-    rotate_logfile
-    date
-    if ping -c 1 $upstream1 || ping -c 1 $upstream2 ; then
-        enable_ap
-    elif ping -c 1 $gw ; then
-        disable_ap
-    else
-        isolate_ap
-    fi
-    sleep 60
-done
+(
+    echo $BASHPID > $pidfile
+    log "Started disable-AP-when-no-internet: $BASHPID"
+    ps fup $BASHPID | log
+
+    while : ; do
+        rotate_logfile
+        date
+        if ping -c 1 $upstream1 || ( sleep 1 ; log "first failover ping attempt, $upstream2" ; ping -c 1 $upstream2 ) ||
+                ( sleep 1 ; log "first failover pair ping attempt, $upstream1" ; ping -c 1 $upstream1 ) || ( sleep 1 ; log "first failover pair ping attempt, $upstream2" ; ping -c 1 $upstream2 ) ||
+                ( sleep 10 ; log "second failover pair ping attempt, $upstream1" ; ping -c 1 $upstream1 ) || ( sleep 10 ; log "second (final) failover pair ping attempt, $upstream2" ; ping -c 1 $upstream2 )
+           # can afford ~30 seconds out outage before triggering
+           # failover procedure
+        then
+            enable_ap
+        elif ping -c 1 $gw || ( sleep 1 ; log "failover attempt to gateway before final isolation, $gw" ; ping -c 1 $gw ) ; then
+            disable_ap
+        else
+            isolate_ap
+        fi
+        sleep 60
+    done
+) &
+echo -n backgrounding...
+sleep 1
+echo

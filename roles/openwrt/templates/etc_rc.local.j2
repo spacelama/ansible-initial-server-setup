@@ -1,12 +1,23 @@
+# -*- Mode: shell-script -*-
+
 # Put your custom commands here that should be executed once
 # the system init finished. By default this file does nothing.
 
 # wait enough time that network is up and time has been synced (is
 # done very late in the process!):
 
+log() {
+    tee >(
+        sed 's/^/\/etc\/rc.local: /' | logger
+    ) |
+        while read -r log ; do
+            sed "s/^/$( date ): /"
+        done
+}
+
 (
-  sleep 30
-  date > /tmp/rebooted-at.log
+    sleep 30
+    date > /tmp/rebooted-at.log
 ) &
 
 (
@@ -22,9 +33,9 @@
 {% endif %}
 
 {% if type == 'ap' %}
-    /root/bin/disable-AP-when-no-internet.sh &
+    /root/bin/disable-AP-when-no-internet.sh
 {% endif %}
 
-) > /tmp/boot.rc.local.log 2>&1 &
+) 2>&1 | log > /tmp/boot.rc.local.log &
 
 exit 0

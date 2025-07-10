@@ -2,6 +2,10 @@
 
 # https://forum.openwrt.org/t/script-to-list-installed-packages-for-simplifying-sysupgrade/7188/4
 
+log() {
+    tee >( sed 's/^/list-installed-packages: /' | logger )
+}
+
 all_since_install=
 print_installed_time=
 while [ "$#" != 0 ] ; do
@@ -23,7 +27,7 @@ done
 
 install_time=$(opkg status kernel | grep Installed-Time | sed "s/Installed-Time: //")
 
-opkg list-installed | awk -F " " '{print $1}' > /tmp/installed_pkg
+opkg list-installed | awk -F " " '{print $1}' | log > /tmp/installed_pkg
 
 while read index
 do
