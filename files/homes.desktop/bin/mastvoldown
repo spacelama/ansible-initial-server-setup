@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/bin/ksh
 # -*- Mode: shell-script -*-
 #template by ~tconnors/bin/newshscript
 #Sun Dec  7 17:01:40 EST 2003
@@ -56,9 +56,18 @@ parseinput() {
 
 detect_vol
 
-if [ $vol -gt 15 ] ; then
+# these values have to be carefully chosen to pair with what is likely
+# to be encountered back on the way up if the only interaction has
+# been via these scripts
+if [ $vol -gt 25 ] ; then
     default_step=3
-else
+elif [ $vol -gt 16 ] ; then # 25 -> 22 -> 19 -> 16
+    default_step=3
+elif [ $vol -gt 10 ] ; then # 16 -> 14 -> 12 -> 10
+    default_step=2
+elif [ $vol -gt 5 ] ; then  # 10 -> 9  ->  8 ->  7 -> 6 -> 5
+    default_step=1
+else                        # 5 -...> 0
     default_step=5
 fi
 
