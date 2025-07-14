@@ -2,9 +2,9 @@
 # -*- Mode: shell-script -*-
 #template by ~tconnors/bin/newshscript
 #Sun Dec  7 17:01:40 EST 2003
-# $Revision: 1.13 $ $Date: 2024/11/18 09:59:19 $
-# $Id: mastvolup,v 1.13 2024/11/18 09:59:19 tconnors Exp $
-# $Header: /home/tconnors/cvsroot/bin/mastvolup,v 1.13 2024/11/18 09:59:19 tconnors Exp $
+# $Revision: 1.15 $ $Date: 2025/07/14 09:20:21 $
+# $Id: mastvolup,v 1.15 2025/07/14 09:20:21 tconnors Exp $
+# $Header: /home/tconnors/cvsroot/bin/mastvolup,v 1.15 2025/07/14 09:20:21 tconnors Exp $
 # $RCSfile: mastvolup,v $
 
 # This program changes volume of line, pcm and cd
@@ -28,6 +28,18 @@ usageerror() {
     exit 1
 }
 
+recently_ran() {
+    [ -f /tmp/vol.up.ran ] || return
+
+    short_interval=0.1
+    now=$( date +%s.%N )
+    initiated=$( stat -c %.Y /tmp/vol.up.ran )
+
+    is_within_short_interval=$(awk "BEGIN { if ($initiated+$short_interval > $now) { print \"true\\n\" } else { print \"false\\n\" } }" )
+
+    $is_within_short_interval
+}
+
 parseinput() {
     step=$default_step
     while [ $# -gt 0 ] ; do
@@ -40,41 +52,43 @@ parseinput() {
                 else
                     step=$((step + 5))
                 fi
-            ;;
+                ;;
             --small|-s)
                 step=1
-            ;;
+                ;;
             -*)
                 usageerror "Unknown option \"$arg\""
-            ;;
+                ;;
             *)
                 usageerror "No non-option arguments allowed"
-            ;;
+                ;;
         esac
     done
 }
 
-detect_vol
-
-# these values have to be carefully chosen to pair with what is likely
-# to be encountered back on the way down if the only interaction has
-# been via these scripts
-if [ $vol -ge 25 ] ; then
-    default_step=4
-elif [ $vol -ge 16 ] ; then # 16 -> 19 -> 22 -> 25
-    default_step=3
-elif [ $vol -ge 10 ] ; then # 10 -> 12 -> 14 -> 16
-    default_step=2
-elif [ $vol -ge 5 ] ; then  #  5 ->  6 ->  7 -> 8 -> 9 -> 10
-    default_step=1
-else                        #  0 -...>  5
-    default_step=5
-fi
-
-parseinput "$@"
+set_vol_step() {
+    # these values have to be carefully chosen to pair with what is likely
+    # to be encountered back on the way down if the only interaction has
+    # been via these scripts
+    if [ $vol -ge 25 ] ; then
+        default_step=4
+    elif [ $vol -ge 16 ] ; then # 16 -> 19 -> 22 -> 25
+        default_step=3
+    elif [ $vol -ge 10 ] ; then # 10 -> 12 -> 14 -> 16
+        default_step=2
+    elif [ $vol -ge 5 ] ; then  #  5 ->  6 ->  7 -> 8 -> 9 -> 10
+        default_step=1
+    else                        #  0 -...>  5
+        default_step=5
+    fi
+}
 
 PATH=$PATH:/usr/local/bin
 export PATH
+
+detect_vol
+set_vol_step
+parseinput "$@"
 
 unmute
 
@@ -82,6 +96,18 @@ lock=/tmp/vol.lock
 lockfile -0 -r 1 $lock || exit
 trap "rm -f $lock ; exit 1" INT HUP TERM QUIT
 
+if recently_ran ; then
+    echo "mastvolup: accelerating steps"
+
+    step1="$step"
+    vol=$(( vol + step1 ))
+
+    set_vol_step
+    parseinput "$@"
+
+    step=$(( step + step1))
+fi
 amixer set Master $step%+ unmute   # acts on the default soundcard as decided by paswitch
 
+touch /tmp/vol.up.ran
 rm -f $lock
