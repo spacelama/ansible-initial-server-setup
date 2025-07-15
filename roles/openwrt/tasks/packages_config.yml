@@ -14,14 +14,15 @@
     state: present
 
 - name: install router configuration
+  when: type == 'router'
   block:
     - name: install router packages
       opkg:
         name: luci-app-sqm,avahi-dbus-daemon,adblock,luci-app-adblock,msmtp,ethtool,arp-scan,ifstat,bind-dig,darkstat,luci-app-nlbwmon,luci-app-statistics,vnstat,vnstati,ip-bridge,bridge # ip-bridge is for `bridge vlan` command, bridge gives more complete control of brctl
         # instead of port mirroring, perhaps we can configure ecowitt mirroring of port 8000->homeassistant:4199 via port forwards ,port-mirroring
+        # FIXME: kmod-wireguard?
         state: present
 
-    #FIXME: kmod-wireguard?
 
     - name: configure msmtp
       lineinfile:
@@ -105,7 +106,6 @@
         dest: /etc/sysctl.conf
         regexp: '^net.netfilter.nf_conntrack_max='
         line: 'net.netfilter.nf_conntrack_max=65535'
-  when: type == "router"
 
   # https://openwrt.org/docs/guide-user/network/wifi/usteer talks
   # about needing wpad full (wpad-wolfssl or wpad-openssl), but we
@@ -113,6 +113,7 @@
   # be causing any problems?  openwrt 23.05.0 may want something in
   # place of wpad-wolfssl, since it's moved from wolfssl to mbedtls
 - name: install AP packages
+  when: type == 'ap'
   opkg:
     name: usteer,luci-app-usteer,hostapd-mbedtls
     # hostapd-mbedtls seems to be needed by some APs with 23.05.3
@@ -121,43 +122,42 @@
     # https://www.reddit.com/r/openwrt/comments/1793zzl/2305_changed_wireless_device_names_from_wlan0_to/
     # https://forum.openwrt.org/t/why-return-to-mbed-tls/162957/4
     state: present
-  when: type == "ap"
 
 - name: install full packages
+  when: openwrt_heavy_installation | default(true)
   opkg:
     name: luci-mod-dashboard,lldpd,luci-app-lldpd,tcpdump,strace,lsof,usbutils,ethtool,mii-tool,psmisc,procps-ng-ps,procps-ng-watch,procps-ng-vmstat,procps-ng-top,iftop,htop,btop,less,diffutils,perl,perlbase-tie,perlbase-getopt,ip-tiny,coreutils-stat # perlbase-tie for munin sensors_, perlbase-getopt for colordiff, ip-tiny so we get at least `ip -c a` instead of busybox version, but other alternative we haven't needed yet is ip-full, coreutils-stat for stat for our shell script's use
     state: present
-  when: openwrt_heavy_installation | default(true)
 
 - name: install host specific packages
+  when: packages_to_install is defined
   opkg:
     # comma separated, single variable
     name: "{{ packages_to_install }}"
     state: present
-  when: packages_to_install is defined
 
 - name: install nut packages
+  when: nut_install | default(false)
   opkg:
     name: luci-app-nut,nut,nut-upscmd,nut-upsc,nut-upslog,nut-server,nut-driver-blazer_usb,nut-driver-usbhid-ups,nut-upssched,nut-avahi-service,nut-upsrw,nut-web-cgi
     state: present
-  when: nut_install | default(false)
 
 - name: install nut munin plugins
+  when: nut_install | default(false)
   file:
     src: /root/bin/nutups_
     dest: "/etc/munin/plugins/nutups_powershield_{{ item }}"
     state: link
     force: yes
   with_items: [ charge,voltages,freq,current ]
-  when: nut_install | default(false)
 
 - name: install temperature sensors munin plugin
+  when: '"lm-sensors" in packages_to_install'
   file:
     src: /root/bin/sensors_
     dest: "/etc/munin/plugins/sensors_temp"
     state: link
     force: yes
-  when: '"lm-sensors" in packages_to_install'
 
 - name: "ensure dnsmasq service {{ 'started' if inventory_hostname != 'gateway-tmp' else 'stopped' }} for {{ inventory_hostname }}"
   service:
