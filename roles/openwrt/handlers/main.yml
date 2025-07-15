@@ -47,3 +47,8 @@
   service:
     name: lldpd
     state: restarted
+
+- name: restart sysctl
+  service:
+    name: sysctl
+    state: restarted
