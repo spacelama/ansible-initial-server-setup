@@ -17,6 +17,10 @@ config dnsmasq
 	list interface           'LANGUEST3'
 	list interface           'LANIOT4'
 	list interface           'LANWINDOWS7'
+	list server '/ext.rather.puzzling.org/8.8.8.8'
+	list server '/ext.rather.puzzling.org/8.8.4.4'
+	list server '/ext.rather.puzzling.org/1.1.1.1'
+{# FIXME: consider ennabling dnssec = 1 , which needs dnsmasq-full; will become necessary soon enough #}
 
 config dhcp 'LAN1'
 	option interface 'LAN1'
