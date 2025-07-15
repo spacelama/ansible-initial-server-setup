@@ -1,4 +1,30 @@
 ---
+- name: install USB disk packages
+  # assumes you've already setup pivot overlay:
+  # https://openwrt.org/docs/guide-user/storage/usb-drives
+  # https://openwrt.org/docs/guide-user/storage/usb-drives-quickstart
+  # https://gist.github.com/shashishailaj/091a2cd5146c36604ecac9e70ce6d50a
+  # For me, at creation time, it was just:
+  # below opkg install then
+  # mkfs.f2fs /dev/sda1
+  # block detect | uci import fstab
+  # uci set fstab.@mount[-1].enabled='1'
+  # uci commit fstab
+  # reboot
+  # tar -C /overlay -cvf - . | tar -C /openwrt -xf -
+  # reboot and rock gently back and forth
+  #
+  # This task then comes along first thing next upgrade time, and
+  # makes sure the prerequisites are installed before rebooting and
+  # trying the rest of the installation process.  NOT TESTED: is the
+  # old cruft from the previous version taken care of?
+  when: openwrt_heavy_installation == 'usb'
+  opkg:
+#    name: block-mount,e2fsprogs,kmod-usb-storage-uas,kmod-usb3,kmod-fs-ext4
+    name: block-mount,kmod-usb-storage-uas,kmod-usb3,f2fs-tools,kmod-fs-f2fs
+    state: present
+    # FIXME: if changed, reboot and wait
+
 - name: remove conflicting and/or obsolete packages
   # if want to go back to DAWN later, it is now better documented: https://github.com/berlin-open-wireless-lab/DAWN/blob/master/CONFIGURE.md
   # also, here: https://www.reddit.com/r/openwrt/comments/v26ybu/dawn_vs_usteer/
