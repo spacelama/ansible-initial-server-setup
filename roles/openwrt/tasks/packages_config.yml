@@ -18,7 +18,7 @@
   block:
     - name: install router packages
       opkg:
-        name: luci-app-sqm,avahi-dbus-daemon,adblock,luci-app-adblock,msmtp,ethtool,arp-scan,ifstat,bind-dig,darkstat,luci-app-nlbwmon,luci-app-statistics,vnstat,vnstati,ip-bridge,bridge # ip-bridge is for `bridge vlan` command, bridge gives more complete control of brctl
+        name: luci-app-sqm,avahi-dbus-daemon,adblock,luci-app-adblock,msmtp,ethtool,arp-scan,ifstat,bind-dig,darkstat,luci-app-nlbwmon,luci-app-statistics,vnstat2,vnstati2,luci-app-vnstat2,ip-bridge,bridge # ip-bridge is for `bridge vlan` command, bridge gives more complete control of brctl
         # instead of port mirroring, perhaps we can configure ecowitt mirroring of port 8000->homeassistant:4199 via port forwards ,port-mirroring
         # FIXME: kmod-wireguard?
         state: present
@@ -50,7 +50,7 @@
       opkg:
         # kmod-tcp-bbr was on b1300 prior to 21.02.1 upgrade - no idea how
         # it got there
-        name: luci-app-vnstat,luci-app-banip
+        name: luci-app-banip
         state: present
       ignore_errors: true
 
