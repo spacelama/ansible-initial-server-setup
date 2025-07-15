@@ -2,12 +2,12 @@
   domain: rather.puzzling.org
 
   install_files:
-    - { source: "roles/openwrt/files/bin/", name: "/root/bin/", mode: "0755", become: false } # permissions supplied because gekmihesg.openwrt can't deal with python 0o755 style octal numerals
-    - { source: "roles/openwrt/files/.config/", name: "/root/.config/", mode, "0644", become: false } # permissions supplied because gekmihesg.openwrt can't deal with python 0o644 style octal numerals
+    - { source: "roles/openwrt/files/bin/", name: "/root/bin/", directory_mode: "0755", mode: "0755", become: false } # permissions supplied because gekmihesg.openwrt can't deal with python 0o755 style octal numerals
+    - { source: "roles/openwrt/files/.config/", name: "/root/.config/", directory_mode: "0755", mode, "0644", become: false } # permissions supplied because gekmihesg.openwrt can't deal with python 0o644 style octal numerals
     - { source: "roles/openwrt/files/.colordiffrc", local_follow: true, name: "/root/", become: false }
     - { source: "roles/openwrt/files/.bash_profile", name: "/root/", become: false }
     - { source: "roles/openwrt/files/.toprc", name: "/root/", become: false }
-    - { source: "roles/openwrt/files/etc_config_firewall", name: /etc/config/firewall, mode: "0600", when: "{{ type == 'router'}}", become: false, notify: "restart firewall" }   # should we also just set up the firewall on APs anyway, to better guard against traffic crossing subnets without going via the gateway?  The APs aren't routing between VLANs anyway, so all traffic must go via the firewall.  And correctly configured clients have default gateway pointed to the gateway's firewall, so it adds nothing to also have the same firewall configured directly on APs
+    - { source: "roles/openwrt/files/firewall/", name: "/etc/", directory_mode: "0755", mode: "0600", when: "{{ type == 'router'}}", become: false, notify: "restart firewall" }   # should we also just set up the firewall on APs anyway, to better guard against traffic crossing subnets without going via the gateway?  The APs aren't routing between VLANs anyway, so all traffic must go via the firewall.  And correctly configured clients have default gateway pointed to the gateway's firewall, so it adds nothing to also have the same firewall configured directly on APs
     - { source: "roles/openwrt/files/etc_config_usteer", name: /etc/config/usteer, mode: "0644", when: "{{ type == 'ap'}}", become: false, notify: "restart usteer" }
     - { source: "roles/openwrt/files/etc_dropbear_authorized_keys", name: /etc/dropbear/authorized_keys, mode: "0600", become: false }
     - { source: "roles/openwrt/templates/etc_config_lldpd.j2", name: /etc/config/lldpd, mode: "0644", become: false, notify: "restart lldpd" }

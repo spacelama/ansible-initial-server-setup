@@ -4,8 +4,8 @@
 - name: "install file per template: '{{ dir_file_or_template.name }}' from '{{ source }}'"
   template:
     dest: "{{ dir_file_or_template.name | default(('/' ~ dir_file_or_template) | regex_replace('\\.j2$', '')) }}"
-    owner: "{{ dir_file_or_template.user | default('root') }}"
-    group: "{{ dir_file_or_template.group | default('root') }}"
+    owner: "{{ dir_file_or_template.user | default(omit) }}"
+    group: "{{ dir_file_or_template.group | default(omit) }}"
     src: "{{ source }}"
     mode: "{{ dir_file_or_template.mode | default(omit) }}"
   become: "{{ dir_file_or_template.become | default(true) }}"
