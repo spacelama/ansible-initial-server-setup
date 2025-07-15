@@ -122,24 +122,18 @@
 
   # https://openwrt.org/docs/guide-user/network/wifi/usteer talks
   # about needing wpad full (wpad-wolfssl or wpad-openssl), but we
-  # haven't had that installed for a few versions, and doesn't seem to
-  # be causing any problems?  openwrt 23.05.0 may want something in
-  # place of wpad-wolfssl, since it's moved from wolfssl to mbedtls
+  # only actually need hostapd-mbedtls since we're not a client:
+  # https://forum.openwrt.org/t/individual-per-passphrase-per-mac-wifi-vlans-using-wpa-psk-file-no-radius-required/161696/12
 - name: install AP packages
   when: type == 'ap'
   opkg:
-    name: usteer,luci-app-usteer,hostapd-mbedtls
-    # hostapd-mbedtls seems to be needed by some APs with 23.05.3
-    # otherwise device doesn't get renamed from wlan0 and nothing
-    # comes up?:
-    # https://www.reddit.com/r/openwrt/comments/1793zzl/2305_changed_wireless_device_names_from_wlan0_to/
-    # https://forum.openwrt.org/t/why-return-to-mbed-tls/162957/4
+    name: usteer,luci-app-usteer,hostapd-mbedtls,hostapd-utils
     state: present
 
 - name: install full packages
   when: openwrt_heavy_installation | default(true)
   opkg:
-    name: luci-mod-dashboard,lldpd,luci-app-lldpd,tcpdump,strace,lsof,usbutils,ethtool,mii-tool,psmisc,procps-ng-ps,procps-ng-watch,procps-ng-vmstat,procps-ng-top,iftop,htop,btop,less,diffutils,perl,perlbase-tie,perlbase-getopt,ip-tiny,coreutils-stat # perlbase-tie for munin sensors_, perlbase-getopt for colordiff, ip-tiny so we get at least `ip -c a` instead of busybox version, but other alternative we haven't needed yet is ip-full, coreutils-stat for stat for our shell script's use
+    name: luci-mod-dashboard,lldpd,luci-app-lldpd,tcpdump,strace,lsof,usbutils,ethtool,mii-tool,psmisc,procps-ng-ps,procps-ng-watch,procps-ng-vmstat,procps-ng-top,iftop,htop,btop,iperf3,less,diffutils,perl,perlbase-tie,perlbase-base,perlbase-getopt,ip-tiny,coreutils-stat # perlbase-tie for munin sensors_, perlbase-getopt and perlbase-base for colordiff, ip-tiny so we get at least `ip -c a` instead of busybox version, but other alternative we haven't needed yet is ip-full, coreutils-stat for stat for our shell script's use
     state: present
 
 - name: install host specific packages
