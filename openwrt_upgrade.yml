@@ -6,6 +6,8 @@
   serial: 1
   gather_facts: no
   remote_user: "{{ remote_user | default('rootsh') }}" # so keeps working even fresh after upgrade, but not on a brand-new installation - supply '-e remote_user=root' for a new installation
+  handlers:
+    - import_tasks: roles/openwrt/handlers/main.yml
   vars:
     ansible_ssh_transfer_method: scp
     ansible_scp_extra_args: -O #https://github.com/gekmihesg/ansible-openwrt/pull/59 https://github.com/gekmihesg/ansible-openwrt/issues/64 https://github.com/ansible/ansible/issues/82239 https://github.com/gekmihesg/ansible-openwrt/pull/67
