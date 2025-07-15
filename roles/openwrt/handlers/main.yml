@@ -12,10 +12,10 @@
   service:
     name: dnsmasq
     state: "{{ 'restarted' if inventory_hostname != 'gateway-tmp' else 'stopped' }}"
-  throttle: 1
-  notify: reload wifi  # might as well actually reload wifi interfaces
-                       # to force devices to fetch their DHCP updated
-                       # addresses
+  throttle: 2
+  notify: reload network to ensure wifi restarted  # might as well actually reload wifi interfaces
+                                                   # to force at least wifi-connected devices to
+                                                   # re-fetch their DHCP updated addresses
 
 - name: restart firewall
   service:
@@ -29,14 +29,14 @@
     command: commit
   notify: reload wifi
 
-- name: reload wifi
+- name: reload network to ensure wifi restarted
   service:
     name: network    # go full network partially because there's no
                      # "wifi service" per se, but network does restart
                      # wifi, but also make sure we pick up any new
                      # VLAN configurations...
-    state: restarted
-  throttle: 1
+    state: "{{ 'restarted' if type == 'ap' else 'started' }}"
+  throttle: 2
 
 - name: restart usteer
   service:
