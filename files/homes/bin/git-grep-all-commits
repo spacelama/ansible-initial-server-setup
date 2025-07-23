@@ -1,14 +1,18 @@
 #!/bin/bash
 
 usage() {
-    echo "git-grep-all-commits [--show-only-lines|--show-whole-files] [git-grep/git-log --regexp options (eg, -i)] <search-regexp>" 1>&2
+    echo "git-grep-all-commits [--all-branches] [--show-only-lines|--show-whole-files] [git-grep/git-log --regexp options (eg, -i)] <search-regexp>" 1>&2
     exit 1
 }
 
 mode=show-commits
 options=(--basic-regexp) # can be overriden by the user supplying --perl-regexp, --extended-regexp
+branches=
 while [[ "$1" == -* ]] ; do
     case "$1" in
+        --all-branches)
+            branches=--all
+            ;;
         --show-commits)
             mode=show-commits # default
             ;;
@@ -38,17 +42,17 @@ done
 case "$mode" in
     show-commits)
         # default: pickaxe (regexp added, deleted or moved), show diff
-        git log --all -p "${options[@]}" -G "$@" # | less -F -R -X -j.1 ++/"$1"
+        git log $branches -p "${options[@]}" -G "$@" # | less -F -R -X -j.1 ++/"$1"
         ;;
     # show-whole-files)
     #     echo "experimental!!!"
 
-    #     git log --all -G "$@" "${options[@]}"
+    #     git log $branches -G "$@" "${options[@]}"
 
     #     echo "experimental!!!"
     #     ;;
     show-only-lines)
-        git grep "${options[@]}" "$@" $(git rev-list --all)
+        git grep "${options[@]}" "$@" $(git rev-list "${branches:-HEAD}")
         ;;
     *)
         echo "unknown mode: $mode" 1>&2
