@@ -1,26 +1,57 @@
 #!/bin/bash
 
 usage() {
-    echo "git-grep [--show-commits] <search>" 1>&2
+    echo "git-grep-all-commits [--show-only-lines|--show-whole-files] [git-grep/git-log --regexp options (eg, -i)] <search-regexp>" 1>&2
     exit 1
 }
 
-show_diffs=true
+mode=show-commits
+options=(--basic-regexp) # can be overriden by the user supplying --perl-regexp, --extended-regexp
 while [[ "$1" == -* ]] ; do
     case "$1" in
         --show-commits)
-            show_diffs=false
+            mode=show-commits # default
+            ;;
+        --show-only-lines)
+            mode=show-only-lines
+            ;;
+        --show-whole-files)
+            # mode=show-whole-files
+
+            # pickaxe-all wants to show all files in the commit when
+            # supplied to git-log, but the user might then limit it
+            # back down if there are other parameters such as pathname
+            # filters supplied on the cmdline
+            options+=(--pickaxe-all)
+            ;;
+        --help)
+            usage
             ;;
         *)
-            usage
+            options+=("$1")
             ;;
     esac
     shift
 done
 
-if $show_diffs ; then
-    git log -p -G "$@"
-else
-    git grep "$@" $(git rev-list --all)
-fi
+# by parsing out options and putting after -G <regexp>
+case "$mode" in
+    show-commits)
+        # default: pickaxe (regexp added, deleted or moved), show diff
+        git log --all -p "${options[@]}" -G "$@" # | less -F -R -X -j.1 ++/"$1"
+        ;;
+    # show-whole-files)
+    #     echo "experimental!!!"
+
+    #     git log --all -G "$@" "${options[@]}"
+
+    #     echo "experimental!!!"
+    #     ;;
+    show-only-lines)
+        git grep "${options[@]}" "$@" $(git rev-list --all)
+        ;;
+    *)
+        echo "unknown mode: $mode" 1>&2
+        exit 1
+esac
 
