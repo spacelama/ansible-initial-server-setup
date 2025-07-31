@@ -18,10 +18,28 @@
 # by definition anything that is about to be shown is the only thing
 # we care about)
 
-export DISPLAY=:0
+if [ "$DISPLAY" != :0 ] ; then
+  echo "Overriding DISPLAY=$( [ -n "$DISPLAY" ] && echo "'$DISPLAY'" || echo unset ) to :0"
+  export DISPLAY=:0
+fi
 
 killall picom 2>/dev/null
 sleep 5
 killall -9 picom 2>/dev/null
 
-picom & # redirection shouldn't be needed with 11.2-0.1 fixing #1053228: < /dev/null >& /dev/null &
+echo "FIXME: restart-compositor - the whole reason we're using this is because of https://bugs-devel.debian.org/cgi-bin/bugreport.cgi?bug=1014625 but perhaps https://bugs.freedesktop.org/show_bug.cgi?id=110214 - xterm -xrm 'XTerm.vt100.scaleHeight: 0.9' seems to also fix the issue (and not when running at 0.92), but does cause 'É' to drop its grave.  References https://savannah.nongnu.org/bugs/index.php?52165 and https://bugs.debian.org/cgi-bin/bugreport.cgi?bug=880407"
+
+(
+    start_time=$( date +%s )
+    if ! picom --backend glx --vsync --glx-no-stencil --glx-no-rebind-pixmap ; then
+        ps=$( ps axfu )
+        finish_time=$( date +%s )
+        if [ $((finish_time-start_time)) -lt 10 ] ; then
+            echo "start_time,finish_time: $start_time,$finish_time"
+            echo "picom died Another compositor running?  Dunno!"
+
+            echo "$ps"
+        fi
+    fi
+) &
+# redirection shouldn't be needed with 11.2-0.1 fixing #1053228: < /dev/null >& /dev/null &
