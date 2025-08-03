@@ -1,6 +1,6 @@
 #!/bin/bash
 
-# ASSUMES A DUAL DISPLAY
+# ASSUMES A DUAL OR TRIPLE DISPLAY
 
 # swap_window.sh
 # Moves the active window to the other screen of a dual-screen Xinerama setup.
@@ -9,6 +9,8 @@
 #
 # Author: Raphael Wimmer
 # raphman@gmx.de
+
+source $HOME/bin/error_handler.sh
 
 # if acting on the same window as last time, and rapidly, then go in a
 # cyclic fashion.  If slowly, then alternate back and forth with the
@@ -25,8 +27,7 @@ function desired_mode() {
     fi
 }
 
-#FIXME: make this work for 2 monitor setups as well (probably just by
-#ignoring "right")
+#set_before=$( set )
 
 # get monitor dimensions
 #monitorLine=$(xwininfo -root | grep "^ *Width")
@@ -70,8 +71,11 @@ yWinDecor=${xWinDecorLine:42 :2}
 
 windowCentre=$((${xPos} + ${xWidth}/2))
 
+#set_after=$( set )
+#colordiff -ub <( echo "$set_before" ) <( echo "$set_after" ) || true
+
 # calculate new window position
-if [ $numMonitors -ge 3 ] && (( $windowCentre  > ${monitorStarts[2]} )) ; then
+if [ $numMonitors -ge 3 ] && (( $windowCentre > ${monitorStarts[2]} )) ; then
     lastPos=right
     case "$desired_mode" in
         default|middle)
@@ -89,7 +93,7 @@ if [ $numMonitors -ge 3 ] && (( $windowCentre  > ${monitorStarts[2]} )) ; then
             fi
             ;;
     esac
-elif (( $windowCentre  > ${monitorStarts[1]} )) ; then
+elif (( $windowCentre > ${monitorStarts[1]} )) ; then
     lastPos=middle
     case "$desired_mode" in
         default|left)
@@ -132,7 +136,8 @@ yPos=$((${yPos}-${yWinDecor}))
 
 # make sure window stays on screen completely
 (( ${xPos} < 0 )) && xPos=0
-(( ${xPos} + ${xWidth} > ${monitorEnds[2]} )) && xPos=$((${monitorEnds[2]} - ${xWidth}))
+[ $numMonitors -ge 3 ] && (( ${xPos} + ${xWidth} > ${monitorEnds[2]} )) && xPos=$((${monitorEnds[2]} - ${xWidth}))
+[ $numMonitors = 2 ]   && (( ${xPos} + ${xWidth} > ${monitorEnds[1]} )) && xPos=$((${monitorEnds[1]} - ${xWidth}))
 #(( ${yPos} + FIXME ${yWidth} > ${monitorEnds[2]} )) && xPos=$((${monitorEnds[2]} - ${xWidth}))
 
 echo Raise
