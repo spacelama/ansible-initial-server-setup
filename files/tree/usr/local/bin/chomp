@@ -6,7 +6,7 @@
 use strict;
 #use warnings;
 
-my ($subst,$str,$chars,$diff,$right,$left,$escapechars);
+my ($subst,$str,$chars,$keep1,$keep2,$strip_position,$left,$escapechars);
 
 if ( defined $ARGV[0] && ( $ARGV[0] eq "--escapechars" || $ARGV[0] eq "--stripnewline")) {
   $escapechars=1;
@@ -27,10 +27,12 @@ if ( @ARGV < 4 or $ARGV[0] ne "--left" and $ARGV[0] ne "--middle" and $ARGV[0] n
    exit 1;
 }
 
-if ( $ARGV[0] eq "--right" ) {
-    $right=1;
-}else{
-    $right=0;
+if ( $ARGV[0] eq "--left" ) {
+    $strip_position="left";
+}elsif ( $ARGV[0] eq "--middle" ) {
+    $strip_position="middle";
+}elsif ( $ARGV[0] eq "--right" ) {
+    $strip_position="right";
 }
 shift;
 $subst=$ARGV[0] ; shift;
@@ -43,13 +45,19 @@ if ($escapechars) {
 }
 #print STDERR "str -> $str\n";
 #sleep 1;
-$diff=length("$str") - $chars;
-if ($diff>0) {
-  $diff=length("$str$subst") - $chars;
-  if ( $right ) {
-    $str =~ s/^.{$diff}/$subst/;
-  } else {
-    $str =~ s/.{$diff}$/$subst/;
+if (length("$str") > $chars) {
+  $keep1=$keep2=$chars;
+  if ( $strip_position eq "middle" ) {
+    $keep1 = int($keep1/2);
+    $keep2 = $chars - $keep1;
+  }
+
+  if ( $strip_position eq "left" ) {
+    $str =~ s/^(.{$keep1}).*$/$1$subst/;
+  } elsif ( $strip_position eq "middle" ) {
+    $str =~ s/^(.{$keep1}).*(.{$keep2})/$1$subst$2/;
+  } elsif ( $strip_position eq "right" ) {
+    $str =~ s/^.*(.{$keep2})$/$subst$1/;
   }
 }
 print "$str";
