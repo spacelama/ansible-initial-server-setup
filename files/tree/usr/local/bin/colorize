@@ -77,7 +77,23 @@ directoutput() {
 }
 
 usage() {
-    echo "Usage: $0 [--stderr] [--notty] [-n|--nolf] [--PS1prompt] [--background <bg>] (bright|dark)? <color> <text>" 1>&2
+    cat 1>&2 <<EOF
+Usage: $0 [--stderr] [--notty] [-n|--nolf] [--PS1prompt] [--background <bgcolour>] [bold] [bright|dark] <colour> <text>
+Outputs text in colour, with an option to print the output within PS1 style escapes
+
+  --shell               Forces the command to run under a shell
+  --stderr              Outputs the header information to stderr
+  --notty               Doesn't output colour when piping to a command rather than tty
+  -n|--nolf             Prevents output of newline at end
+  --PS1prompt           Outputs the ANSI colour codes within \[...\] for incorporation within PS1 prompt
+  --background          Chooses the background colour as well
+  --help                Display this help and exit
+  bold                  Makes the output bold
+  bright                Makes the output bright
+  dark                  Makes the output dark
+  <colour>              Colour
+  <text>                Text to output
+EOF
     if [ -n "$1" ] ; then
         exit $1
     fi

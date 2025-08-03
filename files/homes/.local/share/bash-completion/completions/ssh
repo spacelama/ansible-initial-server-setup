@@ -11,19 +11,7 @@ if ! type -t _ssh > /dev/null ; then
 fi
 
 _ssh_stub() {
-    # let's copy ssh's lazyloaded definition (we can do this
-    # only if hadn't already loaded them)
-    if ! type -t _ssh > /dev/null ; then
-        . /usr/share/bash-completion/completions/ssh
-
-        # but we have to make sure we reset our completion function
-        # because sourcing that file stole it back off us for ssh
-        complete -F _ssh_stub fsh ssh slogin autossh sidedoor
-    fi
     _ssh "$@"
-
-    # FIXME:
-    # colorize bright red "falling back to user@host" 1>&2
 
     # might as well also complete on usernames, if ssh's normal
     # completing didn't return anything
@@ -31,8 +19,5 @@ _ssh_stub() {
         _user_at_host "$@"
     fi
 }
-
-# FIXME:
-# echo got here... 1>&2
 
 complete -F _ssh_stub fsh ssh slogin autossh sidedoor

@@ -2,20 +2,43 @@
 
 #doesn't do much more than run colorizecommand (but tells us the caller)
 
+usage() {
+    cat 1>&2 <<EOF
+Usage: $0 [--shell] [--no-verbose|--verbose[=<true|false>]] cmd...
+Runs a command with extra diagnostics about invocation
+
+  --shell                 Runs the command under the control of a shell for redirections, pipelines, etc
+  --verbose               Output some extra info about command invocation and status
+  --verbose=true|false
+  --no-verbose            Be less verbose than default
+  --help                  Display this help and exit
+
+EOF
+
+    exit 1
+}
+
+if [ "$#" = 0 ] ; then
+    usage
+fi
+
 shell=
 verbose=true
 while [[ "$1" == --* ]] ; do
     case "$1" in
+        --help)
+            usage
+            ;;
         --shell)
             shell="--shell"
             shift
             ;;
-        --verbose*)
-            case "$1" in
-                --verbose=false)
-                    verbose=false
-                    ;;
-            esac
+        --no-verbose|--verbose=false)
+            verbose=false
+            shift
+            ;;
+        --verbose|--verbose=true)
+            verbose=true
             shift
             ;;
         *)

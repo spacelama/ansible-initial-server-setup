@@ -62,7 +62,23 @@ normaloutput() {
 }
 
 usage() {
-    echo "Usage: $0 [--shell] [--stderr] [--notty] [--PS1prompt] [--colourall] <bright?> <colour> <command>" 1>&2
+    cat 1>&2 <<EOF
+Usage: $0 [--shell] [--stderr] [--notty] [--PS1prompt] [--colourall] [--background <bgcolour>] [bold] [bright|dark] <colour> <command>"
+Runs a command with diagnostic info in colour, with an option to print the command output within PS1 style escapes
+
+  --shell               Forces the command to run under a shell
+  --stderr              Outputs the header information to stderr
+  --notty               Doesn't output colour when piping to a command rather than tty
+  --PS1prompt           Outputs the ANSI colour codes within \[...\] for incorporation within PS1 prompt
+  --colourall           Makes sure all output is coloured
+  --background          Chooses the background colour as well
+  --help                Display this help and exit
+  bold                  Makes the output bold
+  bright                Makes the output bright
+  dark                  Makes the output dark
+  <colour>              Colour
+  <command>             Command and args to run
+EOF
     if [ -n "$1" ] ; then
         exit $1
     fi

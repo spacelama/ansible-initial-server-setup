@@ -10,15 +10,6 @@ if ! type -t _pine > /dev/null ; then
 fi
 
 _user_at_host_stub() {
-    # let's copy pine's lazyloaded definition (perhaps we can do this
-    # only if hadn't already loaded them)
-    if ! type -t _pine > /dev/null ; then
-        . /usr/share/bash-completion/completions/pine
-
-        # but we have to make sure we reset our completion function
-        # because sourcing that file stole it back off us for ssh
-        complete -F _ssh_stub fsh ssh
-    fi
     _pine "$@"
 
     # also complete on usernames, if pine's normal completing didn't
