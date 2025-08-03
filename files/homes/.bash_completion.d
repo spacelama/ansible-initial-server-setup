@@ -1,1 +1,0 @@
-.local/share/bash-completion/completions

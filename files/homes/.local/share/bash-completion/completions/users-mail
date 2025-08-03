@@ -1,3 +1,0 @@
-# -*- Mode: shell-script -*-
-
-shopt -u hostcomplete && complete -F _user_at_host -o nospace pine

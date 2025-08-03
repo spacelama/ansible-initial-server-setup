@@ -1,0 +1,265 @@
+# -*- Mode: shell-script -*-
+
+# A meta-command completion function for commands like sudo(8)
+# (although it already has its own more complete meta completer),
+# which need to first complete on a command, then complete according
+# to that command's own completion definition - currently not quite
+# foolproof, but much more useful than just binding it to _command,
+# given you're most likely trying to complete on some obscure option
+# rather than 'emacs'
+
+# Everything in our own directory that overrides the system
+# definition, has to disable every definition that has been
+# pre-defined, otherwise ours will not be triggered to be
+# autoloaded.  In debian bookworm, that's env, xargs, ...
+# We disable these the moment the system definitions are defined in
+# setup-environment.sh
+
+# FIXME:
+colorize bright red step 1 >> /tmp/bash-completion.debug
+
+_longopt_without_file()
+{
+    local cur prev words cword split
+    _init_completion -s || return
+
+    case "${prev,,}" in
+        --help | --usage | --version)
+            return
+            ;;
+        --!(no-*)dir*)
+            _filedir -d
+            return
+            ;;
+        --!(no-*)@(file|path)*)
+            _filedir
+            return
+            ;;
+        --+([-a-z0-9_]))
+            local argtype=$(LC_ALL=C $1 --help 2>&1 | command sed -ne \
+                "s|.*$prev\[\{0,1\}=[<[]\{0,1\}\([-A-Za-z0-9_]\{1,\}\).*|\1|p")
+            case ${argtype,,} in
+                *dir*)
+                    _filedir -d
+                    return
+                    ;;
+                *file* | *path*)
+                    _filedir
+                    return
+                    ;;
+            esac
+            ;;
+    esac
+
+    $split && return
+
+    if [[ $cur == -* ]]; then
+        COMPREPLY=($(compgen -W "$(LC_ALL=C $1 --help 2>&1 |
+            while read -r line; do
+                [[ $line =~ --[A-Za-z0-9]+([-_][A-Za-z0-9]+)*=? ]] &&
+                    printf '%s\n' ${BASH_REMATCH[0]}
+            done)" -- "$cur"))
+        [[ ${COMPREPLY-} == *= ]] && compopt -o nospace
+    fi
+}
+
+_longopt_then_command()
+{
+    # FIXME: might be an idea to crib some of this from _sudo()
+
+    local cur prev words cword split
+    _init_completion -s || return
+
+    echo >> /tmp/bash-completion.debug
+
+    colorize bright red step 1a >> /tmp/bash-completion.debug
+
+    local i=1
+    while (( i < ${#words[@]} )); do
+        colorize bright red i: "$i: ${words[i]}" >> /tmp/bash-completion.debug
+        ((i++))
+    done
+
+    # Step 1: Try bulk of _longopt code:
+    #set -xv
+    #_longopt "$@"
+    #set +xv
+
+    local CWORD_offset
+
+    for ((CWORD_offset = 1, i = 1; i <= cword; CWORD_offset++, i++)); do
+        local w="${words[i]}"
+#        local next="${words[i+1]}"
+#        local next2="${words[i+2]}"
+
+        colorize bright red step 2a testing i:$i w:$w out of "$cword":"${words[@]}" >> /tmp/bash-completion.debug
+
+        # Case: old-style VAR=value (single word)
+        if [[ "$w" =~ ^[A-Za-z_][A-Za-z0-9_]*=.* ]]; then
+            ((CWORD_offset+=2))   # var=word gets split up as var = word, so need to offset CWORD by an extra 2
+            #FIXME:
+
+#            words=("${words[@]:0:i-1}" "${words[@]:i+1}")
+#            ((i <= cword)) && ((cword -= 1))
+#            ((i--))
+
+            colorize bright red step 2a w:$w will iterate, splicing i:$i off "$COMP_CWORD":"${COMP_WORDS[@]}" >> /tmp/bash-completion.debug
+
+            continue
+        fi
+
+        # Case: bash split VAR = val  → recombine and skip
+        # if [[ "$w" =~ ^[A-Za-z_][A-Za-z0-9_]*$ && "$next" == "=" ]]; then
+        #     #FIXME:
+        #     colorize bright red step 3 $w >> /tmp/bash-completion.debug
+        #     ((i += 2))
+        #     continue
+        # fi
+
+        if [[ ${words[i]} != -* ]]; then
+            # local root_command=${words[i]}
+            colorize bright red step 10 offset:$i w:$w COMP_CWORD:$COMP_CWORD COMP_WORDS:"${COMP_WORDS[@]}" >> /tmp/bash-completion.debug
+#            set -xv
+            _command_offset $CWORD_offset
+#            set +xv
+#            if [ -n "$COMPREPLY" ] ; then
+                colorize bright red step 10r obtained and will return: "${COMPREPLY[@]}" >> /tmp/bash-completion.debug
+                return
+#            else
+#                colorize bright red step 10f didnt obtain "${COMPREPLY[@]}" >> /tmp/bash-completion.debug
+#            fi
+        fi
+    done
+
+    set >| /tmp/bash-completion.set
+
+    $split && return
+
+    colorize bright red step 11 cur:$cur >> /tmp/bash-completion.debug
+
+    if [[ $cur == -* ]]; then
+        local opts=$(_parse_help "$1")
+        COMPREPLY=($(compgen -W '${opts:-$(_parse_usage "$1")}' -- "$cur"))
+        [[ ${COMPREPLY-} == *= ]] && compopt -o nospace
+        colorize bright red step 12 COMPREPLY=$COMPREPLY >> /tmp/bash-completion.debug
+        return
+    fi
+
+#    _longopt_without_file "$@"
+
+#    if [[ ${#COMPREPLY[@]} -gt 0 ]]; then
+#        colorize bright red step 2b "${COMPREPLY[@]}" >> /tmp/bash-completion.debug
+#        return
+#    fi
+
+#     colorize bright red step 2a >> /tmp/bash-completion.debug
+
+#     # Step 2: Scan for the subcommand
+#     local i=1
+
+#     # we want two things:
+#     #  - x --wait nan<TAB> should complete nano
+#     #  - x env test=test nan<TAB> should complete nano
+#     while (( i < ${#words[@]} )); do
+#         local w="${words[i]}"
+#         local next="${words[i+1]}"
+#         local next2="${words[i+2]}"
+
+#         # Case: old-style VAR=value (single word)
+#         if [[ "$w" =~ ^[A-Za-z_][A-Za-z0-9_]*=.* ]]; then
+#             ((i++))
+#             #FIXME:
+#             colorize bright red step 2 >> /tmp/bash-completion.debug
+#             continue
+#         fi
+
+#         # Case: bash split VAR = val  → recombine and skip
+#         if [[ "$w" =~ ^[A-Za-z_][A-Za-z0-9_]*$ && "$next" == "=" ]]; then
+#             #FIXME:
+#             colorize bright red step 3 >> /tmp/bash-completion.debug
+#             ((i += 3))
+#             continue
+#         fi
+#         #FIXME:
+#         colorize bright red step 4, skipping $i >> /tmp/bash-completion.debug
+
+# #        colorize bright red "$cword" -- "${words[@]}" >> /tmp/bash-completion.debug
+#         # Otherwise, this is the subcommand
+# #        words=("${words[@]:i}")
+# #        ((i <= cword)) && ((cword -= 1))
+
+#         colorize bright red " -->" "$cword" -- "${words[@]}" >> /tmp/bash-completion.debug
+
+#         break
+#     done
+
+#     colorize bright red step 5 >> /tmp/bash-completion.debug
+
+#     # No subcommand found
+#     if (( i >= ${#words[@]} )); then
+#         COMPREPLY=()
+#         return
+#     fi
+
+#     colorize bright red step 6 >> /tmp/bash-completion.debug
+
+#     # Rebuild new COMP_WORDS/COMP_CWORD for subcommand
+#     local subcommand="${words[i]}"
+#     local sub_words=( "${words[@]:i}" )
+#     local sub_cword=$(( cword - i ))
+
+#     # Shim: fake COMP_* for subcommand
+#     local COMP_WORDS=("${sub_words[@]}")
+#     local COMP_CWORD=$sub_cword
+
+#     # Lookup completion handler for the subcommand
+#     local handler
+#     . /usr/share/bash-completion/
+#     handler=$(complete -p "$subcommand" 2>/dev/null) || {
+#         _filedir
+#         colorize bright red step 7 "$subcommand" >> /tmp/bash-completion.debug
+#         return
+#     }
+
+#     colorize bright red step 8 >> /tmp/bash-completion.debug
+#     if [[ "$handler" =~ -F[[:space:]]+([_a-zA-Z0-9]+) ]]; then
+#         local fn="${BASH_REMATCH[1]}"
+#         type "$fn" &>/dev/null && "$fn"
+#     elif [[ "$handler" =~ -C[[:space:]]+([_a-zA-Z0-9/.-]+) ]]; then
+#         "${BASH_REMATCH[1]}"
+#     else
+#         _filedir
+#     fi
+}
+
+# get default system list with `complete -p | grep _command`
+
+#complete -o bashdefault -o default -F _longopt_then_command x xargs xn exec nice chroot ltrace time command env
+#complete -F _longopt_then_command x xargs xn exec nice chroot ltrace time command env
+
+for cmd in x xargs xn env nice chroot exec ltrace time command ; do
+    complete -F _longopt_then_command "$cmd"
+done
+
+# env is already meant to be defined, although it doesn't work very well in bash-completion 2.11-6
+
+# FIXME: the way we define it then means our env completion override
+# doesn't actually function until one of the other completion handlers
+# loads it first. So x --wai<TAB> env a=b y --<TAB> will use our function for the
+# completion of env, but not before the first TAB
+
+# time doesn't have any --longopts or --help (hmmm, /usr/bin/time does - let's see what happens...)
+
+# strace already has its own dynamically loaded completion
+
+#complete -F _root_command sillysu  # already defined in sillysu.sh
+
+# be nice to override these _root_commands to do similar:
+
+#complete -F _root_longopt_then_command fakeroot gksu gksudo kdesudo really sillysu
+
+# su and sudo already defined more completely
+
+# and these commands that need other arguments first:
+
+# faketime

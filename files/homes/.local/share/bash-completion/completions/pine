@@ -1,0 +1,31 @@
+# -*- Mode: shell-script -*-
+
+# Stupidly, everything in our own directory that overrides the system
+# definition, has to duplicate *every* completion, otherwise the first
+# time they're lazyly loaded by default ordering, we'll lose our
+# completion definition.
+# Or we can just import the functions non-lazily...
+if ! type -t _pine > /dev/null ; then
+    . /usr/share/bash-completion/completions/pine
+fi
+
+_user_at_host_stub() {
+    # let's copy pine's lazyloaded definition (perhaps we can do this
+    # only if hadn't already loaded them)
+    if ! type -t _pine > /dev/null ; then
+        . /usr/share/bash-completion/completions/pine
+
+        # but we have to make sure we reset our completion function
+        # because sourcing that file stole it back off us for ssh
+        complete -F _ssh_stub fsh ssh
+    fi
+    _pine "$@"
+
+    # also complete on usernames, if pine's normal completing didn't
+    # return anything
+    if [ "${#COMPREPLY[@]}" = 0 ] ; then
+        _user_at_host "$@"
+    fi
+}
+
+complete -F _user_at_host_stub -o nospace pine alpine

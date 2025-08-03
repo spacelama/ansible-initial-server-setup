@@ -39,6 +39,10 @@ function setup_profile_files() {
             fi
         fi
     done
+    # but undefine the system defined completions in
+    # /usr/share/bash-completion/bash-completion (prior to the lazily
+    # loaded ones under /usr/share/bash-completion/completion)
+    complete -r env xargs
 }
 
 # add all the other bash settings we care about, paths, etc, that

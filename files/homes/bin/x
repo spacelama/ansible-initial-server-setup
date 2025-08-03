@@ -30,7 +30,22 @@ verbose=true
 while [[ "$1" == --* ]] ; do
     case "$1" in
         --help)
-            echo "Usage: x [--help] [--wait] [--noverbose] [--no-eval] [--shell] [--] [-other-xterm-flags...] [--] <prog> [<args>]" 1>&2
+            cat <<EOF
+Usage: x [--help] [--title <title>] [--no-retry] [--wait[=clean-exit-timeout]] [--no-verbose|--verbose[=<true|false>]] [--no-eval] [--shell] [--] [-other-xterm-flags...] [--] <prog> [<args>]"
+Runs PROG within an xterm, setting window title and potentially retrying as necessary
+
+  --title                 Override default calculated title (not useful with --wait)
+  --wait                  Wait when a command has exited
+  --wait=[0-9]*            and (exiting after a timeout if supplied, only if the command was successful)
+  --no-retry              Do not attempt to retry a failed command
+  --verbose               Output some extra info about command invocation and status
+  --verbose=true|false
+  --no-verbose            Be less verbose than default
+  --no-eval               Just run the command within bash with nothing else interpreting the
+                           command status, and be very quiet about invocation
+  --shell                 Run the command within a shell context as well as potentially under the control of our status checker
+  --help                  Display this help and exit
+EOF
             exit 1
             ;;
         --wait)

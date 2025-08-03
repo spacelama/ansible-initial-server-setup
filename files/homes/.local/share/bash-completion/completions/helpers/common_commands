@@ -1,0 +1,3 @@
+# -*- Mode: shell-script -*-
+
+complete -F _longopt emacs emacs-term emacsclient mygnuclient e nano pico
