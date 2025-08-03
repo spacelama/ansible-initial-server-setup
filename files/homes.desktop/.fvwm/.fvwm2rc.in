@@ -413,6 +413,8 @@ Style "SkyCat" !Icon
 # see also "missing titlebar, decorations for one program (Microsoft Teams electron app)"
 Style "*Microsoft Teams*" NoDecorHint, RecaptureHonorsStartsOnPage, CaptureHonorsStartsOnPage, StartsOnPageIncludesTransients, FixedPPosition, StickyIcon
 Style "zoom" NoDecorHint, RecaptureHonorsStartsOnPage, CaptureHonorsStartsOnPage, StartsOnPageIncludesTransients, FixedPPosition, StickyIcon
+# microsoft (of course) visual studio (cargo culted from above, but does work; it would be nice to get dialogs to open on the same monitor, and not span multiple monitors for a simple yes/no dialog):
+Style "Code" NoDecorHint, RecaptureHonorsStartsOnPage, CaptureHonorsStartsOnPage, StartsOnPageIncludesTransients, FixedPPosition, StickyIcon
 Style "Xitk Combo" !Borders   # xine UI loops fvwm: http://marc.info/?l=xine-user&m=113974627127600
 
 #Style "xdvi"            BackingStore #xdvi doesn't save its image when you come back to it - drawing millions of dots takes a real long time
