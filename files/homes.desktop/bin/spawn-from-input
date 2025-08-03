@@ -1,0 +1,11 @@
+#!/bin/bash
+
+# bound to a window manager keybindin, we ask the user for a command
+# to run, and we run that command.
+
+run_command() {
+    eval "$cmd"
+}
+
+cmd=$( dmenu < /dev/null ) &&
+    run_command &

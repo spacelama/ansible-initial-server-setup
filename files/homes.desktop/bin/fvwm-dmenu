@@ -1,0 +1,25 @@
+#!/bin/bash
+
+# Try to be a little backwards compatible with dmenu but using fvwm's
+# inbuilt menus
+
+prompt=
+while [ -n "$1" ] ; do
+    arg="$1" ; shift
+    case "$arg" in
+        -l|-w)
+            ignore="$1" ; shift
+            ;;
+        -p)
+            prompt="$1" ; shift
+            ;;
+    esac
+done
+
+FvwmCommand "DestroyMenu TmpMenu"
+FvwmCommand "AddToMenu TmpMenu \"$prompt\" Title"
+while read title command ; do
+    FvwmCommand "AddToMenu TmpMenu \"$title\" Exec $command"
+done
+FvwmCommand "Popup \"TmpMenu\""
+

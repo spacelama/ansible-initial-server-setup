@@ -6,17 +6,25 @@
 # We use dmenu rather than fvwm-dynamic-menu because dmenu allows us
 # to enter a custom command
 
-default_commands=(x "x --wait" e m)
+# use this for fvwm-dmenu:
+#default_commands=("&xterm x" "&text spawn-from-input" "x\ --&wait x --wait" "&emacs e" "&mozilla m")
+# or this for dmenu:
+default_commands=("x" "x --wait" "e" "m")
 
-ask_command(){
+ask_command() {
     for cmd in "${default_commands[@]}" ; do
         echo "$cmd"
     done | dmenu
+    # options are dwm's dmenu, our replacement for dmenu, or
+    # gxmessage -entrytext 'freeform text'
 }
 
 run_command() {
     eval "$cmd"
 }
+
+# if invoking fvwm-dmenu, it's just:
+# ask_command
 
 cmd=$( ask_command ) &&
     run_command &
