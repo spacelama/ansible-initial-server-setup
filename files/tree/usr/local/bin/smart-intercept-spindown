@@ -1,14 +1,19 @@
 #!/bin/bash
 
-# detect whether a disk is spun down with sdparm commands (for those
-# disks where smartctl `smartctl --nocheck=standby` and `hdparm -C`
-# actually spins up the disk!), and don't invoke smartctl if it is.
-# Otherwise, we also supply --nocheck=standby,0 for those disks on Dell
-# Perc controllers that sdparm reports as not spundown, but which
-# smartctl --nocheck=standby can correctly detect.  While we're here,
-# we might as well try transform SAS smartctl output into something we
-# can parse too, so we can at least get temperatures for
-# hddtemp_smartctl's use
+# For those disks like some of my SAS drives where `smartctl
+# --nocheck=standby` and `hdparm -C` actually spins up the disk,
+# detect whether a disk is spun down with sdparm commands, and don't
+# invoke smartctl if it is.  Otherwise, some of our other disks like
+# our 16TB SATA drives on Dell Perc controllers give unreliable status to `sdparm
+# --command=sense`, but `smartctl --nocheck=standby` does seem to
+# reliably detect their spundown state anyway, so we continue to
+# supply `--nocheck=standby` to cover this case.
+
+# While we're here, we might as well try transform the mimimal output
+# smartctl gives us on SAS drives into something we can parse too, so
+# we can at least get temperatures for hddtemp_smartctl's use.  We
+# also detect nvme drives and pass off a request to smartctlnvme for
+# it to give us smartctl style output on them.
 
 final_arg="${@: -1}"
 

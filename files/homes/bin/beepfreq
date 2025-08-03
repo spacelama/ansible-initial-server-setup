@@ -29,7 +29,7 @@ class NoteToFrequencyAction(Action):
     def __call__(self, parser, namespace, values, option_string) -> None:
         if not (isinstance(values, str)):
             raise ArgumentError("Should not have multiple values")
-        
+
         parse = self._note.fullmatch(values);
         parts = parse.groups()
 
@@ -37,13 +37,13 @@ class NoteToFrequencyAction(Action):
         freq *= 2 ** (int(parts[2]) - 4)
         freq = self._note_factors[parts[0]](freq)
         freq = self._accidental_factors[parts[1]](freq)
-        
+
         if not type(namespace.__dict__[self.dest]) == list:
             namespace.__dict__[self.dest] = []
         namespace.__dict__[self.dest].append(freq)
 
 
-        
+
 
 parser = ArgumentParser()
 

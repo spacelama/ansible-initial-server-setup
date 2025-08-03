@@ -6,7 +6,8 @@
 
 logf=/.backuppc_status
 date=$( date +%s )
-# excludes should be escaped in the same way paths in /etc/mtab is escaped
+# excludes should be escaped in the same way paths in /etc/mtab is escaped.
+# These are REs that need to match the full pathname you want backups to be able to ignore
 excludes=( # these are anchored at ^ and $:
     "/proc/.*"
     "/sys/.*"
@@ -14,7 +15,6 @@ excludes=( # these are anchored at ^ and $:
     "/run/.*"
     "/backuppc"
     "/snapshots"
-    "/home/tconnors/.mp3.low_qual"
     "/var/spool/squid"
     "/tank[^/]*"
     "/mnt/.*"

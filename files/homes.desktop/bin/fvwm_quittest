@@ -17,11 +17,11 @@ file="$1"
 if close_xemacs_server_and_session ; then
     FvwmCommand 'Quit'
 else
-    beep
+    beepfreq  -v 0.02 -f 500 -d 0.2 &
     sleep 0.2
-    beep
+    beepfreq  -v 0.02 -f 500 -d 0.2 &
     sleep 0.7
-    beep
+    beepfreq  -v 0.02 -f 500 -d 0.2 &
     sleep 0.2
-    beep
+    beepfreq  -v 0.02 -f 500 -d 0.2 &
 fi

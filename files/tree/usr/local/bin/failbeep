@@ -11,7 +11,7 @@
 #  normalbeep ) &
 
 if ! "${PROMPT_FAIL_BEEP_SUPPRESS:-false}" && ! "${PROMPT_BEEP_SUPPRESS:-false}" ; then
-    beep -f 300 -d 0.1 -v 0.05 > /dev/null &
+    beepfreq -f 300 -d 0.1 -v 0.05 > /dev/null &
 fi
 
 #if [[ "$DISPLAY" == :* ]] ; then
