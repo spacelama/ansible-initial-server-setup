@@ -45,6 +45,6 @@ esac
                 fi
             ;;
         esac
-    done	
+    done
     echo -n "${USER}@${CHROOTSHORTHOST}${CHROOT}"
 )

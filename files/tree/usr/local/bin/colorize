@@ -7,67 +7,70 @@
 # $Header: /home/tconnors/cvsroot/bin/colorize,v 1.10 2023/06/24 14:00:03 tconnors Exp $
 # $RCSfile: colorize,v $
 
-# This program colorizes the text in the commandline args
+# This program colourises the text in the commandline args
 
-#set -x 
+#set -x
 
 highlight() {
     if $notty ; then
         return
     fi
-    hi="$2"
+    bold="$2"
+    bright="$3"
+    background="$4"
 
     esc="\033["
-    if $hi ; then
-        bold=";1"
+    if $bold ; then
+        fbold="1"
     else
-        bold=
+        fbold=
     fi
-    case "$3" in
-        grey|black)     back="40;"
-                        ;;
-        red)            back="41;"
-                        ;;
-        green)          back="42;"
-                        ;;
-        yellow)         back="43;"
-                        ;;
-        blue)           back="44;"
-                        ;;
-        magenta|purple) back="45;"
-                        ;;
-        cyan)           back="46;"
-                        ;;
-        white)          back="47;"
-                        ;;
-        no|false|"")    back=
-                        ;;
-        *)              echo -ne "${open}${esc}32;1m${close}"
+    case "$1" in
+        grey|black)     fore=30 ;;
+        red)            fore=31 ;;
+        green)          fore=32 ;;
+        yellow)         fore=33 ;;
+        blue)           fore=34 ;;
+        magenta|purple) fore=35 ;;
+        cyan)           fore=36 ;;
+        white)          fore=37 ;;
+        no|false|"")    fore=   ;;
+        normal)         echo -ne "${open}${esc}0m${close}"
                         return
                         ;;
-    esac
-    case "$1" in 
-        grey|black)     echo -ne "${open}${esc}${back}30${bold}m${close}"
-                        ;;
-        red)            echo -ne "${open}${esc}${back}31${bold}m${close}"
-                        ;;
-        green)          echo -ne "${open}${esc}${back}32${bold}m${close}"
-                        ;;
-        yellow)         echo -ne "${open}${esc}${back}33${bold}m${close}"
-                        ;;
-        blue)           echo -ne "${open}${esc}${back}34${bold}m${close}"
-                        ;;
-        magenta|purple) echo -ne "${open}${esc}${back}35${bold}m${close}"
-                        ;;
-        cyan)           echo -ne "${open}${esc}${back}36${bold}m${close}"
-                        ;;
-        white)          echo -ne "${open}${esc}${back}37${bold}m${close}"
-                        ;;
-        normal)         echo -ne "${open}${esc}0m${close}"
-                        ;;
-        *)              echo -ne "${open}${esc}32;1m${close}"
+        *)              usageerror "supply [bold] [bright|dark] colour and text"
                         ;;
     esac
+
+    if $bright ; then
+        fore=$((fore+60))
+    fi
+
+    case "$background" in  # you'd also add 60 to get bright background
+        grey|black)     back=40 ;;
+        red)            back=41 ;;
+        green)          back=42 ;;
+        yellow)         back=43 ;;
+        blue)           back=44 ;;
+        magenta|purple) back=45 ;;
+        cyan)           back=46 ;;
+        white)          back=47 ;;
+        no|false|"")    back=   ;;
+        *)              usageerror "supply valid background colour"
+                        ;;
+    esac
+
+    cmd="${fbold}"
+    if [ -n "$fore" ] ; then
+        cmd="${fbold:+${fbold};}${fore}"
+    fi
+    if [ -n "$back" ] ; then
+        cmd="${fbold:+${fbold};}${back}"
+    fi
+
+    # good explanation for the ANSI syntax here:
+    # https://www.kenmuse.com/blog/coloring-in-ansi/
+    echo -ne "${open}${esc}${cmd}m${close}"
 }
 
 directoutput() {
@@ -110,14 +113,15 @@ usageerror() {
 
 parseinput() {
     ARGS="$*"
+    nolf=false
     open=
     close=
-    nolf=false
+    bright=false
+    bold=false
     colour=
+    background=false
     stderr=false
     notty=false
-    hi=false
-    bg=false
     first=true
     while : ; do
         if ! $first ; then
@@ -143,7 +147,7 @@ parseinput() {
                 nolf=true
                 ;;
             --background)
-                bg="$2"
+                background="$2"
                 shift
                 ;;
             --stderr)
@@ -164,27 +168,37 @@ parseinput() {
                 ;;
         esac
     done
-    if [ "$#" -lt 2 ] ; then
-        usageerror "supply color and text"
+    if [ "$#" -lt 1 ] ; then
+        usageerror "supply [bold] [bright|dark] colour and text"
     fi
-    case "$1" in
-        bright)
-	    hi=true
-            shift
-            ;;
-        dark)
-            hi=false
-            shift
-            ;;
-    esac
+    while [ "$#" -gt 2 ] ; do
+        case "$1" in
+            bright)
+                bright=true
+                shift
+                ;;
+            dark)
+                bright=false
+                shift
+                ;;
+            bold)
+                bold=true
+                shift
+                ;;
+            *)
+                break
+                ;;
+        esac
+    done
     colour="$1"
     shift
+    if [ "$#" -lt 1 ] ; then
+        usageerror "supply text"
+    fi
 
     #assign all uneaten params to an array
-    i=0
     for arg in "$@" ; do
-        args[i]="$arg"
-        i=$(($i+1))
+        args+=("$arg")
     done
 }
 
@@ -192,8 +206,12 @@ args=()
 parseinput "$@"
 
 directoutput
-highlight "$colour" $hi $bg
+highlight "$colour" "$bold" "$bright" $background
 echo -n "${args[@]}"
-highlight normal false
-$nolf || echo
-
+highlight normal   # change the colour back before finishing the
+                   # line, amongst other reasons to make sure
+                   # formatting including background is back to
+                   # normal before the new line is created
+if ! $nolf ; then
+    echo
+fi
