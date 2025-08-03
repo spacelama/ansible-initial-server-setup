@@ -24,13 +24,23 @@ retry() {
     done
 }
 
+enforce_title_length() {
+    local title="$*"
+
+    title_limit=120 # we don't know the size the xterm will be, yet
+
+    chomp --middle ... "$title_limit" "$title"
+}
+
 eval="verboserun"
 noshell=true
-verbose=true
+verbose=false
+retry=retry
+wait_timeout=
 while [[ "$1" == --* ]] ; do
     case "$1" in
         --help)
-            cat <<EOF
+            cat 1>&2 <<EOF
 Usage: x [--help] [--title <title>] [--no-retry] [--wait[=clean-exit-timeout]] [--no-verbose|--verbose[=<true|false>]] [--no-eval] [--shell] [--] [-other-xterm-flags...] [--] <prog> [<args>]"
 Runs PROG within an xterm, setting window title and potentially retrying as necessary
 
@@ -43,18 +53,34 @@ Runs PROG within an xterm, setting window title and potentially retrying as nece
   --no-verbose            Be less verbose than default
   --no-eval               Just run the command within bash with nothing else interpreting the
                            command status, and be very quiet about invocation
-  --shell                 Run the command within a shell context as well as potentially under the control of our status checker
+  --shell                 Run the command within a shell context as well as potentially under the control
+                           of our status checker
   --help                  Display this help and exit
 EOF
             exit 1
             ;;
-        --wait)
-            shift
-            eval='wait-and-query-rerun'
+        --title)
+            title="$2"
+            shift 2
             ;;
-        --noverbose)
+        --wait*)
+            if [[ "$1" == --wait=* ]] ; then
+                wait_timeout="${1#--wait=}"
+            fi
             shift
+            eval="wait-and-query-rerun${wait_timeout:+ -t $wait_timeout}"
+            ;;
+        --no-retry)
+            shift
+            retry=
+            ;;
+        --no-verbose|--verbose=false)
             verbose=false
+            shift
+            ;;
+        --verbose|--verbose=true)
+            verbose=true
+            shift
             ;;
         --no-eval)
             shift
@@ -70,12 +96,21 @@ EOF
     esac
 done
 
-if [ $eval == wait-and-query-rerun ] ; then
-    if $verbose ; then
-        eval="$eval --verbose"
-    fi
+
+if [ "$eval" == 'wait-and-query-rerun' ] ; then
+    eval="$eval --verbose=$verbose"
     if ! $noshell ; then
         eval="$eval --shell"
+    fi
+elif [ "$eval" = verboserun ] ; then
+    eval="$eval --verbose=$verbose"
+    if ! $noshell ; then
+        eval="$eval --shell"
+    fi
+else  # no eval, but they might still be asking for a shell (kinda the
+      # same thing, eh?)
+    if ! $noshell ; then
+        eval='bash -c'
     fi
 fi
 
@@ -104,8 +139,20 @@ while [ $# != 0 ] ; do
     shift
 done
 
-if [ "${#cmds[@]}" != 0 ] ; then
-    retry xterm "${args[@]}" -T "x: $PWD ${cmds[*]}" -e bash $eval "${cmds[@]}" # ${cmds[*]}
-else
-    retry xterm "${args[@]}"
-fi &
+(
+    if [ "${#cmds[@]}" = 0 ] ; then
+        cmds+=("bash")
+    fi
+    # we don't know the tty yet, nor the size of the window, so
+    # there's no useful metadata to display at the front of the window
+    # title to identify this window yet
+    title="${title-$( enforce_title_length x: "$PWD" "${cmds[@]}" )}"
+    $retry xterm "${args[@]}" -T "$title" -e $eval "${cmds[@]}" &
+    sleep 0.3  # if we exit too soon, and in turn our caller (eg
+               # xterm, ssh) exits, then our child might not even get
+               # a chance to spawn.  This is awful, I wish there were
+               # a better way to get confirmation that the xterm had
+               # actually opened (plus, the retry loop could wait in
+               # the foreground until the xterm succeeds in
+               # opening)...
+)
