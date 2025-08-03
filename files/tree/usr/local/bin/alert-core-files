@@ -6,8 +6,14 @@
 # be cleaned up automatically at some point
 
 (
-    locate -r '/core\.' | grep -e '/core$' -e '/core.[0-9]*$' -e '/core.*zst$' | grep /var/lib/systemd/coredump | xargs '-I{}' find '{}' -ctime -2
-    locate -r '/core\.' | grep -e '/core$' -e '/core.[0-9]*$' -e '/core.*zst$' | grep -v /var/lib/systemd/coredump
+    # /var/lib/systemd/coredump are auto-cleaned-up (and frequent).
+    # The rest aren't, so list them serparately
+    locate -r '/core\.' | grep -e '/core$' -e '/core.[0-9]*$' -e '/core.*zst$' | grep /var/lib/systemd/coredump | xargs '-I{}' find '{}' -ctime -2 | sort | uniq
+    locate -r '/core\.' | grep -e '/core$' -e '/core.[0-9]*$' -e '/core.*zst$' | grep -v /var/lib/systemd/coredump | sort | uniq
+
+    # might as well list other undesirable files that modern systems
+    # create for you occasionally without seeking your permission
+    locate -r '.local/share/Trash$' | xargs '-I{}' find '{}' -type f | sort | uniq
 ) | xargs --delim='\n' --no-run-if-empty file
 
 exit 0
