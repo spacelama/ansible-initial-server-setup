@@ -92,6 +92,8 @@ PATH=/sbin:/bin:/usr/sbin:/usr/bin ; export PATH
 exit=0
 
 trap 'echo "ERROR: $hostname:$0: $LINENO: $BASH_COMMAND"; exit=1' ERR
+hostname=`hostname`
+date=`date`
 
 data_dir_dir=/var/log
 data_dir_base=conf_dump
@@ -102,8 +104,6 @@ mkdir "$data_dir"    #.tmp
 chown root:tconnors "$data_dir" # things like monitor_iot.worker write into it as myself
 chmod g+w,+t "$data_dir"        # but I can only delete my own things
 
-hostname=`hostname`
-date=`date`
 echo "Host: $hostname" > $data_dir/info
 echo "Date: $date" >> $data_dir/info
 
@@ -157,10 +157,25 @@ if grep -q ^zfs /proc/modules ; then
     /usr/local/bin/zfs_print_all > $data_dir/zfs-create.script 2>&1 || true
 fi
 
-for i in /dev/sd? ; do
-    dev="${i#/dev/}"
-    /usr/local/bin/smart-intercept-spindown -a "$i" > $data_dir/smartctl-a.$dev 2>&1 || true
+for i in /dev/sd? /dev/nvme?n? ; do
+    if [ -e "$i" ] ; then
+        dev="${i#/dev/}"
+        /usr/local/bin/smart-intercept-spindown -a "$i" > $data_dir/smartctl-a.$dev 2>&1 || true
+        #FIXME: does this work for nvme and sas drives?
+    fi
 done
+
+if [ -x /usr/sbin/nvme ] ; then
+    nvme list "$i" > $data_dir/nvme.list
+    for i in /dev/nvme?n? ; do
+        if [ -e "$i" ] ; then
+            dev="${i#/dev/}"
+            nvme smart-log "$i" > $data_dir/nvme.smart-log.$dev
+            nvme id-ctrl -H "$i" > $data_dir/nvme.id-ctrl.$dev
+            # endurance-log? effects-log, self-test-log?
+        fi
+    done
+fi
 
 backup /proc/mounts $data_dir/mounts
 backup /proc/swaps $data_dir/swaps
@@ -260,6 +275,8 @@ if [ -x /bin/systemctl ] ; then
 fi
 
 ps axfu > $data_dir/ps.axfu
+# grab the *second* sample for CPU usage
+top -b -n 2 | tail -n +2 | sed -n '/^top/,$p' > $data_dir/top.usage
 
 if [ -x /usr/bin/docker ] ; then
     docker image ls > $data_dir/docker.image.ls
@@ -287,13 +304,19 @@ lsmod > $data_dir/lsmod
 lscpu > $data_dir/lscpu
 lspci > $data_dir/lspci 2>/dev/null || true
 lspci -vvv > $data_dir/lspci-vvv 2>/dev/null || true
+if [ -x /usr/bin/cpupower ] ; then
+    cpupower frequency-info > $data_dir/cpupower-frequency-info
+fi
 for d in /sys/kernel/iommu_groups/*/devices/*; do
     n=${d#*/iommu_groups/*}; n=${n%%/*}
     printf 'IOMMU Group %s ' "$n"
     lspci -nns "${d##*/}" || true
 done > $data_dir/lspci_mmu 2>&1
 if [ -x /usr/sbin/dmidecode ] ; then
-    dmidecode >> $data_dir/dmidecode 2>&1 || true
+    dmidecode > $data_dir/dmidecode 2>&1 || true
+fi
+if [ -x /usr/bin/fwupdmgr ] ; then
+    fwupdmgr get-devices > $data_dir/fwupdmgr.get-devices 2>&1
 fi
 if [ -x /usr/bin/lsusb ] ; then
     lsusb > $data_dir/lsusb || true # can fail if no USB devices?
@@ -318,14 +341,30 @@ if [ -d /etc/pve ] ; then
     cp -pra /etc/pve $data_dir/pve
 
     if grep -q ceph /proc/mounts ; then
+        ceph -s > $data_dir/ceph-s
+        grep ^ceph: $data_dir/apt-show-versions > $data_dir/ceph-version
+        /usr/local/bin/nagios/check_ceph_overall > $data_dir/ceph.nagios.health.overall
+
+        # https://access.redhat.com/solutions/7010265
+        # grab the *second* sample for CPU usage
+        top -b -n 2 -p $( echo $( pgrep -f /usr/bin/ceph ) | sed 's/ /,/g' ) | tail -n +2 | sed -n '/^top/,$p' > $data_dir/ceph.top.daemon.usage
+        ps -o rss,%mem,command ax | awk '{ if( $3 == "/usr/bin/ceph-osd") { cnt++; prc+=$2; byt+=$1; x=$1/1024/1024; $1=""; print x $0 }} END {print "Summary: " cnt " OSDs, Total Mem: " byt/1024/1024 "G, Percent: " prc;}' > $data_dir/ceph.osd.mem-usage
+        for osd in $(ceph osd ls) ; do echo -n "osd.${osd}: " ; ceph config show-with-defaults osd.${osd} -f json | jq -c '.[] | (if .name == "osd_memory_target" or .name == "bluestore_cache_autotune" then .name +": " + .value + " " + .source  else empty end)' | sed -e 's/"//g' |  paste -d"\ " - - ; done  | column -t > $data_dir/ceph.osd.memory-settings 2>&1
+
         ceph balancer status > $data_dir/ceph.balancer.status
-        ceph config dump > $data_dir/ceph.config.dump
+        ceph config dump     > $data_dir/ceph.config.dump
+        # google: cephfs only 30MB/s read hdd 10gbit nic number of pgs
+        ceph pg dump         > $data_dir/ceph.pg.dump 2>&1
+
+        ceph-volume lvm list > $data_dir/ceph-volume.lvm.list
+        osds_on_this_host=$( grep "osd id" $data_dir/ceph-volume.lvm.list | awk '{print $3}' | sort -g | uniq )
 
         ceph osd lspools | awk '{print $2}' | while read pool ; do
             rbd du -p $pool > $data_dir/ceph.du.rbd.pool.$pool
         done
         rados df > $data_dir/ceph.df.rados
         ceph osd pool ls detail > $data_dir/ceph.ls.osd.pool # grep full
+        ceph osd pool autoscale-status > $data_dir/ceph.pool.autoscale-status
         ceph osd df > $data_dir/ceph.df.osd
         ceph osd df tree > $data_dir/ceph.df.osd.tree
         ceph df detail > $data_dir/ceph.df.detail
@@ -338,6 +377,7 @@ if [ -d /etc/pve ] ; then
             done
         done > $data_dir/ceph.pool.volume.snapshots
 
+        # all OSDs across the cluster - for those commands you can reach from any node
         for osd in $( ceph osd df | grep '^ *[0-9]' | awk '{print $1}' ) ; do
             (
                 for param in bdev_enable_discard bdev_async_discard_threads bluestore_use_optimal_io_size_for_min_alloc_size bluestore_min_alloc_size bluestore_min_alloc_size_hdd bluestore_min_alloc_size_ssd bluestore_max_alloc_size bluestore_compression_mode bluestore_compression_algorithm bluestore_compression_min_blob_size bluestore_compression_min_blob_size_hdd bluestore_compression_min_blob_size_ssd bluestore_compression_max_blob_size bluestore_compression_max_blob_size_hdd bluestore_compression_max_blob_size_ssd bluestore_max_blob_size bluestore_max_blob_size_hdd bluestore_max_blob_size_ssd ; do
@@ -345,7 +385,12 @@ if [ -d /etc/pve ] ; then
                     ceph config get osd.$osd $param
                 done
             ) > $data_dir/ceph.osd.$osd.params
+            ceph pg ls-by-osd osd.$osd > $data_dir/ceph.pg.ls.$osd
             ceph daemon osd.$osd perf dump > $data_dir/ceph.osd.$osd.perf.dump 2>/dev/null || true
+            # whole bunch of interesting looking commands visible under:
+            # ceph daemon osd.0 help
+            # eg:
+            #  - ceph daemon osd.6 bluefs stats
         done
         ceph osd lspools | awk '{print $2}' | while read pool ; do
             ceph osd pool get $pool all > $data_dir/ceph.pool.$pool.conf
@@ -353,11 +398,16 @@ if [ -d /etc/pve ] ; then
 
         # let's also look at some PVE ceph tools:
         pveceph pool ls > $data_dir/pveceph.pool.ls
-        for osd in /var/lib/ceph/osd/* ; do
-            osd=${osd#*/ceph-}
+        for osd in $osds_on_this_host ; do
             pveceph osd details $osd > $data_dir/pveceph.osd.details.$osd 2>&1 || true
             # verbose currently same as --output-format json-pretty
             pveceph osd details $osd --output-format json-pretty > $data_dir/pveceph.osd.details.$osd.verbose.json 2>&1 || true
+
+            # and maybe also commands you only want to run on an OSD only a single time per day:
+            # ceph tell osd.$osd bench > $data_dir/ceph.osd.bench.$osd  # but even then, this writes a GB per invocation.  Do we want to cause that level of excess wear per day if we're not actively tracking the results?
+            # but tracking the IOPS would certainly be useful:
+            ceph tell osd.$osd bench 4096 > $data_dir/ceph.osd.bench.$osd.4096
+            # or `ceph tell osd.\* bench` to do it on all osds at the same time
         done
         for pool in $( pveceph pool ls --output-format json | jq -r .[].pool_name ) ; do
             pveceph pool get $pool > $data_dir/pveceph.pool.get.$pool 2>&1
