@@ -3,7 +3,17 @@
 # monitors xscreensaver log to see whether it should restart it after
 # a blacklist of programs (eg, firefox) try to inhibit it.
 
-# My solution to Bug#1009864
+# My solution to Debian Bug#1009864 In firefox,
+# https://bugzilla.mozilla.org/show_bug.cgi?id=1749187 fixed the issue
+# (with mandatory configuration) for audio, but
+# https://bugzilla.mozilla.org/show_bug.cgi?id=1885268 still open for
+# visual.  Can apparently be worked around with:
+# set:  dom.screenwakelock.enabled to false
+#       media.video-wakelock to false
+#       permissions.default.screen-wake-lock to 0
+# But you fix that, and chromium releases an update that breaks it
+# again for that too.  So just fight back with a screensaver
+# restarter service.
 
 blacklist=(firefox-esr chromium)
 

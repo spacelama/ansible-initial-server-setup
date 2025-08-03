@@ -87,9 +87,9 @@ function setupdesks() {
     echo "setupdesks(): $( date )"
     waitforcommandpipe
     for i in `pidof FvwmCommandS` ; do
-        ls -lA --color /proc/$i/fd
+        ls -lA --color=yes /proc/$i/fd
     done
-    ls -lA --color /var/tmp
+    ls -lA --color=yes /var/tmp
     sleep 1
     FvwmCommand 'GotoDesk 0 1'
 
@@ -300,8 +300,9 @@ esac
 ####################           PI               #########
 
 if [ "`xdpyinfo |sed -n 's/.*depth of root window: *\([^ ]*\) .*/\1/p'`" -ge 16 -a `sed -n 's/^MemTotal:  *\([^ ]*\)  *kB/\1/p' /proc/meminfo` -gt 128000 ] ; then
-    #if we have enough colors, display a perty background.
-    ( sleep 120 ; nice updatebackground.sh ) &   #dont want this running on the 8 bit terminal, because it steals too many colors
+    #if we have enough colours, display a perty background.
+    #dont want this running on the 8 bit terminal, because it be stealin' yer colours
+    ( sleep 120 ; nice updatebackground.sh ) &
 fi
 
 (
