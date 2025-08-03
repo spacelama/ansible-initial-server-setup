@@ -117,6 +117,8 @@ Key Tab         A       CMS      Exec exec fvwm_focus
 #Key Down	A	SM	CursorMove +0   +10
 
 # Keyboard accelerators
+Key F1          A       MCS     Exec spawn
+
 Key F1		A	M	Popup "Utilities"
 Key F2		A	M	Popup "Window-Ops"
 Key F2		A	MS	Popup "/Debian"
@@ -163,9 +165,9 @@ Key F7                A       M      Exec exec currenttrackname
 #Key F7                A       CMS    Exec exec ssh scuzzie currenttrackname
 
 Key F11               A       M      Exec exec snip-movie-start
-Key F11               A       MS     Exec exec snip-movie-end
-Key F11               A       CMS    Exec exec snip-movie-end --end
-Key F11               A       CS     Exec exec snip-movie-end --redo
+Key F11               A       MS     Exec exec x --wait=5 snip-movie-end
+Key F11               A       CMS    Exec exec x --wait=5 snip-movie-end --end
+Key F11               A       CS     Exec exec x --wait=5 snip-movie-end --redo
 
 Key XF86Suspend	      A       A      Exec exec suspendtoram
 Key XF86Suspend	      A       C      Exec exec suspendtodisk

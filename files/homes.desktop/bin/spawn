@@ -1,0 +1,22 @@
+#!/bin/bash
+
+# bound to a window manager keybindin, we ask the user for a command
+# to run, and we run that command.
+
+# We use dmenu rather than fvwm-dynamic-menu because dmenu allows us
+# to enter a custom command
+
+default_commands=(x "x --wait" e m)
+
+ask_command(){
+    for cmd in "${default_commands[@]}" ; do
+        echo "$cmd"
+    done | dmenu
+}
+
+run_command() {
+    eval "$cmd"
+}
+
+cmd=$( ask_command ) &&
+    run_command &
