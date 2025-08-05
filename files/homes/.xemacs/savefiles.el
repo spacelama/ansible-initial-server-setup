@@ -216,9 +216,14 @@
       (widen)
       (goto-char (point-min))
       (when (and (looking-at "^#!")
-		 (not (file-executable-p buffer-file-name)))
-	(set-file-modes buffer-file-name
-			(logior (file-modes buffer-file-name) #o111))
-	(message (concat "Made " buffer-file-name " executable"))))))
+                 (not (file-executable-p buffer-file-name)))
+        (condition-case err
+            (progn
+             (set-file-modes buffer-file-name
+                             (logior (file-modes buffer-file-name) #o111))
+             (message (concat "Made " buffer-file-name " executable")))
+          (error
+           (setq message-log-max t)  ; if an error occurs, I'd like to see all messages
+           (message "Ooops, something didn't happen: %s" err)))))))
 
 (add-hook 'after-save-hook 'hlu-make-script-executable)
