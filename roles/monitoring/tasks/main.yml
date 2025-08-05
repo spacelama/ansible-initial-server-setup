@@ -119,8 +119,15 @@
   notify: restart munin-node
 
 - name: determine if any hardware monitors exist
-  stat: path=/sys/class/hwmon/hwmon0
-  register: hwmon0
+  find:
+    paths: /sys/class/hwmon
+    patterns: "hwmon?"
+    file_type: any
+  register: hwmon
+
+- name: debug
+  debug:
+    msg: "found {{ hwmon }} hwmons"
 
 - name: find possibly extraneous munin checks (hwmon wildcard)
   find:
@@ -152,7 +159,7 @@
   with_items: "{{ munin_plugins_to_possibly_delete_hwmon.files }}"
   become: true
   notify: restart munin-node
-  when: not hwmon0.stat.exists
+  when: hwmon.matched == 0
 
 - name: remove extraneous munin plugins without params (pi or non virtual nor container; ie, physical machines including pi)
   file:
