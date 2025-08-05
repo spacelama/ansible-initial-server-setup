@@ -4,3 +4,10 @@
     name: earlyoom
     state: restarted
   become: true
+
+- name: restart bluetooth
+  systemd:
+    name: bluetooth
+    daemon_reload: true
+    state: restarted
+  become: true

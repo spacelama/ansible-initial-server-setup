@@ -44,7 +44,7 @@
 
 - name: install preferred backported/non-backported packages
   apt:
-    name: ['highlight', 'pipewire', 'pipewire-audio', 'libspa-0.2-bluetooth', 'gthumb', 'solaar'] # libspa-0.2-bluetooth for pipewire bluetooth support
+    name: ['highlight', 'pipewire', 'pipewire-audio', 'pipewire-pulse', 'wireplumber', 'libspa-0.2-bluetooth', 'gthumb', 'solaar'] # libspa-0.2-bluetooth for pipewire bluetooth support
     # golang for direnv from git if necessasary
     # FIXME: emacs and/or emacs-gtk
     state: present
@@ -85,6 +85,13 @@
     cmd: "loginctl enable-linger {{ admin_user }}"
     creates: "/var/lib/systemd/linger/{{ admin_user }}"
   become: true
+
+- name: set up bluetooth experimental settings (eg headset battery level)
+  copy:
+    src: etc/systemd/system/bluetooth.service.d/override.conf
+    dest: /etc/systemd/system/bluetooth.service.d/
+  become: true
+  notify: restart bluetooth
 
   # https://www.reddit.com/r/linuxadmin/comments/fbfc6w/how_to_wrap_my_firefox_process_in_a_cgroup_to/
   # https://lists.luv.asn.au/pipermail/luv-main/2020-December/011334.html (firejail other suggestion)
