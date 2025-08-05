@@ -1,9 +1,22 @@
 #!/usr/bin/perl
 
+# A replacement for the various stock versions of hddtemp that all
+# seem to have big issues with different types of drives, or spin up
+# drives that are in powersaving spun-down mode, etc.
+
+# For those disks like some of my SAS drives where `smartctl
+# --nocheck=standby` and `hdparm -C` actually spins up the disk,
+# detect whether a disk is spun down with sdparm commands, and don't
+# invoke smartctl if it is.  Otherwise, some of our other disks like
+# our 16TB SATA drives on Dell Perc controllers give unreliable status to `sdparm
+# --command=sense`, but `smartctl --nocheck=standby` does seem to
+# reliably detect their spundown state anyway, so we continue to
+# supply `--nocheck=standby` to cover this case.
+
+# Much of this stolen from /etc/munin/plugins/hddtemp_smartctl
+
 use strict;
 use warnings;
-
-# much of this stolen from /etc/munin/plugins/hddtemp_smartctl
 
 $ENV{PATH}="$ENV{PATH}:/usr/sbin:/sbin";
 
