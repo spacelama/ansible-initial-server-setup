@@ -14,7 +14,7 @@ pve2                            linux,intel,amd,pve
 pve3                            linux,intel,pve
 pve-backup                      linux,intel,pve,not247
 pi                              linux,arm
-homeassistant                   linux,intel,hassio
+homeassistant                   linuxdarkgreybox,intel,hassio
 zm                              linux,intel,lxc,turnkey
 zm12                            linux,intel,lxc,not247,notyetproduction
 jellyfin                        linux,intel,lxc
