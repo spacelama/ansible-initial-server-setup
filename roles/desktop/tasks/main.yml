@@ -51,6 +51,14 @@
     default_release: "{{ host_has_backports | default(false) | ternary( deb_release ~ '-backports', omit ) }}"
   become: true
 
+- name: install preferred backported/non-backported kernels if desired
+  apt:
+    name: ['linux-image-amd64', 'linux-base', 'linux-headers-amd64']
+    state: present
+    default_release: "{{ deb_release }}-backports"
+  become: true
+  when: host_has_backports_kernel | default(false)
+
 - name: install custom locally build desktop packages
   include_tasks: "{{ playbook_dir }}/roles/common/tasks/install_custom_packages.yml"
   vars:

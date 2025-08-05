@@ -692,7 +692,7 @@
   notify: "Regenerate boot config"
   when: grub_boot_flags is not defined
 
-- name: "Append modprobe blacklist boot config"
+- name: "Append modprobe blacklist boot config (creates /etc/default/grub.d/ansible.modprobe.blacklist.cfg)"
   include_tasks: "{{ playbook_dir }}/roles/common/tasks/add_boot_flag.yml"
   loop_control:
     loop_var: flag

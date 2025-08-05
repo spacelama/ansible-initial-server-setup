@@ -9,6 +9,9 @@
 # MPC IRBNCE Sep 19 18:08:30 pve3 kernel: [59453.495795] pcieport
 # 0000:00:1c.4: Intel PCH root port ACS workaround enabled
 
+# We only run this on pve3 and not on all machines partly because it shows
+# no real saving elsewhere, and partly because it's a bit too aggressive
+# at the wrong things: https://z8.re/blog/aspm.html
 
 powertop --auto-tune
 HIDDEVICES=$(ls /sys/bus/usb/drivers/usbhid | grep -oE '^[0-9]+-[0-9\.]+' | sort -u)
