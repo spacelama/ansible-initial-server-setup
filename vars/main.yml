@@ -282,7 +282,9 @@
   # things deliberately added to /usr/local/bin to make sure we dont
   # have stale copies around, but that's a bit of work...
   # For now, just remember to do:
-  # `cd files/tree/usr/local/bin ; find -type f | while read i ; do l -d ~/bin/$i ; done` and remove those files it finds
+  #   cdrun files/tree/usr/local/bin find -type f | while read i ; do l -d ~/bin/$i ; done
+  #   cdrun files/tree.Linux-x86_64/usr/local/bin find -type f | while read i ; do l -d ~/bin/Linux-x86_64/$i ; done
+  # and remove those files it finds
   usr_local_bin_files_to_remove:
     - "{{ lookup('fileglob', \"homes/bin/*\", wantlist=True) }}"
     - "{{ lookup('fileglob', \"homes.Linux-{{ arch | default ('x86_64') }}/bin/Linux-{{ arch | default ('x86_64') }}/*\", wantlist=True) }}"
@@ -292,6 +294,7 @@
   # excess files later)
   bashrc_files:
     - "{{ lookup('fileglob', 'tree/etc/bash.bashrc.d/*.sh', wantlist=True) }}"
+    - "{{ lookup('fileglob', 'tree/etc/bash.bashrc.d/*.txt', wantlist=True) }}"
 
     # "simple-sync" - let's just transfer a whole bunch of files,
     # according to simple criteria, with possible event triggering:
@@ -320,7 +323,7 @@
       # customisation, unless perhaps that directory already exists in
       # the files/ area because it's relevant to a whole bunch of
       # hosts and you have a further customisation here.
-    - name: /
+    - name: / # tree/
     - name: /
       source: tree.Linux-{{ arch | default ('x86_64') }}/
     - name: /
