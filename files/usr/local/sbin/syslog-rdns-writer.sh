@@ -1,13 +1,15 @@
-#!/bin/bash
+#!/bin/ksh
 
 # invoked by rsyslogd.conf.d/syslog-collector.conf to parse out the IP
 # address of the syslog sender and maps it to a short-hostname (not
 # taking what the sender itself is claiming to be the hostname)
 
-# Declare reverse DNS cache
-declare -A cache
+set -o pipefail
 
-dest_dir=/var/log/remote/
+# Declare reverse DNS cache
+typeset -A cache
+
+dest_dir=/var/log/remote
 mkdir -p "$dest_dir"
 chmod 755 "$dest_dir"
 
@@ -18,7 +20,8 @@ while IFS='|' read -r ip msg; do
     # If we haven't cached the hostname
     if [[ -z "${cache[$ip]}" ]]; then
         # Try reverse DNS
-        host=$(dig +short -x "$ip" | sed 's/\.$//' | cut -d. -f1)
+        host=$(dig +short -x "$ip" | sed 's/\.$//' | cut -d. -f1) ||
+            host=
         # Fallback to IP if rDNS fails (but don't cache this negative
         # lookup)
         if [[ -z "$host" ]] ; then
