@@ -357,6 +357,7 @@
     - { name: /etc/rkhunter.conf,  source: etc/rkhunter.conf.j2 }  # kept separate to the tree because we want to store the various distribution versions for easier comparison
     - { source: etc/munin/munin-node.conf, name: /etc/munin/,   notify: "restart munin-node" }
 
+    - { name: /usr/local/bin/hddtemp,              source: usr/local/bin/hddtemp,                 mode: "0755", local_follow: true }
     - { name: /etc/cron.daily/check-cmos-battery,  source: cron/cron.daily_check-cmos-battery,    mode: "0755", when: "{{ host_is_physical | default(false) }}" }
     - { name: /etc/chrony/,  source: etc/chrony/,            notify: "restart chrony" }
 
