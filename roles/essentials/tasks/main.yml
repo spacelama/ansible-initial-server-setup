@@ -254,6 +254,16 @@
       state: present
     become: true
 
+  - name: Configure dnsmasq for only local DNS consumption
+    blockinfile:
+      path: /etc/dnsmasq.conf
+      marker: "# {mark} ANSIBLE MANAGED BLOCK"
+      backup: yes
+      insertafter: '#listen-address='
+      block: |2
+        listen-address=127.0.0.1
+    become: true
+
   - name: Configure NetworkManager
     when: (not (host_is_container | default(false))) and
           (not (host_is_not_using_network_manager | default(false)))
@@ -295,13 +305,6 @@
     when: (host_is_container | default(false)) or
           (host_is_not_using_network_manager | default(false))
     block:
-    - name: Enable dnsmasq
-      service:
-        name: dnsmasq
-        state: started
-        enabled: yes
-      become: true
-
       # If we couldn't rely on dnsmasq behaviour of ignoring 127.0.0.1
       # and libc otherwise talking to first entry, then we'd have to
       # create /etc/.pve-ignore.resolv.conf in all containers and
@@ -316,7 +319,13 @@
         insertafter: '(?m)request [^;]*;' # multiline search
         block: |2
           prepend domain-name-servers 127.0.0.1;
-          listen-address=127.0.0.1;
+      become: true
+
+    - name: Enable dnsmasq
+      service:
+        name: dnsmasq
+        state: started
+        enabled: yes
       become: true
 
   - name: Purge systemd-resolved
