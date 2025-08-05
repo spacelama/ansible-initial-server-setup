@@ -109,7 +109,7 @@
 
 - name: Install essential packages (all)
   apt:
-    name: ['ksh', 'rsyslog', 'apt-listchanges', 'needrestart', 'rsync', 'sysstat', 'bsd-mailx', 'procmail', 'colordiff', 'net-tools', 'ccze', 'bash-completion', 'rkhunter', 'unhide', 'unhide.rb'] # procmail for lockfile, ccze for cron.daily get_conf
+    name: ['ksh', 'rsyslog', 'apt-listchanges', 'needrestart', 'rsync', 'sysstat', 'bsd-mailx', 'procmail', 'colordiff', 'net-tools', 'ccze', 'bash-completion', 'rkhunter', 'unhide', 'unhide.rb', 'eatmydata'] # procmail for lockfile, ccze for cron.daily get_conf
     autoremove: no
     state: present
   become: true
@@ -365,7 +365,7 @@
 
 - name: Install essential packages (not container)
   apt:
-    name: [ 'ethtool', 'iperf3', 'nicstat', 'lshw', 'hwinfo', 'dmidecode', 'parted', 'sdparm', 'smartmontools', 'htop', 'btop', 'glances', 'iotop', 'smem', 'ifstat', 'iftop', 'dstat', 'chrony', 'git', 'cvs', 'vim', 'make', 'etckeeper', 'strace', 'rlwrap', 'libstring-shellquote-perl', 'keychain', 'expect', 'initscripts', 'direnv', 'bc', 'curl', 'wget', 'netcat-openbsd', 'dlocate', 'aptitude', 'apt-show-versions', 'apt-listbugs' ] # expect for unbuffer, initscripts for bootlogs, pcp for `pcp dstat`, but that results in pmlogger cronjobs that spin up disks on fs, bc for checkntp; not atop since it creates massive logfiles - left for desktops only
+    name: [ 'ethtool', 'iperf3', 'nicstat', 'lshw', 'hwinfo', 'dmidecode', 'parted', 'sdparm', 'smartmontools', 'htop', 'btop', 'glances', 'iotop', 'smem', 'ethstatus', 'ifstat', 'iftop', 'dstat', 'chrony', 'git', 'cvs', 'vim', 'make', 'etckeeper', 'strace', 'rlwrap', 'libstring-shellquote-perl', 'keychain', 'expect', 'initscripts', 'direnv', 'bc', 'curl', 'wget', 'netcat-openbsd', 'dlocate', 'aptitude', 'apt-show-versions', 'apt-listbugs' ] # expect for unbuffer, initscripts for bootlogs, pcp for `pcp dstat`, but that results in pmlogger cronjobs that spin up disks on fs, bc for checkntp; not atop since it creates massive logfiles - left for desktops only
     autoremove: no
     state: present
     install_recommends: no
