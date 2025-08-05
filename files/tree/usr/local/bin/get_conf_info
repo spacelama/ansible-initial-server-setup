@@ -161,7 +161,6 @@ for i in /dev/sd? /dev/nvme?n? ; do
     if [ -e "$i" ] ; then
         dev="${i#/dev/}"
         /usr/local/bin/smart-intercept-spindown -a "$i" > $data_dir/smartctl-a.$dev 2>&1 || true
-        #FIXME: does this work for nvme and sas drives?
     fi
 done
 
@@ -386,14 +385,21 @@ if [ -d /etc/pve ] ; then
                 done
             ) > $data_dir/ceph.osd.$osd.params
             ceph pg ls-by-osd osd.$osd > $data_dir/ceph.pg.ls.$osd
-            ceph daemon osd.$osd perf dump > $data_dir/ceph.osd.$osd.perf.dump 2>/dev/null || true
-            # whole bunch of interesting looking commands visible under:
+            # FIXME: whole bunch of interesting looking commands visible under:
             # ceph daemon osd.0 help
             # eg:
             #  - ceph daemon osd.6 bluefs stats
+            for cmd in "bluefs stats" "perf dump" ; do
+                out="${cmd// /.}"
+                ceph daemon osd.$osd $cmd > $data_dir/ceph.daemon.osd.$osd.$out 2>/dev/null || rm $data_dir/ceph.daemon.osd.$osd.$out
+            done
         done
         ceph osd lspools | awk '{print $2}' | while read pool ; do
             ceph osd pool get $pool all > $data_dir/ceph.pool.$pool.conf
+        done
+
+        for mds in $(ls /var/run/ceph/ | grep '^ceph-mds\..*\.asok$' | sed -E 's/^ceph-mds\.//; s/\.asok$//'); do
+            ceph daemon mds."$mds" dump snaps > $data_dir/ceph.mds.$mds.snaps
         done
 
         # let's also look at some PVE ceph tools:
