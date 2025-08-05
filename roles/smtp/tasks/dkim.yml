@@ -2,13 +2,6 @@
 
 # https://easydmarc.com/blog/how-to-configure-dkim-opendkim-with-postfix/
 
-#- name: Install mail DKIM packages
-#  apt:
-#    name: ['opendkim', 'opendkim-tools' ]
-#    autoremove: no
-#    state: present
-#  become: true
-
 - include_role:
     name: ansible-dkim
 

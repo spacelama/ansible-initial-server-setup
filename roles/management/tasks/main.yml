@@ -22,7 +22,8 @@
 
 - name: Install management packages
   apt:
-    name: ['pdsh', 'clusterssh']
+    # Network and Cluster management stuff, some suggestions from debian forensics-extra
+    name: ['pdsh', 'clusterssh', 'horst', 'hping3', 'ipgrab', 'mdns-scan', 'tcpdump', 'wireshark', 'tcpflow', 'tcptrace', 'tcpxtract', 'ssh-audit', 'hexcompare', 'hexedit', 'mblaze', 'mboxgrep', 'mpack']
     update_cache: yes
     cache_valid_time: 3600
     autoremove: no

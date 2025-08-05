@@ -48,7 +48,7 @@
   block:
   - name: Install dovecot when mda is configured (only tested when mda is also smtp)
     apt:
-      name: ['dovecot-imapd', 'fetchmail', 'psmisc' ] # psmisc for killall for our fetchmail helper
+      name: ['dovecot-imapd', 'fetchmail', 'psmisc', 'mblaze', 'mboxgrep', 'mailutils-mda', 'mailutils-mh', 'mpack' ] # psmisc for killall for our fetchmail helper
       autoremove: no
       state: present
     become: true
@@ -126,10 +126,18 @@
 
 - name: Install mail packages on all satellites as well
   apt:
-    name: ['postfix' ]
+    name: ['postfix']
     autoremove: no
     state: present
   become: true
+
+- name: Install extra mail packages on all satellites as well
+  apt:
+    name: ['python3-aiosqlite>=0.21.0-1'] # python3-aiosqlite>=0.21.0-1 because of postfix-mta-sts-resolver >1% cpu usage caused by #1032856
+    autoremove: no
+    state: present
+  become: true
+  ignore_errors: true
 
 - name: debconf Configure postfix first time
   include_tasks: postfix-debconf.yml
