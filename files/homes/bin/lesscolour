@@ -5,4 +5,12 @@
 # (follow) keybinding etc from working, and highlight has filesize
 # limitations
 
-LESSOPEN="| highlight --out-format=xterm256 %s" less "$@"
+# no colouration when a filter because doesn't run:
+#LESSOPEN="| highlight --out-format=truecolor %s" less "$@"
+# ||- is so stdin filters not looking at direct files will stil work,
+# and failure documented to result in original file being output
+# (doesn't work):
+#LESSOPEN="||- highlight --out-format=truecolor %s" less "$@"
+
+#might work:
+LESSOPEN="||- highlight_nofail %s" less "$@"

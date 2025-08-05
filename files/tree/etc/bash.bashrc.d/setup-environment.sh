@@ -355,8 +355,48 @@ function setup_environment() {
 
     LESSHISTSIZE=20480
     export LESSHISTSIZE
-    LESS="-i -M -R -P%t?f%f:stdin .?pb%pb\%:?lbLine %lb:?bbByte %bb:-..."  #no -X - because this disables cursor movement (when and where was this? Works on debian unstable 20070130, mind you, it seems to be reasonably annoying when viewing multiple files in querybts and the previous file isnt cleared off the screen until you scroll, so it becomes hard to tell where the old file ends and the new file starts)
-    #FIXME: -g has been disabled temporary because of bug #459335, 460171
+    # LESS:
+    # -w/-W: doesn't seem as useful as it should in bash 5.2.15
+    #
+    # -X: circa 2004 on some of the systems I logged into, perhaps
+    # there was no way to stop the braindead xterm alternate-screen
+    # switching (ti/te inhibit), and I'm guessing my main problem was
+    # on Darwin; Can't enable globally because this disables cursor
+    # movement (when and where was this? Works on debian unstable
+    # 20070130, mind you, it seems to be reasonably annoying when
+    # viewing multiple files in querybts and the previous file isnt
+    # cleared off the screen until you scroll, so it becomes hard to
+    # tell where the old file ends and the new file starts)
+    #
+    # -g: FIXME: -g has been disabled temporary circa 2008 because of
+    # bug #459335, 460171
+    #
+    # -i: I usually want to ignore case, but if I put upper-case in,
+    # -then I usually want case-sensitive
+    #
+    # -R: raw because the vast majority of the time, I'm attempting to
+    # -page through ANSI-rised colour text
+    #
+    # -P: appears to be cargo-culted, can't find the source.  '$'
+    # -terminates one string, so looks like the rest of the string is
+    # -the prompt
+    #
+    # --use-color and D: because I like colour.  Every option must
+    # -finish with '$'.  Once you specify --use-color, defaults seem
+    # -to be mostly fine
+    #
+    # Single quote the whole thing because of the frequent occurences of '$'
+    #
+
+    # default LESS prompt for -PM is:
+    # ?f%f .?n?m(%T %i of %m) ..?ltlines %lt-%lb?L/%L. :byte %bB?s/%s. .?e(END) ?x- Next\: %x.:?pB%pB\%..%t$
+
+    # let's move that "(File 1 of 31)" from the middle of the string
+    # to the start, and also say when we're viewing an only file
+    local less_prompt='-PM?m%T %i of %m:Only file.\: ?f%f .?n.?lt%lt-%lb?L/%L. :byte %bB?s/%s. .?e(END) ?x- Next\: %x.:?pB%pB\%..%t$'
+    LESS='--use-color -i -DNGk$ -DBr$ -R -M'
+    LESS="$LESS $less_prompt"
+
     case $OS in
         Darwin)
             LESS="-X $LESS"
