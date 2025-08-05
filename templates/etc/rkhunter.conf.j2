@@ -805,12 +805,15 @@ ALLOWDEVFILE=/dev/shm/resolvconf/interface/lo.pdnsd
 ALLOWDEVFILE=/dev/shm/libpod_lock
 ALLOWDEVFILE=/dev/shm/ledmon.conf
 ALLOWDEVFILE=/dev/shm/ShM.*
+ALLOWDEVFILE=/dev/shm/rocm_smi_card?
 # zoom:
 ALLOWDEVFILE=/dev/shm/aomshm.*
 ALLOWDEVFILE=/dev/shm/sem.Mvlg_ada_lock
 {% if ( host_is_container | default(false) ) %}
 ALLOWDEVFILE=/dev/.lxc/proc/kcore
 ALLOWDEVFILE=/dev/.lxc/proc/cmdline
+{# If /dev/shm/sem.CiscoAcNamedEventPostureISE.* etc reappears,
+then that's a sign the VPN needs to be restarted, not added here #}
 {% endif %}
 {% if ( host_is_pve_server | default(false) ) %}
 ALLOWDEVFILE=/dev/shm/qb-*/*

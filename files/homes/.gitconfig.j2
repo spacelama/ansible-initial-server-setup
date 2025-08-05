@@ -1,3 +1,6 @@
+# man git-config(1) - each [$section] below can be found in git-config
+# under "$section.<param>"
+
 # get the current git config with:
 # old: git config --list
 # new: git config list
@@ -30,12 +33,24 @@
 	coloring = highlightRecent
 
 [color "blame"]
-    highlightRecent = 237, 20 month ago, 238, 19 month ago, 239, 18 month ago, 240, 17 month ago, 241, 16 month ago, 242, 15 month ago, 243, 14 month ago, 244, 13 month ago, 245, 12 month ago, 246, 11 month ago, 247, 10 month ago, 248, 9 month ago, 249, 8 month ago, 250, 7 month ago, 251, 6 month ago, 252, 5 month ago, 253, 4 month ago, 254, 3 month ago, 231, 2 month ago, 230, 1 month ago, 229, 3 weeks ago, 228, 2 weeks ago, 227, 1 week ago, 226
+	highlightRecent = 237, 20 month ago, 238, 19 month ago, 239, 18 month ago, 240, 17 month ago, 241, 16 month ago, 242, 15 month ago, 243, 14 month ago, 244, 13 month ago, 245, 12 month ago, 246, 11 month ago, 247, 10 month ago, 248, 9 month ago, 249, 8 month ago, 250, 7 month ago, 251, 6 month ago, 252, 5 month ago, 253, 4 month ago, 254, 3 month ago, 231, 2 month ago, 230, 1 month ago, 229, 3 weeks ago, 228, 2 weeks ago, 227, 1 week ago, 226
+
+[color "grep"]
+	filename = magenta
+	linenumber = green
+	match = bold red
+
+# Bold the upstream branch name in `git branch -vv`
+[color "branch"]
+	upstream = bold blue
 
 [pager]
-	log = diff-highlight | less
-	show = diff-highlight | less
-	diff = diff-highlight | less
+	# wording in git-config(1) is ambiguous, but these win over
+	# core.pager, so you probably want to specify all the LESS
+	# flags here too
+	log = diff-highlight | less -F -R -X
+	show = diff-highlight | less -F -R -X
+	diff = diff-highlight | less -F -R -X
 
 [log]
 	decorate=short
@@ -49,8 +64,11 @@
 	#    diff.renameLimit
         # The number of files to consider when performing the copy/rename
         # detection; equivalent to the git diff option -l.
-        renamelimit = 20
+        renamelimit = 100
 	algorithm = histogram
+	# Use patience diff as the default.  The diffs produced are easier to
+	# read and have less conflicts--for the most part.
+	#algorithm = patience
 	colorMoved = dimmed-zebra
 	# might want to avoid whitespace change (--ignore-space-change), since whitespace is syntactic in stupid languages like python
 	colorMovedWS = allow-indentation-change
@@ -65,7 +83,17 @@
 	textconv = /bin/pdftotext - - <
 [diff "ps"]
 	binary = true
-	textconv = ps2ascii
+	textconv = /bin/ps2ascii
+[diff "doc"]
+	binary = true
+	textconv = /usr/bin/catdoc - <
+# unoconv would be able to deal with all the formats, but then you have got to deal with stdin/stdout
+
+# https://stackoverflow.com/questions/29937195/how-to-diff-ansible-vault-changes
+[diff "ansible-vault"]
+	textconv = ansible-vault view
+	# for security - don't store insecure decrypted files around
+	cachetextconv = false
 
 [delta]
 	navigate = true    # use n and N to move between diff sections
@@ -82,7 +110,7 @@
 [core]
 	attributesFile = ~/.gitattributes
 	editor = e
-	pager = less -F -X
+	pager = less -F -R -X   # plus whatever is in your $LESS, or "-FRX" by default if no $LESS set
 	# FIXME: work out how to use pager without causing myself more problems
 	# pager = delta
 
@@ -113,32 +141,40 @@
 #     colordiff = diff --color
 	graph = log --graph --abbrev-commit --decorate --date=relative --pretty=format:'%C(bold yellow)%h%Creset -%C(yellow)%d%Creset %s %C(bold green)(%cr) %C(bold blue)<%an>%Creset'
 	graphall = log --graph --abbrev-commit --decorate --date=relative --all --pretty=format:'%C(bold yellow)%h%Creset -%C(yellow)%d%Creset %s %C(bold green)(%cr) %C(bold blue)<%an>%Creset'
-        ci = commit
-        co = checkout
-        br = branch
-        st = status
-        who = shortlog -s --
-        email = config user.email
+	# Tell me the first tag that contains this commit.
+	contains = describe --contains
+	ci = commit
+	co = checkout
+	br = branch
+	st = status
+	who = shortlog -s --
+	email = config user.email
 # following from https://github.com/k88hudson/git-flight-rules#i-want-to-add-aliases-for-some-git-commands
-        a = add
-        amend = commit --amend
-        c = commit
-        ca = commit --amend
-        # ci = commit -a
-        # co = checkout
-        d = diff
-        dc = diff --changed
-        ds = diff --staged
-        f = fetch
-        loll = log --graph --decorate --pretty=oneline --abbrev-commit
-        m = merge
-        one = log --pretty=oneline
-        outstanding = rebase -i @{u}
-        s = status
-        unpushed = log @{u}
-        wc = whatchanged
-        wip = rebase -i @{u}
+	a = add
+	amend = commit --amend --no-edit
+	c = commit
+	ca = commit --amend
+	# ci = commit -a
+	# co = checkout
+	d = diff
+	dc = diff --changed
+	ds = diff --staged
+	f = fetch
+	loll = log --graph --decorate --pretty=oneline --abbrev-commit
+	m = merge
+	one = log --pretty=oneline
+	outstanding = rebase -i @{u}
+	s = status
+	unpushed = log @{u}
+	wc = whatchanged
+	wip = rebase -i @{u}
 	zap = fetch -p
+
+	# https://stackoverflow.com/questions/14848274/git-log-to-get-commits-only-for-a-specific-branch
+	# For Git 1.22+
+	# only = "!b=${1:-$(git branch --show-current)}; git log --oneline --graph \"heads/$b\" --not --exclude=\"$b\" --branches --remotes #"
+	# only = "!b=${1:-$(git symbolic-ref -q --short HEAD)}; b=${b##heads/}; git log --oneline --graph "heads/$b" --not --exclude="$b" --branches --remotes #"
+	# remote-only = "!git log --oneline --graph \"$1\" --not --exclude=\"$1\" --remotes --branches #"
 
 	# for `git blame --follow` which isn't implemented, so git blame just returns the commit that renamed a file.  This doesn't really work that well though:
 	# https://stackoverflow.com/questions/29468273/why-git-blame-does-not-follow-renames
@@ -175,3 +211,6 @@
 [safe]
 	directory = /mnt/c/Users/tconnors/dot-files
         directory = /mnt/c/Documents and Settings/tconnors/OneDrive - LA TROBE UNIVERSITY/Documents/dot-files-copy-from-ltu
+
+[submodule]
+	recurse = true

@@ -1,7 +1,6 @@
 {% if inventory_hostname != 'fs' %}
 {%   if host_is_desktop | default(false) %}
 /home/tconnors/p -hard,noacl,nodev,nosuid,rw,strictatime,actimeo=600,async fs:/home/tconnors/p
-/home/tconnors/.mp3.low_qual -hard,noacl,nodev,nosuid,rw,strictatime,async fs:/home/tconnors/.mp3.low_qual
 {%   endif %}
 {# FIXME: make /var/cache/apt/archives symlink for those that can contact fs #}
 /var/cache/apt/archives.nfs -hard,noacl,nodev,nosuid,rw,strictatime,async fs:/var/cache/apt/archives

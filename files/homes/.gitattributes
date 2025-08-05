@@ -2,6 +2,8 @@
 *.gz	diff=gzip
 *.pdf	diff=pdf
 *.ps    diff=ps
+*.doc	diff=doc
+*.rtf	diff=doc
 # things like bash, tex etc configs are predefined according to gitattributes(5), so enable them:
 *.sh    diff=bash
 *.c     diff=cpp
@@ -12,3 +14,4 @@
 *.rb    diff=ruby
 *.rs    diff=rust
 *.tex	diff=tex
+*.vault.yml diff=ansible-vault merge=binary

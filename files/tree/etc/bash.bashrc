@@ -4,26 +4,29 @@
 # To enable the settings / commands in this file for login shells as well,
 # this file has to be sourced in /etc/profile.
 
+#echo "PS1: '$PS1'" 1>&2
 #echo 9 1>&2
 for i in /etc/bash.bashrc.d/ ~/.bashrc.d/ ; do
-#    echo "1 - $i"
+    # echo "1 - $i"
     if [ -d "$i" ]; then
-#	echo 10 "$i" 1>&2
-	for i in "$i"*.sh; do
-	    #      echo 11 $i 1>&2
-	    if [ -r $i ]; then
-		#      echo 12 $i 1>&2
-		. $i
-	    fi
-	done
-	break
+        # echo 10 "$i" 1>&2
+        for i in "$i"*.sh; do
+            # echo 11 $i 1>&2
+            if [ -r $i ]; then
+                # echo 12 $i 1>&2
+                . $i
+            fi
+        done
+        break
     fi
 done
 unset i
 
+#echo 1 1>&2
 # If not running interactively, don't do anything
 [ -z "$PS1" ] && return
 
+#echo 2 1>&2
 # check the window size after each command and, if necessary,
 # update the values of LINES and COLUMNS.
 shopt -s checkwinsize

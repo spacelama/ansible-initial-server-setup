@@ -134,8 +134,11 @@ $if Bash
 # > bind 'set enable-bracketed-paste 0'
 
 set blink-matching-paren on
-set colored-completion-prefix on
+# Color files by types
+# Note that this may cause completion text blink in some terminals (e.g. xterm).
 set colored-stats on
+# Color the common prefix
+set colored-completion-prefix on
 #set active-region-start-color <ansi-escape-colours>
 #set enable-active-region on
 set mark-modified-lines on
