@@ -348,7 +348,12 @@ if [ -d /etc/pve ] ; then
         # grab the *second* sample for CPU usage
         top -b -n 2 -p $( echo $( pgrep -f /usr/bin/ceph ) | sed 's/ /,/g' ) | tail -n +2 | sed -n '/^top/,$p' > $data_dir/ceph.top.daemon.usage
         ps -o rss,%mem,command ax | awk '{ if( $3 == "/usr/bin/ceph-osd") { cnt++; prc+=$2; byt+=$1; x=$1/1024/1024; $1=""; print x $0 }} END {print "Summary: " cnt " OSDs, Total Mem: " byt/1024/1024 "G, Percent: " prc;}' > $data_dir/ceph.osd.mem-usage
-        for osd in $(ceph osd ls) ; do echo -n "osd.${osd}: " ; ceph config show-with-defaults osd.${osd} -f json | jq -c '.[] | (if .name == "osd_memory_target" or .name == "bluestore_cache_autotune" then .name +": " + .value + " " + .source  else empty end)' | sed -e 's/"//g' |  paste -d"\ " - - ; done  | column -t > $data_dir/ceph.osd.memory-settings 2>&1
+        for osd in $(ceph osd ls) ; do
+            echo -n "osd.${osd}: "
+            ceph config show-with-defaults osd.${osd} -f json |
+                jq -c '.[] | (if .name == "osd_memory_target" or .name == "bluestore_cache_autotune" then .name +": " + .value + " " + .source  else empty end)' |
+                sed -e 's/"//g' |  paste -d"\ " - -
+        done  | column -t > $data_dir/ceph.osd.memory-settings 2>&1
 
         ceph balancer status > $data_dir/ceph.balancer.status
         ceph config dump     > $data_dir/ceph.config.dump
@@ -383,7 +388,7 @@ if [ -d /etc/pve ] ; then
                     printf "%60s" "$osd-$param = "
                     ceph config get osd.$osd $param
                 done
-            ) > $data_dir/ceph.osd.$osd.params
+            ) > $data_dir/ceph.osd.params.$osd
             ceph pg ls-by-osd osd.$osd > $data_dir/ceph.pg.ls.$osd
             # FIXME: whole bunch of interesting looking commands visible under:
             # ceph daemon osd.0 help
@@ -391,7 +396,7 @@ if [ -d /etc/pve ] ; then
             #  - ceph daemon osd.6 bluefs stats
             for cmd in "bluefs stats" "perf dump" ; do
                 out="${cmd// /.}"
-                ceph daemon osd.$osd $cmd > $data_dir/ceph.daemon.osd.$osd.$out 2>/dev/null || rm $data_dir/ceph.daemon.osd.$osd.$out
+                ceph daemon osd.$osd $cmd > $data_dir/ceph.daemon.osd.$out.$osd 2>/dev/null || rm $data_dir/ceph.daemon.osd.$out.$osd
             done
         done
         ceph osd lspools | awk '{print $2}' | while read pool ; do
@@ -407,12 +412,12 @@ if [ -d /etc/pve ] ; then
         for osd in $osds_on_this_host ; do
             pveceph osd details $osd > $data_dir/pveceph.osd.details.$osd 2>&1 || true
             # verbose currently same as --output-format json-pretty
-            pveceph osd details $osd --output-format json-pretty > $data_dir/pveceph.osd.details.$osd.verbose.json 2>&1 || true
+            pveceph osd details $osd --output-format json-pretty > $data_dir/pveceph.osd.details.verbose.json.$osd 2>&1 || true
 
             # and maybe also commands you only want to run on an OSD only a single time per day:
             # ceph tell osd.$osd bench > $data_dir/ceph.osd.bench.$osd  # but even then, this writes a GB per invocation.  Do we want to cause that level of excess wear per day if we're not actively tracking the results?
             # but tracking the IOPS would certainly be useful:
-            ceph tell osd.$osd bench 4096 > $data_dir/ceph.osd.bench.$osd.4096
+            ceph tell osd.$osd bench 4096 > $data_dir/ceph.osd.bench.4096.$osd
             # or `ceph tell osd.\* bench` to do it on all osds at the same time
         done
         for pool in $( pveceph pool ls --output-format json | jq -r .[].pool_name ) ; do
