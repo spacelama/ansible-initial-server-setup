@@ -78,7 +78,7 @@
 
 - name: Remove (and purge) erroneous packages
   apt:
-    name: ['locales-all', 'tuned', 'tuned-utils', 'tuned-utils-systemtap', 'hddtemp', 'bootlogd', 'ntp', 'ntpdate', 'ntpsec', 'ntpsec-ntpdate', 'ntpsec-ntpdig', 'netcat-traditional', 'pulseaudio', 'pulseaudio-equalizer', 'pulseaudio-module-bluetooth', 'pulseaudio-module-gsettings']
+    name: ['locales-all', 'tuned', 'tuned-utils', 'tuned-utils-systemtap', 'hddtemp', 'bootlogd', 'ntp', 'ntpdate', 'ntpsec', 'ntpsec-ntpdate', 'ntpsec-ntpdig', 'netcat-traditional', 'pulseaudio', 'pulseaudio-equalizer', 'pulseaudio-module-bluetooth', 'pulseaudio-module-gsettings', 'apt-xapian-index', 'python3-xapian'] # apt-xapian-index very high daily change rate in disk usage (and backup space), for no apparent use to me
     state: absent
     purge: true
   become: true

@@ -13,7 +13,13 @@
  '(auth-source-save-behavior nil)
  '(auto-save-file-name-transforms
    '(("\\`/[^/]*:\\([^/]*/\\)*\\([^/]*\\)\\'" "~/.emacs.d/auto-save/\\2" t)))
- '(backup-directory-alist '(("." . "~/.emacs.d/auto-save/")))
+ '(backup-directory-alist
+   '(("bin/" . "~/xemacs-backups/")
+     (".*cache.*" . "/tmp/")
+     (".*\\.trash.*" . "/tmp/")
+     (".*\\.log.*" . "/tmp/")
+     ("\\.bash_fullhistory.*" . "/tmp/")
+     ("." . "~/xemacs-backups/")))
  '(buffers-menu-grouping-function 'group-buffers-menu-by-mode-then-alphabetically)
  '(buffers-menu-sort-function 'sort-buffers-menu-by-mode-then-alphabetically)
  '(buffers-menu-submenus-for-groups-p t)
