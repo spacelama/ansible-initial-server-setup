@@ -12,8 +12,8 @@
   file:
     path: "{{ dir_file_or_template.name }}"
     state: directory
-    owner: "{{ dir_file_or_template.user | default('root') }}"
-    group: "{{ dir_file_or_template.group | default('root') }}"
+    owner: "{{ dir_file_or_template.user | default(omit) }}"
+    group: "{{ dir_file_or_template.group | default(omit) }}"
     # AND existing mode in source tree with 0777 to make sure no
     # setuid or setgid bits are set in the filesystem
     mode: "{{ dir_file_or_template.directory_mode | default(omit) }}" # too hard | default(source_stat.mode | bitwise_and_oct('0777')) }}"
@@ -102,6 +102,7 @@
     follow: false
     state: link
     force: true
+    # there's sadly no directory_mode for file: https://github.com/ansible/ansible/issues/78318
   loop_control:
     loop_var: file_recurse
     label: "{{ dir_file_or_template.name }}{{ file_recurse.path }}"

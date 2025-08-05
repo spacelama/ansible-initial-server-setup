@@ -1,11 +1,11 @@
 ---
 # ensures .lines in file .name
 
-name: "set line in conf file: ~{{ user }}/'{{ dir_file_or_template.name }}'"
+- name: "set line in conf file: ~{{ user }}/'{{ dir_file_or_template.name }}'"
   lineinfile:
     dest: "~{{ user }}/{{ dir_file_or_template.name }}"
-    owner: "{{ user }}"
-    group: "{{ user }}"
+    # owner: "{{ user }}"
+    # group: "{{ user }}"
     line: "{{ item }}"
     mode: "{{ dir_file_or_template.mode | default(omit) }}"
     create: yes

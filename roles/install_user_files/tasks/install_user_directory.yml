@@ -11,11 +11,11 @@
   file:
     path: "~{{ user }}/{{ dir_file_or_template.name }}"
     state: directory
-    owner: "{{ user }}"
-    group: "{{ user }}"
+    # owner: "{{ user }}"
+    # group: "{{ user }}"
     # AND existing mode in source tree with 0777 to make sure no
     # setuid or setgid bits are set in the filesystem
-    mode: "{{ dir_file_or_template.mode | default(omit) }}" # too hard | default(source_stat.mode | bitwise_and_oct('0777')) }}"
+    mode: "{{ dir_file_or_template.directory_mode | default(omit) }}" # too hard | default(source_stat.mode | bitwise_and_oct('0777')) }}"
   become: "{{ dir_file_or_template.become | default(true) }}"
   notify: "{{ dir_file_or_template.notify | default(omit) }}"
 
@@ -35,11 +35,11 @@
   file:
     path: "~{{ user }}/{{ dir_file_or_template.name }}{{ file_recurse.path }}"
     state: directory
-    owner: "{{ user }}"
-    group: "{{ user }}"
+    # owner: "{{ user }}"
+    # group: "{{ user }}"
     # AND existing mode in source tree with 0777 to make sure no
     # setuid or setgid bits are set in the filesystem
-    mode: "{{ dir_file_or_template.mode | default(file_recurse.mode | bitwise_and_oct('0777')) }}"
+    mode: "{{ dir_file_or_template.directory_mode | default(file_recurse.mode | bitwise_and_oct('0777')) }}"
   loop_control:
     loop_var: file_recurse
     label: "~{{ user }}/{{ dir_file_or_template.name }}{{ file_recurse.path }}"
@@ -51,14 +51,15 @@
 - name: "install user file under directory: ~{{ user }}/'{{ dir_file_or_template.name }}' from '{{ source }}'"
   copy:
     dest: "~{{ user }}/{{ dir_file_or_template.name }}{{ file_recurse.path }}"
-    owner: "{{ user }}"
-    group: "{{ user }}"
+    # owner: "{{ user }}"
+    # group: "{{ user }}"
     src: "{{ file_recurse.root }}{{ file_recurse.path }}"
     local_follow: "{{ dir_file_or_template.local_follow | default(omit) }}"
     state: "{{ dir_file_or_template.state | default(omit) }}"
     # AND existing mode in source tree with 0777 to make sure no
     # setuid or setgid bits are set in the filesystem
     mode: "{{ dir_file_or_template.mode | default(file_recurse.mode | bitwise_and_oct('0777')) }}"
+    directory_mode: "{{ dir_file_or_template.directory_mode | default(omit) }}"
     follow: true # allow a user to symlink their files directly into
                  # this git repo if they happen to be treating their
                  # editing desktop environment as ansible master, and
@@ -77,12 +78,13 @@
 - name: "install user file per template under directory: ~{{ user }}/'{{ dir_file_or_template.name }}' from (files/)'{{ source }}'"
   template:
     dest: "~{{ user }}/{{ dir_file_or_template.name }}{{ file_recurse.path | regex_replace('\\.j2$', '') }}"
-    owner: "{{ user }}"
-    group: "{{ user }}"
+    # owner: "{{ user }}"
+    # group: "{{ user }}"
     src: "{{ file_recurse.root }}{{ file_recurse.path }}"
     # AND existing mode in source tree with 0777 to make sure no
     # setuid or setgid bits are set in the filesystem
     mode: "{{ dir_file_or_template.mode | default(file_recurse.mode | bitwise_and_oct('0777')) }}"
+    directory_mode: "{{ dir_file_or_template.directory_mode | default(omit) }}"
   loop_control:
     loop_var: file_recurse
     label: "~{{ user }}/{{ dir_file_or_template.name }}{{ file_recurse.path }}"
@@ -95,12 +97,13 @@
 - name: "install user file symlink under directory: ~{{ user }}/'{{ dir_file_or_template.name }}' from '{{ source }}'"
   file:
     dest: "~{{ user }}/{{ dir_file_or_template.name }}{{ file_recurse.path }}"
-    owner: "{{ user }}"
-    group: "{{ user }}"
+    # owner: "{{ user }}"
+    # group: "{{ user }}"
     src: "{{ file_recurse.src }}"
     follow: false
     state: link
     force: true
+    # there's sadly no directory_mode for file: https://github.com/ansible/ansible/issues/78318
   loop_control:
     loop_var: file_recurse
     label: "~{{ user }}/{{ dir_file_or_template.name }}{{ file_recurse.path }}"

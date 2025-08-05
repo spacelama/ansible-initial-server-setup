@@ -4,8 +4,8 @@
 - name: "install user file per template: ~{{ user }}/'{{ dir_file_or_template.name }}' from '{{ source }}'"
   template:
     dest: "~{{ user }}/{{ dir_file_or_template.name }}"
-    owner: "{{ user }}"
-    group: "{{ user }}"
+    # owner: "{{ user }}"
+    # group: "{{ user }}"
     src: "{{ source }}"
     mode: "{{ dir_file_or_template.mode | default(omit) }}"
   become: true

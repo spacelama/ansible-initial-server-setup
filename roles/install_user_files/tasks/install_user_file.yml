@@ -5,9 +5,10 @@
 - name: "install user file: ~{{ user }}/'{{ dir_file_or_template.name }}' from '{{ source }}'"
   copy:
     dest: "~{{ user }}/{{ dir_file_or_template.name }}"
-    owner: "{{ user }}"
-    group: "{{ user }}"
+    # owner: "{{ user }}"
+    # group: "{{ user }}"
     src: "{{ source }}"
     mode: "{{ dir_file_or_template.mode | default(omit) }}"
+    directory_mode: "{{ dir_file_or_template.directory_mode | default(omit) }}"
   become: true
   become_user: "{{ user }}"
