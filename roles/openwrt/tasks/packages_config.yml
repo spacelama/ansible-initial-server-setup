@@ -36,7 +36,7 @@
 
 - name: install compulsory packages
   opkg:
-    name: bash,muninlite,rsync
+    name: bash,muninlite,rsync,fping
     state: present
 
 - name: install router configuration

@@ -65,6 +65,11 @@ log() {
     done
 }
 
+ping() {
+    fping -q -r 3 -c 3 -p 150 -t 1000 "$@" 2>&1
+}
+
+
 enable_ap() {
     if [ -L /etc/config/wireless ] ; then
         # we had previously disabled the main wireless and implemented our emergency SSID
@@ -156,15 +161,15 @@ fi
     while : ; do
         rotate_logfile
         date
-        if ping=$( ping -c 1 $upstream1 ) || { sleep 1 ; log "first failover ping attempt, $upstream2: $ping" ; ping=$( ping -c 1 $upstream2 ) ; } ||
-                { sleep 1  ; log "first failover pair ping attempt, $upstream1: $ping" ;  ping=$( ping -c 1 $upstream1 ) ; } || { sleep 1 ;  log "first failover pair ping attempt, $upstream2: $ping" ;          ping=$( ping -c 1 $upstream2 ) ; } ||
-                { sleep 10 ; log "second failover pair ping attempt, $upstream1: $ping" ; ping=$( ping -c 1 $upstream1 ) ; } || { sleep 10 ; log "second (final) failover pair ping attempt, $upstream2: $ping" ; ping=$( ping -c 1 $upstream2 ) ; }
+        if ping=$( ping $upstream1 ) || { sleep 1 ; log "first failover ping attempt, $upstream2: $ping" ; ping=$( ping $upstream2 ) ; } ||
+                { sleep 1  ; log "first failover pair ping attempt, $upstream1: $ping" ;  ping=$( ping $upstream1 ) ; } || { sleep 1 ;  log "first failover pair ping attempt, $upstream2: $ping" ;          ping=$( ping $upstream2 ) ; } ||
+                { sleep 10 ; log "second failover pair ping attempt, $upstream1: $ping" ; ping=$( ping $upstream1 ) ; } || { sleep 10 ; log "second (final) failover pair ping attempt, $upstream2: $ping" ; ping=$( ping $upstream2 ) ; }
            # can afford ~30 seconds outage before triggering
            # failover procedure
         then
             log "succeeded to talking to upstream: $ping"
             enable_ap
-        elif ping=$( ping -c 1 $gw ) || { sleep 1 ; log "failover attempt to gateway before final isolation, $gw: $ping" ; ping=$( ping -c 1 $gw ) ; } ; then
+        elif ping=$( ping $gw ) || { sleep 1 ; log "failover attempt to gateway before final isolation, $gw: $ping" ; ping=$( ping $gw ) ; } ; then
             log "failed to talk to upstream, but succeeded talking to gateway: $ping"
             disable_ap
         else
