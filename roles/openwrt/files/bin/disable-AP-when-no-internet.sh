@@ -56,7 +56,8 @@ pidfile=/tmp/disable-AP-when-no-internet.pid
 
 log() {
     if [ $# != 0 ] ; then
-        echo "disable-AP-when-no-internet.sh:" "$@"
+        echo "$@" |
+            sed 's/^/disable-AP-when-no-internet.sh: /'
     else
         sed 's/^/disable-AP-when-no-internet.sh: /'
     fi | tee >( logger) | while read -r log ; do
@@ -130,7 +131,7 @@ isolate_ap() {
 
 rotate_logfile() {
     if [ -e "$logfile" ] ; then
-        if [ $( stat -c %s "$logfile" ) -gt 10240 ] ; then
+        if [ $( stat -c %s "$logfile" ) -gt $((1024*1024)) ] ; then
             log "Rotating logfile: $logfile -> $logfile.0"
             mv "$logfile" "$logfile.0"
         else
@@ -155,16 +156,19 @@ fi
     while : ; do
         rotate_logfile
         date
-        if ping -c 1 $upstream1 || ( sleep 1 ; log "first failover ping attempt, $upstream2" ; ping -c 1 $upstream2 ) ||
-                ( sleep 1 ; log "first failover pair ping attempt, $upstream1" ; ping -c 1 $upstream1 ) || ( sleep 1 ; log "first failover pair ping attempt, $upstream2" ; ping -c 1 $upstream2 ) ||
-                ( sleep 10 ; log "second failover pair ping attempt, $upstream1" ; ping -c 1 $upstream1 ) || ( sleep 10 ; log "second (final) failover pair ping attempt, $upstream2" ; ping -c 1 $upstream2 )
-           # can afford ~30 seconds out outage before triggering
+        if ping=$( ping -c 1 $upstream1 ) || { sleep 1 ; log "first failover ping attempt, $upstream2: $ping" ; ping=$( ping -c 1 $upstream2 ) ; } ||
+                { sleep 1  ; log "first failover pair ping attempt, $upstream1: $ping" ;  ping=$( ping -c 1 $upstream1 ) ; } || { sleep 1 ;  log "first failover pair ping attempt, $upstream2: $ping" ;          ping=$( ping -c 1 $upstream2 ) ; } ||
+                { sleep 10 ; log "second failover pair ping attempt, $upstream1: $ping" ; ping=$( ping -c 1 $upstream1 ) ; } || { sleep 10 ; log "second (final) failover pair ping attempt, $upstream2: $ping" ; ping=$( ping -c 1 $upstream2 ) ; }
+           # can afford ~30 seconds outage before triggering
            # failover procedure
         then
+            log "succeeded to talking to upstream: $ping"
             enable_ap
-        elif ping -c 1 $gw || ( sleep 1 ; log "failover attempt to gateway before final isolation, $gw" ; ping -c 1 $gw ) ; then
+        elif ping=$( ping -c 1 $gw ) || { sleep 1 ; log "failover attempt to gateway before final isolation, $gw: $ping" ; ping=$( ping -c 1 $gw ) ; } ; then
+            log "failed to talk to upstream, but succeeded talking to gateway: $ping"
             disable_ap
         else
+            log "failed to talk to gateway: $ping"
             isolate_ap
         fi
         sleep 60
