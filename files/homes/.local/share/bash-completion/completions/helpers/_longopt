@@ -1,0 +1,6 @@
+# -*- Mode: shell-script -*-
+
+# tested with so far:
+# emacs emacs-term emacsclient mygnuclient e nano pico chomp verboserun colorizecommand colorize progress mvi cpi rmi
+
+complete -F _longopt "$cmd"

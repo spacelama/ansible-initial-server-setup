@@ -1,0 +1,6 @@
+# -*- Mode: shell-script -*-
+
+# tested with so far:
+# byname
+
+complete -F _known_hosts "$cmd"

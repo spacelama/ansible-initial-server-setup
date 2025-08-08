@@ -1,3 +1,1 @@
-# -*- Mode: shell-script -*-
-
-complete -F _known_hosts byname
+helpers/_known_hosts

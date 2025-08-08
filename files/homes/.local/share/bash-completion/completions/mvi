@@ -1,8 +1,1 @@
-# -*- Mode: shell-script -*-
-
-for i in mvi cpi rmi; do
-    # have $i &&
-    complete -F _longopt $i
-done
-
-unset i
+helpers/_longopt

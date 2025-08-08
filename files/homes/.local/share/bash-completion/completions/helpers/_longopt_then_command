@@ -56,10 +56,14 @@ _longopt_then_command()
     fi
 }
 
+# tested with so far:
+# x xargs xn env nice chroot exec ltrace time command
+complete -F _longopt_then_command "$cmd"
+
+
 # get default system list with `complete -p | grep _command`
 
 #complete -o bashdefault -o default -F _longopt_then_command x xargs xn env nice chroot exec ltrace time command
-complete -F _longopt_then_command x xargs xn env nice chroot exec ltrace time command
 # env is already meant to be defined, although it doesn't work very well in bash-completion 2.11-6
 
 # time doesn't have any --longopts or --help (hmmm, /usr/bin/time does - let's see what happens...)
