@@ -1,9 +1,38 @@
 #!/bin/bash
 
-usage() {
-    echo "git-grep-all-commits [--all-branches] [--show-only-lines|--show-whole-files] [git-grep/git-log --regexp options (eg, -i)] <search-regexp>" 1>&2
-    exit 1
+function usage() {
+    cat 1>&2 <<EOF
+git-grep-all-commits [--all-branches] [--show-commits|--show-all-commits|--show-only-lines|--show-whole-files] [git-grep/git-log --regexp options (eg, -i)] <search-regexp>
+performs various forms of grep within each commit in git
+
+  --all-branches
+  --show-commits                Shows the commits that match (default)
+  --show-all-commits            Show all commits that match rather than those responsible for the change
+  --show-only-lines             Show only the lines that match rather than the full commit
+  --show-whole-files            Show the whole file rather than the commit diffs
+  -h|--help                     Display this help and exit
+EOF
+    if [ -n "$1" ] ; then
+        exit $1
+    fi
+    exit
 }
+
+function usageerror() {
+    if [ "$#" != 0 ] ; then
+        echo "Usage error:" "$@" 1>&2
+        echo "Usage was:${ARGS:- <no args>}" 1>&2
+    fi
+    usage 1
+}
+
+ARGS=
+for ARG in "$@" ; do
+    ARGS="$ARGS \"$ARG\""
+done
+
+#TEMP=$(getopt -o 'cghw::V' --long 'help,wdiff::,git,ccdiff' -n "$0" -- "$@")
+#eval set -- "$TEMP"
 
 mode=show-commits
 options=(--basic-regexp) # can be overriden by the user supplying --perl-regexp, --extended-regexp
@@ -15,6 +44,9 @@ while [[ "$1" == -* ]] ; do
             ;;
         --show-commits)
             mode=show-commits # default
+            ;;
+        --show-all-commits)
+            mode=show-all-commits
             ;;
         --show-only-lines)
             mode=show-only-lines
@@ -28,7 +60,7 @@ while [[ "$1" == -* ]] ; do
             # filters supplied on the cmdline
             options+=(--pickaxe-all)
             ;;
-        --help)
+        -h|--help)
             usage
             ;;
         *)
@@ -44,6 +76,10 @@ case "$mode" in
         # default: pickaxe (regexp added, deleted or moved), show diff
         git log $branches -p "${options[@]}" -G "$@" # | less -F -R -X -j.1 ++/"$1"
         ;;
+    show-all-commits)
+        # FIXME:
+        echo not implemented...
+        ;;
     # show-whole-files)
     #     echo "experimental!!!"
 
@@ -52,6 +88,7 @@ case "$mode" in
     #     echo "experimental!!!"
     #     ;;
     show-only-lines)
+        # FIXME: first arg or options and arg should go before git rev-list as now, and args beyond that should go after branch/HEAD
         git grep "${options[@]}" "$@" $(git rev-list "${branches:-HEAD}")
         ;;
     *)
