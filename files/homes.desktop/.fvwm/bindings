@@ -22,7 +22,7 @@ Mouse 3         W       M       Resize
 
 #Mouse 1         T       A       DoubleClickShadeNorth
 Mouse 1         S       S       WindowShade North
-#NOT SUPPORTED IN FVWM2.4:
+#NOT SUPPORTED IN older FVWM2.4 (came in in 2.6?):
 Mouse 1         -       S       WindowShade North
 Mouse 1         [       S       WindowShade West
 Mouse 1         ]       S       WindowShade E
@@ -119,10 +119,11 @@ Key Tab         A       CMS      Exec exec fvwm_focus
 # Keyboard accelerators
 Key F1          A       MCS     Exec spawn
 
-Key F1		A	M	Popup "Utilities"
+Key F1		A	M	Popup "MyUtilities"
 Key F2		A	M	Popup "Window-Ops"
-Key F2		A	MS	Popup "/Debian"
-Key F3		A	MC	Module FvwmWinList transient
+Key F2		A	MS	Popup "MenuFvwmRoot"
+# Module FvwmWinList doesn't exist in 2025 (was only in fvwm1 by the looks of it), but also, we have decided to keep C-M-F<x> switching to console for a whille now.
+#Key F3		A	MC	Module FvwmWinList transient
 Key F3		A	M	RaiseLower
 Key F4		A	M	Close
 Key (Skype) F4		A	M	DestroyOrClose

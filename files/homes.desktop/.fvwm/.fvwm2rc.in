@@ -97,7 +97,7 @@ Style "*" IconFont "xft:fixed:size=8"
 # similar to olvwm's auto-raise feature.
 #AutoRaise 750
 
-# Normally, we'll be in focus-follows mouse mode, but uncomment this 
+# Normally, we'll be in focus-follows mouse mode, but uncomment this
 # for mwm-style click-to-focus
 #ClickToFocus
 
@@ -234,7 +234,7 @@ MenuStyle PopupDelayed, PopupDelay 180
 #ClickTime 150
 
 # OpaqueMove has a number (N) attached to it (default 5).
-# if the window occupies less than N% of the screen, 
+# if the window occupies less than N% of the screen,
 # then opaque move is used. 0 <= N <= 100
 OpaqueMoveSize unlimited
 Style "*" ResizeOpaque
@@ -258,12 +258,12 @@ Style * WindowShadeScrolls, WindowShadeSteps 75   #, WindowShadeLazy
 #Style "*" BackingStore
 ########################      WINDOW PLACEMENT     #######################
 
-# SmartPlacement makes new windows pop-up in blank regions of screen 
+# SmartPlacement makes new windows pop-up in blank regions of screen
 # if possible, or falls back to random or interactive placement.
 Style "*" MinOverlapPlacement
 #RandomPlacement, SmartPlacement, CleverPlacement
 
-# With SmartPlacement, windows will normally place themselves over icons. 
+# With SmartPlacement, windows will normally place themselves over icons.
 # Uncomment this to change that.
 #StubbornPlacement
 
@@ -323,6 +323,7 @@ ImagePath ${HOME}/xpm/col:${HOME}/xpm/menu:${HOME}/icons:${HOME}/icons/xpms:${HO
 Style "*"                BorderWidth 3, HandleWidth 5, Color Black/rgb:60/a0/c0,Icon unknown1.xpm
 
 Style "Fvwm*"            NoTitle, NoHandles, Sticky, WindowListSkip, BorderWidth 0
+Style "FvwmForm*"        Title, Handles, NoSticky, NoWindowListSkip, BorderWidth 3
 Style "x2x*"             NoTitle, NoHandles, Sticky, BorderWidth 0, MouseFocus
 #Style "Fvwm Pager"      StaysOnTop
 #Style "FvwmPager"       StaysOnTop
@@ -467,7 +468,7 @@ AddToFunc "StartFunction" "I" GotoPage 0 0
 # Now define some handy complex functions
 
 # This one moves and then raises the window if you drag the mouse,
-# only raises the window if you click,  or does a RaiseLower if you double 
+# only raises the window if you click,  or does a RaiseLower if you double
 # click
 AddToFunc "Move-or-Raise-or-Shade" "I" Raise
 + "M" Move     #M is for mouse
@@ -506,7 +507,7 @@ AddToFunc "Raise" "C" Raise
 # click, or a true full vertical maximization if you just hold the mouse
 # button down.
 
-#opera wants to maximize its new windows all of the time if we have set 
+#opera wants to maximize its new windows all of the time if we have set
 AddToFunc "MaximizeAll" "I" ThisWindow (Maximizable) Maximize $0 $1
 +              "I" TestRc (NoMatch) PipeRead fvwm_maximize_to_current_xinerama_screen.sh
 
@@ -523,7 +524,7 @@ AddToFunc "maximize-func" "C" Function MaximizeAll 100 -125p
 #AddToFunc "maximize-func2" "C" Function "animated-max" 100 100
 
 # This one moves and then lowers the window if you drag the mouse,
-# only lowers the window if you click,  or does a RaiseLower if you double 
+# only lowers the window if you click,  or does a RaiseLower if you double
 # click
 AddToFunc "Move-or-Lower" "M" Move
 +              "M" Lower
@@ -535,7 +536,7 @@ AddToFunc "Move-or-Iconify" "M" Move
 +              "D" Iconify
 
 # This one resizes and then raises the window if you drag the mouse,
-# only raises the window if you click,  or does a RaiseLower if you double 
+# only raises the window if you click,  or does a RaiseLower if you double
 # click
 AddToFunc "Resize-or-Raise" "M" Resize
 +              "M" Raise
@@ -543,7 +544,7 @@ AddToFunc "Resize-or-Raise" "M" Resize
 +              "D" RaiseLower
 
 # This is provided as a hint only.
-# Move to a known page on the desktop, then start an application in a 
+# Move to a known page on the desktop, then start an application in a
 # known location. Could also switch to a known desktop, I guess
 #Function "abs_coord"
 #	GoToPage "Immediate"	1,1
@@ -556,7 +557,22 @@ SetAnimation 10 -.01 0 .01 .03 .08 .18 .3 .45 .6 .75 .85 .90 .94 .97 .99 1.0
 #now define the menus - defer bindings until later
 
 # Read the auto-generated menus
-Read menudefs.hook Quiet                   
+#Read menudefs.hook Quiet
+
+# much of this from man fvwm2-menu-desktop
+DestroyFunc GenRootMenu
+AddToFunc GenRootMenu
++ I DestroyMenu recreate MenuFvwmRoot
++ I AddToMenu MenuFvwmRoot "Fvwm" Title
+#+ I AddToMenu MenuFvwmRoot "Item1" Action1 ...
+#+ I AddToMenu MenuFvwmRoot "ItemN" ActionN
+#+ I AddToMenu MenuFvwmRoot "" Nop
++ I PipeRead "fvwm-cache-and-background-run $HOME/.fvwm/menu-cache.hook fvwm-menu-desktop --insert-in-menu MenuFvwmRoot --include-items config"
+# or --include-items --all-menus, or just no flags?
+
+AddToMenu MenuFvwmRoot "Fvwm" Title
++ DynamicPopUpAction GenRootMenu
++ DynamicPopDownAction DestroyMenu recreate MenuFvwmRoot
 
 # This menu is invoked as a sub-menu - it allows you to quit,
 # restart, or switch to another WM.
@@ -670,7 +686,7 @@ AddToMenu "Hosts" "Here" Exec xterm
 +              "" Nop
 +              "Venice" Exec venice-xterm
 +              "" Nop
-#	Exec    "Vislab"	exec xterm -e ssh -l tconnors vislab.usyd.edu.au 
+#	Exec    "Vislab"	exec xterm -e ssh -l tconnors vislab.usyd.edu.au
 +              "Wilson" Exec wilson-xterm
 +              "Bruce" Exec bruce-xterm
 +              "Napier" Exec napier-xterm
@@ -689,10 +705,10 @@ AddToMenu "Network" "ppp-load" Exec kpppload
 +              "Dial Coonabarabran" Exec dialcoonabarabran
 +              "Dial Last" Exec dial.last
 +              "Hangup" Exec  hangup
-    
+
 
 # This menu will fire up some very common utilities
-AddToMenu "Utilities" "Program Menu" Title
+AddToMenu "MyUtilities" "Program Menu" Title
 +              "%32/xterm_32x32.xpm%&Xterm" Exec xterm
 #+              "RandomCluster&Node" Exec xterm -e randomclusternode
 #+              "X&Emacs" Exec xemacs
@@ -717,9 +733,9 @@ AddToMenu "Utilities" "Program Menu" Title
 +              "&Hosts" Popup Hosts
 +              "Applications" Popup Apps
 #+              "Utilities" Popup Utils
-+              "Debian Menu" Popup /Debian
++              "X&DG Debian Menu" Popup MenuFvwmRoot
 #+              "Network" Popup Network
-+              "Debian Modules" Popup "/Debian/FVWM_Modules"
+#+              "Debian Modules" Popup "/Debian/FVWM_Modules"
 +              "Modules" Popup Module-Popup
 +              "" Nop
 +              "%32/system-restart.png%Restart fvwm2" Function MyRestart --pass-args source-startup-exec-fvwm
@@ -779,7 +795,7 @@ AddToMenu "Window-Ops2" "Move" Function "Move-or-Raise-or-Shade"
 #	Module		"ScrollBar" 	FvwmScroll 2 2
 
 #############################################################################
-# One more complex function - couldn't be defined earlier because it used 
+# One more complex function - couldn't be defined earlier because it used
 # pop-up menus
 #
 # This creates a motif-ish sticky menu for the title-bar window-ops
@@ -792,7 +808,7 @@ AddToFunc "window-ops-func" C PopUp "Window-Ops2"
 # I'll add it too, it can be mighty handy.
 +              D Close
 
-AddToFunc "flipFlopFocus"   "I" FlipFocus 
+AddToFunc "flipFlopFocus"   "I" FlipFocus
 +   "I" WarpToWindow 5p 5p
 
 AddToFunc FocusAndRaise
@@ -880,14 +896,14 @@ AddToFunc RollUnrollDropTerm
 # This defines the mouse bindings
 
 # First, for the mouse in the root window
-# Button 1 gives the Utilities menu
+# Button 1 gives the MyUtilities menu
 # Button 2 gives the Window Ops menu
 # Button 3 gives the WindowList (like TwmWindows)
 # I use the AnyModifier (A) option for the modifier field, so you can hold down
 # any shift-control-whatever combination you want!
 
 #     Button	Context Modifi 	Function
-Mouse 1		R   	A       PopUp "Utilities"
+Mouse 1		R   	A       PopUp "MyUtilities"
 Mouse 2		R    	A      	PopUp "Window-Ops"
 # not in fvwm2: Mouse 3         R       A       Module FvwmWinList transient
 
@@ -1032,7 +1048,7 @@ Style "Tools" NoButton 2, NoButton 4, Sticky, WindowListSkip
     Action(Mouse 1) "Exec xterm -T Top@$SHORTHOST -n Top@$SHORTHOST -e bash -l -c top" )
 *FvwmButtons(2x13, Swallow (UseOld Close SwallowNew) "wmmoonclock" "Exec wmmoonclock -lat -31.14 -lon -149.18")
 *FvwmButtons: (2x8, NoSize, Title "Main menu", \
-    Action(Mouse 1) "PopUp Utilities", \
+    Action(Mouse 1) "PopUp MyUtilities", \
     Action(Mouse 2) "PopUp Window-Ops" )
     #, \
     # not in fvwm2:     Action(Mouse 3) "Module FvwmWinList transient"
