@@ -32,7 +32,19 @@ sub usageerror(;$) {
 
 sub usage(;$) {
   my ($exit)=(@_);
-  print STDERR "Usage: $0 [--colour <colour>] [--exact-match|-X] [--exact-wholeline-match|-x] [--ignore-case|-i] [--partial|-p (WARNING: causing confusion in overlapping -e RE args)] [--invert-match|-v] [--ignore-lines-no-match (implies --partial)|-N] (-e <re1> -e <re2>... | <re>) <files>\n";
+  print STDERR <<EOF;
+Usage: $0 [--colour <colour>] [--exact-match|-X] [--exact-wholeline-match|-x] [--ignore-case|-i] [--partial|-p] [--invert-match|-v] [--ignore-lines-no-match|-N] (-e <re1> -e <re2>... | <re>) <files>
+outputs a whole file unlike grep, while colourising lines/terms
+
+  --colour <colour>             Displays matches using this colour (default red)
+  -X|--exact-match              Match a string rather than regexp
+  -x|--exact-wholeline-match    Requires the string to match the entire line
+  -i|--ignore-case              Folds case matching
+  -p|--partial                  Colourises only the part of the line matching (WARNING: causing confusion in overlapping -e RE args)
+  -v|--invert-match             Colourises everything but the match
+  --ignore-lines-no-match       Act like normal grep (implies --partial)
+  -h|--help                     Display this help and exit
+EOF
   $exit=defined($exit) ? $exit : 0;
   exit $exit;
 }
