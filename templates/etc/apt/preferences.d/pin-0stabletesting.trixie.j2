@@ -13,17 +13,9 @@
 # because we have to include it for puppet, but want the rest of the machine to still be lenny
 # Note that "stable" works as a release here, whereas "squeeze" doesn't seem to work.
 Package: *
-Pin: release a=oldstable, o=Debian
+Pin: release a=stable, o=Debian
 Pin-Priority: 500
 #   (default could be set by apt.conf: Apt::Default-Release "stable";)
-
-# we're not yet ready to upgrade to newstable, but where testing would
-# have usually appeared prior to debian iterating to the next release,
-# there's no such thing as "oldtesting", so we include the next release
-#  "stable" in place of where testing would have been:
-Package: *
-Pin: release a=stable, o=Debian
-Pin-Priority: 5
 
 Package: *
 Pin: release a=testing, o=Debian
@@ -38,7 +30,7 @@ Pin-Priority: 2
 #Pin: release a=oldstable
 #Pin-Priority: 1001
 
-#Package: *
-#Pin: release a=oldstable, o=Debian
-#Pin-Priority: 1
+Package: *
+Pin: release a=oldstable, o=Debian
+Pin-Priority: 1
 
