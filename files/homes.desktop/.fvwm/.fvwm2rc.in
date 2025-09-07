@@ -355,7 +355,7 @@ Style "xclockstandard"   NoTitle, NoHandles, Sticky, WindowListSkip, BorderWidth
 Style "pidisplay*"       NoTitle, NoHandles, Sticky, WindowListSkip, BorderWidth 0, StaysOnTop
 #Style "mpv"              NoTitle, NoHandles, Sticky, WindowListSkip, BorderWidth 0 #piINCLUDE metINCLUDE
 Style "QupZilla"         NoTitle, NoHandles, Sticky, BorderWidth 0
-Style "maxwelldisplay"   NoTitle, NoHandles, Sticky, WindowListSkip, BorderWidth 0
+Style "Volume Display"   NoTitle, NoHandles, Sticky, WindowListSkip, BorderWidth 0
 Style "xbattlocal"       NoTitle, NoHandles, Sticky, WindowListSkip, BorderWidth 0, NeverFocus
 Style "swalxbatt"        NoTitle, NoHandles, Sticky, WindowListSkip, BorderWidth 0, NeverFocus
 Style "xbatt"            NoTitle, NoHandles, Sticky, WindowListSkip, BorderWidth 0, NeverFocus
