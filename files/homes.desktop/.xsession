@@ -1,6 +1,12 @@
 #!/bin/bash
 
 initialise_initial_shell_environment() {
+    cd
+
+    rm -f $HOME/.xsession-errors.$HOSTNAME$DISPLAY.*
+    exec > $HOME/.xsession-errors.$HOSTNAME$DISPLAY.`date +%Y%m%d`.$$ 2>&1
+    exec < /dev/null
+
     echo .xinitrc.real
 
     #HOME's XSESSION
@@ -10,7 +16,7 @@ initialise_initial_shell_environment() {
 
     PATH=$HOME/bin:$HOME/`uname -s`:$PATH
     export PATH
-    cd
+
     HOSTNAME=`hostname`
     export HOSTNAME
 
@@ -25,10 +31,6 @@ initialise_initial_shell_environment() {
     #    echo Resetting DISPLAY=$DISPLAY
     #fi
 
-    rm -f $HOME/.xsession-errors.$HOSTNAME$DISPLAY.*
-    exec > $HOME/.xsession-errors.$HOSTNAME$DISPLAY.`date +%Y%m%d`.$$ 2>&1
-    exec < /dev/null
-
     echo debug: $HOSTNAME $$
     echo DISPLAY: "$PREV_DISPLAY->$DISPLAY"
 
@@ -38,6 +40,18 @@ initialise_initial_shell_environment() {
     export WINDOWMANAGER="$HOME/bin/keepfvwmalive"
 
     set -vx
+}
+
+initialise_display_auth() {
+    # create new blank XAUTHORITY file for every login:
+
+    local XAUTHORITY_NEW=/tmp/.$USER.$DISPLAY
+
+    echo -n "Overriding XAUTHORITY=$XAUTHORITY -> $XAUTHORITY_NEW"
+
+    xauth -f $XAUTHORITY_NEW generate $DISPLAY . trusted
+
+    export XAUTHORITY=$XAUTHORITY_NEW
 }
 
 initialise_display() {
@@ -140,6 +154,7 @@ start_window_manager() {
 }
 
 initialise_initial_shell_environment
+initialise_display_auth
 initialise_display
 clear_shell_session
 initialise_shell

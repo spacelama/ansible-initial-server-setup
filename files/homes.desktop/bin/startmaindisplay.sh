@@ -20,13 +20,6 @@ set
 
 trap 'date' DEBUG
 
-# create new blank XAUTHORITY file for every login:
-
-echo -n "Overriding XAUTHORITY=$XAUTHORITY with: "
-XAUTHORITY=/tmp/.$USER.$DISPLAY ; export XAUTHORITY
-echo XAUTHORITY=$XAUTHORITY
-xauth generate $DISPLAY . trusted
-
 #if [ -z "$VERT2SIZE" -o -z "$HOR2SIZE" ] ; then
 #  sleep 3
 #  . ~/.bash_profile # try calculate it again - might have a race condition on some startups
@@ -137,9 +130,6 @@ repeat=0  # FIXME: turns out you've been able to address individual
           # but nevertheless, that syntax changes in fvwm3 to:
           # xterm -geometry 80x24+100+100@DisplayPort-1
           # https://github.com/fvwmorg/fvwm3/discussions/878
-
-#xhost +localhost
-#xhost -
 
 xrdb-reinitialise
 
