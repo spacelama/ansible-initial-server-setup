@@ -23,6 +23,7 @@
     state: present
     install_recommends: no
   become: true
+  when: not (host_is_light_desktop | default(false))
 
 # debian bug #917931 wants either ibus removed (replaced with /home/tconnors/sysadmin/install/apt-source/ibus_1.5.23-1_all.deb ) or ibus-gtk3 installed and tested on chrome perhaps with GTK_IM_MODULE=ibus: https://github.com/ibus/ibus/issues/2073
 # We remove ibus altogether , since it causes
@@ -51,6 +52,7 @@
     state: present
     default_release: "{{ host_has_backports | default(false) | ternary( deb_release ~ '-backports', omit ) }}"
   become: true
+  when: not (host_is_light_desktop | default(false))
 
 - name: install preferred backported/non-backported kernels if desired
   apt:
@@ -58,7 +60,8 @@
     state: present
     default_release: "{{ deb_release }}-backports"
   become: true
-  when: host_has_backports_kernel | default(false)
+  when: (host_has_backports_kernel | default(false)) and
+        (not (host_is_light_desktop | default(false)))
 
 - name: install custom locally build desktop packages
   include_tasks: "{{ playbook_dir }}/roles/common/tasks/install_custom_packages.yml"
@@ -80,6 +83,7 @@
     - { package: picom, file: picom_11.2-0.1_amd64.deb } # backport from unstable, fixes #1053228
     - { package: libproc2-0, file: libproc2-0_4.0.4-6_amd64.deb } # backport from unstable, fixes #1091673
     - { package: procps, file: procps_4.0.4-6_amd64.deb } # backport from unstable, fixes #1091673
+  when: not (host_is_light_desktop | default(false))
 
 - name: Install radeon firmware
   apt:
@@ -102,6 +106,7 @@
     dest: /etc/systemd/system/bluetooth.service.d/
   become: true
   notify: restart bluetooth
+  when: not (host_is_light_desktop | default(false))
 
   # https://www.reddit.com/r/linuxadmin/comments/fbfc6w/how_to_wrap_my_firefox_process_in_a_cgroup_to/
   # https://lists.luv.asn.au/pipermail/luv-main/2020-December/011334.html (firejail other suggestion)
@@ -113,6 +118,7 @@
     line: "#EARLYOOM_ARGS=\"-r 60\"\nEARLYOOM_ARGS=TEMPLATE_XXX"
     state: present
   become: true
+  when: not (host_is_light_desktop | default(false))
 
 - name: Setup earlyoom for desktops
   lineinfile:
@@ -123,6 +129,7 @@
     state: present
   become: true
   notify: restart earlyoom
+  when: not (host_is_light_desktop | default(false))
 
 # FIXME: /proc/sys/vm/swappiness = 0 on large memory desktops with
 # SSD?.  On 2022/02/23, dirac was actively registering 30MB/s so and

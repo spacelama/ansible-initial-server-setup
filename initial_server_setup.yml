@@ -110,7 +110,7 @@
       when: host_is_dell_server | default(false)
     - role: desktop
       tags: [desktop]
-      when: host_is_desktop | default(false)
+      when: host_is_desktop | default(false) or host_is_light_desktop | default(false)
     - role: ssh
       tags: [ssh]
     - role: fail2ban
