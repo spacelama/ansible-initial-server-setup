@@ -3,7 +3,7 @@
 
 function sillysu() {
     if [ -n "$DISPLAY" ] ; then
-        command cp -a $XAUTHORITY /tmp/.$USER.Xauthority.tmp  # this temporary file is pulled in by root's login scripts
+        command cp -a $XAUTHORITY /tmp/.Xauthority.$USER.tmp  # this temporary file is pulled in by root's login scripts
     fi
     if [ "$#" -eq 0 ] ; then
         (
