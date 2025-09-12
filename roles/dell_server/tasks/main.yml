@@ -1,4 +1,13 @@
 ---
+- name: copy poweredge-fand.conf
+  copy:
+    src: R710-Fan-Control/poweredge-fand.conf
+    dest: /etc/poweredge-fand.conf
+    owner: root
+    group: root
+    mode: 0644
+  become: true
+
 - name: copy poweredge-fand
   copy:
     src: R710-Fan-Control/poweredge-fand.pl
