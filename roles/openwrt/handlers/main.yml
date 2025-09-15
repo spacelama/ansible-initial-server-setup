@@ -1,21 +1,33 @@
 ---
-- name: restart dnsmasq
+- name: trigger restart dnsmasq
+  listen: restart dnsmasq
   # actually, remove reservations first (but we have to keep this name
   # because other callers call us on it.  Ideally these would just be
   # a block)
   file:
     dest: /tmp/dhcp.leases
     state: absent
+  changed_when: true  # force execution of next clause (I guess I tested blocks not working in handlers?)
   notify: restart dnsmasq service
 
 - name: restart dnsmasq service
   service:
     name: dnsmasq
     state: "{{ 'restarted' if inventory_hostname != 'gateway-tmp' else 'stopped' }}"
-  throttle: 2
+  throttle: "{{ '2' if (not(fast_update_dhcp | default(false) | bool)) else '100' }}"
+  changed_when: true  # force execution of next clause (I guess I tested blocks not working in handlers?)
   notify: reload network to ensure wifi restarted  # might as well actually reload wifi interfaces
                                                    # to force at least wifi-connected devices to
                                                    # re-fetch their DHCP updated addresses
+
+- name: reload network to ensure wifi restarted
+  service:
+    name: network    # go full network partially because there's no
+                     # "wifi service" per se, but network does restart
+                     # wifi, but also make sure we pick up any new
+                     # VLAN configurations...
+    state: "{{ 'restarted' if type == 'ap' else 'started' }}"
+  throttle: "{{ '2' if (not(fast_update_dhcp | default(false) | bool)) else '100' }}"
 
 - name: restart firewall
   service:
@@ -28,15 +40,6 @@
   uci:
     command: commit
   notify: reload wifi
-
-- name: reload network to ensure wifi restarted
-  service:
-    name: network    # go full network partially because there's no
-                     # "wifi service" per se, but network does restart
-                     # wifi, but also make sure we pick up any new
-                     # VLAN configurations...
-    state: "{{ 'restarted' if type == 'ap' else 'started' }}"
-  throttle: 2
 
 - name: restart usteer
   service:
