@@ -192,28 +192,6 @@
     state: link
     force: yes
 
-- name: "ensure dnsmasq service {{ 'started' if inventory_hostname != 'gateway-tmp' else 'stopped' }} for {{ inventory_hostname }}"
-  service:
-    name: dnsmasq
-    state: "{{ 'started' if inventory_hostname != 'gateway-tmp' else 'stopped' }}"
-
-- name: setup dhcp reservations
-  copy:
-    dest: /etc/config/dhcp
-    content: "# ANSIBLE template dhcp.head.{{ type }}.j2\n{{ lookup('template', 'dhcp.head.{{ type }}.j2')}}\n\n# ANSIBLE template dhcp.reservations.j2\n{{lookup('template', 'dhcp.reservations.j2') }}\n"
-  notify: restart dnsmasq
-
-- name: No need for /etc/dnsmasq.tmphosts anymore
-  file:
-    dest: /etc/dnsmasq.tmphosts
-    state: absent
-
-- name: setup dnsmasq hosts
-  template:
-    dest: /etc/dnsmasq.hosts
-    src: dnsmasq.hosts.j2
-  notify: restart dnsmasq
-
 - name: set root account passwd
   lineinfile:
     dest: /etc/passwd

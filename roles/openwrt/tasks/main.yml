@@ -1,4 +1,7 @@
 ---
+- name: Update DHCP config
+  include_tasks: update_dhcp.yml
+  when: (update_dhcp | default(true) | bool) or (fast_update_dhcp | default(false) | bool)
 
 - name: include package config
   include_tasks: packages_config.yml
