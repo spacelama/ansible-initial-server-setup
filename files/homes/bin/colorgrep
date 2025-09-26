@@ -33,14 +33,17 @@ sub usageerror(;$) {
 sub usage(;$) {
   my ($exit)=(@_);
   print STDERR <<EOF;
-Usage: $0 [--colour <colour>] [--exact-match|-X] [--exact-wholeline-match|-x] [--ignore-case|-i] [--partial|-p] [--invert-match|-v] [--ignore-lines-no-match|-N] (-e <re1> -e <re2>... | <re>) <files>
+Usage: $0 [--colour <colour>] [--line-buffered] [--exact-match|-X] [--exact-wholeline-match|-x] [--ignore-case|-i] [--partial|-p] [--beforematch <re>] [--aftermatch <re>] [--invert-match|-v] [--ignore-lines-no-match|-N] (-e <re1> -e <re2>... | <re>) <files>
 outputs a whole file unlike grep, while colourising lines/terms
 
   --colour <colour>             Displays matches using this colour (default red)
+  --line-buffered               Ensure the output is line-buffered at maximum
   -X|--exact-match              Match a string rather than regexp
   -x|--exact-wholeline-match    Requires the string to match the entire line
   -i|--ignore-case              Folds case matching
   -p|--partial                  Colourises only the part of the line matching (WARNING: causing confusion in overlapping -e RE args)
+  --beforematch <re>            Enforces a regexp match before the item you're colourising, but which doesn't get coloured itself (only useful in -p case; your matches can't include parentheses terms)
+  --aftermatch <re>             Enforces a regexp match after the item you're colourising, but which doesn't get coloured itself (only useful in -p case; your matches can't include parentheses terms)
   -v|--invert-match             Colourises everything but the match
   --ignore-lines-no-match       Act like normal grep (implies --partial)
   -h|--help                     Display this help and exit
@@ -49,7 +52,8 @@ EOF
   exit $exit;
 }
 
-my ($exact_match,$exact_wholeline_match,$highlight_fullline,$invert_match,$ignore_case,$ignore_lines_no_match,$colour);
+my ($line_buffered,$exact_match,$exact_wholeline_match,$highlight_fullline,$invert_match);
+my ($ignore_case,$ignore_lines_no_match,$colour,$before_match,$after_match);
 
 my (@REs);
 
@@ -60,7 +64,10 @@ sub parseinput() {
   $ignore_lines_no_match=0;
   $exact_match=0;
   $exact_wholeline_match=0;
+  $before_match='';
+  $after_match='';
   $colour="red";
+  $line_buffered=0;
 
   while (defined($_= shift (@ARGV))) {
     /^--exact-match$|^-X$/ && do { $exact_match=1 ; 1; } ||
@@ -68,7 +75,10 @@ sub parseinput() {
     /^--ignore-lines-no-match$|^-N$/ && do { $ignore_lines_no_match=1 ; $highlight_fullline=0 ; 1; } ||
     /^--ignore-case$|^-i$/ && do { $ignore_case=1 ; 1; } ||
     /^--partial$|^-p$/ && do { $highlight_fullline=0 ; 1; } ||
+    /^--beforematch$/ && do { $before_match=shift(@ARGV) ; 1; } ||
+    /^--aftermatch$/ && do { $after_match=shift(@ARGV) ; 1; } ||
     /^--invert-match$|^-v$/ && do { $invert_match=1 ; 1; } ||
+    /^--line-buffered/ && do { $line_buffered=1 ; 1; } ||
     /^--colour$|^-c$/ && do { $colour=shift(@ARGV) ; 1; } ||
     /^-e$/ && do { push @REs, shift(@ARGV) ; 1; } ||
     /^--help$/ && usage() ||
@@ -118,6 +128,10 @@ $colour{OFF}         = "\033[0;0m";
 
 parseinput();
 
+if ($line_buffered) {
+  select(STDERR); $| = 1;
+  select(STDOUT); $| = 1;
+}
 
 my $match=$colour{$colour};
 my $normal=$colour{OFF};
@@ -176,9 +190,9 @@ while (defined ($line=<>)) {
         }
       } else {
         if ($ignore_case) {
-          $line =~ s/($re)/$match$1$normal/gi;
+          $line =~ s/($before_match)($re)($after_match)/$1$match$2$normal$3/gi;
         } else {
-          $line =~ s/($re)/$match$1$normal/g;
+          $line =~ s/($before_match)($re)($after_match)/$1$match$2$normal$3/g;
         }
       }
       # And now, if we did fall through above (there was not a match, or

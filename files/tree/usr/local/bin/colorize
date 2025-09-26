@@ -26,7 +26,8 @@ highlight() {
         fbold=
     fi
     case "$1" in
-        grey|black)     fore=30 ;;
+        black)          fore=30 ;;
+        grey)           fore=30 ; bright=true ;;
         red)            fore=31 ;;
         green)          fore=32 ;;
         yellow)         fore=33 ;;

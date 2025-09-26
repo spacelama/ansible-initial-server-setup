@@ -41,7 +41,7 @@ while [[ "$1" == --* ]] ; do
     case "$1" in
         --help)
             cat 1>&2 <<EOF
-Usage: x [--help] [--title <title>] [--no-retry] [--wait[=clean-exit-timeout]] [--no-verbose|--verbose[=<true|false>]] [--no-eval] [--shell] [--] [-other-xterm-flags...] [--] <prog> [<args>]"
+Usage: x [--help] [--title <title>] [--no-retry] [--wait[=clean-exit-timeout]] [--no-verbose|--verbose[=<true|false>]] [--no-eval] [--shell] [--] [-other-xterm-flags...] [--] <prog> [<args>]
 Runs PROG within an xterm, setting window title and potentially retrying as necessary
 
   --title                 Override default calculated title (not useful with --wait)

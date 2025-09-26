@@ -12,7 +12,7 @@ trap "" SIGTTOU
 
 background=
 sshbackground=
-while true ; do 
+while true ; do
     if [ "$1" = --testonly ] ; then
         testonly=true
         shift

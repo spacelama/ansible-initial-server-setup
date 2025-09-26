@@ -70,11 +70,18 @@ while [[ "$1" == -* ]] ; do
     shift
 done
 
-# by parsing out options and putting after -G <regexp>
+if [ "$#" = 0 ] ; then
+    usageerror "Supply search argument(s)"
+fi
+
+search_arg="$1" ; shift
+
+export LESS="++/$search_arg$ $LESS"
+
 case "$mode" in
     show-commits)
         # default: pickaxe (regexp added, deleted or moved), show diff
-        git log $branches -p "${options[@]}" -G "$@" # | less -F -R -X -j.1 ++/"$1"
+        git log $branches -p "${options[@]}" -G "$search_arg" "$@"
         ;;
     show-all-commits)
         # FIXME:
@@ -88,8 +95,9 @@ case "$mode" in
     #     echo "experimental!!!"
     #     ;;
     show-only-lines)
-        # FIXME: first arg or options and arg should go before git rev-list as now, and args beyond that should go after branch/HEAD
-        git grep "${options[@]}" "$@" $(git rev-list "${branches:-HEAD}")
+        # first arg or options and arg should go before the commit
+        # list, and args beyond that should go after the commitids
+        git grep "${options[@]}" "$search_arg" $(git rev-list "${branches:-HEAD}") "$@"
         ;;
     *)
         echo "unknown mode: $mode" 1>&2

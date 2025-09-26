@@ -1,0 +1,136 @@
+#!/bin/bash
+
+function usage() {
+    cat 1>&2 <<EOF
+cvs-grep-all-commits [--show-commits|--show-all-commits|--show-only-lines|--show-whole-files] [cvs... FIXME: options (eg, -i)] <search-regexp>
+performs various forms of grep within each commit in git
+
+  --show-commits                Shows the commits that match (default)
+  --show-all-commits            Show all commits that match rather than those responsible for the change
+  --show-only-lines             Show only the lines that match rather than the full commit
+  --show-whole-files            Show the whole file rather than the commit diffs
+  -h|--help                     Display this help and exit
+EOF
+    if [ -n "$1" ] ; then
+        exit $1
+    fi
+    exit
+}
+
+function usageerror() {
+    if [ "$#" != 0 ] ; then
+        echo "Usage error:" "$@" 1>&2
+        echo "Usage was:${ARGS:- <no args>}" 1>&2
+    fi
+    usage 1
+}
+
+ARGS=
+for ARG in "$@" ; do
+    ARGS="$ARGS \"$ARG\""
+done
+
+#TEMP=$(getopt -o 'cghw::V' --long 'help,wdiff::,git,ccdiff' -n "$0" -- "$@")
+#eval set -- "$TEMP"
+
+mode=show-commits
+options=(--basic-regexp) # can be overriden by the user supplying --perl-regexp, --extended-regexp
+branches=
+while [[ "$1" == -* ]] ; do
+    case "$1" in
+        --show-commits)
+            mode=show-commits # default
+            ;;
+        --show-all-commits)
+            mode=show-all-commits
+            ;;
+        --show-only-lines)
+            mode=show-only-lines
+            ;;
+        --show-whole-files)
+            mode=show-whole-files
+            ;;
+        -h|--help)
+            usage
+            ;;
+        *)
+            options+=("$1")
+            ;;
+    esac
+    shift
+done
+
+if [ "$#" = 0 ] ; then
+    usageerror "Supply search argument(s)"
+fi
+
+search_arg="$1" ; shift
+
+export LESS="++/$search_arg$ $LESS"
+
+ensure_run_once=
+if [ "$#" = 0 ] ; then
+    ensure_run_once="."
+fi
+
+case "$mode" in
+    show-commits)
+        # default: regexp added, deleted or moved, show diff
+        for file in $ensure_run_once "$@" ; do
+            echo -n '#' 1>&2
+            cvs log "$@" | grep ^revision | awk '{print $2}' | while read revision ; do
+                echo -n '.' 1>&2
+                commit="$( cvscolordiff --quiet --prev "$revision" "$file" )"
+                if echo "$commit" | grep -q "${options[@]}" "$search_arg" ; then
+                    echo "$commit"
+                fi
+            done
+        done | less
+        ;;
+    show-whole-files)
+        for file in $ensure_run_once "$@" ; do
+            echo -n '#' 1>&2
+            cvs log "$@" | grep ^revision | awk '{print $2}' | while read revision ; do
+                echo -n '.' 1>&2
+                commit="$( cvscolordiff --quiet --prev "$revision" "$file" )"
+                if echo "$commit" | grep -q "${options[@]}" "$search_arg" ; then
+                    contents="$( cvsviewversion "$revision" "$file" )"
+                    echo "$file:$revision"
+                    echo
+                    echo "$contents"
+                fi
+            done
+        done | less
+        ;;
+    show-all-commits)
+        for file in $ensure_run_once "$@" ; do
+            echo -n '#' 1>&2
+            cvs log "$@" | grep ^revision | awk '{print $2}' | while read revision ; do
+                echo -n '.' 1>&2
+                contents="$( cvsviewversion "$revision" "$file" )"
+                if echo "$contents" | grep -q "${options[@]}" "$search_arg" ; then
+                    echo "$file:$revision"
+                    echo
+                    echo "$contents"
+                fi
+            done
+        done | less
+        ;;
+    show-only-lines)
+        for file in $ensure_run_once "$@" ; do
+            echo -n '#' 1>&2
+            cvs log "$@" | grep ^revision | awk '{print $2}' | while read revision ; do
+                echo -n '.' 1>&2
+                commit="$( cvscolordiff --quiet --prev "$revision" "$file" )"
+                if echo "$commit" | grep -q "${options[@]}" "$search_arg" ; then
+                    contents="$( cvsviewversion "$revision" "$file" )"
+                    echo "$contents" | grep -H --label="$file:$revision" "${options[@]}" "$search_arg"
+                fi
+            done
+        done | less
+        ;;
+    *)
+        echo "unknown mode: $mode" 1>&2
+        exit 1
+esac
+
