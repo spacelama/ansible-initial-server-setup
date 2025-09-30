@@ -56,6 +56,10 @@ iface vmbr0 inet manual
 #All VLANs trunked
 
 {#
+# mesh networking for ceph, with 3 hosts connected 2 NICs per machine without a switch, using open vswitch:
+# https://pve.proxmox.com/wiki/Full_Mesh_Network_for_Ceph_Server
+
+{#
 # possibly want native vlan untagged on switch: https://www.reddit.com/r/Proxmox/comments/iu24ld/vlan_trunking_on_a_single_interface/g5iwt4v/
 #}
 auto vmbr0.5

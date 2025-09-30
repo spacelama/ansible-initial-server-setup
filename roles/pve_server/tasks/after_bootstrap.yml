@@ -19,6 +19,8 @@
     purge: true
   become: true
 
+# FIXME: consider Proxmox Software Defined Networking (SDN): https://pve.proxmox.com/wiki/Software-Defined_Network
+
 - name: Purge ineffective packages
   apt:
     name: ['ksm-control-daemon'] # ksm is constantly eating a fair
@@ -201,6 +203,20 @@
 # somewhere appropriate, then present that through the LXC using
 # resource mounts, with shared=1; eg, see lxc 129 webserver or 105
 # media
+
+# - name: Configure ceph MDS servers/clients
+#   ini_file:
+#     path: /etc/ceph/ceph.conf
+#     section: "{{ item.section }}"
+#     option: "{{ item.key }}"
+#     value: "{{ item.value }}"
+#     state: present
+#   become: true
+#   with_items:
+#     # Disable blocklisting on timeout and eviction for less strict behavior
+#     # Enable automatic client reconnection after eviction
+#     - { section: "mds", key: "mds_session_blocklist_on_timeout", value: "false" }
+#     - { section: "client", key: "client_reconnect_stale", value: "true" }
 
 - name: ensure SMR drives have a longer timeout
   copy:
