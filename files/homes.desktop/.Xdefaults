@@ -37,6 +37,8 @@ Xft.hintstyle: hintslight
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 ! xterm (and friends)
 
+XTerm.termName: xterm-256color
+
 XTerm*veryBoldColors:           15
 XTerm*on2Clicks:           word
 XTerm*on3Clicks:           line

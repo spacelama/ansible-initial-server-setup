@@ -763,15 +763,17 @@ ALLOWPROCLISTEN=/sbin/dhclient3
 # The default value is the null string.
 #
 #ALLOWPROMISCIF=eth0
-ALLOWPROMISCIF=tap100i0
-ALLOWPROMISCIF=tap100i1
-ALLOWPROMISCIF=tap100i2
-ALLOWPROMISCIF=tap103i0
-ALLOWPROMISCIF=tap104i0
-ALLOWPROMISCIF=tap105i0
-ALLOWPROMISCIF=tap121i0
-ALLOWPROMISCIF=tap123i0
-ALLOWPROMISCIF=tap131i0
+# ALLOWPROMISCIF=tap100i0
+# ALLOWPROMISCIF=tap100i1
+# ALLOWPROMISCIF=tap100i2
+# ALLOWPROMISCIF=tap103i0
+# ALLOWPROMISCIF=tap104i0
+# ALLOWPROMISCIF=tap105i0
+# ALLOWPROMISCIF=tap121i0
+# ALLOWPROMISCIF=tap123i0
+# ALLOWPROMISCIF=tap131i0
+
+ALLOWPROMISCIF=tap1.*
 
 #
 # This option specifies how rkhunter should scan the '/dev' directory for
@@ -834,6 +836,7 @@ ALLOWDEVFILE=/dev/shm/ansible_adm/Downloads/*
 #
 #ALLOWIPCPROC=/usr/bin/firefox
 ALLOWIPCPROC=/usr/lib/firefox-esr/firefox-esr
+ALLOWIPCPROC=/usr/libexec/xdg-desktop-portal-gnome
 ALLOWIPCPROC=/usr/bin/x11vnc
 ALLOWIPCPROC=/usr/bin/mpv
 ALLOWIPCPROC=/usr/bin/pavucontrol
@@ -841,10 +844,10 @@ ALLOWIPCPROC=/usr/sbin/apache2
 ALLOWIPCPROC=/usr/bin/gthumb
 ALLOWIPCPROC=/usr/bin/python
 ALLOWIPCPROC=/usr/bin/python3
-ALLOWIPCPROC=/home/tconnors/sysadmin/code/pqiv/pqiv
 ALLOWIPCPROC=/usr/bin/python3.* # pretty broad, but it's either that or increase the limit to above 4MB, because /usr/bin/blueman-applet is always running on desktops
 ALLOWIPCPROC=/usr/bin/emacs-lucid
 ALLOWIPCPROC=/usr/bin/dunst
+ALLOWIPCPROC=/home/tconnors/sysadmin/code/pqiv/pqiv
 #ALLOWIPCPROC=/usr/bin/vlc
 
 #

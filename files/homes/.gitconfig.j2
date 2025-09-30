@@ -47,7 +47,8 @@
 [pager]
 	# wording in git-config(1) is ambiguous, but these win over
 	# core.pager, so you probably want to specify all the LESS
-	# flags here too
+	# flags here too.  "FRX" is the default according to
+	# core.pager in git-config(1)
 	log = diff-highlight | less -F -R -X
 	show = diff-highlight | less -F -R -X
 	diff = diff-highlight | less -F -R -X
