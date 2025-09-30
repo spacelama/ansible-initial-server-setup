@@ -86,3 +86,8 @@
 ;; Or start grip when opening a markdown/org buffer
 (add-hook 'markdown-mode-hook #'grip-mode)
 (add-hook 'org-mode-hook #'grip-mode)
+
+(try-require 'berry-mode)
+;; Associate .be files with berry-mode
+;;(add-to-list 'auto-mode-alist '("\\.be\\'" . berry-mode))
+
