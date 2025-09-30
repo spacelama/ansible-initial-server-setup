@@ -1,0 +1,16 @@
+#!/bin/bash
+
+# add dir of where this prog was executed from, to PATH
+RUN_DIR=$(cd -- "$(dirname "$0")" && pwd)
+PATH=$RUN_DIR:/usr/local/bin/:$PATH ; export PATH
+
+cd $RUN_DIR/..
+
+limits='!b1300,!ap1'
+
+if [ -n "$1" ] ; then
+    limits="$limits,$1"
+    shift
+fi
+
+ansible-playbook --diff openwrt_upgrade.yml --limit "$limits" "$@"

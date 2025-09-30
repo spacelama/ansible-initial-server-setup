@@ -1,2 +1,2 @@
 #!/bin/sh
-exec gpg --batch --decrypt --quiet "$(dirname $0)/vault-password.gpg"
+bash P | gpg --passphrase-fd 0 --batch --pinentry-mode loopback --decrypt --quiet "$(dirname $0)/vault-password.gpg"

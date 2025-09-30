@@ -1,0 +1,9 @@
+#!/bin/bash
+
+# add dir of where this prog was executed from, to PATH
+RUN_DIR=$(cd -- "$(dirname "$0")" && pwd)
+PATH=$RUN_DIR:/usr/local/bin/:$PATH ; export PATH
+
+cd $RUN_DIR/..
+
+ansible-playbook --diff initial_server_setup.yml --limit '!maxwell,!gamow,!zm12,!dirac-new,!pve-backup,!fs-new,!hass-debian' "$@"
