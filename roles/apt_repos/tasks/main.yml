@@ -21,7 +21,7 @@
 
 - name: Enable apt testing repo
   template:
-    src: etc/apt/sources.list.d/testing-unstable.list.j2
+    src: etc/apt/sources.list.d/testing-unstable.list.{{ deb_release }}.j2
     dest: /etc/apt/sources.list.d/testing-unstable.list
     owner: root
     group: root
