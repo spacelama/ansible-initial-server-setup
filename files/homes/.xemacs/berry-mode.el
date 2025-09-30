@@ -1,12 +1,7 @@
 ;;; berry-mode.el --- Major mode for editing Berry script files -*- lexical-binding: t; -*-
 ;;
-;; Minimal Emacs major mode for the Berry scripting language
-;; Provides: syntax highlighting (font-lock), basic indentation, and file association
-;; Installation: drop this file in your load-path and add
-;;   (require 'berry-mode)
-;;   (add-to-list 'auto-mode-alist '("\\.be\\'" . berry-mode))
-;;
-;;; Code:
+;; Major mode for the Berry scripting language
+;; Provides syntax highlighting, indentation, and file association.
 
 (require 'prog-mode)
 
@@ -15,7 +10,6 @@
   :prefix "berry-"
   :group 'languages)
 
-;; Keywords collected from the Berry reference manual and examples.
 (defvar berry-keywords
   '("if" "elif" "else" "end" "for" "while" "do" "break" "continue"
     "return" "function" "def" "class" "var" "import" "from" "try" "catch"
@@ -43,7 +37,6 @@
     ;; function definitions
     ("\\<\\(def\\|function\\)\\s-+\\([A-Za-z_]\\w*\)" 2 font-lock-function-name-face)))
 
-;; Comment syntax: Berry examples use `#` for line comments.
 (defvar berry-mode-syntax-table
   (let ((st (make-syntax-table)))
     (modify-syntax-entry ?# "<" st)
@@ -52,7 +45,7 @@
     st)
   "Syntax table for `berry-mode'.")
 
-(defvar berry-indent-offset 4
+(defvar berry-indent-offset 2
   "Indentation offset for `berry-mode'.")
 
 (defun berry--line-starts-block-p (line)
@@ -62,6 +55,10 @@
 (defun berry--line-ends-block-p (line)
   "Return non-nil if LINE closes a block (contains `end')."
   (string-match-p "^\\s-*end\\b" line))
+
+(defun berry--line-mid-block-p (line)
+  "Return non-nil if LINE is a mid-block keyword like else/elif/case/default."
+  (string-match-p "^\\s-*\\(elif\\|else\\|case\\|default\\)\\b" line))
 
 (defun berry-calc-indentation ()
   "Compute indentation for current line in `berry-mode'."
@@ -77,8 +74,11 @@
               (setq nest (1- nest)))))))
     ;; Adjust for current line
     (let ((curr (string-trim (buffer-substring-no-properties (line-beginning-position) (line-end-position)))))
-      (when (berry--line-ends-block-p curr)
-        (setq nest (1- nest))))
+      (cond
+       ((berry--line-ends-block-p curr)
+        (setq nest (1- nest)))
+       ((berry--line-mid-block-p curr)
+        (setq nest (max 0 (1- nest))))))
     (max 0 (* berry-indent-offset nest))))
 
 (defun berry-indent-line ()
