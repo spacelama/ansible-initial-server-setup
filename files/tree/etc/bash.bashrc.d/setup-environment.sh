@@ -18,6 +18,9 @@ function setup_profile_files() {
         #[gnome-session_gnomerc]=false
         [gnome-session_gnomerc]=true
         [vte-2.91]=true
+        [debuginfod]=true
+        [grc]=true
+        [srvadmin-path]=true
     )
 
     local i=
@@ -142,9 +145,6 @@ function setup_environment() {
         export LC_TIME=POSIX
         #    echo bland
     else
-        #LANG=en_AU.ISO8859-1 ; export LANG
-        #LANG=en_AU ; export LANG  #still bad ls -lA listings
-
         export LANG=en_AU$utf
         export LC_COLLATE=POSIX
         export LC_MESSAGES=en_AU$utf

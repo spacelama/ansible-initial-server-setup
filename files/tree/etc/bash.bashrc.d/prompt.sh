@@ -136,26 +136,6 @@ function print_to_eol() {
     echo -ne '\r'
 }
 
-if [ "$TERM" = xterm ] ; then
-    function winname () {
-        if [ -t 2 ] ; then
-            echo -ne  '\033]2;'"$1"'\007' 1>&2
-        fi
-    }
-    function iconname  () {
-        if [ -t 2 ] ; then
-            echo -ne  '\033]1;'"$1"'\007' 1>&2
-        fi
-    }
-else
-    function winname () {
-        :
-    }
-    function iconname () {
-        :
-    }
-fi
-
 if [ "$SMALLPROMPT" = yes ] ; then
     function generatetitle () {
         :

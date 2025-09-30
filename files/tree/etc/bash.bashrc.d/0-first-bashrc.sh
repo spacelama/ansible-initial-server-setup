@@ -22,24 +22,27 @@ if ! sh_interactive ; then
     # Silly hacks I was doing with remote systems?  Anyway, works for now...
     NONINTERACT=1
 elif [ -z "$PBS_ENVIRONMENT" ] ; then
-    if [ $TERM = xterm ] ; then
-        function winname () { 
-            if [ -t 2 ] ; then
-                echo -ne  '\033]2;'"$1"'\007' 1>&2
-            fi
-        }
-        function iconname  () { 
-            if [ -t 2 ] ; then
-                echo -ne  '\033]1;'"$1"'\007' 1>&2
-            fi
-        }
-    else
-        function winname () {
-            :
-        }
-        function iconname () {
-            :
-        }
-    fi
+    case $TERM in
+        xterm*)
+            function winname() {
+                if [ -t 2 ] ; then
+                    echo -ne  '\033]2;'"$1"'\007' 1>&2
+                fi
+            }
+            function iconname() {
+                if [ -t 2 ] ; then
+                    echo -ne  '\033]1;'"$1"'\007' 1>&2
+                fi
+            }
+            ;;
+        *)
+            function winname() {
+                :
+            }
+            function iconname() {
+                :
+            }
+            ;;
+    esac
     ( winname "Wait... logged into $HOSTNAME and sourcing startup" & )
 fi

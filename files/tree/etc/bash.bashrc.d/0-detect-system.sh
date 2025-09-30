@@ -1,7 +1,7 @@
 # -*- Mode: shell-script -*-
 # shellcheck shell=bash
 
-#set -x 
+#set -x
 
 if [ "$BASH_PROFILE_INITIATING$BASHRC_INITIATING" != "" ] ; then
     return   #already running -- return outside a function returns to who called "source"

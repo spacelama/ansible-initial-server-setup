@@ -32,6 +32,7 @@ function setup_aliases() {
     alias ls='ls $enablecolor'
     alias l-ft='ls -lA --time-style=full-iso'
     alias l-lt='ls -lA --time-style=long-iso'
+    alias duf='command duf --hide special,loops --output mountpoint,size,used,avail,usage,inodes_usage,type,filesystem --theme ansi'
     # might want to also consider ls --quoting-style (-N) or QUOTING_STYLE=literal
     alias p='pstree -ap tconnors'
     alias pavucontrol='DBUS_SESSION_BUS_ADDRESS= pavucontrol'  # https://gitlab.freedesktop.org/pulseaudio/pavucontrol/-/issues/75#note_1467143
@@ -52,8 +53,10 @@ function setup_aliases() {
     alias info=pinfo
     alias perlfunc='perldoc -f'
     alias bashfunc='help'
-    alias c='yes "" | head -n28'
+    alias c='yes "" | head -n28'   #"clear screen" while preserving scrollback
 
+    #debian apt
+    function apt-desc() { apt-cache show "$@" | grep --color -E "^Package|^Description-en|^ "; }
     #https://stackoverflow.com/questions/15292391/is-it-possible-to-perform-a-grep-search-in-all-the-branches-of-a-git-project
     alias grep_git_all_branches="git branch -a | tr -d \* | sed '/->/d' | xargs git grep"
     alias grep_git_all_commits="git rev-list --all | tr -d \* | sed '/->/d' | xargs git grep"
@@ -110,7 +113,7 @@ function setup_aliases() {
     }
 
     function uid() {
-        id | sed 's/^[^=]*=\([0-9]*\)(\([^ ]*\)).*/\1/' 
+        id | sed 's/^[^=]*=\([0-9]*\)(\([^ ]*\)).*/\1/'
     }
 
     function log-to-file() {
