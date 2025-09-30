@@ -14,6 +14,8 @@
     # might as well list other undesirable files that modern systems
     # create for you occasionally without seeking your permission
     locate -r '.local/share/Trash$' | xargs '-I{}' find '{}' -type f | sort | uniq
-) | xargs --delim='\n' --no-run-if-empty file
+) | grep -v /sysadmin/.*/test/ |
+    xargs --delim='\n' --no-run-if-empty -I{} bash -c 'ls -lA {} ; if [[ {} == *.zst ]] ; then zstd -dc -- {} | file -b - ; else file -b {} ; fi ; echo'
+# FIXME: properly escape {} above
 
 exit 0
