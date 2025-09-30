@@ -836,10 +836,12 @@
   become: true
   notify: systemd daemon reload
 
-- name: start custom systemd services
+- name: enable custom systemd services
   service:
     name: "{{ item.dest | default(item) }}"
-    state: started
+    # start is delegated to the handler triggered by systemd daemon
+    # reload, otherwise one-shot services try to restart every time
+    # regardless of change above
     enabled: yes
   loop: "{{ systemd_services | default([]) }}"
   become: true

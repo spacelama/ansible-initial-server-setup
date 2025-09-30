@@ -66,14 +66,23 @@
     name: autofs
     state: restarted
 
-- name: "systemd daemon reload"
+- name: systemd daemon reload
   systemd:
     daemon_reload: true
+  notify: start custom systemd services
 
 - name: restart systemd-logind
   service:
     name: systemd-logind
     state: restarted
+
+- name: start custom systemd services
+  service:
+    name: "{{ item.dest | default(item) }}"
+    state: started
+    enabled: yes
+  loop: "{{ systemd_services | default([]) }}"
+  become: true
 
 - name: restart ssh
   service:
