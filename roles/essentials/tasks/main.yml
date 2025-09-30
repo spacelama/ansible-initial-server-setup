@@ -78,7 +78,7 @@
 
 - name: Remove (and purge) erroneous packages
   apt:
-    name: ['locales-all', 'tuned', 'tuned-utils', 'tuned-utils-systemtap', 'hddtemp', 'bootlogd', 'ntp', 'ntpdate', 'ntpsec', 'ntpsec-ntpdate', 'ntpsec-ntpdig', 'netcat-traditional', 'pulseaudio', 'pulseaudio-equalizer', 'pulseaudio-module-bluetooth', 'pulseaudio-module-gsettings', 'apt-xapian-index', 'python3-xapian'] # apt-xapian-index very high daily change rate in disk usage (and backup space), for no apparent use to me
+    name: ['locales-all', 'tuned', 'tuned-utils', 'tuned-utils-systemtap', 'iotop', 'hddtemp', 'bootlogd', 'ntp', 'ntpdate', 'ntpsec', 'ntpsec-ntpdate', 'ntpsec-ntpdig', 'netcat-traditional', 'pulseaudio', 'pulseaudio-equalizer', 'pulseaudio-module-bluetooth', 'pulseaudio-module-gsettings', 'apt-xapian-index', 'python3-xapian'] # apt-xapian-index very high daily change rate in disk usage (and backup space), for no apparent use to me
     state: absent
     purge: true
   become: true
@@ -109,7 +109,7 @@
 
 - name: Install essential packages (all)
   apt:
-    name: ['ksh', 'rsyslog', 'apt-listchanges', 'needrestart', 'rsync', 'sysstat', 'bsd-mailx', 'procmail', 'colordiff', 'net-tools', 'ccze', 'bash-completion', 'rkhunter', 'unhide', 'unhide.rb', 'eatmydata'] # procmail for lockfile, ccze for cron.daily get_conf
+    name: ['ksh', 'rsyslog', 'apt-listchanges', 'needrestart', 'rsync', 'sysstat', 'bsd-mailx', 'procmail', 'colordiff', 'ccdiff', 'grc', 'net-tools', 'ccze', 'bash-completion', 'rkhunter', 'unhide', 'unhide.rb', 'eatmydata'] # procmail for lockfile, ccze for cron.daily get_conf
     autoremove: no
     state: present
   become: true
@@ -124,6 +124,15 @@
   apt:
     name: "{{[ 'plocate' if (deb_release != 'buster') else 'mlocate' ]}}"
     autoremove: no
+    state: present
+  become: true
+
+- name: setup grc colouriser
+  lineinfile:
+    dest: /etc/default/grc
+    backrefs: yes
+    regexp: '^(GRC_ALIASES=false)'
+    line: '#\1\nGRC_ALIASES=true'
     state: present
   become: true
 
@@ -365,7 +374,7 @@
 
 - name: Install essential packages (not container)
   apt:
-    name: [ 'ethtool', 'iperf3', 'nicstat', 'lshw', 'hwinfo', 'dmidecode', 'parted', 'sdparm', 'smartmontools', 'htop', 'btop', 'glances', 'iotop', 'smem', 'ethstatus', 'ifstat', 'iftop', 'dstat', 'chrony', 'git', 'cvs', 'vim', 'make', 'etckeeper', 'strace', 'rlwrap', 'libstring-shellquote-perl', 'keychain', 'expect', 'initscripts', 'direnv', 'bc', 'curl', 'wget', 'netcat-openbsd', 'dlocate', 'aptitude', 'apt-show-versions', 'apt-listbugs' ] # expect for unbuffer, initscripts for bootlogs, pcp for `pcp dstat`, but that results in pmlogger cronjobs that spin up disks on fs, bc for checkntp; not atop since it creates massive logfiles - left for desktops only
+    name: [ 'ethtool', 'iperf3', 'nicstat', 'lshw', 'hwinfo', 'dmidecode', 'parted', 'sdparm', 'smartmontools', 'duf', 'htop', 'btop', 'glances', 'iotop-c', 'smem', 'ethstatus', 'ifstat', 'iftop', 'dstat', 'chrony', 'git', 'cvs', 'vim', 'make', 'etckeeper', 'strace', 'rlwrap', 'libstring-shellquote-perl', 'keychain', 'expect', 'initscripts', 'direnv', 'bc', 'curl', 'wget', 'netcat-openbsd', 'dlocate', 'aptitude', 'apt-show-versions', 'apt-listbugs' ] # expect for unbuffer, initscripts for bootlogs, pcp for `pcp dstat`, but that results in pmlogger cronjobs that spin up disks on fs, bc for checkntp; not atop since it creates massive logfiles - left for desktops only
     autoremove: no
     state: present
     install_recommends: no
