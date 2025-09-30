@@ -11,7 +11,7 @@
   :group 'languages)
 
 (defvar berry-keywords
-  '("if" "elif" "else" "end" "for" "while" "do" "break" "continue"
+  '("elif" "else" "if" "end" "for" "while" "do" "break" "continue"
     "return" "function" "def" "class" "var" "import" "from" "try" "catch"
     "throw" "switch" "case" "default" "in" "and" "or" "not"))
 
@@ -23,19 +23,39 @@
   '("true" "false" "nil"))
 
 (defun berry--regexp-from-keywords (keywords)
-  "Return regexp matching any of KEYWORDS as a symbol."
-  (concat "\\b" (regexp-opt keywords t) "\\b"))
+  (concat "\\_<" (regexp-opt keywords t) "\\_>"))
 
 (defvar berry-font-lock-keywords
-  `((,(berry--regexp-from-keywords berry-keywords) . font-lock-keyword-face)
+  `(
+    ;; Keywords
+    (,(berry--regexp-from-keywords berry-keywords) . font-lock-keyword-face)
+
+    ;; Builtins and constants
     (,(berry--regexp-from-keywords berry-builtins) . font-lock-builtin-face)
     (,(berry--regexp-from-keywords berry-constants) . font-lock-constant-face)
-    ;; double-quoted strings
+
+    ;; Strings
     ("\"\\(\\\\.\\|[^\"\\]\\)*\"" . font-lock-string-face)
-    ;; single quoted words (simplistic)
-    ("'\\w+" . font-lock-variable-name-face)
-    ;; function definitions
-    ("\\<\\(def\\|function\\)\\s-+\\([A-Za-z_]\\w*\)" 2 font-lock-function-name-face)))
+
+    ;; Numbers
+    ("\\b[0-9]+\\(\\.[0-9]+\\)?\\b" . font-lock-constant-face)
+
+    ;; Function definitions (highlight function name)
+    ("\\<\\(def\\|function\\)\\s-+\\([A-Za-z_]\\w*\)" 2 font-lock-function-name-face)
+
+    ;; Class definitions (highlight class name)
+    ("\\<class\\s-+\\([A-Za-z_]\\w*\)" 1 font-lock-type-face)
+
+    ;; Variable declarations (highlight var name)
+    ("\\<var\\s-+\\([A-Za-z_]\\w*\)" 1 font-lock-variable-name-face)
+
+    ;; Operators (basic set)
+    ("[=+\-*/<>!]+" . font-lock-operator-face)))
+
+;; Provide an operator face if theme doesn’t have one
+(defface font-lock-operator-face
+  '((t :inherit font-lock-keyword-face))
+  "Face for operators in Berry.")
 
 (defvar berry-mode-syntax-table
   (let ((st (make-syntax-table)))
