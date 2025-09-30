@@ -3,6 +3,19 @@
 #firefox is such a stupid peice of shit, we have to protect the
 #bookmarks and prefs files before starting up.
 
+# this will cause firefox itself to swap, and also any children it forks
+# background: https://superuser.com/questions/952302/how-to-make-google-chrome-or-chromium-use-less-memory
+memory_soft_limit=40%
+memory_hard_limit=60%
+memory_swap_limit=2G
+io_weight=50
+#FIXME: want to implement a swap bandwidth limit and IOPs limits perhaps
+
+#FIXME: I wonder if faking how much free ram the machine had via
+#/proc/meminfo would deal with people's claims on the interweb that
+#it'll use as much RAM as it thinks it can:
+#https://unix.stackexchange.com/questions/581058/how-can-i-fake-the-amount-of-installed-ram-for-a-specific-program-in-linux
+
 #ulimit -v $(($(free | head -n 2 | tail -n 1 | awk '{print $2}')*4/5))
 
 #export MOZ_DISABLE_GMP_SANDBOX=1 # NOPE: visual freezing, with associated log messages: https://bugs.launchpad.net/ubuntu/+source/firefox/+bug/1983010, although this sounds like a DRM issue:
@@ -67,16 +80,74 @@ unset XDG_CURRENT_DESKTOP
 
 os=`uname -s`
 
+eatmydata=
 if [ -x /usr/bin/eatmydata ] ; then
         eatmydata="eatmydata --"
 fi
+
+# migrated from .bashrc* - on dirac this directory has been empty for years, so doubt I'm still using this anywhere...
+if [ -d $HOME/.mozilla/plugins ] ; then
+    #make sure all of the plugins I actually want are in this directory, if it exists. Don't copy the crap like nppdf.so
+    export MOZ_PLUGIN_PATH=$HOME/.mozilla/plugins
+fi
+
+# FIXME: 24 nov consider sticking firefox in its own cgroup (use:
+# MemorySwapMax, MemoryHigh=xxxG or 60% and MemoryMax 80%, ....;
+# probably no need for: CPUWeight/CPUQuota/IOWeight).  Measure swap
+# usage with: : 57661,15; find /sys/fs/cgroup/user.slice/ -name
+# memory.swap.current | xn grep . | sed 's/:/: /' | sort -g -k 2 |
+# pretty-print-number | grep :.*
+
+cgroup_metrics=(
+    -p MemorySwapMax=$memory_swap_limit
+    -p MemoryHigh=$memory_soft_limit
+    -p MemoryMax=$memory_hard_limit
+    -p IOWeight=$io_weight
+)
+cggroup=( systemd-run -u "firefox-$USER" "${cgroup_metrics[@]}" --user --scope --uid=$USER --gid=$USER -- )
+
+BROWSER_FIREFOX_ARGS=
+
+# FIXME: it'd be nice to choose the correct profile by default rather
+# than just the last one fired off manually...  But it has to get the
+# right profile per system, so read it from a conf file somewhere...
+# Work out whether the site given requires a particular browser
+#if echo "$@" | grep -q ".pdf$" ; then
+#    BROWSER_OVERRIDE=firefox
+#el
+case "$*" in
+    #*.pdf)
+    #    BROWSER_OVERRIDE=firefox
+    #;;
+    *theage.com.au/*|*smh.com.au/*)
+        BROWSER_FIREFOX_ARGS="--profile $HOME/.mozilla/firefox/*.DisabledJavascript"
+        ;;
+    *instagram.com/*)
+        BROWSER_FIREFOX_ARGS="--profile $HOME/.mozilla/firefox/*.Instagram"
+        ;;
+    -*)
+        :
+        ;;
+    *)
+        case "$HOSTNAME" in
+            dirac|dirac-laptop)
+                BROWSER_FIREFOX_ARGS="--profile $HOME/.mozilla/firefox/*.Test -new-window"
+                ;;
+            *)
+                BROWSER_FIREFOX_ARGS="--profile $HOME/.mozilla/firefox/*.default -new-window"
+                ;;
+        esac
+        ;;
+esac
+# FIXME: heck, there should also be a flag to choose a custom profile based on similar wildcards
 
 #PROGS="/usr/bin/firefox"
 PROGS="/usr/bin/firefox-esr"
 #PROGS="/snap/bin/firefox"
 for PROG in $PROGS ; do
     if [ -x $PROG ] ; then
-        exec $eatmydata $PROG -new-window "$@"
+#        exec "${cggroup[@]}" $eatmydata $PROG -new-window "$@"
+        exec $eatmydata $PROG $BROWSER_FIREFOX_ARGS "$@"
     fi
 done
 echo "sorry, no firefox found in $PROGS"

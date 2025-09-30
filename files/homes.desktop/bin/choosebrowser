@@ -22,12 +22,14 @@ fi
 #if echo "$@" | grep -q ".pdf$" ; then
 #    BROWSER_OVERRIDE=firefox
 #el
-if echo "$@" | grep -q "isupport/" ; then
-    BROWSER_OVERRIDE=chromium
-fi
-if echo "$@" | grep -q "mercuryaero.sharepoint.com/" ; then
-    BROWSER_OVERRIDE=chromium
-fi
+case "$*" in
+    #*.pdf)
+    #    BROWSER_OVERRIDE=firefox
+    #;;
+    *isupport/*|*mercuryaero.sharepoint.com/*)
+        BROWSER_OVERRIDE=chromium
+        ;;
+esac
 
 # If BROWSER has already been set, but we are running choosebrowser as
 # part of another script, run that browser preferentially
