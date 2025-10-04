@@ -2,8 +2,12 @@
 - name: Install desktop tools
   apt:
 # emacs-lucid for bug https://bugs.debian.org/cgi-bin/bugreport.cgi?bug=567934 https://bugzilla.gnome.org/show_bug.cgi?id=85715
+# emacs suffers from this bug where old client display is not closed, and when it errors out, the original emacs session exit(1):
+# Bug was well on its way to being fixed but hasn't been touched in 3 years now: https://gitlab.gnome.org/GNOME/gtk/-/issues/2315
 #FIXME: 'fvwm3'
-    name: "{{ item }}"
+    name: "{{ item.packages | default ( item ) }}"
+    state: "{{ item.state | default ( 'present' ) }}"
+    default_release:  "{{ item.default_release | default ( omit ) }}"
 #    FIXME: debian bookworm will want fvwm3
 #    FIXME: this thread talks of fvwm3! https://www.linuxquestions.org/questions/slackware-14/wlroots-sway-xdg-desktop-portal-wlroots-and-other-third-position-wayland-window-mangers-for-slackware-users-4175705256/
 
@@ -20,11 +24,9 @@
     update_cache: yes
     cache_valid_time: 3600
     autoremove: no
-    state: present
     install_recommends: no
   become: true
   when: not (host_is_light_desktop | default(false))
-  # FIXME: could encode preferred backports/non-backports into each of these lists independently:
   loop:
     - [ 'nfs-common', 'nfs4-acl-tools', 'afuse', 'sshfs', 'acl', 'ntfs-3g',
     'snapd',
@@ -78,7 +80,8 @@
     'hyphen-en-gb', 'hunspell-en-gb', 'hunspell-en-au', 'ibritish-insane', 'wbritish-insane', 'ispell', 'aspell', 'hunspell', 'dict',
     'libreoffice' ]
 
-    - [ 'emacs', 'emacs-lucid', 'emacs-el', 'emacs-common-non-dfsg', 'mmm-mode', 'dh-elpa', 'dh-elpa-helper', 'dh-make-elpa',
+    - default_release: "{{ host_has_backports | default(false) | ternary( deb_release ~ '-backports', omit ) }}"
+      packages: [ 'emacs', 'emacs-lucid', 'emacs-el', 'emacs-common-non-dfsg', 'mmm-mode', 'dh-elpa', 'dh-elpa-helper', 'dh-make-elpa',
     'elpa-apache-mode', 'elpa-async', 'elpa-bar-cursor', 'elpa-bind-key', 'elpa-bm', 'elpa-boxquote', 'elpa-browse-kill-ring',
     'elpa-bug-hunter', 'elpa-color-theme-modern', 'elpa-csv-mode', 'elpa-dash', 'elpa-debian-el', 'elpa-diff-hl',
     'elpa-diffview', 'elpa-diminish', 'elpa-dired-du', 'elpa-dired-quick-sort', 'elpa-dired-rsync', 'elpa-epl', 'elpa-eproject',
@@ -87,7 +90,7 @@
     'elpa-go-mode', 'elpa-goto-chg', 'elpa-graphql', 'elpa-graphviz-dot-mode', 'elpa-helm', 'elpa-helm-core',
     'elpa-highlight-indentation', 'elpa-highlight-numbers', 'elpa-hl-todo', 'elpa-htmlize', 'elpa-hydra', 'elpa-initsplit',
     'elpa-jinja2-mode', 'elpa-let-alist', 'elpa-magit', 'elpa-magit-popup', 'elpa-markdown-mode', 'elpa-mutt-alias',
-    'elpa-muttrc-mode', 'elpa-org/trixie', 'elpa-parent-mode', 'elpa-pcre2el', 'elpa-pdf-tools', 'elpa-pdf-tools-server',
+    'elpa-muttrc-mode', 'elpa-org', 'elpa-parent-mode', 'elpa-pcre2el', 'elpa-pdf-tools', 'elpa-pdf-tools-server',
     'elpa-perspective', 'elpa-php-mode', 'elpa-pkg-info', 'elpa-pod-mode', 'elpa-popup', 'elpa-powerline', 'elpa-puppet-mode',
     'elpa-rainbow-delimiters', 'elpa-rich-minority', 'elpa-s', 'elpa-session', 'elpa-smart-mode-line',
     'elpa-smart-mode-line-powerline-theme', 'elpa-systemd', 'elpa-tabbar', 'elpa-tablist', 'elpa-treepy', 'elpa-undo-tree',
