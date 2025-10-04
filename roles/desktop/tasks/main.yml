@@ -87,11 +87,11 @@
     'elpa-go-mode', 'elpa-goto-chg', 'elpa-graphql', 'elpa-graphviz-dot-mode', 'elpa-helm', 'elpa-helm-core',
     'elpa-highlight-indentation', 'elpa-highlight-numbers', 'elpa-hl-todo', 'elpa-htmlize', 'elpa-hydra', 'elpa-initsplit',
     'elpa-jinja2-mode', 'elpa-let-alist', 'elpa-magit', 'elpa-magit-popup', 'elpa-markdown-mode', 'elpa-mutt-alias',
-    'elpa-muttrc-mode', 'elpa-org', 'elpa-parent-mode', 'elpa-pcre2el', 'elpa-pdf-tools', 'elpa-pdf-tools-server',
+    'elpa-muttrc-mode', 'elpa-org/trixie', 'elpa-parent-mode', 'elpa-pcre2el', 'elpa-pdf-tools', 'elpa-pdf-tools-server',
     'elpa-perspective', 'elpa-php-mode', 'elpa-pkg-info', 'elpa-pod-mode', 'elpa-popup', 'elpa-powerline', 'elpa-puppet-mode',
-    'elpa-rainbow-delimiters', 'elpa-rich-minority', 'elpa-s', 'elpa-seq', 'elpa-session', 'elpa-smart-mode-line',
+    'elpa-rainbow-delimiters', 'elpa-rich-minority', 'elpa-s', 'elpa-session', 'elpa-smart-mode-line',
     'elpa-smart-mode-line-powerline-theme', 'elpa-systemd', 'elpa-tabbar', 'elpa-tablist', 'elpa-treepy', 'elpa-undo-tree',
-    'elpa-use-package', 'elpa-visual-regexp', 'elpa-wc-mode', 'elpa-web-mode', 'elpa-with-editor', 'elpa-world-time-mode',
+    'elpa-visual-regexp', 'elpa-wc-mode', 'elpa-web-mode', 'elpa-with-editor', 'elpa-world-time-mode',
     'elpa-yaml-mode', 'elpa-treemacs', 'elpa-treemacs-magit', 'elpa-emacs-dashboard', 'elpa-projectile', 'elpa-treemacs-projectile' ]
 
     # 'synergy' has been taken over by 'barrier', which will be taken over by InputLeap after v2.4.0, xpra is a far better more modern alternative to Xnest, hwloc for lstopo amongst others, yq for xq for xml parsing ; abcde should hopefully replace my reliance on grip, xdg-desktop-portal-gnome because the gtk filechooser is awful
