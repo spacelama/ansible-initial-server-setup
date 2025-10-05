@@ -43,3 +43,6 @@
 [submodule "repos/ansible-dkim"]
 	path = repos/ansible-dkim
 	url = git@github.com:spacelama/ansible-dkim.git
+[submodule "files/homes.desktop/bin/bomradar"]
+	path = files/homes.desktop/bin/bomradar
+	url = git@github.com:spacelama/bomradar.git
