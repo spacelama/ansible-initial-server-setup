@@ -57,36 +57,70 @@
     st))
 
 (defun berry-indent-line ()
-  "Indent current line for Berry Script."
+  "Indent current line for Berry Script, handling blank lines and comments gracefully."
   (interactive)
   (let ((indent 0)
-        (not-indented t)
-        (offset 2))
+        (offset 2)
+        (ppss (syntax-ppss))
+        prev-indent
+        prev-code
+        (case-fold-search nil))
     (save-excursion
       (beginning-of-line)
-      (cond
-       ;; Dedent for block-ending keywords
-       ((looking-at "\\s-*\\(end\\|elif\\|else\\|case\\|default\\|catch\\)\\b")
-        (save-excursion
-          (forward-line -1)
-          (setq indent (current-indentation))
-          (setq indent (max 0 (- indent offset)))))
-       ;; Align within parentheses
-       ((nth 1 (syntax-ppss))
-        (goto-char (nth 1 (syntax-ppss)))
-        (forward-char 1)
-        (skip-syntax-forward "- ")
-        (setq indent (current-column)))
-       ;; Increase indent after block openers
-       (t
-        (save-excursion
-          (forward-line -1)
-          (setq indent (current-indentation))
-          (when (looking-at ".*\\<\\(class\\|def\\|function\\|if\\|elif\\|else\\|for\\|while\\|try\\|switch\\|case\\)\\b.*")
-            (setq indent (+ indent offset)))))))
+      ;; Case 1: current line is a comment -> align with previous comment if any
+      (if (looking-at "^[ \t]*#")
+          (progn
+            (save-excursion
+              (forward-line -1)
+              ;; Skip blank lines backward
+              (while (and (not (bobp))
+                          (looking-at "^[ \t]*$"))
+                (forward-line -1))
+              (cond
+               ;; Previous line also a comment → align to it
+               ((looking-at "^[ \t]*#")
+                (setq indent (current-indentation)))
+               ;; Otherwise align to previous non-empty line
+               (t (setq indent (current-indentation))))))
+        ;; Case 2: closing keywords
+        (cond
+         ((looking-at "^[ \t]*\\(end\\|elif\\|else\\|case\\|default\\|catch\\)\\b")
+          (save-excursion
+            (forward-line -1)
+            ;; Skip blank lines backward
+            (while (and (not (bobp))
+                        (looking-at "^[ \t]*$"))
+              (forward-line -1))
+            (setq indent (max 0 (- (current-indentation) offset)))))
+         ;; Case 3: inside parentheses → align under opening
+         ((nth 1 ppss)
+          (goto-char (nth 1 ppss))
+          (forward-char 1)
+          (skip-syntax-forward "- ")
+          (setq indent (current-column)))
+         ;; Case 4: normal indentation logic
+         (t
+          (save-excursion
+            (forward-line -1)
+            ;; Skip blank lines backward
+            (while (and (not (bobp))
+                        (looking-at "^[ \t]*$"))
+              (forward-line -1))
+            (setq prev-indent (current-indentation))
+            ;; Strip comments from previous line before testing for block keywords
+            (let ((line (buffer-substring-no-properties
+                         (line-beginning-position)
+                         (line-end-position))))
+              (setq prev-code (car (split-string line "#" t)))
+              (setq indent prev-indent)
+              (when (and prev-code
+                         (string-match
+                          ".*\\b\\(class\\|def\\|function\\|if\\|elif\\|else\\|for\\|while\\|try\\|switch\\|case\\)\\b.*"
+                          prev-code))
+                (setq indent (+ prev-indent offset)))))))))
     (indent-line-to indent)
-    (when (< (point) (+ (line-beginning-position) indent))
-      (goto-char (+ (line-beginning-position) indent)))))
+    (when (< (current-column) indent)
+      (move-to-column indent))))
 
 ;;;###autoload
 (define-derived-mode berry-mode prog-mode "Berry"
