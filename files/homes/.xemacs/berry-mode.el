@@ -57,68 +57,118 @@
     st))
 
 (defun berry-indent-line ()
-  "Indent current line for Berry Script, handling blank lines and comments gracefully."
+  "Indent current line for Berry Script.
+
+Rules:
+- Blank lines inherit indentation from the previous non-blank line.
+- A comment line aligns to the column of the previous line's `#` if present.
+- A comment immediately after a block-opener is indented into the block.
+- Keywords inside strings or comments are ignored when deciding block structure."
   (interactive)
-  (let ((indent 0)
-        (offset 2)
-        (ppss (syntax-ppss))
-        prev-indent
-        prev-code
-        (case-fold-search nil))
+  (let ((offset 2)
+        indent
+        (case-fold-search nil)) ;; keywords are case-sensitive
     (save-excursion
       (beginning-of-line)
-      ;; Case 1: current line is a comment -> align with previous comment if any
-      (if (looking-at "^[ \t]*#")
-          (progn
-            (save-excursion
-              (forward-line -1)
-              ;; Skip blank lines backward
-              (while (and (not (bobp))
-                          (looking-at "^[ \t]*$"))
-                (forward-line -1))
+      ;; Helper functions
+      (cl-labels
+          ((prev-nonblank-pos ()
+             (save-excursion
+               (when (> (line-number-at-pos) 1)
+                 (forward-line -1)
+                 (while (and (not (bobp))
+                             (looking-at "^[ \t]*$"))
+                   (forward-line -1))
+                 (if (bobp) nil (line-beginning-position)))))
+
+           (prev-noncomment-pos ()
+             (save-excursion
+               (let ((p (funcall #'prev-nonblank-pos)))
+                 (when p
+                   (goto-char p)
+                   (while (and (not (bobp))
+                               (looking-at "^[ \t]*#"))
+                     (forward-line -1))
+                   (if (bobp) nil (line-beginning-position))))))
+
+           (comment-column (pos)
+             (when pos
+               (save-excursion
+                 (goto-char pos)
+                 (let ((line (buffer-substring-no-properties
+                              (line-beginning-position)
+                              (line-end-position))))
+                   (when (string-match "#" line)
+                     (save-excursion
+                       (forward-char (match-beginning 0))
+                       (current-column)))))))
+
+           (line-has-block-opener-p (pos)
+             (when pos
+               (save-excursion
+                 (goto-char pos)
+                 (let* ((line (buffer-substring-no-properties
+                               (line-beginning-position)
+                               (line-end-position)))
+                        (re "\\b\\(class\\|def\\|function\\|if\\|elif\\|else\\|for\\|while\\|try\\|switch\\|case\\)\\b"))
+                   (when (string-match re line)
+                     (let ((match-beg (+ pos (match-beginning 0))))
+                       (not (nth 3 (syntax-ppss match-beg))))))))))
+
+        ;; Start main logic
+        (if (looking-at "^[ \t]*$")
+            ;; Blank line: same indent as previous nonblank
+            (let ((p (funcall #'prev-nonblank-pos)))
+              (setq indent (if p
+                               (save-excursion (goto-char p) (current-indentation))
+                             0)))
+          ;; Non-blank line
+          (let* ((prev-pos (funcall #'prev-nonblank-pos))
+                 (prev-nc-pos (funcall #'prev-noncomment-pos))
+                 (prev-indent (if prev-pos
+                                  (save-excursion (goto-char prev-pos)
+                                                  (current-indentation))
+                                0))
+                 (prev-hash-col (funcall #'comment-column prev-pos))
+                 (curr-is-comment (looking-at "^[ \t]*#"))
+                 (prev-was-block
+                  (or (and prev-nc-pos (funcall #'line-has-block-opener-p prev-nc-pos))
+                      (and prev-pos (funcall #'line-has-block-opener-p prev-pos)))))
+
+            (if curr-is-comment
+                ;; Handle comment indentation
+                (cond
+                 ;; Comment right after a block opener
+                 ((and prev-pos prev-was-block)
+                  (setq indent (+ prev-indent offset)))
+                 ;; Previous line had a '#' → align under it
+                 (prev-hash-col
+                  (setq indent prev-hash-col))
+                 ;; Otherwise just align to previous indent
+                 (t
+                  (setq indent prev-indent)))
+              ;; Handle code indentation
               (cond
-               ;; Previous line also a comment → align to it
-               ((looking-at "^[ \t]*#")
-                (setq indent (current-indentation)))
-               ;; Otherwise align to previous non-empty line
-               (t (setq indent (current-indentation))))))
-        ;; Case 2: closing keywords
-        (cond
-         ((looking-at "^[ \t]*\\(end\\|elif\\|else\\|case\\|default\\|catch\\)\\b")
-          (save-excursion
-            (forward-line -1)
-            ;; Skip blank lines backward
-            (while (and (not (bobp))
-                        (looking-at "^[ \t]*$"))
-              (forward-line -1))
-            (setq indent (max 0 (- (current-indentation) offset)))))
-         ;; Case 3: inside parentheses → align under opening
-         ((nth 1 ppss)
-          (goto-char (nth 1 ppss))
-          (forward-char 1)
-          (skip-syntax-forward "- ")
-          (setq indent (current-column)))
-         ;; Case 4: normal indentation logic
-         (t
-          (save-excursion
-            (forward-line -1)
-            ;; Skip blank lines backward
-            (while (and (not (bobp))
-                        (looking-at "^[ \t]*$"))
-              (forward-line -1))
-            (setq prev-indent (current-indentation))
-            ;; Strip comments from previous line before testing for block keywords
-            (let ((line (buffer-substring-no-properties
-                         (line-beginning-position)
-                         (line-end-position))))
-              (setq prev-code (car (split-string line "#" t)))
-              (setq indent prev-indent)
-              (when (and prev-code
-                         (string-match
-                          ".*\\b\\(class\\|def\\|function\\|if\\|elif\\|else\\|for\\|while\\|try\\|switch\\|case\\)\\b.*"
-                          prev-code))
-                (setq indent (+ prev-indent offset)))))))))
-    (indent-line-to indent)
+               ;; Closing keywords dedent
+               ((looking-at "^[ \t]*\\(end\\|elif\\|else\\|case\\|default\\|catch\\)\\b")
+                (setq indent (max 0 (- prev-indent offset))))
+               ;; Inside parentheses: align under opening paren
+               ((nth 1 (syntax-ppss))
+                (let ((open-pos (nth 1 (syntax-ppss))))
+                  (goto-char open-pos)
+                  (forward-char 1)
+                  (skip-syntax-forward "- ")
+                  (setq indent (current-column))))
+               ;; Otherwise: same or deeper if previous line opened a block
+               (t
+                (setq indent prev-indent)
+                (when (and prev-nc-pos
+                           (funcall #'line-has-block-opener-p prev-nc-pos))
+                  (setq indent (+ prev-indent offset))))))))))
+
+    ;; Apply indentation
+    (unless indent (setq indent 0))
+    (indent-line-to (max 0 indent))
     (when (< (current-column) indent)
       (move-to-column indent))))
 
