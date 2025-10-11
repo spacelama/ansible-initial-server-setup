@@ -3,128 +3,97 @@
 ;; Major mode for the Berry scripting language
 ;; Provides syntax highlighting, indentation, and file association.
 
-(require 'prog-mode)
-
-(defgroup berry-mode nil
-  "Major mode for editing Berry scripts."
-  :prefix "berry-"
-  :group 'languages)
+(defvar berry-mode-hook nil)
 
 (defvar berry-keywords
-  '("elif" "else" "if" "end" "for" "while" "do" "break" "continue"
-    "return" "function" "def" "class" "var" "import" "from" "try" "catch"
-    "throw" "switch" "case" "default" "in" "and" "or" "not"))
-
-(defvar berry-builtins
-  '("print" "input" "assert" "type" "size" "int" "real" "bool" "str"
-    "list" "map" "range" "super" "classname" "classof"))
+  '("if" "elif" "else" "for" "while" "break" "continue" "return"
+    "class" "def" "function" "end" "try" "catch" "throw"
+    "switch" "case" "default" "import" "from" "as"))
 
 (defvar berry-constants
   '("true" "false" "nil"))
 
-(defun berry--regexp-from-keywords (keywords)
-  (concat "\\_<" (regexp-opt keywords t) "\\_>"))
+(defvar berry-builtins
+  '("print" "input" "len" "range" "int" "float" "string" "tasmota"))
 
 (defvar berry-font-lock-keywords
   `(
     ;; Keywords
-    (,(berry--regexp-from-keywords berry-keywords) . font-lock-keyword-face)
-
-    ;; Builtins and constants
-    (,(berry--regexp-from-keywords berry-builtins) . font-lock-builtin-face)
-    (,(berry--regexp-from-keywords berry-constants) . font-lock-constant-face)
-
-    ;; Strings
-    ("\"\\(\\\\.\\|[^\"\\]\\)*\"" . font-lock-string-face)
-
+    (,(regexp-opt berry-keywords 'symbols) . font-lock-keyword-face)
+    ;; Constants
+    (,(regexp-opt berry-constants 'symbols) . font-lock-constant-face)
+    ;; Builtins
+    (,(regexp-opt berry-builtins 'symbols) . font-lock-builtin-face)
+    ;; Function names after def/function
+    ("\\<\\(def\\|function\\)\\s-+\\([A-Za-z_][A-Za-z0-9_]*\\)" 2 font-lock-function-name-face)
+    ;; Class names after class
+    ("\\<class\\s-+\\([A-Za-z_][A-Za-z0-9_]*\\)" 1 font-lock-type-face)
+    ;; Variables after var
+    ("\\<var\\s-+\\([A-Za-z_][A-Za-z0-9_]*\\)" 1 font-lock-variable-name-face)
+    ;; self.foo highlighting
+    ("\\<self\\.\\([A-Za-z_][A-Za-z0-9_]*\\)" 1 font-lock-variable-name-face)
     ;; Numbers
     ("\\b[0-9]+\\(\\.[0-9]+\\)?\\b" . font-lock-constant-face)
-
-    ;; Function definitions (highlight function name)
-    ("\\<\\(def\\|function\\)\\s-+\\([A-Za-z_]\\w*\)" 2 font-lock-function-name-face)
-
-    ;; Class definitions (highlight class name)
-    ("\\<class\\s-+\\([A-Za-z_]\\w*\)" 1 font-lock-type-face)
-
-    ;; Variable declarations (highlight var name)
-    ("\\<var\\s-+\\([A-Za-z_]\\w*\)" 1 font-lock-variable-name-face)
-
-    ;; Operators (basic set)
-    ("[=+\-*/<>!]+" . font-lock-operator-face)))
-
-;; Provide an operator face if theme doesn’t have one
-(defface font-lock-operator-face
-  '((t :inherit font-lock-keyword-face))
-  "Face for operators in Berry.")
+    ;; Strings (safe quoting)
+    ("\\\"\\(\\\\.\\|[^\\\"\\]\\)*\\\"" . font-lock-string-face)
+    ;; Operators
+    ("[+\-*/%=&|!<>]+" . font-lock-builtin-face)
+    ))
 
 (defvar berry-mode-syntax-table
   (let ((st (make-syntax-table)))
+    ;; Comments start with #
     (modify-syntax-entry ?# "<" st)
     (modify-syntax-entry ?\n ">" st)
-    (modify-syntax-entry ?' "'" st)
-    st)
-  "Syntax table for `berry-mode'.")
-
-(defvar berry-indent-offset 2
-  "Indentation offset for `berry-mode'.")
-
-(defun berry--line-starts-block-p (line)
-  "Return non-nil if LINE starts a block that should increase indent."
-  (string-match-p "^\\s-*\\(if\\|for\\|while\\|function\\|def\\|class\\|do\\|try\\|switch\\)\\b" line))
-
-(defun berry--line-ends-block-p (line)
-  "Return non-nil if LINE closes a block (contains `end')."
-  (string-match-p "^\\s-*end\\b" line))
-
-(defun berry--line-mid-block-p (line)
-  "Return non-nil if LINE is a mid-block keyword like else/elif/case/default."
-  (string-match-p "^\\s-*\\(elif\\|else\\|case\\|default\\)\\b" line))
-
-(defun berry-calc-indentation ()
-  "Compute indentation for current line in `berry-mode'."
-  (let ((nest 0))
-    (save-excursion
-      (while (not (bobp))
-        (forward-line -1)
-        (let ((line (string-trim (buffer-substring-no-properties (line-beginning-position) (line-end-position)))))
-          (unless (or (string-empty-p line) (string-prefix-p "#" line))
-            (when (berry--line-starts-block-p line)
-              (setq nest (1+ nest)))
-            (when (berry--line-ends-block-p line)
-              (setq nest (1- nest)))))))
-    ;; Adjust for current line
-    (let ((curr (string-trim (buffer-substring-no-properties (line-beginning-position) (line-end-position)))))
-      (cond
-       ((berry--line-ends-block-p curr)
-        (setq nest (1- nest)))
-       ((berry--line-mid-block-p curr)
-        (setq nest (max 0 (1- nest))))))
-    (max 0 (* berry-indent-offset nest))))
+    ;; Strings
+    (modify-syntax-entry ?\" "\"" st)
+    ;; Parentheses for function calls
+    (modify-syntax-entry ?( "(" st)
+    (modify-syntax-entry ?) ")" st)
+    (modify-syntax-entry ?[ "(" st)
+    (modify-syntax-entry ?] ")" st)
+    (modify-syntax-entry ?{ "(" st)
+    (modify-syntax-entry ?} ")" st)
+    st))
 
 (defun berry-indent-line ()
-  "Indent current line for `berry-mode'."
+  "Indent current line for Berry Script."
   (interactive)
-  (let ((indent (berry-calc-indentation)))
+  (let ((indent 0)
+        (not-indented t)
+        (offset 2))
     (save-excursion
       (beginning-of-line)
-      (delete-horizontal-space)
-      (indent-to indent))
-    (when (< (current-column) (current-indentation))
-      (back-to-indentation))))
+      (cond
+       ;; Dedent for block-ending keywords
+       ((looking-at "\\s-*\\(end\\|elif\\|else\\|case\\|default\\|catch\\)\\b")
+        (save-excursion
+          (forward-line -1)
+          (setq indent (current-indentation))
+          (setq indent (max 0 (- indent offset)))))
+       ;; Align within parentheses
+       ((nth 1 (syntax-ppss))
+        (goto-char (nth 1 (syntax-ppss)))
+        (forward-char 1)
+        (skip-syntax-forward "- ")
+        (setq indent (current-column)))
+       ;; Increase indent after block openers
+       (t
+        (save-excursion
+          (forward-line -1)
+          (setq indent (current-indentation))
+          (when (looking-at ".*\\<\\(class\\|def\\|function\\|if\\|elif\\|else\\|for\\|while\\|try\\|switch\\|case\\)\\b.*")
+            (setq indent (+ indent offset)))))))
+    (indent-line-to indent)
+    (when (< (point) (+ (line-beginning-position) indent))
+      (goto-char (+ (line-beginning-position) indent)))))
 
 ;;;###autoload
 (define-derived-mode berry-mode prog-mode "Berry"
   "Major mode for editing Berry script files."
   :syntax-table berry-mode-syntax-table
   (setq-local font-lock-defaults '(berry-font-lock-keywords))
-  (setq-local comment-start "# ")
-  (setq-local comment-end "")
-  (setq-local indent-line-function 'berry-indent-line)
-  (when (fboundp 'electric-indent-local-mode)
-    (electric-indent-local-mode 1)))
-
-;;;###autoload
-(add-to-list 'auto-mode-alist '("\\.be\\'" . berry-mode))
+  (setq-local indent-line-function 'berry-indent-line))
 
 (provide 'berry-mode)
 ;;; berry-mode.el ends here
