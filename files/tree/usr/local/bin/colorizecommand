@@ -89,7 +89,7 @@ normaloutput() {
 
 usage() {
     cat 1>&2 <<EOF
-Usage: $0 [--shell] [--stderr] [--notty] [--PS1prompt] [--colourall] [--background <bgcolour>] [bold] [bright|dark] <colour> <command>"
+Usage: $0 [--shell] [--stderr] [--notty] [--PS1prompt] [--colourall] [--background <bgcolour>] [bold] [bright|dark] <colour> <command>
 Runs a command with diagnostic info in colour, with an option to print the command output within PS1 style escapes
 
   --shell               Forces the command to run under a shell

@@ -1,0 +1,98 @@
+#!/bin/bash
+
+usage() {
+    cat 1>&2 <<EOF
+Usage: $0 [--escape] <pid> <keystrokes>
+Injects keystrokes into an xterm
+
+  --escape               Escapes arguments as if they were separate files
+EOF
+    if [ -n "$1" ] ; then
+        exit $1
+    fi
+    exit
+}
+
+usageerror() {
+    if [ "$#" != 0 ] ; then
+        echo "Usage error:" "$@" 1>&2
+        echo "Usage was $ARGS" 1>&2
+    fi
+    usage 1
+}
+
+inject_keys() {
+#    arg="$1"
+#    while [ "$#" -gt 0 ] ; do
+#        shift
+##        echo "$( echo "$1" | sed 's/ /space/g ; s/\//slash/g ; s/\\/backslash/g ; s/' )"
+#        if [ "$#" -gt 0 ] ; then
+#            echo space
+#        fi
+    #    done | xn xdotool key
+
+    pid="$1"
+    shift
+
+    # window chaining doesn't work per ambiguous description in
+    # manpage, but xdotool search is extremely slow anyway:
+    # xdotool search --limit 1 --sync --onlyvisible --pid "$pid" -- type --window %1 "$@"
+
+    # find the bash process forked by xterm:
+    found_xterm_windowid=false
+    # Each time a child is spawned, dig down to see whether it has set
+    # a $WINDOWID (only bash is expected to do this - each of the
+    # processes that fork our xterm, and then fork our helpers with
+    # xterm, don't set this, until they finally invoke bash itself.
+    # Allow up to 10 probes before timing out
+    processes_whose_parent_is_pid="$( grep -H "^PPid:\s$pid$" /proc/*/status 2>/dev/null | sed 's/^\/proc\/// ; s/\/.*//' | head -n 1)"
+    pid="$processes_whose_parent_is_pid"
+    for s in `seq 1 10` ; do
+        ps=$( ps axfu | grep -A1 -B1 "$pid" )
+        colorize bright yellow "Finding parent of pid: $pid -> $ps" 1>&2
+        processes_whose_parent_is_pid="$( grep -H "^PPid:\s$pid$" /proc/*/status 2>/dev/null | sed 's/^\/proc\/// ; s/\/.*//' | head -n 1)"
+        # in case we found a bash process, find the bash processes
+        # $WINDOWID and exit the loop successfully:
+        windowid=$( tr '\0' '\n' < /proc/$processes_whose_parent_is_pid/environ 2>/dev/null | grep ^WINDOWID= | sed 's/^WINDOWID=//' )
+        if [ -n "$windowid" ] ; then
+            found_xterm_windowid=true
+            break
+        fi
+
+        if [ -z "$processes_whose_parent_is_pid" ] ; then
+            sleep 0.1
+        else
+            pid="$processes_whose_parent_is_pid"
+        fi
+    done
+
+    if $found_xterm_windowid ; then
+        # xterm probably uses a security setting that doesn't directly allow input being sent to it:
+        #xdotool type --window "$windowid" "$@"
+        # so focus it, then send input to it instead:
+        xdotool windowfocus --sync "$windowid" type --clearmodifiers --delay 1 "$*"
+    else
+        colorize bright red "Giving up on finding window belonging to process $pid" 1>&2
+    fi
+}
+
+escape=false
+if [ "$1" = --escape ] ; then
+    shift
+    escape=true
+fi
+
+if [ "$#" -lt 2 ] ; then
+    usageerror "Supply xterm pid and keys to inject"
+fi
+
+xterm_pid="$1"
+shift
+
+if $escape ; then
+    inject_keys $xterm_pid $( printf "%q\n" "$@" ) &
+    # newlines because then each arg gets passed to the child without
+    # trailing space while being interpreted as separate args properly
+else
+    inject_keys $xterm_pid "$@" &
+fi

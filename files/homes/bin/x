@@ -37,25 +37,27 @@ noshell=true
 verbose=false
 retry=retry
 wait_timeout=
+inject_escaped_keystrokes=()
 while [[ "$1" == --* ]] ; do
     case "$1" in
         --help)
             cat 1>&2 <<EOF
-Usage: x [--help] [--title <title>] [--no-retry] [--wait[=clean-exit-timeout]] [--no-verbose|--verbose[=<true|false>]] [--no-eval] [--shell] [--] [-other-xterm-flags...] [--] <prog> [<args>]
+Usage: x [--help] [--title <title>] [--no-retry] [--wait[=clean-exit-timeout]] [--no-verbose|--verbose[=<true|false>]] [--no-eval] [--shell] [--inject-escaped-keystrokes] [--] [-other-xterm-flags...] [--] <prog> [<args>]
 Runs PROG within an xterm, setting window title and potentially retrying as necessary
 
-  --title                 Override default calculated title (not useful with --wait)
-  --wait                  Wait when a command has exited
-  --wait=[0-9]*            and (exiting after a timeout if supplied, only if the command was successful)
-  --no-retry              Do not attempt to retry a failed command
-  --verbose               Output some extra info about command invocation and status
+  --title                     Override default calculated title (not useful with --wait)
+  --wait                      Wait when a command has exited
+  --wait=[0-9]*                and (exiting after a timeout if supplied, only if the command was successful)
+  --no-retry                  Do not attempt to retry a failed command
+  --verbose                   Output some extra info about command invocation and status
   --verbose=true|false
-  --no-verbose            Be less verbose than default
-  --no-eval               Just run the command within bash with nothing else interpreting the
-                           command status, and be very quiet about invocation
-  --shell                 Run the command within a shell context as well as potentially under the control
-                           of our status checker
-  --help                  Display this help and exit
+  --no-verbose                Be less verbose than default
+  --no-eval                   Just run the command within bash with nothing else interpreting the
+                               command status, and be very quiet about invocation
+  --shell                     Run the command within a shell context as well as potentially under the control
+                               of our status checker
+  --inject-escaped-keystrokes Place files passed to this onto the commandline ready for bash to interpret
+  --help                      Display this help and exit
 EOF
             exit 1
             ;;
@@ -89,6 +91,16 @@ EOF
         --shell)
             shift
             noshell=false
+            ;;
+        --inject-escaped-keystrokes)
+            shift
+            while [ "$#" -gt 0 -a "$1" != "--" ] ; do
+                inject_escaped_keystrokes+=("$1")
+                shift
+            done
+            #if [ "$1" = "--" ] ; then
+            #    shift
+            #fi
             ;;
         *)
             break
@@ -148,6 +160,10 @@ done
     # title to identify this window yet
     title="${title-$( enforce_title_length x: "$PWD" "${cmds[@]}" )}"
     $retry xterm "${args[@]}" -T "$title" -e $eval "${cmds[@]}" &
+    pid_xterm=$!
+    if [ ${#inject_escaped_keystrokes[@]} -gt 0 ] ; then
+        inject_keystrokes --escape $pid_xterm "${inject_escaped_keystrokes[@]}"
+    fi
     sleep 0.3  # if we exit too soon, and in turn our caller (eg
                # xterm, ssh) exits, then our child might not even get
                # a chance to spawn.  This is awful, I wish there were

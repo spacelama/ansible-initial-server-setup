@@ -61,7 +61,7 @@
 
     - [ 'fvwm', 'picom', 'menu', 'mesa-utils', 'xdg-desktop-portal-gnome',
     'dconf-cli',
-    'xterm', 'xtermcontrol',
+    'xterm', 'xtermcontrol', 'xdotool',
     'xdm', 'xorg', 'xinit', 'ddccontrol', 'xinput', 'gtk3-nocsd', 'inputplug',
     'x11-utils', 'xcb', 'autocutsel', 'xclip',
     'gxmessage', 'xpdf',
