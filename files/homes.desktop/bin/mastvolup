@@ -1,4 +1,4 @@
-#!/bin/ksh
+#!/bin/bash
 # -*- Mode: shell-script -*-
 #template by ~tconnors/bin/newshscript
 #Sun Dec  7 17:01:40 EST 2003
@@ -9,35 +9,82 @@
 
 # This program changes volume of line, pcm and cd
 
+usage() {
+    cat 1>&2 <<EOF
+Usage: $0 [--small|-s] [--large|-l]+
+Increments the master volume
+
+  --small                       Sets the step size to minimal
+  --large                       Increases the step size - can be specified multiple times
+  -V|--version                  Display version information
+  -h|--help                     Display this help and exit
+EOF
+    if [ -n "$1" ] ; then
+        exit $1
+    fi
+    exit
+}
+
+usageerror() {
+    if [ "$#" != 0 ] ; then
+        echo "Usage error:" "$@" 1>&2
+        echo "Usage was:${ARGS:- <no args>}" 1>&2
+    fi
+    usage 1
+}
+
+version() {
+    cat 1>&2 <<'EOF'
+# $Revision: 1.4 $ $Date: 2025/08/10 04:43:57 $
+# $Id: colorwdiff,v 1.4 2025/08/10 04:43:57 tconnors Exp $
+# $Header: /home/tconnors/cvsroot/bin/colorwdiff,v 1.4 2025/08/10 04:43:57 tconnors Exp $
+# $RCSfile: colorwdiff,v $/
+EOF
+    exit 0
+}
+
 detect_vol() {
-    sound=$( amixer -D default -M get Master )
-    vol=$( echo "$sound" |
-               grep -Pio '(\d+)%' |
-               sed 's/%//' |
-               head -n 1
-       )
+#    sound=$( amixer -D default -M get Master )
+#    vol=$( echo "$sound" |
+#               grep -Pio '(\d+)%' |
+#               sed 's/%//' |
+#               head -n 1
+#       )
+    vol=$( pamixer --get-volume )
     mute=false
     echo "$sound" | grep -q "\[off\]" && mute=true && vol=0
 }
 
-usageerror() {
-    if [ $# != 0 ] ; then
-        echo "Usage error:" "$@" 1>&2
-    fi
-    echo "Usage: $0 [--small|-s] [--large|-l]+" 1>&2
-    exit 1
+writelock() {
+    lockf="$1"
+
+    exec 4<"$lockf" # open lock
+
+    timeout -k 0.01 0.1 flock -x 4 || exit 1
 }
 
-recently_ran() {
+readlock() {
+    lockf="$1"
+
+    exec 4<"$lockf" # open lock
+
+    timeout -k 0.01 0.1 flock -s 4 || exit 1
+}
+
+unlock() {
+    lockf="$1"
+
+    exec 4<&- # close lock
+}
+
+determine_recently_ran() {
     [ -f /tmp/vol.up.ran ] || return
 
-    short_interval=0.1
+    short_interval=0.15
     now=$( date +%s.%N )
     initiated=$( stat -c %.Y /tmp/vol.up.ran )
 
-    is_within_short_interval=$(awk "BEGIN { if ($initiated+$short_interval > $now) { print \"true\\n\" } else { print \"false\\n\" } }" )
-
-    $is_within_short_interval
+    recently_ran=$(awk "BEGIN { if ($initiated+$short_interval > $now) { print \"true\\n\" } else { print \"false\\n\" } }" )
 }
 
 parseinput() {
@@ -56,6 +103,12 @@ parseinput() {
             --small|-s)
                 step=1
                 ;;
+            -V|--version)
+                version
+                ;;
+            -h|--help)
+                usage
+                ;;
             -*)
                 usageerror "Unknown option \"$arg\""
                 ;;
@@ -71,11 +124,11 @@ set_vol_step() {
     # to be encountered back on the way down if the only interaction has
     # been via these scripts
     if [ $vol -ge 25 ] ; then
-        default_step=4
+        default_step=1
     elif [ $vol -ge 16 ] ; then # 16 -> 19 -> 22 -> 25
-        default_step=3
+        default_step=1
     elif [ $vol -ge 10 ] ; then # 10 -> 12 -> 14 -> 16
-        default_step=2
+        default_step=1
     elif [ $vol -ge 5 ] ; then  #  5 ->  6 ->  7 -> 8 -> 9 -> 10
         default_step=1
     else                        #  0 -...>  5
@@ -86,18 +139,43 @@ set_vol_step() {
 PATH=$PATH:/usr/local/bin
 export PATH
 
-detect_vol
+ARGS=
+for ARG in "$@" ; do
+    ARGS="$ARGS \"$ARG\""
+done
+
+lock=/tmp/vol.lock
+
+determine_recently_ran
+touch /tmp/vol.up.ran   # this script can take some time,
+                        # non-deterministically, to operate, so we
+                        # should use start time when working out if
+                        # invoked quickly.
+
+readlock "$lock"
+detect_vol # That we race locklessly with a previous caller is not
+           # harmful here - it allows us to determine that we have
+           # been called quickly in succession, and thus accelerate
+           # our step size.  If we win and the calls get sequenced the
+           # way they started, we increase our stepsize.  If we lose,
+           # it just results in the original non-accelarated stepsize,
+           # no real harm.
 set_vol_step
 parseinput "$@"
 
 unmute
 
-lock=/tmp/vol.lock
-lockfile -0 -r 1 $lock || exit
-trap "rm -f $lock ; exit 1" INT HUP TERM QUIT
-
-if recently_ran ; then
+writelock $lock # the lock might try a couple of times, but we want to
+                # allow it to fail if allowing it to succeed will
+                # result in the action taking place well after the
+                # user has stopped asking for it
+trap "unlock $lock ; exit 1" INT HUP TERM QUIT
+#amixer set Master $step%+ unmute  # acts on the default soundcard as decided by paswitch
+if $recently_ran ; then
     echo "mastvolup: accelerating steps"
+    # we effectively just want to call ourselves exactly twice (but
+    # without all the expensive steps and under the same lock), so
+    # steps are symmetrical up and down
 
     step1="$step"
     vol=$(( vol + step1 ))
@@ -106,8 +184,10 @@ if recently_ran ; then
     parseinput "$@"
 
     step=$(( step + step1))
+#    amixer set Master $step%+ unmute  # acts on the default soundcard as decided by paswitch
 fi
-amixer set Master $step%+ unmute   # acts on the default soundcard as decided by paswitch
+#amixer set Master $step%+ unmute  # acts on the default soundcard as decided by paswitch
+#pamixer -u -i $step
+~/code/pulseaudio-smooth-volume-change/target/debug/pasv +$step% -d 100
 
-touch /tmp/vol.up.ran
-rm -f $lock
+unlock $lock
