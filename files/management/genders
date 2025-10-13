@@ -3,6 +3,7 @@ dirac-laptop                    linux,intel,not247,desktop
 maxwell                         linux,intel,not247,desktop
 gamow                           linux,intel,not247,desktop
 fermi                           linux,intel,amd,not247,desktop
+work                            linux,intel
 
 fs                              linux,intel,depends_on_pve1
 iot                             linux,intel
