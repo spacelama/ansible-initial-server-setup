@@ -1,0 +1,7 @@
+#!/bin/bash
+
+# things like $CVS_RSH can't take arguments, and one frequent argument we want is
+# "ssh -x"/"fsh -x" to inhibit X11 forwarding on hosts where we've set it to be default.
+# Hence fshnox
+
+exec fsh -x "$@"

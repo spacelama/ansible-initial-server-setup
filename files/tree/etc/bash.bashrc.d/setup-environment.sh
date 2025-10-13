@@ -347,8 +347,8 @@ function setup_environment() {
     #CVSROOT=$HOME/cvs
     #CVSROOT=/var/cvs
     #CVSROOT=":ext:developer@cvs_server_box.domain.com:/home/cvsroot"
-    if programexists fsh ; then
-        export CVS_RSH=fsh
+    if programexists fshnox ; then
+        export CVS_RSH=fshnox
     else
         export CVS_RSH=ssh
     fi
