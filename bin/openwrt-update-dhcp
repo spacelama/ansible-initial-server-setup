@@ -6,6 +6,8 @@ PATH=$RUN_DIR:/usr/local/bin/:$PATH ; export PATH
 
 cd $RUN_DIR/..
 
+export ANSIBLE_FORCE_COLOR=true
+
 ansible-playbook --diff openwrt_maintenance.yml --extra-vars "run_uci_config=no" --extra-vars "run_packages_config=no" --extra-vars "fast_update_dhcp=yes" --tags openwrt_config "$@"
 
 echo "FIXME: really should force a manual lookup of something here, and back out the change somehow if we can't look it up because we caused all DHCP servers to simultaneously fail"

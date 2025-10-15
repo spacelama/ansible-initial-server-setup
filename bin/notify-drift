@@ -1,19 +1,19 @@
 #!/bin/bash
 
-exec 2>&1
-
 # add dir of where this prog was executed from, to PATH
 RUN_DIR=$(cd -- "$(dirname "$0")" && pwd)
 PATH=$RUN_DIR:/usr/local/bin/:$PATH ; export PATH
 
 cd $RUN_DIR/..
 
+export ANSIBLE_FORCE_COLOR=true
+
 export MAILTO=root
 OUTPUT=/tmp/ansible.daily.$USER.diff
 
-. $HOME/.keychain/$HOSTNAME-sh;
+exec 2>&1
 
-export ANSIBLE_FORCE_COLOR=true
+. $HOME/.keychain/$HOSTNAME-sh;
 
 (
     echo "     $OUTPUT"
@@ -29,6 +29,7 @@ html=$( echo "$ansible_output" | aha )
 text=$(echo "$ansible_output" | perl -pe 's/\e\[?.*?[\@-~]//g')
 SUBJECT="Ansible drift $(date)"
 
-if echo "$text" | grep ^changed: ; then
+if echo "$text" | # doesn't do what you want: grep -v -B1 '^\.\.\.ignoring' |
+        grep -e '^changed:' -e '^fatal:' ; then
     USER=root send-html-multipart.sh "$SUBJECT" <(echo "$text") <(echo "$html")   # USER: MAILTO
 fi

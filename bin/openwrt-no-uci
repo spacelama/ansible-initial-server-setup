@@ -6,4 +6,6 @@ PATH=$RUN_DIR:/usr/local/bin/:$PATH ; export PATH
 
 cd $RUN_DIR/..
 
+export ANSIBLE_FORCE_COLOR=true
+
 ansible-playbook --diff openwrt_maintenance.yml --extra-vars "run_uci_config=no" --extra-vars "run_packages_config=yes" "$@"

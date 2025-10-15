@@ -6,6 +6,8 @@ PATH=$RUN_DIR:/usr/local/bin/:$PATH ; export PATH
 
 cd $RUN_DIR/..
 
+export ANSIBLE_FORCE_COLOR=true
+
 limits='!b1300,!ap1'
 
 if [ -n "$1" ] ; then

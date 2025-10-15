@@ -6,4 +6,6 @@ PATH=$RUN_DIR:/usr/local/bin/:$PATH ; export PATH
 
 cd $RUN_DIR/..
 
+export ANSIBLE_FORCE_COLOR=true
+
 ansible-playbook tasmota_maintenance.yml --diff --extra-vars "setpsk=true" --extra-vars "setsyslog=true" "$@"
