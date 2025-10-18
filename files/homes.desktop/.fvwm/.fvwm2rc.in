@@ -452,10 +452,10 @@ AddToFunc "StartFunction" "I" GotoPage 0 0
 +                         "I" Module FvwmButtons       #piEXCLUDE metEXCLUDE
 #+                         "I" Wait FvwmButtons        #diracINCLUDE gamowINCLUDE maxwellINCLUDE fermiINCLUDE weinbergINCLUDE
 #the delay is so that things get captured into a definite window instead of the race condition that seems to exist
-#+                         "I" Schedule 5000 Module FvwmButtons -g +$[HORSIZE]+1795    #maxwellINCLUDE fermiINCLUDE weinbergINCLUDE (VERT2SIZE is 1920, but we can't do arithmetic here)
+#+                         "I" Schedule 5000 Module FvwmButtons -g +$[HORSIZE]-0    #maxwellINCLUDE fermiINCLUDE weinbergINCLUDE
 #+                         "I" Wait FvwmButtons        #weinbergINCLUDE
 #+                         "I" Schedule 5000 Module FvwmButtons -g +$[HORSIZE]-0    #diracINCLUDE
-#+                         "I" Schedule 5000 Module FvwmButtons -g +-$[HOR0SIZE]+955    #weinbergINCLUDE (VERT0SIZE is 1080, but we can't do arithmetic here)
+#+                         "I" Schedule 5000 Module FvwmButtons -g +-$[HOR0SIZE]-0  #weinbergINCLUDE
 #+                         "I" All (Xconsole) Destroy
 
 
@@ -767,6 +767,7 @@ AddToMenu "Window-Ops" "Window Ops" Title
 +              "(De)&Iconify" Iconify
 +              "(Un)&Stick" Stick
 +              "(Un)Ma&ximize" Function MaximizeAll 100 -125p
++              "(Un)Grow Verti&cally maximised" Function MaximizeAll grow -125p
 +              "(Un)Fully Maximi&ze" Function MaximizeAll 100 100
 +              "(Un)Maximize &Vertical" Function MaximizeAll 0 -125p
 +              "(Un)&Fully Maximize Vertical" Function MaximizeAll 0 100
@@ -774,7 +775,7 @@ AddToMenu "Window-Ops" "Window Ops" Title
 +              "" Nop
 +              "%32/bomb-kill.xpm%Destroy" Destroy
 #	Exec		"Destroy" exec xkill
-+              "%32/bomb-sparkle.xpm%&Close" Close
++              "%32/bomb-sparkle.xpm%Close" Close
 +              "" Nop
 +              "R&efresh Screen" Refresh
 +              "%32/system-restart.png%Restart Window Manager" Function MyRestart --pass-args source-startup-exec-fvwm
