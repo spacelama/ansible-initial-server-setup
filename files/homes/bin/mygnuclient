@@ -40,7 +40,38 @@ function trygnuclient() {
         if [ true = "$testonly" ] ; then
             exit 0
         fi
+        ensure_xauthority
         exec emacsclient -c $background "$@"
+    fi
+}
+
+function find_emacs_xauthority() {
+    pid=$( emacsclient -e '(emacs-pid)' )
+    echo found emacs process: $pid 1>&2
+    ps $pid 1>&2
+
+    tr '\0' '\n' < /proc/$pid/environ | sed -n "s/^XAUTHORITY=//p"
+}
+
+# since setting XAUTHORITY dedicated at each login to just this
+# private X11/ssh etc session, we can no longer open up frames on
+# other DISPLAYS, denied authority.  gnuclient contacts the server
+# with the current DISPLAY and current tty, and the server then
+# requests emacs to open up the new frame on that tty or DISPLAY, but
+# only if the emacs process, not emacsclient, has authority.  So we
+# should (temporarily, except that we don't know how many client
+# windows the user is eventually going to want before logging out; or
+# will be overwritten next time someone claims that TTY anyway) add
+# our private settings to that which opened the original session
+# (got to find the right server though...)
+function ensure_xauthority() {
+    EMACS_XAUTHORITY=$( find_emacs_xauthority )
+
+    echo "Found XAUTHORITY: $EMACS_XAUTHORITY" 1>&2
+    if [ "$XAUTHORITY" != "$EMACS_XAUTHORITY" ] ; then
+        XAUTHORITY=$EMACS_XAUTHORITY xauth merge $XAUTHORITY
+    else
+        echo "We already have the right XAUTHORITY=$XAUTHORITY, so not merging" 1>&2
     fi
 }
 
