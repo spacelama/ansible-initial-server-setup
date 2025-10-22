@@ -8,41 +8,39 @@
 # $Header: /home/tconnors/cvsroot/bin/mygnuclient,v 1.25 2012/02/11 05:14:03 tconnors Exp $
 # $RCSfile: mygnuclient,v $
 
-trap "" SIGTTOU
-
-background=
-sshbackground=
+nobackground=false
+emacs_args=()
 while true ; do
-    if [ "$1" = --testonly ] ; then
-        testonly=true
-        shift
-    elif [ "$1" = --background ] ; then
-        background=-n
-        sshbackground=-f
-        shift
-    else
-        break
-    fi
+    case "$1" in
+        --testonly)
+            testonly=true
+            ;;
+        --background)
+            emacs_args+=("-n")
+            ;;
+        -nw)
+            nobackground=true
+            emacs_args+=("-nw")
+            ;;
+        *)
+            break
+            ;;
+    esac
+    shift
 done
 
-if [[ $(ps -p $PPID) == *bash ]] && isbackgrounded ; then
-    background=-n
-    sshbackground=-f
-fi
-
-trap - SIGTTOU
-
-function trygnuclient() {
-    if [ true != "$testonly" ] ; then
-        echo trying emacsclient 1>&2
-    fi
-    if emacsclient -a false -e t >/dev/null 2>&1 ; then
-        if [ true = "$testonly" ] ; then
-            exit 0
+function determine_if_backgrounding() {
+    trap "" SIGTTOU
+    if ( [[ $(ps -p $PPID) == *bash ]] && isbackgrounded ) ||
+           [ "$#" = 0 ]  ; then
+        if ! $nobackground ; then
+            emacs_args+=("-n")
+            echo "Will background..." 1>&2
+        else
+            echo "Suppressing backgrounding" 1>&2
         fi
-        ensure_xauthority
-        exec emacsclient -c $background "$@"
     fi
+    trap - SIGTTOU
 }
 
 function find_emacs_xauthority() {
@@ -67,14 +65,29 @@ function find_emacs_xauthority() {
 function ensure_xauthority() {
     EMACS_XAUTHORITY=$( find_emacs_xauthority )
 
-    echo "Found XAUTHORITY: $EMACS_XAUTHORITY" 1>&2
+    echo -n "Found Emacs' parent's XAUTHORITY: $EMACS_XAUTHORITY" 1>&2
     if [ "$XAUTHORITY" != "$EMACS_XAUTHORITY" ] ; then
+        echo ", so will attempt to merge ours ($XAUTHORITY) with theirs" 1>&2
         XAUTHORITY=$EMACS_XAUTHORITY xauth merge $XAUTHORITY
     else
-        echo "We already have the right XAUTHORITY=$XAUTHORITY, so not merging" 1>&2
+        echo "; We already have the right XAUTHORITY=$XAUTHORITY, so not merging" 1>&2
+    fi
+}
+
+function trygnuclient() {
+    if [ true != "$testonly" ] ; then
+        echo trying emacsclient 1>&2
+    fi
+    if emacsclient -a false -e t >/dev/null 2>&1 ; then
+        if [ true = "$testonly" ] ; then
+            exit 0
+        fi
+        ensure_xauthority
+        determine_if_backgrounding "$@"
+        exec emacsclient -c "${emacs_args[@]}" "$@"
     fi
 }
 
 trygnuclient "$@"
 
-exit 1
+exit 1 # we only get here if the exec fails
