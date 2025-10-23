@@ -1,5 +1,9 @@
 #!/bin/bash
 
+strip_formatting() {
+    perl -pe 's/\e\[?.*?[\@-~]//g'
+}
+
 # add dir of where this prog was executed from, to PATH
 RUN_DIR=$(cd -- "$(dirname "$0")" && pwd)
 PATH=$RUN_DIR:/usr/local/bin/:$PATH ; export PATH
@@ -11,25 +15,72 @@ export ANSIBLE_FORCE_COLOR=true
 export MAILTO=root
 OUTPUT=/tmp/ansible.daily.$USER.diff
 
-exec 2>&1
+ESC=$'\e'
+ANSI_RE="$ESC[[0-9][^m]*m"
+ANSI_CYAN="$ESC\\[0;36m"  # "include"
+ANSI_GREEN="$ESC\\[0;32m" # "ok"
+
+STDOUT=$( mktemp "/tmp/ansible.notify-drift.XXXXXX" ) || exit 1
+exec > $STDOUT 2>&1
 
 . $HOME/.keychain/$HOSTNAME-sh;
+
+# Run ansible-playbook:
+normal --check > $OUTPUT.today.tmp 2>&1
+
+#summary_changes=$( grep -e "^${ANSI_RE}changed:" -e "^${ANSI_RE}fatal:" < $OUTPUT.today.tmp )
+summary_changes=$( grep "^$ESC" < $OUTPUT.today.tmp | grep -v -e "^$ANSI_GREEN" -e "^$ANSI_CYAN" )
 
 (
     echo "     $OUTPUT"
     echo "   ^ Output stored in"
     echo "Running ansible from: $(pwd)"
     echo
-    normal --check 2>&1
-) > $OUTPUT
 
-ansible_output=$( cat $OUTPUT )
+    if [ -n "$summary_changes" ] ; then
+        echo "Summary:"
+        echo "$summary_changes"
+        echo
+    fi
 
+    cat $OUTPUT.today.tmp
+) > $OUTPUT.today
+rm $OUTPUT.today.tmp
+
+ansible_output_yesterday=$( cat $OUTPUT )
+ansible_output=$( cat $OUTPUT.today )
+
+diff_changed=$( diff --color=always "$OUTPUT" "$OUTPUT.today" )
+
+diffhtml=$( echo "Diff from yesterday: $diff_changed" | aha )
+difftext=$( echo "Diff from yesterday: $diff_changed" | strip_formatting )  # FIXME: strip datetimes?
+if [ -n "$diff_changed" ] ; then
+    read -r -d '' ansible_output <<-EOF
+Changes to drift from yesterday:
+
+$diff_changed
+
+Drift:
+
+$ansible_output
+EOF
+fi
 html=$( echo "$ansible_output" | aha )
-text=$(echo "$ansible_output" | perl -pe 's/\e\[?.*?[\@-~]//g')
+text=$(echo "$ansible_output" | strip_formatting )
 SUBJECT="Ansible drift $(date)"
 
 if echo "$text" | # doesn't do what you want: grep -v -B1 '^\.\.\.ignoring' |
-        grep -e '^changed:' -e '^fatal:' ; then
+        grep -q -e '^changed:' -e '^fatal:' ; then
     USER=root send-html-multipart.sh "$SUBJECT" <(echo "$text") <(echo "$html")   # USER: MAILTO
 fi
+
+mv $OUTPUT.today $OUTPUT
+
+# We've already sent out the main drift output, but take care of
+# stdout/stderr from ansible too:
+
+if [ -s $STDOUT ] ; then
+    # intercept error messages before they get sent externally
+    mail -s notify-drift root < $STDOUT
+fi
+rm -f $STDOUT
