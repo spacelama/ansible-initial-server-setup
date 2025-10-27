@@ -53,24 +53,19 @@
     - name: configure msmtp
       lineinfile:
         dest: /etc/msmtprc
-        regexp: "^host "
-        line: "host smtp.{{ domain }}"
-    - lineinfile:
-        dest: /etc/msmtprc
-        regexp: "^port "
-        line: "port 25"
-    - lineinfile:
-        dest: /etc/msmtprc
-        regexp: "^tls "
-        line: "tls off"
-    - lineinfile:
-        dest: /etc/msmtprc
-        regexp: "^tls_starttls "
-        line: "tls_starttls off"
-    - lineinfile:
-        dest: /etc/msmtprc
-        regexp: "^from "
-        line: "from %U@{{ inventory_hostname }}.{{ domain }}"
+        regexp: "{{ item.regexp }}"
+        line: "{{ item.line }}"
+      loop:
+        - regexp: "^host "
+          line: "host smtp.{{ domain }}"
+        - regexp: "^port "
+          line: "port 25"
+        - regexp: "^tls "
+          line: "tls off"
+        - regexp: "^tls_starttls "
+          line: "tls_starttls off"
+        - regexp: "^from "
+          line: "from %U@{{ inventory_hostname }}.{{ domain }}"
 
     - name: install router packages that were failing at one point
       opkg:
@@ -90,39 +85,31 @@
       #  dest: /etc/avahi/avahi-daemon.conf
       lineinfile:
         dest: /etc/avahi/avahi-daemon.conf
-        regexp: '^#*host-name='
-        line: "host-name={{ inventory_hostname }}"
-        insertafter: '^#host-name='
-    - lineinfile:
-        dest: /etc/avahi/avahi-daemon.conf
-        regexp: '^#*domain-name='
-        line: "domain-name={{ domain }}"
-        insertafter: '^#domain-name='
-    - lineinfile:
-        dest: /etc/avahi/avahi-daemon.conf
-        regexp: '^#*enable-dbus='
-        line: 'enable-dbus=yes'
-        insertafter: 'use-iff-running='
-    - lineinfile:
-        dest: /etc/avahi/avahi-daemon.conf
-        regexp: '^#*allow-interfaces='
-        line: "allow-interfaces={{ allow_avahi_zeroconf_interfaces }}"
-        insertafter: 'enable-dbus='
-    - lineinfile:
-        dest: /etc/avahi/avahi-daemon.conf
-        regexp: '^#*publish-dns-servers='
-        line: "publish-dns-servers={{ avahi_zeroconf_public_dns_servers }}"
-        insertafter: "^#publish-dns-servers="
-    - lineinfile:
-        dest: /etc/avahi/avahi-daemon.conf
-        regexp: '^#*publish-resolv-conf-dns-servers'
-        line: "publish-resolv-conf-dns-servers=yes"
-        insertafter: '^#publish-resolv-conf-dns-servers='
-    - lineinfile:
-        dest: /etc/avahi/avahi-daemon.conf
-        regexp: '^#*enable-reflector='
-        line: 'enable-reflector=yes'
-        insertafter: '^#enable-relfector='
+        regexp: "{{ item.regexp }}"
+        line: "{{ item.line }}"
+        insertafter: "{{ item.insertafter | default(omit) }}"
+      loop:
+        - regexp: '^#*host-name='
+          line: "host-name={{ inventory_hostname }}"
+          insertafter: '^#host-name='
+        - regexp: '^#*domain-name='
+          line: "domain-name={{ domain }}"
+          insertafter: '^#domain-name='
+        - regexp: '^#*enable-dbus='
+          line: 'enable-dbus=yes'
+          insertafter: 'use-iff-running='
+        - regexp: '^#*allow-interfaces='
+          line: "allow-interfaces={{ allow_avahi_zeroconf_interfaces }}"
+          insertafter: 'enable-dbus='
+        - regexp: '^#*publish-dns-servers='
+          line: "publish-dns-servers={{ avahi_zeroconf_public_dns_servers }}"
+          insertafter: "^#publish-dns-servers="
+        - regexp: '^#*publish-resolv-conf-dns-servers'
+          line: "publish-resolv-conf-dns-servers=yes"
+          insertafter: '^#publish-resolv-conf-dns-servers='
+        - regexp: '^#*enable-reflector='
+          line: 'enable-reflector=yes'
+          insertafter: '^#enable-relfector='
 
     # https://www.reddit.com/r/openwrt/comments/wdkp8t/new_to_openwrt_active_connections_constantly/
     # monitor /proc/net/nf_conntrack
