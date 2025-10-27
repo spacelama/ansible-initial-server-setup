@@ -262,8 +262,48 @@ config redirect
 	option dest_port '22'
 
 config redirect
+	option name 'ssh.dirac.windows'
+	option src 'WINDOWSLAN'
+	option src_dport '2228'
+	list proto 'tcp'
+	option target 'DNAT'
+	option dest 'lan'
+	option dest_ip '192.168.1.17'
+	option dest_port '22'
+
+config redirect
+	option name 'ssh.dirac.iot'
+	option src 'IOTLAN'
+	option src_dport '2228'
+	list proto 'tcp'
+	option target 'DNAT'
+	option dest 'lan'
+	option dest_ip '192.168.1.17'
+	option dest_port '22'
+
+config redirect
 	option name 'ssh.iot'
 	option src 'wan'
+	option src_dport '2229'
+	list proto 'tcp'
+	option target 'DNAT'
+	option dest 'lan'
+	option dest_ip '192.168.1.3'
+	option dest_port '22'
+
+config redirect
+	option name 'ssh.iot.windows'
+	option src 'WINDOWSLAN'
+	option src_dport '2229'
+	list proto 'tcp'
+	option target 'DNAT'
+	option dest 'lan'
+	option dest_ip '192.168.1.3'
+	option dest_port '22'
+
+config redirect
+	option name 'ssh.iot.iot'
+	option src 'IOTLAN'
 	option src_dport '2229'
 	list proto 'tcp'
 	option target 'DNAT'
@@ -282,6 +322,26 @@ config redirect
 	option dest_port '22'
 
 config redirect
+	option name 'ssh.gamow.windows'
+	option src 'WINDOWSLAN'
+	option src_dport '2230'
+	list proto 'tcp'
+	option target 'DNAT'
+	option dest 'lan'
+	option dest_ip '192.168.1.20'
+	option dest_port '22'
+
+config redirect
+	option name 'ssh.gamow.iot'
+	option src 'IOTLAN'
+	option src_dport '2230'
+	list proto 'tcp'
+	option target 'DNAT'
+	option dest 'lan'
+	option dest_ip '192.168.1.20'
+	option dest_port '22'
+
+config redirect
 	option name 'ssh.fermi'
 	option src 'wan'
 	option src_dport '2236'
@@ -292,8 +352,48 @@ config redirect
 	option dest_port '22'
 
 config redirect
+	option name 'ssh.fermi.windows'
+	option src 'WINDOWSLAN'
+	option src_dport '2236'
+	list proto 'tcp'
+	option target 'DNAT'
+	option dest 'lan'
+	option dest_ip '192.168.1.36'
+	option dest_port '22'
+
+config redirect
+	option name 'ssh.fermi.iot'
+	option src 'IOTLAN'
+	option src_dport '2236'
+	list proto 'tcp'
+	option target 'DNAT'
+	option dest 'lan'
+	option dest_ip '192.168.1.36'
+	option dest_port '22'
+
+config redirect
 	option name 'ssh.fs'
 	option src 'wan'
+	option src_dport '2234'
+	list proto 'tcp'
+	option target 'DNAT'
+	option dest 'lan'
+	option dest_ip '192.168.1.2'
+	option dest_port '22'
+
+config redirect
+	option name 'ssh.fs.windows'
+	option src 'WINDOWSLAN'
+	option src_dport '2234'
+	list proto 'tcp'
+	option target 'DNAT'
+	option dest 'lan'
+	option dest_ip '192.168.1.2'
+	option dest_port '22'
+
+config redirect
+	option name 'ssh.fs.iot'
+	option src 'IOTLAN'
 	option src_dport '2234'
 	list proto 'tcp'
 	option target 'DNAT'
@@ -711,6 +811,32 @@ config rule
 	option dest '*'
 	list dest_ip '192.168.1.18'
 	option dest_port '443'
+
+config rule
+	option name 'internal.iot-to-ssh'
+	option src 'IOTLAN'
+	list proto 'tcp'
+	option target 'ACCEPT'
+	option dest '*'
+	list dest_ip '192.168.1.2'
+	list dest_ip '192.168.1.3'
+	list dest_ip '192.168.1.17'
+	list dest_ip '192.168.1.20'
+	list dest_ip '192.168.1.36'
+	option dest_port '22'
+
+config rule
+	option name 'internal.windows-to-ssh'
+	option src 'WINDOWSLAN'
+	list proto 'tcp'
+	option target 'ACCEPT'
+	option dest '*'
+	list dest_ip '192.168.1.2'
+	list dest_ip '192.168.1.3'
+	list dest_ip '192.168.1.17'
+	list dest_ip '192.168.1.20'
+	list dest_ip '192.168.1.36'
+	option dest_port '22'
 
 config rule
 	option name 'samba.137'
