@@ -97,6 +97,7 @@
     apt_preferences_hold_suffix: "-dell_server-megacli"
     install_packages:
     - "megacli_8.07.14-2_all.deb"
+    - "perccli_007.1020.0000.0000-2_all.deb"
 
 - name: Install dell tools
   apt:
