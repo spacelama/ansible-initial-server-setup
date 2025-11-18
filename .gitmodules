@@ -46,3 +46,6 @@
 [submodule "files/homes.desktop/bin/bomradar"]
 	path = files/homes.desktop/bin/bomradar
 	url = git@github.com:spacelama/bomradar.git
+[submodule "files/homes.desktop/.config/mpv/scripts/mpv-plugin-xrandr"]
+	path = files/homes.desktop/.config/mpv/scripts/mpv-plugin-xrandr
+	url = https://gitlab.com/lvml/mpv-plugin-xrandr
