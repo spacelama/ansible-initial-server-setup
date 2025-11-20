@@ -10,7 +10,7 @@
 # Author: Raphael Wimmer
 # raphman@gmx.de
 
-source $HOME/bin/error_handler.sh
+source bash_error_handler.sh
 
 # if acting on the same window as last time, and rapidly, then go in a
 # cyclic fashion.  If slowly, then alternate back and forth with the
