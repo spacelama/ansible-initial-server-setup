@@ -47,7 +47,7 @@ ERR() {
         # control over, takes user input, etc.  Merely a debugging aid
         # to your own scripts.
 
-        local SLIGHTLY_SAFENED_FAILED_COMMAND=$( echo "$cmnd" | sed 's/\([`()&;<>]\)/\\\1/g' )
+        local SLIGHTLY_SAFENED_FAILED_COMMAND=$( echo "$cmnd" | sed 's/\([`()&;<>|]\)/\\\1/g' )
         FAILED_COMMAND="$nl>$(eval echo "$SLIGHTLY_SAFENED_FAILED_COMMAND")"
     fi
     echo "Exit status $(bold "$code") for command:$nl $(bold "$cmnd$FAILED_COMMAND")"

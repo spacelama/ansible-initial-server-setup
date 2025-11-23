@@ -22,10 +22,6 @@
 
 set -xv
 
-
-
-set -xv
-
 ho=HO
 
 asd() {
@@ -38,3 +34,13 @@ echo 1
 asd
 echo 2
 
+PS4='\[\e[32m\]\u@\h:\w ${LINENO} {$BASH_COMMAND} \$ \[\e[0m\]' # Customize the prompt for more context
+
+for i in `seq 1 4 ` ; do
+    echo i:$i
+done
+
+echo "This is a test"
+echo "$MY_VAR" "$ANOTHER_VAR"
+v=/nonexistent
+ls $v

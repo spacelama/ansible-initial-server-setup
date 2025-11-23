@@ -48,7 +48,7 @@ function depth_dell_info() {
     echo "$in_dell_field"
     printf "%$((header_len-1))s\\n" |tr " " "-"
 
-    local dell_fields=$( /opt/dell/srvadmin/sbin/racadm get "$in_dell_field" )
+    local dell_fields=$( /opt/dell/srvadmin/sbin/racadm get "$in_dell_field" || true )
     echo "$dell_fields" | while read dell_field ; do
         if [[ "$dell_field" == "$in_dell_field".* ]] ; then
             # sometimes you get the following, and only want
@@ -251,9 +251,14 @@ if [ -x /opt/dell/srvadmin/bin/omreport ] ; then
 fi
 if [ -x /usr/local/bin/megaclisas-status ] ; then
     /usr/local/bin/megaclisas-status > $data_dir/megaclisas-status
+    /opt/MegaRAID/perccli/perccli /c0 show all > $data_dir/perccli.c0.show.all
+    # could also do loop over `MegaCLI -AdpGetProp`, but all that info is in AdpAllInfo
+    # #https://www.alteeve.com/w/MegaCli64_Cheat_Sheet
+    # https://www.dell.com/support/kbdoc/en-au/000188270/extracting-the-raid-controller-logs-via-megacli
+    for i in PDList AdpAllInfo AdpBbuCmd ; do
+        /opt/MegaRAID/MegaCli/MegaCli64 "-$i" -aALL -NoLog > $data_dir/megacli.$i
+    done
 fi
-# FIXME: other raid controller status?
-# MegaCli64 AdpGetProp ... https://www.alteeve.com/w/MegaCli64_Cheat_Sheet
 
 # Installation
 #backup /root/anaconda-ks.cfg $data_dir/anaconda-ks.cfg
@@ -278,6 +283,7 @@ fi
 ps axfu > $data_dir/ps.axfu
 # grab the *second* sample for CPU usage
 top -b -n 2 | tail -n +2 | sed -n '/^top/,$p' > $data_dir/top.usage
+top -ibc -d.1 -n 1 | head -n 15 > $data_dir/top.top-usage
 
 if [ -x /usr/bin/docker ] ; then
     docker image ls > $data_dir/docker.image.ls
@@ -303,6 +309,9 @@ backup /proc/cpuinfo $data_dir/cpuinfo
 backup /proc/meminfo $data_dir/meminfo
 lsmod > $data_dir/lsmod
 lscpu > $data_dir/lscpu
+if [ -x /usr/bin/lsgpu ] ; then
+    lsgpu > $data_dir/lsgpu
+fi
 lspci > $data_dir/lspci 2>/dev/null || true
 lspci -vvv > $data_dir/lspci-vvv 2>/dev/null || true
 if [ -x /usr/bin/cpupower ] ; then
@@ -317,7 +326,9 @@ if [ -x /usr/sbin/dmidecode ] ; then
     dmidecode > $data_dir/dmidecode 2>&1 || true
 fi
 if [ -x /usr/bin/fwupdmgr ] ; then
-    fwupdmgr get-devices > $data_dir/fwupdmgr.get-devices 2>&1
+    for i in get-bios-setting get-devices get-history get-plugins get-topology get-updates get-upgrades ; do
+        fwupdmgr $i > $data_dir/fwupdmgr.$i 2>&1 || true
+    done
 fi
 if [ -x /usr/bin/lsusb ] ; then
     lsusb > $data_dir/lsusb || true # can fail if no USB devices?
@@ -333,7 +344,7 @@ backup --noerr /proc/pci $data_dir/pci
 sysctl -a > $data_dir/sysctl 2> $data_dir/sysctl.err
 backup /proc/cmdline $data_dir/cmdline
 
-journalctl -b -p err | grep -v 'Journal begins' | ccze -m ansi > $data_dir/journal-errors
+timeout -k 1 120 journalctl -b -p err | grep -v 'Journal begins' | ccze -m ansi > $data_dir/journal-errors
 
 # Vendor
 # copy the /etc/pve fuse filesystem that's built by proxmox based on
@@ -403,6 +414,11 @@ if [ -d /etc/pve ] ; then
         done
         ceph osd lspools | awk '{print $2}' | while read pool ; do
             ceph osd pool get $pool all > $data_dir/ceph.pool.$pool.conf
+        done
+
+        ceph fs ls | while read n fs junk ; do
+            fs="${fs%,}"
+            ceph fs get "$fs" > $data_dir/ceph.fs.$fs.conf
         done
 
         for mds in $(ls /var/run/ceph/ | grep '^ceph-mds\..*\.asok$' | sed -E 's/^ceph-mds\.//; s/\.asok$//'); do
