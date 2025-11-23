@@ -91,7 +91,9 @@ PATH=/sbin:/bin:/usr/sbin:/usr/bin ; export PATH
 
 exit=0
 
-trap 'echo "ERROR: $hostname:$0: $LINENO: $BASH_COMMAND"; exit=1' ERR
+ERROR_CONTINUE=t
+ERROR_PRINT_UNSAFE=t
+source /usr/local/bin/bash_error_handler.sh
 hostname=`hostname`
 date=`date`
 

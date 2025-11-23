@@ -20,10 +20,11 @@ fix_file_formatting() {
     done
 }
 
-set -u
 exit=0
 hostname=`hostname`
-trap 'echo "ERROR: $hostname:$0: $LINENO: $BASH_COMMAND"; exit=1' ERR
+ERROR_CONTINUE=t
+ERROR_PRINT_UNSAFE=t
+source /usr/local/bin/bash_error_handler.sh
 
 (
     mkdir -p switch

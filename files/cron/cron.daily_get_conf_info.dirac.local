@@ -5,10 +5,11 @@
 # $2 being where the directory will end up (ie, will otherwise
 # contains yesterday's full run)
 
-set -u
 exit=0
 hostname=`hostname`
-trap 'echo "ERROR: $hostname:$0: $LINENO: $BASH_COMMAND"; exit=1' ERR
+ERROR_CONTINUE=t
+ERROR_PRINT_UNSAFE=t
+source /usr/local/bin/bash_error_handler.sh
 
 data_dir="$1"
 data_dir_dest="$2"
