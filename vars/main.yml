@@ -365,8 +365,8 @@
     - { name: /usr/local/bin/smartctlnvme,             source: usr/local/bin/smartctlnvme,             mode: "0755", local_follow: true }
     - { name: /usr/local/bin/smart-intercept-spindown, source: usr/local/bin/smart-intercept-spindown, mode: "0755", local_follow: true }
 
-    - { name: /etc/cron.daily/check-cmos-battery, source: cron/cron.daily_check-cmos-battery,    mode: "0755", when: "{{ host_is_physical | default(false) }}" }
-    - { name: /etc/chrony/,  source: etc/chrony/,            notify: "restart chrony" }
+    - { name: /etc/cron.daily/check-cmos-battery,      source: etc/cron.daily/check-cmos-battery,      mode: "0755", when: "{{ host_is_physical | default(false) }}" }
+    - { name: /etc/chrony/,                            source: etc/chrony/,                            notify: "restart chrony" }
 
     - { source: etc/logrotate.d/apache2,       name: /etc/logrotate.d/, when_pkg_installed: "apache2"                  }
     - { source: etc/logrotate.d/sleep-browser, name: /etc/logrotate.d/, when: "{{ host_is_desktop | default(false) }}" }

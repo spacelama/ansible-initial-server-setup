@@ -587,33 +587,6 @@
   when: (not (host_is_container | default(false))) and
          ('keyboard-configuration' in ansible_facts.packages)
 
-- name: install cron.daily.get_conf_info custom host helpers
-  copy:
-    src: "{{ item }}"
-    dest: "{{ item | regex_replace('.*get_conf_info.' + hostname | default(inventory_hostname), '/usr/local/bin/get_conf_info') }}"
-    mode: 0755
-  become: true
-  with_fileglob:
-    - "cron/cron.daily_get_conf_info.{{ hostname | default(inventory_hostname) }}*"
-
-- name: install cron.daily switch password conf file if defined for this host
-  copy:
-    content: "{{ switch_pass }}"
-    dest: /usr/local/etc/get_conf_info.switch.pass
-    owner: root
-    group: root
-    mode: 0600
-  become: true
-  when: switch_pass is defined
-
-- name: install cron.daily.get_conf_info
-  file:
-    src: /usr/local/bin/get_conf_info
-    dest: /etc/cron.daily/get_conf_info
-    state: link
-    force: yes
-  become: true
-
 # https://forum.proxmox.com/threads/oom-kill-process-inside-lxc-memory-cgroup-out-of-memory.65106/
 - name: ensure /var/log/journal persistent journal exists
   file:

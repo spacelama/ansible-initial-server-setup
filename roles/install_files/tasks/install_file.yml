@@ -9,6 +9,7 @@
     group: "{{ dir_file_or_template.group | default(omit) }}"
     src: "{{ source }}"
     local_follow: "{{ dir_file_or_template.local_follow | default(omit) }}"
+    follow: "{{ dir_file_or_template.follow | default(omit) }}"
     mode: "{{ dir_file_or_template.mode | default(omit) }}"
     directory_mode: "{{ dir_file_or_template.directory_mode | default(omit) }}"
   become: "{{ dir_file_or_template.become | default(true) }}"
