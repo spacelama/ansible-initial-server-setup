@@ -55,20 +55,24 @@ ERR() {
     echo "${BASH_SOURCE[1]}:${BASH_LINENO[0]}:"
     print_context "${BASH_SOURCE[1]}" "${BASH_LINENO[0]}"
 
-    for i in "${!FUNCNAME[@]}"; do
-        if [[ $i == 0 ]]; then continue; fi
+    local indent=1
+    # Loop from the (second) last element to the first
+    for ((i=${#FUNCNAME[@]}-1; i>0; i--)); do
+        # could equally use bash's `caller` here:
         local func=${FUNCNAME[$i]}
         local file=${BASH_SOURCE[$i]}
         local line=${BASH_LINENO[$i - 1]}
 
         if (( i == ${#FUNCNAME[@]} - 1 )); then
-            local level='└─'
+            local level='─'
             func="<$func>"
         else
-            local level='├─'
+            indent=$((indent+1))
+            local spaces=$( printf '%*s' $indent )
+            local level="$spaces└"
         fi
 
-        echo " $level $(bold "$func") ($file:$line)"
+        echo "$level$(bold "$func") ($file:$line)"
     done
 
     if [ -n "${ERROR_CONTINUE:-}" ] ; then
