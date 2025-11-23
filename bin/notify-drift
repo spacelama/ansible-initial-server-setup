@@ -16,9 +16,9 @@ export MAILTO=root
 OUTPUT=/tmp/ansible.daily.$USER.diff
 
 ESC=$'\e'
-ANSI_RE="$ESC[[0-9][^m]*m"
-ANSI_CYAN="$ESC\\[0;36m"  # "include"
-ANSI_GREEN="$ESC\\[0;32m" # "ok"
+ANSI_RE="$ESC\[[0-9][^m]*m"
+ANSI_RE_CYAN="$ESC\\[0;36m"  # "include"
+ANSI_RE_GREEN="$ESC\\[0;32m" # "ok"
 
 STDOUT=$( mktemp "/tmp/ansible.notify-drift.XXXXXX" ) || exit 1
 exec > $STDOUT 2>&1
@@ -29,7 +29,7 @@ exec > $STDOUT 2>&1
 normal --check > $OUTPUT.today.tmp 2>&1
 
 #summary_changes=$( grep -e "^${ANSI_RE}changed:" -e "^${ANSI_RE}fatal:" < $OUTPUT.today.tmp )
-summary_changes=$( grep "^$ESC" < $OUTPUT.today.tmp | grep -v -e "^$ANSI_GREEN" -e "^$ANSI_CYAN" )
+summary_changes=$( grep "^$ESC" < $OUTPUT.today.tmp | grep -v -e "^$ANSI_RE_GREEN" -e "^$ANSI_RE_CYAN" )
 
 (
     echo "     $OUTPUT"

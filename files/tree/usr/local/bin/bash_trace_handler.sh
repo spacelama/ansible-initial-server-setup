@@ -1,4 +1,6 @@
-#!/bin/bash
+#!/usr/bin/env -S echo "This should not be run directly - try using the following command, perhaps configuring \$ERROR_CONTINUE, \$ERROR_PRINT_UNSAFE: \nsource"
+# -*- Mode: shell-script -*-
+# shellcheck shell=bash
 
 # source this, and you get a nicer 'set -xv' output
 # https://news.ycombinator.com/item?id=44666984

@@ -1,4 +1,6 @@
 #!/usr/bin/env -S echo "This should not be run directly - try using the following command, perhaps configuring \$ERROR_CONTINUE, \$ERROR_PRINT_UNSAFE: \nsource"
+# -*- Mode: shell-script -*-
+# shellcheck shell=bash
 
 # source this from your script that wants backtraces from your error
 # handler:
