@@ -1,15 +1,25 @@
+# outline of this file comes from:
 # page up in gnu screen with Shift-PageUp - Unix & Linux Stack Exchange
 # https://unix.stackexchange.com/questions/148872/page-up-in-gnu-screen-with-shift-pageup
 # https://unix.stackexchange.com/questions/46483/how-to-allow-page-up-in-gnu-screen#comment1136229_165810
 # https://superuser.com/questions/138748/how-to-scroll-up-and-look-at-data-in-gnu-screen/903665#903665
 
-termcapinfo xterm|xterms|xs|rxvt ti@:te@
+# Commented out per
+# https://serverfault.com/questions/3740/what-are-useful-screenrc-settings
+# but doesn't seem to affect me one way or the other, perhaps because
+# I'm ignoring ti/te everywhere:
+# "Doesn't fix scrollback problem on xterm because if you scroll back
+# all you see is the other terminals history."
+# termcapinfo xterm|xterms|xs|rxvt ti@:te@
 
 term screen-256color
 
 hardstatus on
 hardstatus alwayslastline
-hardstatus string "%{= wb}%-w%{.yb}%n %t%{-}%+w %=%{b r} %H %{..b}[%l] %{..K}%C%a "
+#hardstatus string "%{= wb}%-w%{.yb}%n %t%{-}%+w %=%{b r} %H %{..b}[%l] %{..K}%C%a "
+#change the hardstatus settings to give an window list at the bottom of the
+##screen, with the time and date and with the current window highlighted
+hardstatus string '%{= kG}[ %{G}%H %{g}][%= %{= kw}%?%-Lw%?%{r}(%{W}%n*%f%t%?(%u)%?%{r})%{w}%?%+Lw%?%?%= %{g}][%{B} %d/%m %{W}%c %{g}]'
 
 startup_message off
 
@@ -17,29 +27,33 @@ startup_message off
 vbell off
 
 # Autodetach session on hangup instead of terminating screen completely
-autodetach on 
+autodetach on
 
 # give more scroll back
 defscrollback 20000
 
-# turn on alternate screen support 
+# turn on alternate screen support
 #altscreen on
 
-# bash will be replaced by the running command 
+# bash will be replaced by the running command
 #shelltitle " $ |bash"
 
 #screen 3
 #screen 2
 #screen 1
 
-# ctrl pg-up/pg-down
-#bindkey ^[[5;5~ eval "copy" "stuff ^U"
-#bindkey ^[[6;5~ eval "copy" "stuff ^D"
+# ctrl pg-up/pg-down from a linux machine
+bindkey ^[[5;5~ eval "copy" "stuff ^U"
+bindkey ^[[6;5~ eval "copy" "stuff ^D"
 # (need to press esc to exit copy mode after invoking)
+
+# ctrl-shift up/down on a mac keyboard:
+bindkey ^[[A eval "copy" "stuff ^U"
+bindkey ^[[B eval "copy" "stuff ^U"
 
 # shift pg-up/pg-down (doesn't work on my linux xterm, but native scrollback works in that situation anyway)
 #bindkey ^[[5;2~ eval "copy" "stuff ^U"
-#bindkey ^[[6;2~ eval "copy" "stuff ^D" 
+#bindkey ^[[6;2~ eval "copy" "stuff ^D"
 
 # switching tabs:
 # https://superuser.com/questions/946109/how-do-i-set-key-bindings-for-ctrl-page-up-and-ctrl-page-down-in-gnu-screen
