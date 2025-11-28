@@ -44,6 +44,8 @@ function setup_preexec_hook() {
             . ~/bash-preexec/bash-preexec.sh
         fi
 
+        screen_prompt_initialise
+
         # FIXME: when set after, these values just completely
         # disappear from scope...  Setting them before we load
         # bash-preexec seems to work though...
@@ -136,6 +138,78 @@ function print_to_eol() {
     echo -ne '\r'
 }
 
+# https://serverfault.com/questions/3740/what-are-useful-screenrc-settings
+function screen_prompt_initialise() {
+    # if using GNU screen, let the zsh tell screen what the title and hardstatus
+    # of the tab window should be.
+    if [[ $TERM == screen* ]]; then
+        # tell GNU screen what the tab window title ($1) and the hardstatus($2) should be
+        function screen_set()
+        {
+            # set the tab window title (%t) for screen
+            echo -n $'\033k'"$1"$'\033'\\
+
+            # set hardstatus of tab window (%h) for screen
+            echo -n $'\033]0;'"$2"$'\a'
+        }
+        # called by zsh before executing a command
+        function screen_preexec()
+        {
+            local -a cmd; cmd=("$BASH_COMMAND") # the command string
+
+            local _GET_PATH="$USER@$HOSTNAME:$( echo "$PWD" | sed "s/^\/Users\//~/;s/^\/home\//~/;s/^~$USER/~/" )"
+
+            # use the current user as the prefix of the current tab title (since that's
+            # fairly important, and I change it fairly often)
+            local TAB_TITLE_PREFIX="`echo "$_GET_PATH" | sed "s:..*/::"`>"
+            # when running a command, show the title of the command as the rest of the
+            # title (truncate to drop the path to the command)
+            local TAB_TITLE_EXEC="${cmd##*/}"
+
+            # use the current path (with standard ~ replacement) in square brackets as the
+            # prefix of the tab window hardstatus.
+            local TAB_HARDSTATUS_PREFIX="[$_GET_PATH] "
+            # when running a command, show the command name and arguments as the rest of
+            # the title
+            local TAB_HARDSTATUS_EXEC="$cmd"
+
+            local tab_title="$TAB_TITLE_PREFIX$TAB_TITLE_EXEC"
+            local tab_hardstatus="$TAB_HARDSTATUS_PREFIX$TAB_HARDSTATUS_EXEC"
+
+            screen_set "$tab_title" "$tab_hardstatus"
+        }
+        # called by zsh before showing the prompt
+        function screen_precmd()
+        {
+            local _GET_PATH="$USER@$HOSTNAME:$( echo "$PWD" | sed "s/^\/Users\//~/;s/^\/home\//~/;s/^~$USER/~/" )"
+
+            # use the current user as the prefix of the current tab title (since that's
+            # fairly important, and I change it fairly often)
+            local TAB_TITLE_PREFIX="`echo "$_GET_PATH" | sed "s:..*/::"`>"
+
+            # use the current path (with standard ~ replacement) in square brackets as the
+            # prefix of the tab window hardstatus.
+            local TAB_HARDSTATUS_PREFIX="[$_GET_PATH] "
+            # when at the shell prompt, use the shell name (truncated to remove the path to
+            # the shell) as the rest of the title
+            local TAB_HARDSTATUS_PROMPT="${SHELL##*/}"
+
+            local tab_title="$TAB_TITLE_PREFIX$TAB_TITLE_PROMPT"
+            local tab_hardstatus="$TAB_HARDSTATUS_PREFIX$TAB_HARDSTATUS_PROMPT"
+
+            screen_set "$tab_title" "$tab_hardstatus"
+        }
+    else
+        function screen_preexec() {
+            :
+        }
+
+        function screen_precmd() {
+            :
+        }
+    fi
+}
+
 if [ "$SMALLPROMPT" = yes ] ; then
     function generatetitle () {
         :
@@ -198,6 +272,7 @@ else
         fi
         winname  "$EXTRA_TITLE`date +%d/%m-%H:%M:%S` -- $PTS -- $cmd -- ${me}: `chomp --escapechars --right ... $((COLUMNS-60)) ${shortpwd}`" ;
         iconname "$EXTRA_TITLE`date +%d/%m-%H:%M:%S` -- $PTS -- $cmd -- ${me}: `chomp --escapechars --right ... 20 ${shortpwd}`"
+        screen_preexec
     }
     function setprompt () {
         local shortpwd="${PWD/$HOME/~}"
@@ -242,6 +317,7 @@ else
         fi
         winname  "$EXTRA_TITLE`date +%d/%m-%H:%M:%S` -- $PTS -- $retcode -- ${me}: `chomp --escapechars --right ... $((COLUMNS-55)) ${shortpwd}` (bash)" ;
         iconname "$EXTRA_TITLE`date +%d/%m-%H:%M:%S` -- $PTS -- $retcode -- ${me}: `chomp --escapechars --right ... 20 ${shortpwd}` (bash)"
+        screen_precmd
         #            echo have set title
     }
 fi

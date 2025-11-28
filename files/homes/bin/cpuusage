@@ -1,0 +1,6 @@
+#!/bin/bash
+if [[ $(uname) == "Darwin" ]]; then
+    top -i1 -l2 -n0|awk '/CPU/{i+=1; gsub(/%/,"",$0);p=substr(sprintf("%3.2f",$3+$5),0,4);if(i==2){printf "%g", p}}'
+else
+    top -b -i1 -n1 |awk '/^%Cpu/{i+=1 ; ps+=$3+$5+$7 ; p=substr(sprintf("%3.2f",ps/i),0,4);} END { printf "%g", p }'
+fi
