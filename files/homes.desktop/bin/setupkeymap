@@ -43,7 +43,10 @@ case $LONGHOST-$SHORTDISPHOST in
 
         # might as well be consistent everywhere, and seems to not
         # conflict with keys we were already using?
-        setxkbmap -rules evdev -model pc104 -option terminate:ctrl_alt_bksp -option ctrl:nocaps -option "compose:lwin"
+        # setxkbmap -rules evdev -model pc104 -option terminate:ctrl_alt_bksp -option ctrl:nocaps -option "compose:lwin"
+        # disable ctrl_alt_bksp terminate server on our main desktop workstation, because there is
+        # always ways back into it in an emergency, and it's far too easy to trigger accidentally.
+        setxkbmap -rules evdev -model pc104 -option ctrl:nocaps -option "compose:lwin"
         ;;
 esac
 # 2018/12/06: on weinberg, occasionally numlock still asserts via
