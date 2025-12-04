@@ -7,14 +7,32 @@
 # $Header: /home/tconnors/cvsroot/bin/reset_mouse_keyboard_speed,v 1.10 2025/10/27 04:48:00 tconnors Exp $
 # $RCSfile: reset_mouse_keyboard_speed,v $
 
+allowed_hids='(Virtual core pointer|XTEST pointer|Touchscreen|DELL087F:00 04F3:3082)'
+# xinput list: ->
+read -r -d '' params <<EOF
+# old MX master 3
+# Do I need to detect both "Master 3 Mouse" and "Master 3"?  Perhaps
+# there's a bluetooth vs universal reciever difference?
+"Logitech MX Master 3|Logitech MX Master 3 Mouse"   "libinput Accel Speed" "0.7"
+
+# Same device as mx Master 3!  No idea why this keeps changing!
+"Logitech Wireless Device PID:4082 Mouse"           "libinput Accel Speed" "0.5"
+
+# new MX master 3S (also keeps changing!)
+"MX Master 3S Mouse"                                "libinput Accel Speed" "0.01"
+"MX Master 3S"                                      "libinput Accel Speed" "0.01"
+
+"HID*"                                              "libinput Accel Speed" "0.9"
+EOF
+
 keyboard=true
 mouse=true
 
 detect_external_mice() {
-    mice=$( xinput list | grep pointer | grep -v -E '(Virtual core pointer|XTEST pointer|Touchscreen|DELL087F:00 04F3:3082)' )
-    echo "mice=$mice"
+    mice=$( xinput list | grep pointer | grep -v -E "$allowed_hids" )
+    # echo "mice=$mice"
     number_mice=$( echo "$mice" | grep . | wc -l )
-    echo number_mice=$number_mice
+    # echo number_mice=$number_mice
 
     if [ $number_mice = 0 ] ; then
         return 1
@@ -22,7 +40,7 @@ detect_external_mice() {
 }
 
 no_mice_to_configure() {
-    gxmessage -timeout 2 -geometry +500+500 'reset_mouse_keyboard_speed: No mice to be configured?' &
+    gxmessage -timeout 2 -geometry +500+500 'reset_mouse_keyboard_speed: No mice to be configured?' 2>/dev/null &
     success=true  #nothing to fail, I guess...
 }
 
@@ -35,63 +53,65 @@ configure_mouse_settings() {
             fi
 
             xset m 20/10 30   # twice the speed, when moving more than 30 pixels (so already moving quite rapidly)
-            # xinput list: ->
-            for dev in 'HID 046d:c521' 'Logitech MX Master 3' 'Logitech MX Master 3 Mouse' 'Logitech MX Master 3S' 'Logitech Wireless Device PID:4082 Mouse' ; do
-                if ! list_props=$( hiliteStdErr --no-colour-stdout xinput list-props "pointer:$dev" ) ; then
-                    if ! $shown_list ; then
-                        hiliteStdErr xinput list
-                        shown_list=true
-                    fi
-                    continue
+
+            while read device ; do
+                found_device=false
+                while read param_map ; do
+                    case "$param_map" in
+                        # comments or blank lines
+                        \#*|"")
+                            # echo "comment or blank line found: $param_map"
+                            continue
+                            ;;
+                        *)
+                            devmatch=$( echo "$param_map" | sed -n 's/^"\(.*\)" \+"\(.*\)" \+"\(.*\)"$/\1/p' )
+                            key=$( echo "$param_map" | sed -n 's/^"\(.*\)" \+"\(.*\)" \+"\(.*\)"$/\2/p' )
+                            val=$( echo "$param_map" | sed -n 's/^"\(.*\)" \+"\(.*\)" \+"\(.*\)"$/\3/p' )
+                            devmatch="@($devmatch)"
+                            if [ -z "$val" ] ; then
+                                echo "parse error: $param_map"
+                                continue
+                            fi
+                            # echo "devmatch:$devmatch found"
+                            ;;
+                    esac
+                    shopt -s extglob
+                    # echo "Comparing: $device <= $devmatch?"
+
+                    case "$device" in
+                        $devmatch)
+                            if ! list_props=$(
+                                    hiliteStdErr --no-colour-stdout xinput list-props "pointer:$device"
+                                 ) ; then
+                                if ! $shown_list ; then
+                                    hiliteStdErr echo "$mice"
+                                    shown_list=true
+                                fi
+                                continue
+                            fi
+                            echo "Found $device <= $devmatch, want to set: $key = $val"
+                            echo
+                            found_device=true
+                            if echo "$list_props" | grep "$key" ; then
+                                xinput set-prop "pointer:$device" "$key" "$val" &&
+                                    success=true
+                                echo " Setting pointer:$device $key $val"
+                                echo -n "    --> "
+                                xinput list-props "pointer:$device" | grep "$key"
+                            fi
+                            ;;
+                    esac
+                done <<< "$params"
+                if ! $found_device ; then
+                    echo "No match for device: $device"
                 fi
-                echo "Found $dev"
-                echo
-                # xinput list | grep pointer | grep -v -E '(Virtual core pointer|XTEST pointer|Touchscreen|DELL087F:00 04F3:3082)'
-                case "$dev" in
-                    # new MX master 3S (also keeps changing!)
-                    MX\ Master\ 3S\ Mouse)
-                        adj=(
-                            ["libinput Accel Speed"]="0.01"
-                        )
-                        ;;
-                    MX\ Master\ 3S)
-                        adj=(
-                            ["libinput Accel Speed"]="0.01"
-                        )
-                        ;;
-                    # old MX master 3
-                    Logitech\ MX\ Master\ 3|Logitech\ MX\ Master\ 3\ Mouse) # Do I need to detect both "Master 3 Mouse" and "Master 3"?  Perhaps there's a bluetooth vs universal reciever difference?
-                        adj=(
-                            ["libinput Accel Speed"]="0.7"
-                        )
-                        ;;
-                    Logitech\ Wireless\ Device\ PID:4082\ Mouse) # Same mx Master 3!  No idea why this keeps changing!
-                        adj=(
-                            ["libinput Accel Speed"]="0.5"
-                        )
-                        ;;
-                    HID*)
-                        adj=(
-                            ["libinput Accel Speed"]="0.9"
-                        )
-                        ;;
-                    *)
-                        echo "Forgot dev match? $dev"
-                        break
-                        ;;
-                esac
-                for k in "${!adj[@]}" ; do
-                    if echo "$list_props" | grep "$k" ; then
-                        v="${adj[$k]}"
-                        xinput set-prop "pointer:$dev" "$k" "$v" && success=true
-                        echo " Setting pointer:$dev $k $v"
-                        echo -n "    --> "
-                        xinput list-props "pointer:$dev" | grep "$k"
-                    fi
-                done
-            done
+            done < <( echo "$mice" |
+                          # just get the device portion of these style strings:
+                          # ⎜   ↳ MX Master 3S Mouse                        id=7    [slave  pointer  (2)]
+                          sed -E 's/^[^0-9A-Za-z]+\s([^[:space:]].*[^[:space:]])\s+id=.*/\1/' )
+
             ;;
-        scuzzie|dirac-laptop|maxwell)
+        scuzzie|maxwell)
             xset m 13/10 1
             no_mice_to_configure
             ;;
@@ -122,7 +142,6 @@ fi
 
 shown_list=false
 success=false
-declare -A adj=()
 list_props=
 case $LONGHOST-$SHORTDISPHOST in
     bohr*-galileo)
@@ -150,6 +169,6 @@ case $LONGHOST-$SHORTDISPHOST in
         ;;
 esac
 
-! $success && gxmessage -timeout 5 -geometry +500+500 'reset_mouse_keyboard_speed: Keyboard or mouse failed to set customisations; see reset_mouse_keyboard_speed' &
+! $success && gxmessage -timeout 5 -geometry +500+500 'reset_mouse_keyboard_speed: Keyboard or mouse failed to set customisations; see reset_mouse_keyboard_speed' 2>/dev/null &
 
 $success
