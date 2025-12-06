@@ -42,12 +42,13 @@ excludes=( # these are anchored at ^ and $:
     "/home/angela/media"
     "/angela"
 )
-exclude_types=( "tmpfs" "devtmpfs" "devpts" "sysfs" "proc" "udf" "squashfs" "nfs" "nfs3" "nfs4" "fuse.sshfs" "fuse.lxcfs" "autofs" "fuse.afuse" )
+exclude_types=( "tmpfs" "devtmpfs" "devpts" "sysfs" "proc" "udf" "squashfs" "nfs" "nfs3" "nfs4" "fuse.sshfs" "fuse.lxcfs" "autofs" "fuse.afuse" "overlay" )
 # exclude tuples of: "$HOST $dev $type $fs", in array of regexp form
 exclude_host_dev_type_matches=(
-    "dirac /dev/mapper/hdd.* .* /home/tconnors/.*"  # these are bind mounted in
-    "fermi /dev/mmcblk0p1 .* /\(usr\|opt\)/.*"      # these are bind mounted in
+    "dirac /dev/mapper/\(hdd\|fastssd\).* .* /home/tconnors/.*"  # these are bind mounted in on dirac
+    "fermi /dev/mmcblk0p1 .* /\(usr\|opt\)/.*"                   # these are bind mounted in on fermi
 )
+#    "[^ ]+ overlay /var/lib/docker/overlay2/.*"                  # docker overlays
 HOST=$( hostname )
 
 function get_logentry() {
