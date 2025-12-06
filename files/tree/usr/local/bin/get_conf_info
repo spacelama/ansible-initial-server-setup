@@ -376,9 +376,6 @@ if [ -d /etc/pve ] ; then
         ceph-volume lvm list > $data_dir/ceph-volume.lvm.list
         osds_on_this_host=$( grep "osd id" $data_dir/ceph-volume.lvm.list | awk '{print $3}' | sort -g | uniq )
 
-        ceph osd lspools | awk '{print $2}' | while read pool ; do
-            rbd du -p $pool > $data_dir/ceph.du.rbd.pool.$pool
-        done
         rados df > $data_dir/ceph.df.rados
         ceph osd pool ls detail > $data_dir/ceph.ls.osd.pool # grep full
         ceph osd pool autoscale-status > $data_dir/ceph.pool.autoscale-status
@@ -387,12 +384,28 @@ if [ -d /etc/pve ] ; then
         ceph df detail > $data_dir/ceph.df.detail
 
         ceph osd lspools | while read num pool ; do
+            rbd du -p $pool > $data_dir/ceph.du.rbd.pool.$pool
+            inconsistent_pgs=$(
+                rados list-inconsistent-pg $pool | jq -r '.[]'
+                            )
+            if [ -n "$inconsistent_pgs" ] ; then
+                echo "$inconsistent_pgs" > $data_dir/ceph.pool.$pool.list-inconsistent-pg
+                while read pg ; do
+                    rados list-inconsistent-obj "$pg --format=json-pretty" > $data_dir/ceph.pool.$pool.inconsistent-pg."$pg"
+                done <<< "$inconsistent_pgs"
+                # respond to these with `ceph pg repair 32.e` if all
+                # errors are just showing `read_error`, indicating
+                # disk media read error.
+            fi
+
             rbd ls $pool | while read volume ; do
-                echo $pool/$volume:
-                rbd snap ls $pool/$volume
-                echo
+                snapshot=$( rbd snap ls $pool/$volume )
+
+                if [ -n "$snapshot" ] ; then
+                    echo "$snapshot" > $data_dir/ceph.pool.volume.snapshots.$pool.$volume
+                fi
             done
-        done > $data_dir/ceph.pool.volume.snapshots
+        done
 
         # all OSDs across the cluster - for those commands you can reach from any node
         for osd in $( ceph osd df | grep '^ *[0-9]' | awk '{print $1}' ) ; do
