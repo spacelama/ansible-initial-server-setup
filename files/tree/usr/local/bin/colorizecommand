@@ -233,8 +233,8 @@ parseinput() {
     done
 }
 
-set -A args
-set -A escaped_args
+args=()
+escaped_args=()
 parseinput "$@"
 
 directoutput
