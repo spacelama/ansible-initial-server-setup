@@ -64,14 +64,17 @@ highlight() {
     cmd="${fbold}"
     if [ -n "$fore" ] ; then
         cmd="${fbold:+${fbold};}${fore}"
+        # good explanation for the ANSI syntax here:
+        # https://www.kenmuse.com/blog/coloring-in-ansi/
+        echo -ne "${open}${esc}${cmd}m${close}"
     fi
     if [ -n "$back" ] ; then
         cmd="${fbold:+${fbold};}${back}"
+        # good explanation for the ANSI syntax here:
+        # https://www.kenmuse.com/blog/coloring-in-ansi/
+        echo -ne "${open}${esc}${cmd}m${close}"
     fi
 
-    # good explanation for the ANSI syntax here:
-    # https://www.kenmuse.com/blog/coloring-in-ansi/
-    echo -ne "${open}${esc}${cmd}m${close}"
 }
 
 directoutput() {
@@ -120,7 +123,7 @@ parseinput() {
     bright=false
     bold=false
     colour=
-    background=false
+    background=
     stderr=false
     notty=false
     first=true
@@ -169,9 +172,6 @@ parseinput() {
                 ;;
         esac
     done
-    if [ "$#" -lt 1 ] ; then
-        usageerror "supply [bold] [bright|dark] colour and text"
-    fi
     while [ "$#" -gt 2 ] ; do
         case "$1" in
             bright)
@@ -191,8 +191,20 @@ parseinput() {
                 ;;
         esac
     done
-    colour="$1"
-    shift
+    if [ -z "$background" ] && [ "$#" -lt 1 ] ; then
+        usageerror "supply [bold] [bright|dark] colour and text"
+    fi
+    case "$1" in
+        black|grey|red|green|yellow|blue|magenta|purple|cyan|white)
+            colour="$1"
+            shift
+            ;;
+        *)
+            if [ -z "$background" ] ; then
+                usageerror "supply [bold] [bright|dark] colour and text"
+            fi
+            ;;
+    esac
     if [ "$#" -lt 1 ] ; then
         usageerror "supply text"
     fi
