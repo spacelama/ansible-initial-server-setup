@@ -34,7 +34,7 @@ ERR() {
     local cmnd=$BASH_COMMAND
     local func file line level
 
-    echo "ERROR: $hostname:$0"
+    echo "ERROR: $(hostname):$0"
 
     local nl=$'\n'
     local FAILED_COMMAND=
@@ -51,6 +51,8 @@ ERR() {
 
         local SLIGHTLY_SAFENED_FAILED_COMMAND=$( echo "$cmnd" | sed 's/\([`()&;<>|]\)/\\\1/g' )
         FAILED_COMMAND="$nl>$(eval echo "$SLIGHTLY_SAFENED_FAILED_COMMAND")"
+    else
+        echo " (not printing evalled expansion of that command due to ERROR_PRINT_UNSAFE not being set)"
     fi
     echo "Exit status $(bold "$code") for command:$nl $(bold "$cmnd$FAILED_COMMAND")"
 
