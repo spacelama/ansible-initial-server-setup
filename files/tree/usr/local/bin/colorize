@@ -215,7 +215,24 @@ parseinput() {
     done
 }
 
-args=()
+
+if [ -n "$BASH_VERSION" ] ; then
+    #echo bash
+    declarearray() {
+        declare -A "$@"
+    }
+elif [ -n "$KSH_VERSION" ] ; then
+    #echo ksh
+    declarearray() {
+        set -A "$@"
+    }
+else
+    echo unknown shell
+    exit 1
+fi
+
+# these allow colorizecommand to be sourced from bash or ksh:
+declarearray args
 parseinput "$@"
 
 directoutput

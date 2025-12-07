@@ -66,10 +66,10 @@ if $verbose ; then
                                        # of this entirely if matches
                                        # bash, ksh, sh?)
 
-    colorize $output --nolf bright yellow "$parent: "
+    source colorize $output --nolf bright yellow "$parent: "
 fi
 
 if [ -n "$extra" ] ; then
-     colorize $output --nolf bright cyan "$extra"
+     source colorize $output --nolf bright cyan "$extra"
 fi
-exec colorizecommand $shell $output bright cyan "$@"
+source colorizecommand $shell $output bright cyan "$@"
